@@ -5,8 +5,7 @@
   "workspaces": ["shared", "backend", "frontend"],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
-    "format": "prettier --write .",
-    "update": "npm run format && git add . && git commit -m '⠀' && git push"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
