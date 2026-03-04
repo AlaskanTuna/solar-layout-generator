@@ -25,14 +25,14 @@ Monorepo with npm workspaces: `/shared` (types), `/backend` (Express API), `/fro
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| `npm install` | Install all workspace dependencies |
-| `npm run dev:backend` | Start backend only (port 3001) |
-| `npm run dev:frontend` | Start frontend only (port 5173) |
-| `npm run format` | Run Prettier across the repo |
-| `npm run db:migrate` | Run Prisma migrations against Supabase (uses `DIRECT_URL`) |
-| `npm run db:seed` | Seed tariff config data into the database |
-| `npx vitest` | Run unit tests |
+| Command                | Description                                                |
+| ---------------------- | ---------------------------------------------------------- |
+| `npm install`          | Install all workspace dependencies                         |
+| `npm run dev:backend`  | Start backend only (port 3001)                             |
+| `npm run dev:frontend` | Start frontend only (port 5173)                            |
+| `npm run format`       | Run Prettier across the repo                               |
+| `npm run db:migrate`   | Run Prisma migrations against Supabase (uses `DIRECT_URL`) |
+| `npm run db:seed`      | Seed tariff config data into the database                  |
+| `npx vitest`           | Run unit tests                                             |
 
 ---

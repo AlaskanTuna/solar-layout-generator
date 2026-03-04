@@ -29,31 +29,6 @@ venv/
 __pycache__/
 *.py[cod]
 
-# Agent & AI Tooling
-# ==================
-
-# Antigravity / Gemini
-.gemini/
-
-# Claude
-.claude/
-
-# BMAD
-_bmad/
-_bmad-output/
-
-# ADK
-.adk/
-
-# Agents workspace (workflows, prompts — not formatted)
-.agents/
-.agent/
-_agents/
-_agent/
-
-# GitHub Actions
-.github/
-
 # IDE
 # ===
 
@@ -69,5 +44,3 @@ temp/
 
 # Custom
 # ===========
-
-docs/
