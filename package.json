@@ -1,8 +1,11 @@
 {
   "name": "solar-layout-generator",
-  "version": "0.1.0",
   "private": true,
-  "workspaces": ["shared", "backend", "frontend"],
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
