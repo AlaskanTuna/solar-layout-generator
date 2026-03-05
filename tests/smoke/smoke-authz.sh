@@ -26,7 +26,8 @@ SUPABASE_BASE_URL="${SUPABASE_PROJECT_URL:-${SUPABASE_URL:-}}"
 SUPABASE_BASE_URL="${SUPABASE_BASE_URL%/}"
 SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-}"
 SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY:-}"
-BACKEND_URL="${BACKEND_URL:-http://localhost:${BACKEND_PORT:-3001}}"
+BACKEND_PORT="${BACKEND_PORT:-3001}"
+BACKEND_URL="${BACKEND_URL:-}"
 
 [[ -n "$SUPABASE_BASE_URL" ]] || { echo "Missing SUPABASE_PROJECT_URL (or SUPABASE_URL) in .env"; exit 1; }
 [[ -n "$SUPABASE_ANON_KEY" ]] || { echo "Missing SUPABASE_ANON_KEY in .env"; exit 1; }
@@ -36,10 +37,14 @@ TMP_DIR="$(mktemp -d)"
 RESP_FILE=""
 RESP_STATUS=""
 declare -a CREATED_USER_IDS=()
+# Force local direct calls (bypass any system/http proxy that can break localhost checks)
+CURL_COMMON_ARGS=(--noproxy '*')
+CURL_TIMEOUT_ARGS=(--connect-timeout 10 --max-time 60)
+HEALTH_TIMEOUT_ARGS=(--connect-timeout 3 --max-time 5)
 
 cleanup() {
   for uid in "${CREATED_USER_IDS[@]:-}"; do
-    curl -sS -X DELETE \
+    curl "${CURL_COMMON_ARGS[@]}" "${CURL_TIMEOUT_ARGS[@]}" -sS -X DELETE \
       "$SUPABASE_BASE_URL/auth/v1/admin/users/$uid" \
       -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
       -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" >/dev/null || true
@@ -55,10 +60,89 @@ request_backend() {
   local body="${4:-}"
 
   RESP_FILE="$(mktemp "$TMP_DIR/resp.XXXX.json")"
-  local -a args=(-sS -o "$RESP_FILE" -w "%{http_code}" -X "$method" "$url" -H "Content-Type: application/json")
+  local -a args=("${CURL_COMMON_ARGS[@]}" "${CURL_TIMEOUT_ARGS[@]}" -sS -o "$RESP_FILE" -w "%{http_code}" -X "$method" "$url" -H "Content-Type: application/json")
   [[ -n "$token" ]] && args+=(-H "Authorization: Bearer $token")
   [[ -n "$body" ]] && args+=(--data "$body")
   RESP_STATUS="$(curl "${args[@]}")"
+}
+
+probe_backend_health() {
+  local candidate="$1"
+  local status
+  status="$(curl "${CURL_COMMON_ARGS[@]}" "${HEALTH_TIMEOUT_ARGS[@]}" -sS -o /dev/null -w "%{http_code}" "$candidate/api/health" 2>/dev/null || true)"
+  [[ "$status" == "200" ]]
+}
+
+diagnose_backend_listener() {
+  command -v ss >/dev/null || return
+
+  local listener_line
+  listener_line="$(ss -ltnp 2>/dev/null | awk -v port="$BACKEND_PORT" '$4 ~ ":" port "$" { print; exit }')"
+  [[ -n "$listener_line" ]] || return
+
+  echo
+  echo "Detected listener on port $BACKEND_PORT, but health checks did not return 200."
+  echo "$listener_line"
+
+  local pid
+  pid="$(sed -n 's/.*pid=\([0-9]\+\).*/\1/p' <<<"$listener_line" | head -n 1)"
+  if [[ -n "$pid" ]] && command -v ps >/dev/null; then
+    local stat
+    stat="$(ps -o stat= -p "$pid" 2>/dev/null | tr -d '[:space:]')"
+    if [[ "$stat" == T* ]]; then
+      echo "Backend process $pid is STOPPED (job-control state '$stat')."
+      echo "This usually means it was suspended (e.g. Ctrl+Z)."
+      echo "Run 'fg' in the backend terminal or restart backend cleanly."
+    fi
+  fi
+}
+
+resolve_backend_url() {
+  if [[ -n "$BACKEND_URL" ]]; then
+    if probe_backend_health "$BACKEND_URL"; then
+      return
+    fi
+    echo "Configured BACKEND_URL is not reachable: $BACKEND_URL"
+    echo "Check backend server status and port, then retry."
+    exit 1
+  fi
+
+  local -a candidates=(
+    "http://localhost:${BACKEND_PORT}"
+    "http://127.0.0.1:${BACKEND_PORT}"
+  )
+
+  if command -v ip >/dev/null; then
+    local gateway_ip
+    gateway_ip="$(ip route 2>/dev/null | awk '/^default / {print $3; exit}' || true)"
+    if [[ -n "$gateway_ip" ]]; then
+      candidates+=("http://${gateway_ip}:${BACKEND_PORT}")
+    fi
+  fi
+
+  if [[ -f /etc/resolv.conf ]]; then
+    local win_host_ip
+    win_host_ip="$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf || true)"
+    if [[ -n "$win_host_ip" ]]; then
+      candidates+=("http://${win_host_ip}:${BACKEND_PORT}")
+    fi
+  fi
+
+  for candidate in "${candidates[@]}"; do
+    if probe_backend_health "$candidate"; then
+      BACKEND_URL="$candidate"
+      return
+    fi
+  done
+
+  echo "Backend is not reachable from this shell."
+  echo "Tried:"
+  for candidate in "${candidates[@]}"; do
+    echo "  - $candidate"
+  done
+  diagnose_backend_listener
+  echo "Start backend first and retry."
+  exit 1
 }
 
 expect_status() {
@@ -92,7 +176,7 @@ create_test_user() {
   local password='P@ssw0rd!123456'
 
   local create_resp
-  create_resp="$(curl -sS -X POST "$SUPABASE_BASE_URL/auth/v1/admin/users" \
+  create_resp="$(curl "${CURL_COMMON_ARGS[@]}" "${CURL_TIMEOUT_ARGS[@]}" -sS -X POST "$SUPABASE_BASE_URL/auth/v1/admin/users" \
     -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
     -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
     -H "Content-Type: application/json" \
@@ -109,7 +193,7 @@ create_test_user() {
   CREATED_USER_IDS+=("$user_id")
 
   local sign_in_resp
-  sign_in_resp="$(curl -sS -X POST "$SUPABASE_BASE_URL/auth/v1/token?grant_type=password" \
+  sign_in_resp="$(curl "${CURL_COMMON_ARGS[@]}" "${CURL_TIMEOUT_ARGS[@]}" -sS -X POST "$SUPABASE_BASE_URL/auth/v1/token?grant_type=password" \
     -H "apikey: $SUPABASE_ANON_KEY" \
     -H "Content-Type: application/json" \
     --data "$(jq -n --arg email "$email" --arg password "$password" \
@@ -126,6 +210,7 @@ create_test_user() {
   echo "$token|$user_id|$email"
 }
 
+resolve_backend_url
 echo "Backend URL: $BACKEND_URL"
 echo "Creating test users..."
 IFS='|' read -r TOKEN_A USER_A_ID EMAIL_A <<<"$(create_test_user user_a)"
@@ -174,7 +259,15 @@ request_backend POST "$BACKEND_URL/api/locations/$LOCATION_B_ID/panels/recompute
   "$(jq -n --argjson lat "$LAT_B" --argjson lng "$LNG_B" '{panelId:"smoke_panel",center:{lat:$lat,lng:$lng},rotation:0}')"
 expect_status 404 "$RESP_STATUS" "A cannot recompute B location"
 
-echo "Smoke 3: A can still access own location"
+echo "Smoke 3: Shared cache cross-link via POST /api/projects"
+request_backend POST "$BACKEND_URL/api/projects" "$TOKEN_A" \
+  "$(jq -n --arg name "smoke-a-shared" --arg locationId "$LOCATION_B_ID" '{name:$name,locationId:$locationId}')"
+expect_status 201 "$RESP_STATUS" "A can create project linked to existing B location"
+
+request_backend GET "$BACKEND_URL/api/locations/$LOCATION_B_ID/status" "$TOKEN_A"
+expect_status 200 "$RESP_STATUS" "A can read shared location status after linking"
+
+echo "Smoke 4: A can still access own location"
 request_backend GET "$BACKEND_URL/api/locations/$LOCATION_A_ID/status" "$TOKEN_A"
 expect_status 200 "$RESP_STATUS" "A can read own status"
 
