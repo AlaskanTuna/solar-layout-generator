@@ -46,7 +46,7 @@ Frontend (React + Vite + Konva.js)  ↔  REST API  ↔  Backend (Express.js + Pr
      ```
 3. **Agent Reminder Rule** — after completing any **major implementation or significant change** (i.e., something worth a standalone Git commit), the agent **must** suggest a ready-to-use commit message to the user in this format:
 
-   > 💾 **Suggested commit:** `feat(scope): brief description of what was done`
+   > **Suggested commit:** `feat(scope): brief description of what was done`
 
    Do **not** suggest a commit for minor tweaks, formatting-only changes, or doc-only updates unless explicitly asked.
 
