@@ -3,7 +3,29 @@ import { runLocationPipeline } from './locationPipeline.js'
 
 const COORDINATE_TOLERANCE = 0.0001
 
-export async function resolveLocation(lat: number, lng: number, projectId?: string) {
+type ResolveLocationResult =
+  | {
+      locationId: string
+      status: 'processing' | 'ready' | 'failed'
+    }
+  | {
+      error: 'PROJECT_NOT_FOUND'
+    }
+
+async function linkOwnedProjectToLocation(userId: string, projectId: string, locationId: string): Promise<boolean> {
+  const result = await prisma.project.updateMany({
+    where: { id: projectId, userId },
+    data: { locationId }
+  })
+  return result.count > 0
+}
+
+export async function resolveLocation(
+  userId: string,
+  lat: number,
+  lng: number,
+  projectId?: string
+): Promise<ResolveLocationResult> {
   // Check for existing location within coordinate tolerance
   const existing = await prisma.location.findFirst({
     where: {
@@ -15,10 +37,10 @@ export async function resolveLocation(lat: number, lng: number, projectId?: stri
   if (existing) {
     // Cache hit — link project if provided
     if (projectId) {
-      await prisma.project.update({
-        where: { id: projectId },
-        data: { locationId: existing.id }
-      })
+      const linked = await linkOwnedProjectToLocation(userId, projectId, existing.id)
+      if (!linked) {
+        return { error: 'PROJECT_NOT_FOUND' }
+      }
     }
     return { locationId: existing.id, status: existing.status }
   }
@@ -29,10 +51,11 @@ export async function resolveLocation(lat: number, lng: number, projectId?: stri
   })
 
   if (projectId) {
-    await prisma.project.update({
-      where: { id: projectId },
-      data: { locationId: location.id }
-    })
+    const linked = await linkOwnedProjectToLocation(userId, projectId, location.id)
+    if (!linked) {
+      await prisma.location.delete({ where: { id: location.id } })
+      return { error: 'PROJECT_NOT_FOUND' }
+    }
   }
 
   // Run pipeline asynchronously (don't block HTTP response)
@@ -43,15 +66,15 @@ export async function resolveLocation(lat: number, lng: number, projectId?: stri
   return { locationId: location.id, status: 'processing' as const }
 }
 
-export async function getLocationStatus(locationId: string) {
-  return prisma.location.findUnique({
-    where: { id: locationId },
+export async function getLocationStatusForUser(userId: string, locationId: string) {
+  return prisma.location.findFirst({
+    where: { id: locationId, projects: { some: { userId } } },
     select: { status: true }
   })
 }
 
-export async function getLocationData(locationId: string) {
-  return prisma.location.findUnique({
-    where: { id: locationId }
+export async function getLocationDataForUser(userId: string, locationId: string) {
+  return prisma.location.findFirst({
+    where: { id: locationId, projects: { some: { userId } } }
   })
 }

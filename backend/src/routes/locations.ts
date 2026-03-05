@@ -20,7 +20,11 @@ export const locationsRouter = Router()
 // POST /api/locations/resolve
 locationsRouter.post('/resolve', requireAuth, validate(resolveLocationSchema), async (req, res) => {
   const { lat, lng, projectId } = req.body
-  const result = await locationService.resolveLocation(lat, lng, projectId)
+  const result = await locationService.resolveLocation(req.user!.id, lat, lng, projectId)
+  if ('error' in result) {
+    res.status(404).json({ error: 'Project not found' })
+    return
+  }
   const response: ResolveLocationResponse = {
     locationId: result.locationId,
     status: result.status
@@ -30,7 +34,7 @@ locationsRouter.post('/resolve', requireAuth, validate(resolveLocationSchema), a
 
 // GET /api/locations/:id/status
 locationsRouter.get('/:id/status', requireAuth, async (req, res) => {
-  const location = await locationService.getLocationStatus(req.params.id as string)
+  const location = await locationService.getLocationStatusForUser(req.user!.id, req.params.id as string)
   if (!location) {
     res.status(404).json({ error: 'Location not found' })
     return
@@ -41,7 +45,7 @@ locationsRouter.get('/:id/status', requireAuth, async (req, res) => {
 
 // GET /api/locations/:id/data
 locationsRouter.get('/:id/data', requireAuth, async (req, res) => {
-  const location = await locationService.getLocationData(req.params.id as string)
+  const location = await locationService.getLocationDataForUser(req.user!.id, req.params.id as string)
   if (!location) {
     res.status(404).json({ error: 'Location not found' })
     return
@@ -69,7 +73,7 @@ locationsRouter.post('/:locationId/panels/recompute', requireAuth, validate(flux
   const { center, rotation } = req.body
 
   // Load location data
-  const location = await locationService.getLocationData(req.params.locationId as string)
+  const location = await locationService.getLocationDataForUser(req.user!.id, req.params.locationId as string)
   if (!location || location.status !== 'ready') {
     res.status(404).json({ error: 'Location not found or not ready' })
     return
