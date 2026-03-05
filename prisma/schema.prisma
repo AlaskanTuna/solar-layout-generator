@@ -52,7 +52,7 @@ model Project {
 
 model TariffConfig {
   id              String @id @default(uuid())
-  tariffVersion   String
+  tariffVersion   String @unique
   rates           Json
   thresholds      Json
   eeiTable        Json

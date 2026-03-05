@@ -1,23 +1,113 @@
 import { Router } from 'express'
+import * as GeoTIFF from 'geotiff'
+import { requireAuth } from '../middleware/auth.js'
+import { validate } from '../middleware/validate.js'
+import { resolveLocationSchema, fluxRecomputeSchema } from '../validators/locations.js'
+import * as locationService from '../services/locationService.js'
+import { downloadFromStorage, getSignedUrl } from '../services/storageService.js'
+import { setupGeoTransform, latLngToPixel, metersToPixels } from '../geo/transforms.js'
+import { getRotatedCorners } from '../geo/panelGeometry.js'
+import { computeMonthlyEnergy } from '../geo/fluxSampler.js'
+import type {
+  ResolveLocationResponse,
+  LocationStatusResponse,
+  LocationDataResponse,
+  FluxRecomputeResponse
+} from '@shared/types'
 
 export const locationsRouter = Router()
 
 // POST /api/locations/resolve
-locationsRouter.post('/resolve', (_req, res) => {
-  res.status(501).json({ error: 'Not implemented' })
+locationsRouter.post('/resolve', requireAuth, validate(resolveLocationSchema), async (req, res) => {
+  const { lat, lng, projectId } = req.body
+  const result = await locationService.resolveLocation(lat, lng, projectId)
+  const response: ResolveLocationResponse = {
+    locationId: result.locationId,
+    status: result.status
+  }
+  res.json(response)
 })
 
 // GET /api/locations/:id/status
-locationsRouter.get('/:id/status', (_req, res) => {
-  res.status(501).json({ error: 'Not implemented' })
+locationsRouter.get('/:id/status', requireAuth, async (req, res) => {
+  const location = await locationService.getLocationStatus(req.params.id as string)
+  if (!location) {
+    res.status(404).json({ error: 'Location not found' })
+    return
+  }
+  const response: LocationStatusResponse = { status: location.status }
+  res.json(response)
 })
 
 // GET /api/locations/:id/data
-locationsRouter.get('/:id/data', (_req, res) => {
-  res.status(501).json({ error: 'Not implemented' })
+locationsRouter.get('/:id/data', requireAuth, async (req, res) => {
+  const location = await locationService.getLocationData(req.params.id as string)
+  if (!location) {
+    res.status(404).json({ error: 'Location not found' })
+    return
+  }
+  if (location.status !== 'ready') {
+    res.status(409).json({ error: 'Location data not ready', status: location.status })
+    return
+  }
+
+  // Generate signed URL for RGB image
+  let rgbImageUrl = ''
+  if (location.rgbImageUrl) {
+    rgbImageUrl = await getSignedUrl(location.rgbImageUrl)
+  }
+
+  const response: LocationDataResponse = {
+    buildingInsights: location.buildingInsightsJson as Record<string, unknown>,
+    rgbImageUrl
+  }
+  res.json(response)
 })
 
 // POST /api/locations/:locationId/panels/recompute
-locationsRouter.post('/:locationId/panels/recompute', (_req, res) => {
-  res.status(501).json({ error: 'Not implemented' })
+locationsRouter.post('/:locationId/panels/recompute', requireAuth, validate(fluxRecomputeSchema), async (req, res) => {
+  const { center, rotation } = req.body
+
+  // Load location data
+  const location = await locationService.getLocationData(req.params.locationId as string)
+  if (!location || location.status !== 'ready') {
+    res.status(404).json({ error: 'Location not found or not ready' })
+    return
+  }
+  if (!location.monthlyFluxPath) {
+    res.status(404).json({ error: 'Monthly flux data not available' })
+    return
+  }
+
+  // Extract panel dimensions from building insights
+  const insights = location.buildingInsightsJson as Record<string, unknown>
+  const solarPotential = insights.solarPotential as Record<string, unknown>
+  const panelWidthMeters = solarPotential.panelWidthMeters as number
+  const panelHeightMeters = solarPotential.panelHeightMeters as number
+  const panelCapacityWatts = solarPotential.panelCapacityWatts as number
+
+  // Download monthly flux GeoTIFF from Supabase Storage
+  const fluxBuffer = await downloadFromStorage(location.monthlyFluxPath)
+
+  // Open GeoTIFF and setup transforms
+  const tiff = await GeoTIFF.fromArrayBuffer(fluxBuffer)
+  const image = await tiff.getImage()
+  const geo = setupGeoTransform(image)
+
+  // Convert center lat/lng to pixel coordinates
+  const { px, py } = latLngToPixel(center.lat, center.lng, geo)
+
+  // Convert panel dimensions from meters to pixels
+  const widthPx = metersToPixels(panelWidthMeters, geo)
+  const heightPx = metersToPixels(panelHeightMeters, geo)
+
+  // Compute rotated corners
+  const rotationRad = (rotation * Math.PI) / 180
+  const corners = getRotatedCorners(px, py, widthPx, heightPx, rotationRad)
+
+  // Sample 12 monthly flux bands
+  const monthlyEnergyDcKwh = await computeMonthlyEnergy(image, corners, panelCapacityWatts)
+
+  const response: FluxRecomputeResponse = { monthlyEnergyDcKwh }
+  res.json(response)
 })
