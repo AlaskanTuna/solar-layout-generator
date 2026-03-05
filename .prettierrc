@@ -1,5 +1,4 @@
 {
-  "plugins": ["prettier-plugin-java"],
   "trailingComma": "none",
   "singleQuote": true,
   "semi": false,
