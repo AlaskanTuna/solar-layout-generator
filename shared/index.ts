@@ -21,7 +21,7 @@ export type PanelEdit = {
 export type ResolveLocationRequest = {
   lat: number
   lng: number
-  projectId: string
+  projectId?: string
 }
 
 export type ResolveLocationResponse = {
@@ -45,6 +45,7 @@ export type FluxRecomputeRequest = {
 }
 
 export type FluxRecomputeResponse = {
+  panelId: string
   monthlyEnergyDcKwh: number[]
 }
 

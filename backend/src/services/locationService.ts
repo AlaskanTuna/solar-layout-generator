@@ -46,6 +46,10 @@ export async function resolveLocation(
   }
 
   // Cache miss — create new location and start pipeline
+  if (!projectId) {
+    // Shared-cache policy: allow warm-up even before a project is linked
+    console.warn(`[LocationResolve] Cache miss without projectId for (${lat}, ${lng})`)
+  }
   const location = await prisma.location.create({
     data: { lat, lng }
   })
