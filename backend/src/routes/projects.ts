@@ -14,6 +14,7 @@ projectsRouter.post(
   validate(createProjectSchema),
   asyncHandler(async (req, res) => {
     const { name, locationId } = req.body
+    console.info(`[ProjectCreate] user=${req.user!.id} location=${locationId} name="${name}"`)
     const project = await projectService.createProject(req.user!.id, name, locationId)
     res.status(201).json(project)
   })
@@ -24,6 +25,7 @@ projectsRouter.get(
   '/',
   requireAuth,
   asyncHandler(async (req, res) => {
+    console.info(`[ProjectList] user=${req.user!.id}`)
     const projects = await projectService.listProjects(req.user!.id)
     res.json(projects)
   })
@@ -34,8 +36,10 @@ projectsRouter.get(
   '/:id',
   requireAuth,
   asyncHandler(async (req, res) => {
+    console.info(`[ProjectGet] user=${req.user!.id} project=${req.params.id as string}`)
     const project = await projectService.getProject(req.user!.id, req.params.id as string)
     if (!project) {
+      console.warn(`[ProjectGet] not found user=${req.user!.id} project=${req.params.id as string}`)
       res.status(404).json({ error: 'Project not found' })
       return
     }
@@ -49,8 +53,12 @@ projectsRouter.patch(
   requireAuth,
   validate(saveLayoutSchema),
   asyncHandler(async (req, res) => {
+    console.info(
+      `[ProjectSaveLayout] user=${req.user!.id} project=${req.params.id as string} panels=${req.body.editedLayout.length}`
+    )
     const updated = await projectService.saveLayout(req.user!.id, req.params.id as string, req.body.editedLayout)
     if (!updated) {
+      console.warn(`[ProjectSaveLayout] not found user=${req.user!.id} project=${req.params.id as string}`)
       res.status(404).json({ error: 'Project not found' })
       return
     }
@@ -64,6 +72,7 @@ projectsRouter.patch(
   requireAuth,
   validate(saveAnalysisSchema),
   asyncHandler(async (req, res) => {
+    console.info(`[ProjectSaveAnalysis] user=${req.user!.id} project=${req.params.id as string}`)
     const updated = await projectService.saveAnalysis(
       req.user!.id,
       req.params.id as string,
@@ -71,6 +80,7 @@ projectsRouter.patch(
       req.body.analysisResults
     )
     if (!updated) {
+      console.warn(`[ProjectSaveAnalysis] not found user=${req.user!.id} project=${req.params.id as string}`)
       res.status(404).json({ error: 'Project not found' })
       return
     }

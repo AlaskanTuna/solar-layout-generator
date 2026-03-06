@@ -12,6 +12,7 @@ declare global {
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization
   if (!authHeader?.startsWith('Bearer ')) {
+    console.warn(`[Auth] Missing bearer token for ${req.method} ${req.originalUrl}`)
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
@@ -20,10 +21,12 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   const { data, error } = await supabase.auth.getUser(token)
 
   if (error || !data.user) {
+    console.warn(`[Auth] Invalid session for ${req.method} ${req.originalUrl}`)
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
 
   req.user = { id: data.user.id, email: data.user.email ?? '' }
+  console.info(`[Auth] user=${req.user.id} ${req.method} ${req.originalUrl}`)
   next()
 }

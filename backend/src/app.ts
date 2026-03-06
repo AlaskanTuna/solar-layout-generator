@@ -7,6 +7,7 @@ import { locationsRouter } from './routes/locations.js'
 import { projectsRouter } from './routes/projects.js'
 import { tariffRouter } from './routes/tariff.js'
 import { errorHandler } from './middleware/errorHandler.js'
+import { requestLogger } from './middleware/requestLogger.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -14,6 +15,7 @@ export const app = express()
 
 app.use(cors())
 app.use(express.json())
+app.use(requestLogger)
 
 app.use('/api/health', healthRouter)
 app.use('/api/locations', locationsRouter)

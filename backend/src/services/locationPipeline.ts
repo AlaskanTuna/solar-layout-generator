@@ -1,6 +1,7 @@
 import * as GeoTIFF from 'geotiff'
 import sharp from 'sharp'
 import { prisma } from '../config/prisma.js'
+import { env } from '../config/env.js'
 import { fetchBuildingInsights, fetchDataLayers, calculateRadius, enrichBuildingInsights } from './solarApiService.js'
 import { uploadToStorage } from './storageService.js'
 
@@ -42,6 +43,8 @@ async function convertRgbToPng(rgbTifBuffer: ArrayBuffer | Buffer): Promise<Buff
 
 export async function runLocationPipeline(locationId: string, lat: number, lng: number): Promise<void> {
   try {
+    console.info(`[Pipeline] start location=${locationId} lat=${lat.toFixed(6)} lng=${lng.toFixed(6)}`)
+
     // Step 1: Fetch building insights
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawInsights = (await fetchBuildingInsights(lat, lng)) as any
@@ -61,14 +64,17 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       const url = dataLayers[field]
       if (!url) continue
 
-      // Signed URLs expire ~1 hour — download immediately
-      const response = await fetch(url)
+      // GeoTIFF URLs from dataLayers require the API key appended
+      const downloadUrl = new URL(url)
+      downloadUrl.searchParams.set('key', env.GOOGLE_SOLAR_API_KEY)
+      const response = await fetch(downloadUrl.toString())
       if (!response.ok) throw new Error(`Failed to download ${field}`)
       const buffer = Buffer.from(await response.arrayBuffer())
 
       const storagePath = `locations/${locationId}/${filename}`
       await uploadToStorage(storagePath, buffer, 'image/tiff')
       storagePaths[field] = storagePath
+      console.info(`[Pipeline] uploaded ${storagePath}`)
 
       if (field === 'rgbUrl') rgbBuffer = buffer
     }
@@ -80,6 +86,7 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       const pngPath = `locations/${locationId}/rgb.png`
       await uploadToStorage(pngPath, pngBuffer, 'image/png')
       rgbImageUrl = pngPath
+      console.info(`[Pipeline] uploaded ${pngPath}`)
     }
 
     // Step 5: Mark location ready with all data
@@ -96,7 +103,7 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       }
     })
 
-    console.log(`Pipeline completed for location ${locationId}`)
+    console.info(`Pipeline completed for location ${locationId}`)
   } catch (error) {
     console.error(`Pipeline failed for location ${locationId}:`, error)
     await prisma.location.update({
