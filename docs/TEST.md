@@ -1,5 +1,11 @@
 ﻿# TEST - AGENT ONLY
 
+## [07/03/26] - Phase 2.4 Workbench Rendering Alignment
+
+- Scenario: Validate the prototype-aligned Workbench transform path using reference GeoTIFF metadata rather than the building bounding box approximation.
+- Steps: Ran `npm run build --workspace=backend`, `npm run build --workspace=frontend`, `npm exec --workspace=backend -- vitest run`, `npm run test --workspace=frontend`, and a one-off numeric sanity check against the latest stored `rgb.tif` + `buildingInsightsJson`.
+- Result: Pass (backend build passed; frontend build passed; backend Vitest: 5 files / 24 tests passed; frontend Vitest: 3 files / 7 tests passed; latest location panels projected to `x=183.64..235.65`, `y=181.25..361.94` within a `439x439` image).
+
 ## [07/03/26] - Phase 2.3 Workbench Bootstrap + Runtime Logging
 
 - Scenario: Validate the Workbench bootstrap fix and the new runtime observability pass across frontend and backend.

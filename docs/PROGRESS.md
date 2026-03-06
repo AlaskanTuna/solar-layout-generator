@@ -1,5 +1,14 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [07/03/26] - Phase 2.4: Workbench Rendering Alignment
+
+- Replaced the frontend Workbench's building-bounding-box approximation with reference GeoTIFF transform data derived from the stored `rgb.tif` (fallback `dsm.tif`), matching the validated prototype's rendering workflow.
+- Extended `GET /api/locations/:id/data` to return `imageGeoTransform` metadata (origin, resolution, CRS, intrinsic image size) alongside the signed rooftop PNG URL for Workbench rendering.
+- Updated frontend `canvasTransforms.ts` to use `proj4` with the reference GeoTIFF transform and display scaling, so panel centers and dimensions are computed in the same projected image space as the prototype.
+- Normalized positive GeoTIFF Y resolutions in `backend/src/geo/transforms.ts` so both Workbench rendering and backend recompute interpret image rows top-down correctly for the real Google Solar `rgb.tif` files.
+- Added a backend transform test for Y-resolution normalization and updated the frontend transform tests to cover the projected-CRS rendering path.
+- Ran a live sanity check against the latest location data: panel centers now cluster within the `439x439` rooftop image bounds instead of stretching across the full image.
+
 ## [07/03/26] - Phase 2.3: Workbench Bootstrap + Runtime Logging
 
 - Fixed a Workbench bootstrap deadlock where the page waited for `panelDimensions` before rendering the canvas container that `panelDimensions` depended on, which could trap Page 2 on the full-screen "Preparing the workbench..." loader.

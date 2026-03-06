@@ -1,13 +1,11 @@
-import type { BoundingBox } from './buildingInsights'
+import proj4 from 'proj4'
+import type { LocationImageGeoTransform } from '@/api/locations'
 
-export type CanvasGeo = {
-  boundingBox: BoundingBox
-  width: number
-  height: number
-  widthMeters: number
-  heightMeters: number
-  metersPerPixelX: number
-  metersPerPixelY: number
+export type CanvasGeo = LocationImageGeoTransform & {
+  displayWidth: number
+  displayHeight: number
+  scaleX: number
+  scaleY: number
 }
 
 export type PixelPoint = {
@@ -22,65 +20,38 @@ export type RectAabb = {
   maxY: number
 }
 
-const EARTH_RADIUS_METERS = 6371000
-
-function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const phi1 = (lat1 * Math.PI) / 180
-  const phi2 = (lat2 * Math.PI) / 180
-  const dPhi = ((lat2 - lat1) * Math.PI) / 180
-  const dLambda = ((lng2 - lng1) * Math.PI) / 180
-
-  const a = Math.sin(dPhi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) ** 2
-
-  return EARTH_RADIUS_METERS * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-export function createCanvasGeo(boundingBox: BoundingBox, width: number, height: number): CanvasGeo {
-  const widthMeters = haversineDistance(
-    boundingBox.sw.latitude,
-    boundingBox.sw.longitude,
-    boundingBox.sw.latitude,
-    boundingBox.ne.longitude
-  )
-  const heightMeters = haversineDistance(
-    boundingBox.sw.latitude,
-    boundingBox.sw.longitude,
-    boundingBox.ne.latitude,
-    boundingBox.sw.longitude
-  )
-
+export function createCanvasGeo(
+  imageGeoTransform: LocationImageGeoTransform,
+  displayWidth: number,
+  displayHeight: number
+): CanvasGeo {
   return {
-    boundingBox,
-    width,
-    height,
-    widthMeters,
-    heightMeters,
-    metersPerPixelX: widthMeters / width,
-    metersPerPixelY: heightMeters / height
+    ...imageGeoTransform,
+    displayWidth,
+    displayHeight,
+    scaleX: displayWidth / imageGeoTransform.imageWidth,
+    scaleY: displayHeight / imageGeoTransform.imageHeight
   }
 }
 
 export function latLngToPixel(lat: number, lng: number, geo: CanvasGeo): PixelPoint {
-  const latRange = geo.boundingBox.ne.latitude - geo.boundingBox.sw.latitude
-  const lngRange = geo.boundingBox.ne.longitude - geo.boundingBox.sw.longitude
-
-  const xRatio = lngRange === 0 ? 0 : (lng - geo.boundingBox.sw.longitude) / lngRange
-  const yRatio = latRange === 0 ? 0 : (geo.boundingBox.ne.latitude - lat) / latRange
+  const [projX, projY] = proj4(geo.fromCRS, geo.toCRS, [lng, lat])
+  const imageX = (projX - geo.originX) / geo.resX
+  const imageY = (projY - geo.originY) / geo.resY
 
   return {
-    x: xRatio * geo.width,
-    y: yRatio * geo.height
+    x: imageX * geo.scaleX,
+    y: imageY * geo.scaleY
   }
 }
 
 export function pixelToLatLng(x: number, y: number, geo: CanvasGeo): { lat: number; lng: number } {
-  const lng =
-    geo.boundingBox.sw.longitude +
-    (x / geo.width) * (geo.boundingBox.ne.longitude - geo.boundingBox.sw.longitude)
+  const imageX = x / geo.scaleX
+  const imageY = y / geo.scaleY
 
-  const lat =
-    geo.boundingBox.ne.latitude -
-    (y / geo.height) * (geo.boundingBox.ne.latitude - geo.boundingBox.sw.latitude)
+  const projX = geo.originX + imageX * geo.resX
+  const projY = geo.originY + imageY * geo.resY
+  const [lng, lat] = proj4(geo.toCRS, geo.fromCRS, [projX, projY])
 
   return { lat, lng }
 }
@@ -91,8 +62,8 @@ export function panelMetersToPixels(
   geo: CanvasGeo
 ): { width: number; height: number } {
   return {
-    width: panelWidthMeters / geo.metersPerPixelX,
-    height: panelHeightMeters / geo.metersPerPixelY
+    width: (panelWidthMeters / Math.abs(geo.resX)) * geo.scaleX,
+    height: (panelHeightMeters / Math.abs(geo.resY)) * geo.scaleY
   }
 }
 

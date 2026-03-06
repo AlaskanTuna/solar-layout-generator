@@ -8,6 +8,21 @@ import type {
   FluxRecomputeResponse
 } from '@shared/types'
 
+export type LocationImageGeoTransform = {
+  originX: number
+  originY: number
+  resX: number
+  resY: number
+  fromCRS: string
+  toCRS: string
+  imageWidth: number
+  imageHeight: number
+}
+
+export type LocationDataWithGeoTransform = LocationDataResponse & {
+  imageGeoTransform: LocationImageGeoTransform
+}
+
 export function resolveLocation(req: ResolveLocationRequest) {
   return apiFetch<ResolveLocationResponse>('/locations/resolve', {
     method: 'POST',
@@ -20,7 +35,7 @@ export function getLocationStatus(id: string) {
 }
 
 export function getLocationData(id: string) {
-  return apiFetch<LocationDataResponse>(`/locations/${id}/data`)
+  return apiFetch<LocationDataWithGeoTransform>(`/locations/${id}/data`)
 }
 
 export function recomputeFlux(locationId: string, req: FluxRecomputeRequest) {

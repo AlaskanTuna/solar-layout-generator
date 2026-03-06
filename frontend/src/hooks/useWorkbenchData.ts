@@ -29,9 +29,19 @@ export function useWorkbenchData(projectId: string | undefined) {
     locationQuery.data && !locationQuery.data.rgbImageUrl
       ? new Error('Location data is ready, but the rooftop preview image URL is missing')
       : null
+  const missingImageGeoTransformError =
+    locationQuery.data && !locationQuery.data.imageGeoTransform
+      ? new Error('Location data is ready, but the rooftop GeoTIFF transform is missing')
+      : null
   const parseError =
     locationQuery.data && !buildingInsights ? new Error('Location data is missing required building insights fields') : null
-  const error = projectQuery.error ?? locationQuery.error ?? missingLocationError ?? missingRgbImageError ?? parseError
+  const error =
+    projectQuery.error ??
+    locationQuery.error ??
+    missingLocationError ??
+    missingRgbImageError ??
+    missingImageGeoTransformError ??
+    parseError
 
   useEffect(() => {
     if (!import.meta.env.DEV) return
@@ -42,14 +52,25 @@ export function useWorkbenchData(projectId: string | undefined) {
       projectStatus: projectQuery.status,
       locationStatus: locationQuery.status,
       hasBuildingInsights: Boolean(buildingInsights),
+      hasImageGeoTransform: Boolean(locationQuery.data?.imageGeoTransform),
       hasRgbImageUrl: Boolean(locationQuery.data?.rgbImageUrl),
       error: error instanceof Error ? error.message : null
     })
-  }, [projectId, locationId, projectQuery.status, locationQuery.status, buildingInsights, locationQuery.data?.rgbImageUrl, error])
+  }, [
+    projectId,
+    locationId,
+    projectQuery.status,
+    locationQuery.status,
+    buildingInsights,
+    locationQuery.data?.imageGeoTransform,
+    locationQuery.data?.rgbImageUrl,
+    error
+  ])
 
   return {
     project: projectQuery.data,
     buildingInsights,
+    imageGeoTransform: locationQuery.data?.imageGeoTransform ?? null,
     rgbImageUrl: locationQuery.data?.rgbImageUrl ?? '',
     isLoading: projectQuery.isLoading || locationQuery.isLoading,
     error

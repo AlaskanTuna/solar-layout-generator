@@ -10,15 +10,21 @@ import {
   pixelToLatLng
 } from './canvasTransforms'
 
-const boundingBox = {
-  sw: { latitude: 3.14, longitude: 101.68 },
-  ne: { latitude: 3.15, longitude: 101.69 }
+const imageGeoTransform = {
+  originX: 0,
+  originY: 1000,
+  resX: 1,
+  resY: -1,
+  fromCRS: 'EPSG:4326',
+  toCRS: 'EPSG:3857',
+  imageWidth: 1000,
+  imageHeight: 1000
 }
 
 describe('canvasTransforms', () => {
   it('round-trips latitude and longitude through canvas coordinates', () => {
-    const geo = createCanvasGeo(boundingBox, 1000, 500)
-    const original = { lat: 3.145, lng: 101.685 }
+    const geo = createCanvasGeo(imageGeoTransform, 1000, 1000)
+    const original = { lat: 0.005, lng: 0.005 }
 
     const pixel = latLngToPixel(original.lat, original.lng, geo)
     const roundTrip = pixelToLatLng(pixel.x, pixel.y, geo)
@@ -28,7 +34,7 @@ describe('canvasTransforms', () => {
   })
 
   it('converts panel dimensions to pixels and computes rotated bounds', () => {
-    const geo = createCanvasGeo(boundingBox, 1000, 500)
+    const geo = createCanvasGeo(imageGeoTransform, 1000, 1000)
     const size = panelMetersToPixels(1.134, 2.278, geo)
 
     expect(size.width).toBeGreaterThan(0)
@@ -39,7 +45,7 @@ describe('canvasTransforms', () => {
 
     expect(aabb.minX).toBeLessThan(aabb.maxX)
     expect(aabbsOverlap(aabb, neighbour)).toBe(true)
-    expect(isAabbInsideStage(aabb, 1000, 500)).toBe(true)
-    expect(isAabbInsideStage({ minX: -1, maxX: 10, minY: 0, maxY: 10 }, 1000, 500)).toBe(false)
+    expect(isAabbInsideStage(aabb, 1000, 1000)).toBe(true)
+    expect(isAabbInsideStage({ minX: -1, maxX: 10, minY: 0, maxY: 10 }, 1000, 1000)).toBe(false)
   })
 })

@@ -429,6 +429,20 @@
 - [x] Add backend request/route/pipeline logging for auth, project CRUD, location resolve/status/data, recompute, and pipeline file uploads
 - [x] Harden `GET /api/locations/:id/data` so a `ready` location cannot return a partial 200 response without `buildingInsightsJson` or `rgbImageUrl`
 
+## Phase 2.4: Workbench Rendering Alignment
+
+### 1. Refinement: Prototype-Accurate Panel Rendering
+
+**Purpose/Issue:** Manual QA found that Page 2 rendered the initial Solar API panel layout at the wrong scale and mirrored/spread across the rooftop image. The validated prototype (`layout_compiler.py`) uses the full reference GeoTIFF transform from `rgb.tif`, while the current frontend was approximating placement from `buildingInsights.boundingBox`.
+
+**Implementation:**
+
+- [x] Expose reference image geo-transform metadata from `GET /api/locations/:id/data` using the stored `rgb.tif` (fallback `dsm.tif`) instead of relying on the building bounding box alone
+- [x] Update frontend Workbench coordinate conversion to use the reference GeoTIFF transform plus display scaling, matching the prototype's lat/lng → projected CRS → pixel workflow
+- [x] Normalize positive GeoTIFF Y resolutions to top-down image coordinates so both frontend rendering and backend recompute use the correct row direction
+- [x] Add/update focused transform tests for the new frontend projected-CRS path and the backend GeoTIFF Y-resolution normalization
+- [x] Verify with a live numeric sanity check that the latest location's panel centers now cluster within the actual rooftop image bounds instead of spanning the whole image
+
 ## Phase 3: Frontend - Billing Engine, Page 3, PDF Export
 
 ### 1. Refinement: Workbench Placement + Energy Consistency

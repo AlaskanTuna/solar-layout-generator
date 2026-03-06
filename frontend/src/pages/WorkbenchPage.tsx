@@ -143,18 +143,19 @@ export function WorkbenchPage() {
   const [message, setMessage] = useState<UiMessage>(null)
   const [rotationInputValue, setRotationInputValue] = useState('')
 
-  const { project, buildingInsights, rgbImageUrl, isLoading, error: dataError } = useWorkbenchData(projectId)
+  const { project, buildingInsights, imageGeoTransform, rgbImageUrl, isLoading, error: dataError } =
+    useWorkbenchData(projectId)
   const { image: backgroundImage, imageError } = useLoadedImage(rgbImageUrl)
   const error = dataError ?? (imageError ? new Error(imageError) : null)
   const stageSize = useStageSize(containerRef, backgroundImage)
 
   const geo = useMemo(() => {
-    if (!buildingInsights || stageSize.width === 0 || stageSize.height === 0) {
+    if (!imageGeoTransform || stageSize.width === 0 || stageSize.height === 0) {
       return null
     }
 
-    return createCanvasGeo(buildingInsights.boundingBox, stageSize.width, stageSize.height)
-  }, [buildingInsights, stageSize])
+    return createCanvasGeo(imageGeoTransform, stageSize.width, stageSize.height)
+  }, [imageGeoTransform, stageSize])
 
   const panelDimensions = useMemo(() => {
     if (!buildingInsights || !geo) return null
@@ -230,6 +231,7 @@ export function WorkbenchPage() {
       projectId: projectId ?? null,
       hasProject: Boolean(project),
       hasBuildingInsights: Boolean(buildingInsights),
+      hasImageGeoTransform: Boolean(imageGeoTransform),
       hasRgbImageUrl: Boolean(rgbImageUrl),
       hasBackgroundImage: Boolean(backgroundImage),
       stageWidth: stageSize.width,
@@ -242,6 +244,7 @@ export function WorkbenchPage() {
     projectId,
     project,
     buildingInsights,
+    imageGeoTransform,
     rgbImageUrl,
     backgroundImage,
     stageSize.width,
