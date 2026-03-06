@@ -19,6 +19,56 @@ import type {
 
 export const locationsRouter = Router()
 
+type LocationImageGeoTransformResponse = {
+  originX: number
+  originY: number
+  resX: number
+  resY: number
+  fromCRS: string
+  toCRS: string
+  imageWidth: number
+  imageHeight: number
+}
+
+type LocationDataRouteResponse = LocationDataResponse & {
+  imageGeoTransform: LocationImageGeoTransformResponse
+}
+
+async function loadReferenceGeoTransform(location: {
+  id: string
+  dsmPath: string | null
+}): Promise<LocationImageGeoTransformResponse> {
+  const candidatePaths = [`locations/${location.id}/rgb.tif`, location.dsmPath].filter(
+    (path): path is string => Boolean(path)
+  )
+
+  let lastError: unknown = null
+
+  for (const storagePath of candidatePaths) {
+    try {
+      const buffer = await downloadFromStorage(storagePath)
+      const tiff = await GeoTIFF.fromArrayBuffer(buffer)
+      const image = await tiff.getImage()
+      const geo = setupGeoTransform(image)
+
+      return {
+        ...geo,
+        imageWidth: image.getWidth(),
+        imageHeight: image.getHeight()
+      }
+    } catch (error) {
+      lastError = error
+      console.warn(`[LocationData] failed to load reference GeoTIFF path=${storagePath}`, error)
+    }
+  }
+
+  throw new Error(
+    `Failed to load reference GeoTIFF for location ${location.id}: ${
+      lastError instanceof Error ? lastError.message : 'unknown error'
+    }`
+  )
+}
+
 // POST /api/locations/resolve
 locationsRouter.post(
   '/resolve',
@@ -90,13 +140,15 @@ locationsRouter.get(
     }
 
     const rgbImageUrl = await getSignedUrl(location.rgbImageUrl)
+    const imageGeoTransform = await loadReferenceGeoTransform(location)
     console.info(
       `[LocationData] user=${req.user!.id} location=${location.id} signedImage=true monthlyFlux=${Boolean(location.monthlyFluxPath)}`
     )
 
-    const response: LocationDataResponse = {
+    const response: LocationDataRouteResponse = {
       buildingInsights: location.buildingInsightsJson as Record<string, unknown>,
-      rgbImageUrl
+      rgbImageUrl,
+      imageGeoTransform
     }
     res.json(response)
   })

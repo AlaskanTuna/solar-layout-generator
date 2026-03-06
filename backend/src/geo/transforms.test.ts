@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { latLngToPixel, pixelToLatLng, metersToPixels } from './transforms.js'
+import { latLngToPixel, pixelToLatLng, metersToPixels, setupGeoTransform } from './transforms.js'
 import type { GeoTransform } from './transforms.js'
 
 // Synthetic geo-transform mimicking a UTM zone GeoTIFF
@@ -24,6 +24,24 @@ describe('metersToPixels', () => {
     // metersToPixels uses Math.abs(resX), so sign doesn't matter
     const geoNeg = { ...mockGeo, resX: -0.5 }
     expect(metersToPixels(1.0, geoNeg)).toBe(2)
+  })
+})
+
+describe('setupGeoTransform', () => {
+  it('normalizes positive GeoTIFF Y resolution to a top-down pixel transform', () => {
+    const image = {
+      getOrigin: () => [770412.6, 330441.6],
+      getResolution: () => [0.1, 0.1],
+      getGeoKeys: () => ({ ProjectedCSTypeGeoKey: 32647 })
+    }
+
+    const geo = setupGeoTransform(image as never)
+
+    expect(geo.originX).toBe(770412.6)
+    expect(geo.originY).toBe(330441.6)
+    expect(geo.resX).toBe(0.1)
+    expect(geo.resY).toBe(-0.1)
+    expect(geo.toCRS).toBe('EPSG:32647')
   })
 })
 

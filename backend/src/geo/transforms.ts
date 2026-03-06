@@ -12,15 +12,16 @@ export interface GeoTransform {
 
 export function setupGeoTransform(image: GeoTIFFImage): GeoTransform {
   const [originX, originY] = image.getOrigin()
-  const [resX, resY] = image.getResolution()
+  const [rawResX, rawResY] = image.getResolution()
   const geoKeys = image.getGeoKeys()
   const epsgCode = geoKeys.ProjectedCSTypeGeoKey
 
   return {
     originX,
     originY,
-    resX,
-    resY,
+    resX: rawResX,
+    // geotiff.js may report a positive Y resolution even though pixel rows grow downward.
+    resY: rawResY > 0 ? -rawResY : rawResY,
     fromCRS: 'EPSG:4326',
     toCRS: `EPSG:${epsgCode}`
   }
