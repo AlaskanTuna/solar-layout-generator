@@ -400,6 +400,20 @@
 - [x] Add utility tests for `canvasTransforms.ts`
 - [x] Add hook tests for `usePanelState.ts`
 
+## Phase 2.2: Manual QA Follow-up
+
+### 1. Refinement: MapPage Polling + Places Modernization
+
+**Purpose/Issue:** Manual QA exposed a new-project polling deadlock (`GET /api/locations/:id/status` returned 404 before a `Project` existed), while Google Maps flagged the legacy Places Autocomplete path as deprecated for new customers.
+
+**Implementation:**
+
+- [x] Allow `GET /api/locations/:id/status` to return status for orphan `Location` records during the new-project analysis window, while keeping `GET /api/locations/:id/data` tied to owned projects
+- [x] Add a backend regression test for the orphan-status ownership filter so the Phase 2 new-project flow stays covered
+- [x] Update `MapPage` to load the newer `PlaceAutocompleteElement` via `google.maps.importLibrary('places')` when available, with legacy autocomplete retained only as a compatibility fallback
+- [x] Fail the processing state cleanly when polling errors occur instead of leaving the UI stuck on "Analyzing your rooftop..."
+- [x] Guard ready-state project creation so repeated polling responses cannot create duplicate projects before navigation completes
+
 ## Phase 3: Frontend - Billing Engine, Page 3, PDF Export
 
 ### 1. Refinement: Workbench Placement + Energy Consistency

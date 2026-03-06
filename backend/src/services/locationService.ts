@@ -72,7 +72,10 @@ export async function resolveLocation(
 
 export async function getLocationStatusForUser(userId: string, locationId: string) {
   return prisma.location.findFirst({
-    where: { id: locationId, projects: { some: { userId } } },
+    where: {
+      id: locationId,
+      OR: [{ projects: { some: { userId } } }, { projects: { none: {} } }]
+    },
     select: { status: true }
   })
 }

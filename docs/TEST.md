@@ -1,5 +1,11 @@
 ﻿# TEST - AGENT ONLY
 
+## [06/03/26] - Phase 2.2 MapPage Polling + Places Follow-up
+
+- Scenario: Validate the manual-QA follow-up fixes for new-project location polling, modern Google Places initialization, and the backend ownership regression.
+- Steps: Ran `npm exec --workspace=backend -- vitest run`, `npm run test --workspace=frontend`, `npm run build --workspace=backend`, and root `npm run build`.
+- Result: Pass (backend Vitest: 5 files / 23 tests passed; frontend Vitest: 3 files / 7 tests passed; backend build passed; root monorepo build passed).
+
 ## [06/03/26] - Phase 2.1 Frontend QA Fix Validation
 
 - Scenario: Validate the Phase 2 QA-fix pass for Page 1 search/recovery, Workbench interaction polish, and new frontend unit tests.

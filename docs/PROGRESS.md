@@ -1,5 +1,14 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [06/03/26] - Phase 2.2: MapPage Polling + Places Follow-up
+
+- Fixed the new-project MapPage polling deadlock by allowing authenticated users to poll orphan `Location` records during rooftop analysis before a `Project` is created.
+- Added `backend/src/services/locationService.test.ts` to lock the ownership query behavior for status polling versus owned location-data access.
+- Updated `MapPage` to initialize the newer Google Places `PlaceAutocompleteElement` through `google.maps.importLibrary('places')`, while retaining legacy autocomplete only as a fallback path.
+- Added explicit polling-error handling so `GET /api/locations/:id/status` failures surface a recoverable error instead of leaving the UI stuck in the processing state.
+- Added a ready-state guard so repeated polling responses cannot trigger duplicate `POST /api/projects` calls before the app navigates to Workbench.
+- Verification: `npm exec --workspace=backend -- vitest run`, `npm run test --workspace=frontend`, and root `npm run build` all pass.
+
 ## [06/03/26] - Phase 2.1: QA Fixes for MapPage + Workbench
 
 - Reworked `MapPage` so the Google Maps address search is rendered as a visible React overlay input while still using Google Places Autocomplete under the hood.
