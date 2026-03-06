@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc -b",
+    "dev": "node ../node_modules/tsx/dist/cli.mjs watch src/server.ts",
+    "build": "node ../node_modules/typescript/bin/tsc -b",
     "start": "node dist/server.js"
   },
   "dependencies": {
@@ -19,7 +19,7 @@
     "zod": "^3.24.4"
   },
   "prisma": {
-    "seed": "tsx ../prisma/seed.ts"
+    "seed": "node ../node_modules/tsx/dist/cli.mjs ../prisma/seed.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

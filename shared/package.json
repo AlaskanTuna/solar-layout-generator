@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "tsc -b"
+    "build": "node ../node_modules/typescript/bin/tsc -b"
   },
   "main": "index.ts",
   "types": "index.ts",

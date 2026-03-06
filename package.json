@@ -7,12 +7,13 @@
     "frontend"
   ],
   "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "db:migrate": "npm exec --workspace=backend -- prisma migrate dev",
     "db:seed": "npm exec --workspace=backend -- prisma db seed",
     "format": "prettier --write .",
-    "build": "npm run build --workspace=shared && npx prisma generate && npm run build --workspace=backend && npm run build --workspace=frontend",
+    "build": "npm run build --workspace=shared && node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma && npm run build --workspace=backend && npm run build --workspace=frontend",
     "start": "npm run start --workspace=backend",
     "heroku-postbuild": "npm run build"
   },
