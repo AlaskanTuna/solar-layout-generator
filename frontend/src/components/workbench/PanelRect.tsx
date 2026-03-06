@@ -13,7 +13,7 @@ type PanelRectProps = {
   stageHeight: number
   disabled?: boolean
   onSelect: (panelId: string) => void
-  onDragEnd: (panelId: string, position: { x: number; y: number }) => void
+  onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
 }
 
 export function PanelRect({
@@ -56,7 +56,15 @@ export function PanelRect({
       onTap={() => onSelect(id)}
       onDragStart={() => onSelect(id)}
       onDragEnd={(event) => {
-        onDragEnd(id, { x: event.target.x(), y: event.target.y() })
+        const node = event.target
+        onDragEnd(
+          id,
+          { x: node.x(), y: node.y() },
+          () => {
+            node.position({ x, y })
+            node.getLayer()?.batchDraw()
+          }
+        )
       }}
     />
   )

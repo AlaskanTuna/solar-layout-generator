@@ -6,6 +6,8 @@ import { resolveLocation, getLocationStatus } from '@/api/locations'
 import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
 
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
 
@@ -18,16 +20,37 @@ export function MapPage() {
   const { isLoaded, error: mapsError } = useGoogleMaps()
 
   const isNewProject = projectId === 'new'
-  const projectName = (location.state as { projectName?: string })?.projectName ?? ''
+  const initialDraft = isNewProject ? readNewProjectDraft() : null
+  const routeProjectName = (location.state as { projectName?: string } | null)?.projectName?.trim() ?? ''
+  const projectName = isNewProject ? routeProjectName || initialDraft?.projectName || '' : ''
 
   const mapRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const mapInstance = useRef<google.maps.Map | null>(null)
+  const autocompleteInstance = useRef<google.maps.places.Autocomplete | null>(null)
   const markerInstance = useRef<google.maps.marker.AdvancedMarkerElement | null>(null)
 
-  const [phase, setPhase] = useState<Phase>('search')
+  const [phase, setPhase] = useState<Phase>(
+    initialDraft?.phase === 'processing' && initialDraft.locationId ? 'processing' : 'search'
+  )
   const [selectedPlace, setSelectedPlace] = useState<{ lat: number; lng: number; address: string } | null>(null)
-  const [locationId, setLocationId] = useState<string | null>(null)
+  const [locationId, setLocationId] = useState<string | null>(initialDraft?.locationId ?? null)
   const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    if (!isNewProject) return
+
+    if (!projectName) {
+      navigate('/dashboard', { replace: true })
+      return
+    }
+
+    writeNewProjectDraft({
+      projectName,
+      locationId: phase === 'processing' ? locationId ?? undefined : undefined,
+      phase: phase === 'processing' ? 'processing' : 'search'
+    })
+  }, [isNewProject, projectName, locationId, navigate, phase])
 
   // For existing projects, load the project to get its locationId
   const { data: existingProject } = useQuery({
@@ -59,6 +82,7 @@ export function MapPage() {
       if (isNewProject && projectName && locationId) {
         createProject({ name: projectName, locationId })
           .then((project) => {
+            clearNewProjectDraft()
             navigate(`/project/${project.id}/workbench`, { replace: true })
           })
           .catch((err) => {
@@ -89,19 +113,14 @@ export function MapPage() {
     })
     mapInstance.current = map
 
-    const input = document.createElement('input')
-    input.type = 'text'
-    input.placeholder = 'Search for your address...'
-    input.className = 'map-search-input'
-    input.style.cssText =
-      'margin:10px;padding:10px 16px;width:360px;font-size:14px;border:none;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.3);outline:none;'
-
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input)
+    const input = searchInputRef.current
+    if (!input || autocompleteInstance.current) return
 
     const autocomplete = new google.maps.places.Autocomplete(input, {
       componentRestrictions: { country: 'my' },
       fields: ['geometry', 'formatted_address']
     })
+    autocompleteInstance.current = autocomplete
     autocomplete.bindTo('bounds', map)
 
     autocomplete.addListener('place_changed', () => {
@@ -144,10 +163,18 @@ export function MapPage() {
         ...(isNewProject ? {} : { projectId: projectId })
       })
       setLocationId(result.locationId)
+      if (isNewProject && projectName) {
+        writeNewProjectDraft({
+          projectName,
+          locationId: result.locationId,
+          phase: result.status === 'processing' ? 'processing' : 'search'
+        })
+      }
 
       if (result.status === 'ready') {
         if (isNewProject && projectName) {
           const project = await createProject({ name: projectName, locationId: result.locationId })
+          clearNewProjectDraft()
           navigate(`/project/${project.id}/workbench`, { replace: true })
         } else if (!isNewProject && projectId) {
           navigate(`/project/${projectId}/workbench`, { replace: true })
@@ -165,6 +192,9 @@ export function MapPage() {
     setSelectedPlace(null)
     setLocationId(null)
     setErrorMessage('')
+    if (isNewProject && projectName) {
+      writeNewProjectDraft({ projectName, phase: 'search' })
+    }
   }
 
   if (mapsError) {
@@ -182,6 +212,18 @@ export function MapPage() {
   return (
     <div className="relative h-screen w-full">
       <div ref={mapRef} className="h-full w-full" />
+
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
+        <div className="pointer-events-auto w-full max-w-md">
+          <Input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Search for your address..."
+            disabled={!isLoaded || phase === 'processing'}
+            className="h-12 border-white/70 bg-white/95 px-4 text-base shadow-lg backdrop-blur"
+          />
+        </div>
+      </div>
 
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-background">

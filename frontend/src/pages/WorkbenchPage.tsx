@@ -105,6 +105,7 @@ export function WorkbenchPage() {
   const [pendingPanelId, setPendingPanelId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<UiMessage>(null)
+  const [rotationInputValue, setRotationInputValue] = useState('')
 
   const { project, buildingInsights, rgbImageUrl, isLoading, error } = useWorkbenchData(projectId)
   const backgroundImage = useLoadedImage(rgbImageUrl)
@@ -180,6 +181,10 @@ export function WorkbenchPage() {
     }
   }, [])
 
+  useEffect(() => {
+    setRotationInputValue(selectedPanel ? String(Math.round(selectedPanel.rotation)) : '')
+  }, [selectedPanel?.id, selectedPanel?.rotation])
+
   function getPlacementAabb(panelId: string, center: { lat: number; lng: number }, rotation: number, canvasGeo: CanvasGeo) {
     if (!panelDimensions) return null
 
@@ -241,7 +246,7 @@ export function WorkbenchPage() {
     }
   }
 
-  async function handlePanelDragEnd(panelId: string, position: { x: number; y: number }) {
+  async function handlePanelDragEnd(panelId: string, position: { x: number; y: number }, resetPosition: () => void) {
     if (!geo) return
 
     const panel = getPanel(panelId)
@@ -249,13 +254,17 @@ export function WorkbenchPage() {
 
     const nextCenter = pixelToLatLng(position.x, position.y, geo)
     if (!isPlacementValid(panelId, nextCenter, panel.rotation)) {
+      resetPosition()
       setMessage({ tone: 'error', text: 'That placement overlaps another panel or leaves the roof image bounds.' })
       return
     }
 
     const previousCenter = panel.center
     movePanel(panelId, nextCenter)
-    await recomputePanel(panelId, nextCenter, panel.rotation, () => movePanel(panelId, previousCenter))
+    await recomputePanel(panelId, nextCenter, panel.rotation, () => {
+      movePanel(panelId, previousCenter)
+      resetPosition()
+    })
   }
 
   function scheduleRotationRecompute(
@@ -446,12 +455,20 @@ export function WorkbenchPage() {
                     min={0}
                     max={359}
                     step={5}
-                    value={selectedPanel ? Math.round(selectedPanel.rotation) : ''}
+                    value={rotationInputValue}
                     disabled={!selectedPanel || pendingPanelId === selectedPanel.id}
                     onChange={(event) => {
-                      const nextValue = Number(event.target.value)
+                      const rawValue = event.target.value
+                      setRotationInputValue(rawValue)
+
+                      if (rawValue === '') return
+
+                      const nextValue = Number(rawValue)
                       if (!Number.isFinite(nextValue)) return
-                      handleRotationInput(nextValue)
+
+                      const normalizedValue = ((nextValue % 360) + 360) % 360
+                      setRotationInputValue(String(Math.round(normalizedValue)))
+                      handleRotationInput(normalizedValue)
                     }}
                   />
                   <p className="text-xs text-muted-foreground">

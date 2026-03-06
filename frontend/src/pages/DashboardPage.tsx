@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { writeNewProjectDraft } from '@/lib/projectDraftStorage'
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,7 @@ export function DashboardPage() {
     e.preventDefault()
     const name = projectName.trim()
     if (!name) return
+    writeNewProjectDraft({ projectName: name, phase: 'search' })
     setDialogOpen(false)
     setProjectName('')
     navigate('/project/new/map', { state: { projectName: name } })

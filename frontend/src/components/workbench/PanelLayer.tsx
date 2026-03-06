@@ -18,7 +18,7 @@ type PanelLayerProps = {
   stageHeight: number
   disabledPanelId?: string | null
   onSelect: (panelId: string) => void
-  onDragEnd: (panelId: string, position: { x: number; y: number }) => void
+  onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
 }
 
 function panelAnnualEnergy(panel: WorkbenchPanelState): number {
