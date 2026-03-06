@@ -411,6 +411,11 @@
 - [ ] Expose or derive usable roof/mask boundary data for the frontend so Workbench placement validation can reject panels outside the valid rooftop area instead of only outside the image bounds
 - [ ] Define and implement how Analysis consumes `editedLayout` when some panels have not been recomputed in Phase 2, so monthly energy data is consistent for both untouched and edited panels
 
+### 2. Refinement: React Error Boundary
 
+**Purpose/Issue:** QA Phase 2 follow-up #6 — no top-level error boundary exists. If `AuthProvider` or any root-level query throws, users see a white screen with no recovery path.
 
+**Implementation:**
 
+- [ ] Add a React error boundary component wrapping the app in `App.tsx` or `main.tsx`
+- [ ] Display a user-friendly fallback UI with a "Return to Dashboard" or "Reload" action
