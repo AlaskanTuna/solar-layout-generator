@@ -163,4 +163,5 @@ temp/
 # Custom
 # ===========
 
+*.tsbuildinfo
 settings.local.json
