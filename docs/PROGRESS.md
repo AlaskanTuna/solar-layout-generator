@@ -1,5 +1,15 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [07/03/26] - Phase 2.3: Workbench Bootstrap + Runtime Logging
+
+- Fixed a Workbench bootstrap deadlock where the page waited for `panelDimensions` before rendering the canvas container that `panelDimensions` depended on, which could trap Page 2 on the full-screen "Preparing the workbench..." loader.
+- Narrowed the top-level Workbench loading gate to true data prerequisites only and kept canvas sizing/loading inside the rendered page so stage measurement can complete normally.
+- Added explicit Workbench errors for missing linked `locationId`, missing signed rooftop image URL, and stalled image loading instead of silently treating those cases as loading forever.
+- Added frontend dev-console logging for API requests, Workbench data state, and rooftop image loading so manual QA can see which prerequisite is pending.
+- Added backend request, auth, route, and pipeline logging across project fetch/create, location resolve/status/data, signed rooftop image generation, recompute, and file uploads to improve troubleshooting from the terminal.
+- Hardened `GET /api/locations/:id/data` so a `ready` location now fails clearly if `buildingInsightsJson` or `rgbImageUrl` is missing instead of returning a partial success payload.
+- Verification: `npm run build --workspace=backend`, `npm run build --workspace=frontend`, `npm exec --workspace=backend -- vitest run`, and `npm run test --workspace=frontend` all pass.
+
 ## [06/03/26] - Phase 2.2: MapPage Polling + Places Follow-up
 
 - Fixed the new-project MapPage polling deadlock by allowing authenticated users to poll orphan `Location` records during rooftop analysis before a `Project` is created.

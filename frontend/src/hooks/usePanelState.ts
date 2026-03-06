@@ -54,8 +54,8 @@ export function usePanelState({
 
   useEffect(() => {
     if (!projectId || solarPanels.length === 0) {
-      setPanels([])
-      setVisibleCountState(0)
+      setPanels((prev) => (prev.length === 0 ? prev : []))
+      setVisibleCountState((prev) => (prev === 0 ? prev : 0))
       return
     }
 

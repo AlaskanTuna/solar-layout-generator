@@ -14,6 +14,7 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   const {
     data: { session }
   } = await supabase.auth.getSession()
+  const method = options?.method ?? 'GET'
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -24,6 +25,10 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
     headers['Authorization'] = `Bearer ${session.access_token}`
   }
 
+  if (import.meta.env.DEV) {
+    console.info(`[API] ${method} ${path}`)
+  }
+
   const response = await fetch(`/api${path}`, {
     ...options,
     headers
@@ -31,7 +36,16 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
+
+    if (import.meta.env.DEV) {
+      console.error(`[API] ${method} ${path} -> ${response.status}`, body)
+    }
+
     throw new ApiError(response.status, body.error ?? `Request failed: ${response.status}`)
+  }
+
+  if (import.meta.env.DEV) {
+    console.info(`[API] ${method} ${path} -> ${response.status}`)
   }
 
   return response.json() as Promise<T>

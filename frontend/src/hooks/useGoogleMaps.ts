@@ -6,13 +6,16 @@ let loadError: string | null = null
 let loadPromise: Promise<void> | null = null
 
 const loader = new Loader({
-  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '',
-  libraries: ['places', 'marker']
+  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? ''
 })
 
 function ensureLoaded(): Promise<void> {
   if (!loadPromise) {
-    loadPromise = loader.load().then(() => {
+    loadPromise = Promise.all([
+      loader.importLibrary('maps'),
+      loader.importLibrary('places'),
+      loader.importLibrary('marker')
+    ]).then(() => {
       loaded = true
     })
   }

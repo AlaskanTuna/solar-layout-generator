@@ -78,3 +78,8 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
+/* Google Places Autocomplete dropdown must sit above the map */
+.pac-container {
+  z-index: 10000 !important;
+}

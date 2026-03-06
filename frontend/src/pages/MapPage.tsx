@@ -11,17 +11,6 @@ import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from 
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
 
 const MALAYSIA_CENTER = { lat: 3.14, lng: 101.69 }
-type PlacesLibraryWithWidget = google.maps.PlacesLibrary & {
-  PlaceAutocompleteElement?: typeof google.maps.places.PlaceAutocompleteElement
-}
-type PlaceAutocompleteElementWithUi = google.maps.places.PlaceAutocompleteElement & {
-  placeholder?: string
-  includedRegionCodes?: string[]
-}
-type PlaceAutocompleteSelectionEvent = Event & {
-  place?: google.maps.places.Place
-  placePrediction?: google.maps.places.PlacePrediction
-}
 
 export function MapPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -38,7 +27,6 @@ export function MapPage() {
   const searchHostRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<google.maps.Map | null>(null)
   const autocompleteInstance = useRef<google.maps.places.Autocomplete | null>(null)
-  const placeAutocompleteWidgetRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null)
   const markerInstance = useRef<google.maps.marker.AdvancedMarkerElement | null>(null)
   const isCreatingProjectRef = useRef(false)
 
@@ -181,8 +169,8 @@ export function MapPage() {
     })
   }, [handleSelectedPlace])
 
-  // Initialize map and autocomplete
-  const initMap = useCallback(async () => {
+  // Initialize map and autocomplete (uses legacy Autocomplete — reliable with standard Places API)
+  const initMap = useCallback(() => {
     if (!mapRef.current || mapInstance.current) return
 
     const map = new google.maps.Map(mapRef.current, {
@@ -196,78 +184,13 @@ export function MapPage() {
     })
     mapInstance.current = map
 
-    const host = searchHostRef.current
-    if (!host) return
-
-    let placesLibrary: PlacesLibraryWithWidget | null = null
-    try {
-      placesLibrary = (await google.maps.importLibrary('places')) as PlacesLibraryWithWidget
-    } catch {
-      initLegacyAutocomplete()
-      return
-    }
-
-    const PlaceAutocompleteElement = placesLibrary.PlaceAutocompleteElement
-
-    if (!PlaceAutocompleteElement) {
-      initLegacyAutocomplete()
-      return
-    }
-
-    host.replaceChildren()
-
-    const widget = new PlaceAutocompleteElement({}) as PlaceAutocompleteElementWithUi
-    placeAutocompleteWidgetRef.current = widget
-
-    widget.placeholder = 'Search for your address...'
-    widget.includedRegionCodes = ['my']
-    widget.requestedRegion = 'my'
-    widget.classList.add('w-full')
-
-    const updateRestriction = () => {
-      widget.locationRestriction = map.getBounds() ?? null
-    }
-
-    google.maps.event.addListener(map, 'bounds_changed', updateRestriction)
-    updateRestriction()
-
-    widget.addEventListener('gmp-error', () => {
-      placeAutocompleteWidgetRef.current = null
-      initLegacyAutocomplete()
-    })
-
-    widget.addEventListener('gmp-select', async (event: Event) => {
-      const payload = event as PlaceAutocompleteSelectionEvent &
-        CustomEvent<{ placePrediction?: google.maps.places.PlacePrediction }>
-
-      const placePrediction = payload.placePrediction ?? payload.detail?.placePrediction
-      const place = payload.place ?? placePrediction?.toPlace()
-      if (!place) return
-
-      await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] })
-
-      const location = place.location
-      if (!location) return
-
-      const lat = typeof location.lat === 'function' ? location.lat() : location.lat
-      const lng = typeof location.lng === 'function' ? location.lng() : location.lng
-      if (typeof lat !== 'number' || typeof lng !== 'number') return
-
-      const address = place.formattedAddress ?? place.displayName ?? `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-
-      handleSelectedPlace(lat, lng, address)
-    })
-
-    host.appendChild(widget)
-  }, [handleSelectedPlace, initLegacyAutocomplete])
+    initLegacyAutocomplete()
+  }, [initLegacyAutocomplete])
 
   useEffect(() => {
     if (!isLoaded) return
 
-    initMap().catch((err) => {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to initialize Google Maps')
-      setPhase('failed')
-    })
+    initMap()
   }, [isLoaded, initMap])
 
   async function handleConfirm() {
@@ -334,7 +257,7 @@ export function MapPage() {
       <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
         <div
           ref={searchHostRef}
-          className={`pointer-events-auto w-full max-w-md overflow-hidden rounded-xl border border-white/70 bg-white/95 shadow-lg backdrop-blur ${
+          className={`pointer-events-auto w-full max-w-md rounded-xl border border-white/70 bg-white/95 shadow-lg backdrop-blur ${
             !isLoaded || phase === 'processing' ? 'pointer-events-none opacity-70' : ''
           }`}
         >

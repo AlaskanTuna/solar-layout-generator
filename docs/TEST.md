@@ -1,5 +1,11 @@
 ﻿# TEST - AGENT ONLY
 
+## [07/03/26] - Phase 2.3 Workbench Bootstrap + Runtime Logging
+
+- Scenario: Validate the Workbench bootstrap fix and the new runtime observability pass across frontend and backend.
+- Steps: Ran `npm run build --workspace=backend`, `npm run build --workspace=frontend`, `npm exec --workspace=backend -- vitest run`, and `npm run test --workspace=frontend`.
+- Result: Pass (backend build passed; frontend build passed; backend Vitest: 5 files / 23 tests passed; frontend Vitest: 3 files / 7 tests passed).
+
 ## [06/03/26] - Phase 2.2 MapPage Polling + Places Follow-up
 
 - Scenario: Validate the manual-QA follow-up fixes for new-project location polling, modern Google Places initialization, and the backend ownership regression.

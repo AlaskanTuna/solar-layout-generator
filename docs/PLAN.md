@@ -414,6 +414,21 @@
 - [x] Fail the processing state cleanly when polling errors occur instead of leaving the UI stuck on "Analyzing your rooftop..."
 - [x] Guard ready-state project creation so repeated polling responses cannot create duplicate projects before navigation completes
 
+## Phase 2.3: Manual QA Follow-up - Workbench + Observability
+
+### 1. Refinement: Workbench Bootstrap Deadlock + Runtime Logging
+
+**Purpose/Issue:** Manual QA found that Page 2 could remain stuck on "Preparing the workbench..." even after the project and location were created successfully. Debugging was also slowed by minimal frontend/backend runtime logging across auth, project, location, and pipeline steps.
+
+**Implementation:**
+
+- [x] Remove the Workbench render deadlock where `panelDimensions` was required before the canvas container could mount and report stage size
+- [x] Keep the top-level Workbench loading gate focused on actual data prerequisites (`project`, parsed `buildingInsights`, rooftop image) and move canvas sizing/loading to the in-page canvas area
+- [x] Add explicit runtime errors for incomplete Workbench data such as a missing linked `locationId` or missing signed rooftop image URL
+- [x] Add frontend dev-console logging for API requests and Workbench bootstrap state so manual QA can see which prerequisite is still pending
+- [x] Add backend request/route/pipeline logging for auth, project CRUD, location resolve/status/data, recompute, and pipeline file uploads
+- [x] Harden `GET /api/locations/:id/data` so a `ready` location cannot return a partial 200 response without `buildingInsightsJson` or `rgbImageUrl`
+
 ## Phase 3: Frontend - Billing Engine, Page 3, PDF Export
 
 ### 1. Refinement: Workbench Placement + Energy Consistency

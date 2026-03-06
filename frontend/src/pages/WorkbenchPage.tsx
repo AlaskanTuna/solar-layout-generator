@@ -37,21 +37,57 @@ function formatNumber(value: number): string {
 
 function useLoadedImage(src: string) {
   const [image, setImage] = useState<HTMLImageElement | null>(null)
+  const [imageError, setImageError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!src) {
       setImage(null)
+      setImageError(null)
       return
     }
 
     const nextImage = new window.Image()
+    const loadTimeout = window.setTimeout(() => {
+      setImage(null)
+      setImageError('Timed out while loading the rooftop preview image')
+    }, 15000)
+
+    if (import.meta.env.DEV) {
+      console.info('[WorkbenchImage] Loading rooftop image', { src })
+    }
+
     nextImage.crossOrigin = 'anonymous'
-    nextImage.onload = () => setImage(nextImage)
-    nextImage.onerror = () => setImage(null)
+    nextImage.onload = () => {
+      window.clearTimeout(loadTimeout)
+      setImage(nextImage)
+      setImageError(null)
+
+      if (import.meta.env.DEV) {
+        console.info('[WorkbenchImage] Rooftop image loaded', {
+          width: nextImage.width,
+          height: nextImage.height
+        })
+      }
+    }
+    nextImage.onerror = () => {
+      window.clearTimeout(loadTimeout)
+      setImage(null)
+      setImageError(`Failed to load rooftop image from: ${src.slice(0, 120)}`)
+
+      if (import.meta.env.DEV) {
+        console.error('[WorkbenchImage] Rooftop image failed to load', { src })
+      }
+    }
     nextImage.src = src
+
+    return () => {
+      window.clearTimeout(loadTimeout)
+      nextImage.onload = null
+      nextImage.onerror = null
+    }
   }, [src])
 
-  return image
+  return { image, imageError }
 }
 
 function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTMLImageElement | null) {
@@ -107,8 +143,9 @@ export function WorkbenchPage() {
   const [message, setMessage] = useState<UiMessage>(null)
   const [rotationInputValue, setRotationInputValue] = useState('')
 
-  const { project, buildingInsights, rgbImageUrl, isLoading, error } = useWorkbenchData(projectId)
-  const backgroundImage = useLoadedImage(rgbImageUrl)
+  const { project, buildingInsights, rgbImageUrl, isLoading, error: dataError } = useWorkbenchData(projectId)
+  const { image: backgroundImage, imageError } = useLoadedImage(rgbImageUrl)
+  const error = dataError ?? (imageError ? new Error(imageError) : null)
   const stageSize = useStageSize(containerRef, backgroundImage)
 
   const geo = useMemo(() => {
@@ -127,6 +164,7 @@ export function WorkbenchPage() {
       geo
     )
   }, [buildingInsights, geo])
+  const stageReady = stageSize.width > 0 && stageSize.height > 0 && !!geo && !!panelDimensions
 
   const {
     visiblePanels,
@@ -184,6 +222,34 @@ export function WorkbenchPage() {
   useEffect(() => {
     setRotationInputValue(selectedPanel ? String(Math.round(selectedPanel.rotation)) : '')
   }, [selectedPanel?.id, selectedPanel?.rotation])
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+
+    console.info('[WorkbenchPage]', {
+      projectId: projectId ?? null,
+      hasProject: Boolean(project),
+      hasBuildingInsights: Boolean(buildingInsights),
+      hasRgbImageUrl: Boolean(rgbImageUrl),
+      hasBackgroundImage: Boolean(backgroundImage),
+      stageWidth: stageSize.width,
+      stageHeight: stageSize.height,
+      hasPanelDimensions: Boolean(panelDimensions),
+      isLoading,
+      error: error instanceof Error ? error.message : null
+    })
+  }, [
+    projectId,
+    project,
+    buildingInsights,
+    rgbImageUrl,
+    backgroundImage,
+    stageSize.width,
+    stageSize.height,
+    panelDimensions,
+    isLoading,
+    error
+  ])
 
   function getPlacementAabb(panelId: string, center: { lat: number; lng: number }, rotation: number, canvasGeo: CanvasGeo) {
     if (!panelDimensions) return null
@@ -326,19 +392,6 @@ export function WorkbenchPage() {
     }
   }
 
-  if (isLoading || !project || !buildingInsights || !backgroundImage || !panelDimensions) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex items-center justify-center gap-3 py-10">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
-            <p className="text-sm text-muted-foreground">Preparing the workbench...</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
@@ -352,6 +405,19 @@ export function WorkbenchPage() {
             <Button asChild variant="outline">
               <Link to="/dashboard">Back to Dashboard</Link>
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (isLoading || !project || !buildingInsights || !backgroundImage) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center gap-3 py-10">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
+            <p className="text-sm text-muted-foreground">Preparing the workbench...</p>
           </CardContent>
         </Card>
       </div>
@@ -516,7 +582,7 @@ export function WorkbenchPage() {
                 ref={containerRef}
                 className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-[radial-gradient(circle_at_top_left,#fefce8,transparent_30%),linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-2"
               >
-                {stageSize.width > 0 && stageSize.height > 0 ? (
+                {stageReady && panelDimensions ? (
                   <Stage width={stageSize.width} height={stageSize.height} className="overflow-hidden rounded-xl shadow-lg">
                     <Layer listening={false}>
                       <KonvaImage image={backgroundImage} width={stageSize.width} height={stageSize.height} />
@@ -536,7 +602,7 @@ export function WorkbenchPage() {
                 ) : (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
-                    Loading the rooftop image...
+                    Preparing the canvas...
                   </div>
                 )}
               </div>
