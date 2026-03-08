@@ -1,5 +1,13 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [08/03/26] - Phase 2.5: Location Cache Smoke Test
+
+- Added `tests/smoke/smoke-location-cache.sh` to exercise the real Page 1 cache path through the backend rather than calling Google Solar directly, since the cache behavior under test lives behind `POST /api/locations/resolve`.
+- The smoke script creates a temporary Supabase auth user, resolves a target coordinate, polls until the location is `ready`, inspects the `Location` row via Prisma, and confirms the expected cached artifacts (`buildingInsightsJson`, `rgbImageUrl`, `monthlyFluxPath`, `maskPath`) were persisted to Supabase-backed storage/metadata.
+- The script then creates a first project, repeats the same resolve flow with the same coordinates, creates a second project, and asserts both project flows land on the same cached `locationId` without increasing the number of `Location` rows in the coordinate tolerance window.
+- Added a warm-cache override (`CACHE_ALLOW_WARM=1`) so the same script can verify reuse behavior on an already-cached coordinate during troubleshooting, while cold-cache mode intentionally fails fast if the coordinate has already been cached.
+- Verification so far is a shell syntax pass only (`bash -n tests/smoke/smoke-location-cache.sh`); the live Solar API-backed smoke run is intentionally left to the user so it can be pointed at a chosen test coordinate.
+
 ## [07/03/26] - Phase 2.4: Workbench Rendering Alignment
 
 - Replaced the frontend Workbench's building-bounding-box approximation with reference GeoTIFF transform data derived from the stored `rgb.tif` (fallback `dsm.tif`), matching the validated prototype's rendering workflow.
@@ -125,6 +133,3 @@
 - Backend: Express app with CORS, JSON parsing, health route (`GET /api/health`), placeholder route stubs for locations/projects/tariff, Zod env validation, global error handler.
 - Prisma: full schema with `Location`, `Project`, `TariffConfig` models and enums.
 - Frontend: Vite + React + Tailwind + TanStack Query + React Router. All 7 placeholder pages wired to routes. shadcn/ui config (`components.json`) and `cn()` utility set up. Dev proxy to backend on `/api`.
-
-
-

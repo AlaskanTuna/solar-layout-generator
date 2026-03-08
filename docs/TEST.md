@@ -1,5 +1,11 @@
 ﻿# TEST - AGENT ONLY
 
+## [08/03/26] - Phase 2.5 Location Cache Smoke Test
+
+- Scenario: Validate the new location-cache smoke script structure before using a live Solar API-backed coordinate.
+- Steps: Ran `bash -n tests/smoke/smoke-location-cache.sh` to verify shell syntax and checked the script flow against the existing backend auth/project/location contracts.
+- Result: Pass (shell syntax validation succeeded; live end-to-end execution intentionally not run from this environment because it requires a chosen test coordinate, a running backend, and may consume a real Solar API cache miss).
+
 ## [07/03/26] - Phase 2.4 Workbench Rendering Alignment
 
 - Scenario: Validate the prototype-aligned Workbench transform path using reference GeoTIFF metadata rather than the building bounding box approximation.

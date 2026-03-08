@@ -443,6 +443,20 @@
 - [x] Add/update focused transform tests for the new frontend projected-CRS path and the backend GeoTIFF Y-resolution normalization
 - [x] Verify with a live numeric sanity check that the latest location's panel centers now cluster within the actual rooftop image bounds instead of spanning the whole image
 
+## Phase 2.5: Location Cache Smoke Test
+
+### 1. Testing: End-to-End Cache Reuse Verification
+
+**Purpose/Issue:** Manual QA and future regressions need a repeatable way to prove that `POST /api/locations/resolve` warms the shared immutable cache on the first run, persists the expected location artifacts to Supabase, and reuses the same `Location` on a second run instead of triggering duplicate cache rows.
+
+**Implementation:**
+
+- [x] Add a dedicated smoke script under `tests/smoke/` that authenticates a temporary Supabase user, resolves a test coordinate, polls until the location is `ready`, and verifies the cached `Location` row contains the expected persisted artifacts
+- [x] Extend the script to mirror the real new-project flow by creating a project after the first ready location, then repeating the resolve + create-project flow again with the same coordinates
+- [x] Assert the second resolve reuses the same `locationId`, returns `ready` immediately, and does not increase the number of `Location` rows within the configured coordinate tolerance window
+- [x] Support both cold-cache validation (fresh coordinate required) and warm-cache validation (`CACHE_ALLOW_WARM=1`) so the script is usable during manual troubleshooting without always burning a fresh Solar API call
+- [x] Syntax-check the script and document usage/verification notes for the manual live run
+
 ## Phase 3: Frontend - Billing Engine, Page 3, PDF Export
 
 ### 1. Refinement: Workbench Placement + Energy Consistency
