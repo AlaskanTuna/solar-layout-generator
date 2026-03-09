@@ -3,12 +3,48 @@ import { describe, expect, it } from 'vitest'
 import { usePanelState } from './usePanelState'
 
 const solarPanels = [
-  { id: 'panel_0', center: { lat: 3.14, lng: 101.68 }, orientation: 'LANDSCAPE' as const, yearlyEnergyDcKwh: 520, segmentIndex: 0 },
-  { id: 'panel_1', center: { lat: 3.141, lng: 101.681 }, orientation: 'PORTRAIT' as const, yearlyEnergyDcKwh: 510, segmentIndex: 0 },
-  { id: 'panel_2', center: { lat: 3.142, lng: 101.682 }, orientation: 'LANDSCAPE' as const, yearlyEnergyDcKwh: 500, segmentIndex: 1 },
-  { id: 'panel_3', center: { lat: 3.143, lng: 101.683 }, orientation: 'LANDSCAPE' as const, yearlyEnergyDcKwh: 490, segmentIndex: 1 },
-  { id: 'panel_4', center: { lat: 3.144, lng: 101.684 }, orientation: 'PORTRAIT' as const, yearlyEnergyDcKwh: 480, segmentIndex: 0 },
-  { id: 'panel_5', center: { lat: 3.145, lng: 101.685 }, orientation: 'LANDSCAPE' as const, yearlyEnergyDcKwh: 470, segmentIndex: 1 }
+  {
+    id: 'panel_0',
+    center: { lat: 3.14, lng: 101.68 },
+    orientation: 'LANDSCAPE' as const,
+    yearlyEnergyDcKwh: 520,
+    segmentIndex: 0
+  },
+  {
+    id: 'panel_1',
+    center: { lat: 3.141, lng: 101.681 },
+    orientation: 'PORTRAIT' as const,
+    yearlyEnergyDcKwh: 510,
+    segmentIndex: 0
+  },
+  {
+    id: 'panel_2',
+    center: { lat: 3.142, lng: 101.682 },
+    orientation: 'LANDSCAPE' as const,
+    yearlyEnergyDcKwh: 500,
+    segmentIndex: 1
+  },
+  {
+    id: 'panel_3',
+    center: { lat: 3.143, lng: 101.683 },
+    orientation: 'LANDSCAPE' as const,
+    yearlyEnergyDcKwh: 490,
+    segmentIndex: 1
+  },
+  {
+    id: 'panel_4',
+    center: { lat: 3.144, lng: 101.684 },
+    orientation: 'PORTRAIT' as const,
+    yearlyEnergyDcKwh: 480,
+    segmentIndex: 0
+  },
+  {
+    id: 'panel_5',
+    center: { lat: 3.145, lng: 101.685 },
+    orientation: 'LANDSCAPE' as const,
+    yearlyEnergyDcKwh: 470,
+    segmentIndex: 1
+  }
 ]
 
 const roofSegments = [{ azimuthDegrees: 180 }, { azimuthDegrees: 135 }]

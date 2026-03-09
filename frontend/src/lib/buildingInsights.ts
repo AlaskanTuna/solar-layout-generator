@@ -42,9 +42,7 @@ function getString(value: unknown): string | null {
   return typeof value === 'string' ? value : null
 }
 
-function getCoordinate(
-  raw: unknown
-): {
+function getCoordinate(raw: unknown): {
   latitude: number
   longitude: number
 } | null {
@@ -152,8 +150,7 @@ export function parsePanelEdits(raw: unknown): PanelEdit[] {
       if (!isRecord(item)) return null
 
       const id = getString(item.id)
-      const status =
-        item.status === 'kept' || item.status === 'moved' || item.status === 'deleted' ? item.status : null
+      const status = item.status === 'kept' || item.status === 'moved' || item.status === 'deleted' ? item.status : null
       const center = getPanelCenter(item.center)
       const rotation = getNumber(item.rotation)
       const monthlyEnergyDcKwh = Array.isArray(item.monthlyEnergyDcKwh)

@@ -57,14 +57,10 @@ export function PanelRect({
       onDragStart={() => onSelect(id)}
       onDragEnd={(event) => {
         const node = event.target
-        onDragEnd(
-          id,
-          { x: node.x(), y: node.y() },
-          () => {
-            node.position({ x, y })
-            node.getLayer()?.batchDraw()
-          }
-        )
+        onDragEnd(id, { x: node.x(), y: node.y() }, () => {
+          node.position({ x, y })
+          node.getLayer()?.batchDraw()
+        })
       }}
     />
   )

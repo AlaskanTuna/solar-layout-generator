@@ -47,7 +47,7 @@ export function MapPage() {
 
     writeNewProjectDraft({
       projectName,
-      locationId: phase === 'processing' ? locationId ?? undefined : undefined,
+      locationId: phase === 'processing' ? (locationId ?? undefined) : undefined,
       phase: phase === 'processing' ? 'processing' : 'search'
     })
   }, [isNewProject, projectName, locationId, navigate, phase])

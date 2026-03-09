@@ -1,6 +1,6 @@
 # Knowledge Vault: Solar Potential Analysis (Page 3 MVP)
 
-> The billing engine in this vault targets **NEM Rakyat 3.0 (1-to-1 kWh offset with carry-forward within the Settlement Period)** only.  
+> The billing engine in this vault targets **NEM Rakyat 3.0 (1-to-1 kWh offset with carry-forward within the Settlement Period)** only.
 
 **Target: Peninsular Malaysia residential NEM Rakyat consumers under post-July 2025 tariff structure**
 
@@ -24,10 +24,10 @@ Sabah (SESB) and Sarawak (Sarawak Energy) operate separate schemes with differen
 
 > **Correct NEM Rakyat capacity caps (authoritative):** 5 kW (single-phase) and 12.5 kW (three-phase). Source: SEDA NEM Rakyat / NEM GoMEn guideline (July 2023).
 
-| Connection type | Maximum capacity |
-|---|---|
-| Single-phase | **5 kW (single-phase)** |
-| Three-phase | **12.5 kW (three-phase)** |
+| Connection type | Maximum capacity          |
+| --------------- | ------------------------- |
+| Single-phase    | **5 kW (single-phase)**   |
+| Three-phase     | **12.5 kW (three-phase)** |
 
 These limits are codified in Section 7 of the NEM 3.0 Guidelines and restated in the NEM Rakyat Contract (TNB). Some secondary sources cite 5 kWac and 12.5 kWac following a May 2025 quota expansion, but **no official SEDA or Energy Commission document confirms revised limits**. The MVP should use 4/12.5 kW (three-phase) as the validated defaults.
 
@@ -63,10 +63,10 @@ The old five-tier block-rate Tariff A was **abolished** on 30 June 2025. The rep
 
 **A. Energy (Generation) Charge — the threshold behavior rate:**
 
-| Monthly consumption | Rate |
-|---|---|
-| ≤ 1,500 kWh | **27.03 sen/kWh** |
-| > 1,500 kWh | **37.03 sen/kWh** |
+| Monthly consumption | Rate              |
+| ------------------- | ----------------- |
+| ≤ 1,500 kWh         | **27.03 sen/kWh** |
+| > 1,500 kWh         | **37.03 sen/kWh** |
 
 This is a **threshold-based rate, not a block rate**. If consumption exceeds 1,500 kWh by even 1 unit, **all** kWh are charged at 37.03. This creates a cliff where crossing from 1,500 to 1,501 kWh adds approximately **RM150** to the energy charge alone. Multiple sources including TNB's own calculator confirm this behaviour.
 
@@ -78,29 +78,29 @@ This is a **threshold-based rate, not a block rate**. If consumption exceeds 1,5
 
 **E. Automatic Fuel Adjustment (AFA):** Variable monthly rate replacing the old semi-annual ICPT. Capped at ±3 sen/kWh change per month. **Waived** for consumption **≤ 600 kWh**. Recent rates:
 
-| Month | AFA (sen/kWh) |
-|---|---|
-| Jul 2025 | 0.00 |
-| Oct 2025 | −6.50 |
-| Jan 2026 | −4.99 |
+| Month    | AFA (sen/kWh)                |
+| -------- | ---------------------------- |
+| Jul 2025 | 0.00                         |
+| Oct 2025 | −6.50                        |
+| Jan 2026 | −4.99                        |
 | Feb 2026 | **−2.77** (latest confirmed) |
 
 ### Energy Efficiency Incentive (EEI)
 
 A tiered rebate for consumers using **≤ 1,000 kWh/month**, applied uniformly to all kWh based on which 50 kWh bracket total consumption falls in:
 
-| kWh bracket | Rebate (sen/kWh) | | kWh bracket | Rebate (sen/kWh) |
-|---|---|---|---|---|
-| 1–200 | **25.00** | | 501–550 | 10.50 |
-| 201–250 | 24.50 | | 551–600 | 9.00 |
-| 251–300 | 22.50 | | 601–650 | 7.50 |
-| 301–350 | 21.00 | | 651–700 | 5.50 |
-| 351–400 | 17.00 | | 701–750 | 4.50 |
-| 401–450 | 14.50 | | 751–800 | 4.00 |
-| 451–500 | 12.00 | | 801–850 | 2.50 |
-| | | | 851–900 | 1.00 |
-| | | | 901–1,000 | 0.50 |
-| | | | > 1,000 | **0.00** |
+| kWh bracket | Rebate (sen/kWh) |     | kWh bracket | Rebate (sen/kWh) |
+| ----------- | ---------------- | --- | ----------- | ---------------- |
+| 1–200       | **25.00**        |     | 501–550     | 10.50            |
+| 201–250     | 24.50            |     | 551–600     | 9.00             |
+| 251–300     | 22.50            |     | 601–650     | 7.50             |
+| 301–350     | 21.00            |     | 651–700     | 5.50             |
+| 351–400     | 17.00            |     | 701–750     | 4.50             |
+| 401–450     | 14.50            |     | 751–800     | 4.00             |
+| 451–500     | 12.00            |     | 801–850     | 2.50             |
+|             |                  |     | 851–900     | 1.00             |
+|             |                  |     | 901–1,000   | 0.50             |
+|             |                  |     | > 1,000     | **0.00**         |
 
 **Caveat:** PETRA indicated that EEI rates and calculations "will be adjusted" for NEM/MBIPV users "to ensure greater equity." Exact modifications have not been published. The MVP should use the standard table as default but flag this as a potential future change.
 
@@ -116,11 +116,11 @@ A tiered rebate for consumers using **≤ 1,000 kWh/month**, applied uniformly t
 
 ### Combined effective rates before AFA and taxes
 
-| Consumption level | Energy + Capacity + Network | Key waivers |
-|---|---|---|
-| ≤ 600 kWh | 44.43 sen/kWh | Retail, AFA, SST all waived |
-| 601–1,500 kWh | 44.43 sen/kWh | + RM10 retail + AFA + SST |
-| > 1,500 kWh | **54.43 sen/kWh** | + RM10 retail + AFA + SST |
+| Consumption level | Energy + Capacity + Network | Key waivers                 |
+| ----------------- | --------------------------- | --------------------------- |
+| ≤ 600 kWh         | 44.43 sen/kWh               | Retail, AFA, SST all waived |
+| 601–1,500 kWh     | 44.43 sen/kWh               | + RM10 retail + AFA + SST   |
+| > 1,500 kWh       | **54.43 sen/kWh**           | + RM10 retail + AFA + SST   |
 
 ### NEM interaction with thresholds
 
@@ -209,14 +209,14 @@ Based on IEN Consultants' professional standard for Kuala Lumpur and multiple si
 
 Peninsular Malaysia's equatorial location produces relatively uniform monthly irradiance. The peak-to-trough ratio is only **1.39:1** (March to November). The following factors are derived from PVsyst Meteonorm data for a representative west-coast Peninsular Malaysia location and cross-validated against MMD ground-station records:
 
-| Month | Factor | kWh for 1 kWp | | Month | Factor | kWh for 1 kWp |
-|---|---|---|---|---|---|---|
-| Jan | 0.088 | 105.6 | | Jul | 0.082 | 98.4 |
-| Feb | 0.090 | 108.0 | | Aug | 0.080 | 96.0 |
-| **Mar** | **0.100** | **120.0** | | Sep | 0.078 | 93.6 |
-| Apr | 0.092 | 110.4 | | Oct | 0.075 | 90.0 |
-| May | 0.087 | 104.4 | | **Nov** | **0.072** | **86.4** |
-| Jun | 0.080 | 96.0 | | Dec | 0.076 | 91.2 |
+| Month   | Factor    | kWh for 1 kWp |     | Month   | Factor    | kWh for 1 kWp |
+| ------- | --------- | ------------- | --- | ------- | --------- | ------------- |
+| Jan     | 0.088     | 105.6         |     | Jul     | 0.082     | 98.4          |
+| Feb     | 0.090     | 108.0         |     | Aug     | 0.080     | 96.0          |
+| **Mar** | **0.100** | **120.0**     |     | Sep     | 0.078     | 93.6          |
+| Apr     | 0.092     | 110.4         |     | Oct     | 0.075     | 90.0          |
+| May     | 0.087     | 104.4         |     | **Nov** | **0.072** | **86.4**      |
+| Jun     | 0.080     | 96.0          |     | Dec     | 0.076     | 91.2          |
 
 Factors sum to **1.000**. March is the peak month; November is the lowest (northeast monsoon onset).
 
@@ -246,33 +246,33 @@ All examples use AFA = −2.77 sen/kWh (February 2026 rate). Currency in RM. All
 
 **Baseline bill (800 kWh, no PV):**
 
-| Component | Calculation | Amount (RM) |
-|---|---|---|
-| Energy | 800 × 27.03 sen | 216.24 |
-| Capacity | 800 × 4.55 sen | 36.40 |
-| Network | 800 × 12.85 sen | 102.80 |
-| Retail | > 600 kWh | 10.00 |
-| AFA | 800 × (−2.77) sen | −22.16 |
-| EEI | 800 kWh → 4.00 sen bracket → 800 × 4.00 | −32.00 |
-| **Pre-tax subtotal** | | **311.28** |
-| RE Fund | 1.6% × (216.24 + 36.40 + 102.80) = 1.6% × 355.44 | 5.69 |
-| SST | 8% × (311.28 + 5.69) | 25.36 |
-| **Total baseline** | | **342.33** |
+| Component            | Calculation                                      | Amount (RM) |
+| -------------------- | ------------------------------------------------ | ----------- |
+| Energy               | 800 × 27.03 sen                                  | 216.24      |
+| Capacity             | 800 × 4.55 sen                                   | 36.40       |
+| Network              | 800 × 12.85 sen                                  | 102.80      |
+| Retail               | > 600 kWh                                        | 10.00       |
+| AFA                  | 800 × (−2.77) sen                                | −22.16      |
+| EEI                  | 800 kWh → 4.00 sen bracket → 800 × 4.00          | −32.00      |
+| **Pre-tax subtotal** |                                                  | **311.28**  |
+| RE Fund              | 1.6% × (216.24 + 36.40 + 102.80) = 1.6% × 355.44 | 5.69        |
+| SST                  | 8% × (311.28 + 5.69)                             | 25.36       |
+| **Total baseline**   |                                                  | **342.33**  |
 
 **NEM bill (320 kWh billable = 800 − 480):**
 
-| Component | Calculation | Amount (RM) |
-|---|---|---|
-| Energy | 320 × 27.03 sen | 86.50 |
-| Capacity | 320 × 4.55 sen | 14.56 |
-| Network | 320 × 12.85 sen | 41.12 |
-| Retail | ≤ 600 kWh → waived | 0.00 |
-| AFA | ≤ 600 kWh → waived | 0.00 |
-| EEI | 320 kWh → 21.00 sen bracket → 320 × 21.00 | −67.20 |
-| **Pre-tax subtotal** | | **74.98** |
-| RE Fund | 1.6% × (86.50 + 14.56 + 41.12) = 1.6% × 142.18 | 2.27 |
-| SST | ≤ 600 kWh → exempt | 0.00 |
-| **Total NEM** | | **77.25** |
+| Component            | Calculation                                    | Amount (RM) |
+| -------------------- | ---------------------------------------------- | ----------- |
+| Energy               | 320 × 27.03 sen                                | 86.50       |
+| Capacity             | 320 × 4.55 sen                                 | 14.56       |
+| Network              | 320 × 12.85 sen                                | 41.12       |
+| Retail               | ≤ 600 kWh → waived                             | 0.00        |
+| AFA                  | ≤ 600 kWh → waived                             | 0.00        |
+| EEI                  | 320 kWh → 21.00 sen bracket → 320 × 21.00      | −67.20      |
+| **Pre-tax subtotal** |                                                | **74.98**   |
+| RE Fund              | 1.6% × (86.50 + 14.56 + 41.12) = 1.6% × 142.18 | 2.27        |
+| SST                  | ≤ 600 kWh → exempt                             | 0.00        |
+| **Total NEM**        |                                                | **77.25**   |
 
 **Monthly savings: RM265.08 (77.4%).** Credit balance remains 0 kWh. The dramatic savings arise from three compounding effects: direct kWh offset, crossing below the 600 kWh threshold (eliminating retail/AFA/SST), and jumping to a much higher EEI rebate bracket (from 4.00 to 21.00 sen/kWh).
 
@@ -284,16 +284,16 @@ Net import = 300 − 480 = **−180 kWh** → billable = 0 kWh; new credit = 180
 
 **Baseline bill (300 kWh):**
 
-| Component | Calculation | Amount (RM) |
-|---|---|---|
-| Energy | 300 × 27.03 | 81.09 |
-| Capacity | 300 × 4.55 | 13.65 |
-| Network | 300 × 12.85 | 38.55 |
-| Retail / AFA | ≤ 600 kWh → waived | 0.00 |
-| EEI | 300 kWh → 22.50 sen → 300 × 22.50 | −67.50 |
-| RE Fund | ≤ 300 kWh → exempt | 0.00 |
-| SST | ≤ 600 kWh → exempt | 0.00 |
-| **Total baseline** | | **65.79** |
+| Component          | Calculation                       | Amount (RM) |
+| ------------------ | --------------------------------- | ----------- |
+| Energy             | 300 × 27.03                       | 81.09       |
+| Capacity           | 300 × 4.55                        | 13.65       |
+| Network            | 300 × 12.85                       | 38.55       |
+| Retail / AFA       | ≤ 600 kWh → waived                | 0.00        |
+| EEI                | 300 kWh → 22.50 sen → 300 × 22.50 | −67.50      |
+| RE Fund            | ≤ 300 kWh → exempt                | 0.00        |
+| SST                | ≤ 600 kWh → exempt                | 0.00        |
+| **Total baseline** |                                   | **65.79**   |
 
 **NEM bill (0 kWh):** Falls below minimum → **RM3.00**.
 
@@ -305,33 +305,33 @@ Net import = 300 − 480 = **−180 kWh** → billable = 0 kWh; new credit = 180
 
 **Baseline bill (1,600 kWh — ABOVE the 1,500 cliff):**
 
-| Component | Calculation | Amount (RM) |
-|---|---|---|
-| Energy | 1,600 × **37.03** sen (cliff rate!) | 592.48 |
-| Capacity | 1,600 × 4.55 | 72.80 |
-| Network | 1,600 × 12.85 | 205.60 |
-| Retail | > 600 kWh | 10.00 |
-| AFA | 1,600 × (−2.77) | −44.32 |
-| EEI | > 1,000 kWh → none | 0.00 |
-| **Pre-tax subtotal** | | **836.56** |
-| RE Fund | 1.6% × 870.88 | 13.93 |
-| SST | 8% × 850.49 | 68.04 |
-| **Total baseline** | | **918.53** |
+| Component            | Calculation                         | Amount (RM) |
+| -------------------- | ----------------------------------- | ----------- |
+| Energy               | 1,600 × **37.03** sen (cliff rate!) | 592.48      |
+| Capacity             | 1,600 × 4.55                        | 72.80       |
+| Network              | 1,600 × 12.85                       | 205.60      |
+| Retail               | > 600 kWh                           | 10.00       |
+| AFA                  | 1,600 × (−2.77)                     | −44.32      |
+| EEI                  | > 1,000 kWh → none                  | 0.00        |
+| **Pre-tax subtotal** |                                     | **836.56**  |
+| RE Fund              | 1.6% × 870.88                       | 13.93       |
+| SST                  | 8% × 850.49                         | 68.04       |
+| **Total baseline**   |                                     | **918.53**  |
 
 **NEM bill (640 kWh = 1,600 − 960, BELOW the cliff):**
 
-| Component | Calculation | Amount (RM) |
-|---|---|---|
-| Energy | 640 × **27.03** sen (lower rate!) | 173.00 |
-| Capacity | 640 × 4.55 | 29.12 |
-| Network | 640 × 12.85 | 82.24 |
-| Retail | > 600 kWh | 10.00 |
-| AFA | 640 × (−2.77) | −17.73 |
-| EEI | 640 kWh → 7.50 sen → 640 × 7.50 | −48.00 |
-| **Pre-tax subtotal** | | **228.63** |
-| RE Fund | 1.6% × 284.36 | 4.55 |
-| SST | 8% × 233.18 | 18.65 |
-| **Total NEM** | | **251.83** |
+| Component            | Calculation                       | Amount (RM) |
+| -------------------- | --------------------------------- | ----------- |
+| Energy               | 640 × **27.03** sen (lower rate!) | 173.00      |
+| Capacity             | 640 × 4.55                        | 29.12       |
+| Network              | 640 × 12.85                       | 82.24       |
+| Retail               | > 600 kWh                         | 10.00       |
+| AFA                  | 640 × (−2.77)                     | −17.73      |
+| EEI                  | 640 kWh → 7.50 sen → 640 × 7.50   | −48.00      |
+| **Pre-tax subtotal** |                                   | **228.63**  |
+| RE Fund              | 1.6% × 284.36                     | 4.55        |
+| SST                  | 8% × 233.18                       | 18.65       |
+| **Total NEM**        |                                   | **251.83**  |
 
 **Monthly savings: RM666.70 (72.6%).** This exceptional savings comes from simultaneously crossing the 1,500 kWh cliff (energy rate drops by 10 sen/kWh on all units), qualifying for EEI rebate, and reducing the SST/AFA base.
 
@@ -583,20 +583,20 @@ class SystemConfig:
 
 All use AFA = −2.77 sen/kWh. Expected values are computed manually and serve as regression anchors.
 
-| ID | Consumption | Generation | Prior credit | Billable | Baseline (RM) | NEM (RM) | Savings (RM) | New credit | Notes |
-|---|---|---|---|---|---|---|---|---|---|
-| T1 | 800 | 480 | 0 | 320 | 342.33 | 77.25 | 265.08 | 0 | Scenario A reference |
-| T2 | 300 | 480 | 50 | 0 | 65.79 | 3.00 | 62.79 | 230 | Surplus → credit |
-| T3 | 500 | 365 | 200 | 0 | 165.70 | 3.00 | 162.70 | 65→0* | *Dec forfeiture |
-| T4 | 1600 | 960 | 0 | 640 | 918.53 | 251.83 | 666.70 | 0 | Cliff crossing |
-| T5 | 0 | 0 | 0 | 0 | 3.00 | 3.00 | 0.00 | 0 | Zero usage |
-| T6 | 100 | 0 | 0 | 100 | ~6.43 | ~6.43 | 0.00 | 0 | Low usage, EEI 25 sen |
-| T7 | 1500 | 0 | 0 | 1500 | ~696.67* | same | 0 | 0 | Just at threshold behavior |
-| T8 | 1501 | 0 | 0 | 1501 | ~846.77* | same | 0 | 0 | Just over cliff |
-| T9 | 601 | 200 | 0 | 401 | ~236.36* | ~119.10* | ~117.26 | 0 | Cross below 600 |
-| T10 | 400 | 600 | 100 | 0 | ~126.56* | 3.00 | ~123.56 | 300 | Large surplus |
+| ID  | Consumption | Generation | Prior credit | Billable | Baseline (RM) | NEM (RM)  | Savings (RM) | New credit | Notes                      |
+| --- | ----------- | ---------- | ------------ | -------- | ------------- | --------- | ------------ | ---------- | -------------------------- |
+| T1  | 800         | 480        | 0            | 320      | 342.33        | 77.25     | 265.08       | 0          | Scenario A reference       |
+| T2  | 300         | 480        | 50           | 0        | 65.79         | 3.00      | 62.79        | 230        | Surplus → credit           |
+| T3  | 500         | 365        | 200          | 0        | 165.70        | 3.00      | 162.70       | 65→0\*     | \*Dec forfeiture           |
+| T4  | 1600        | 960        | 0            | 640      | 918.53        | 251.83    | 666.70       | 0          | Cliff crossing             |
+| T5  | 0           | 0          | 0            | 0        | 3.00          | 3.00      | 0.00         | 0          | Zero usage                 |
+| T6  | 100         | 0          | 0            | 100      | ~6.43         | ~6.43     | 0.00         | 0          | Low usage, EEI 25 sen      |
+| T7  | 1500        | 0          | 0            | 1500     | ~696.67\*     | same      | 0            | 0          | Just at threshold behavior |
+| T8  | 1501        | 0          | 0            | 1501     | ~846.77\*     | same      | 0            | 0          | Just over cliff            |
+| T9  | 601         | 200        | 0            | 401      | ~236.36\*     | ~119.10\* | ~117.26      | 0          | Cross below 600            |
+| T10 | 400         | 600        | 100          | 0        | ~126.56\*     | 3.00      | ~123.56      | 300        | Large surplus              |
 
-*Approximate values — compute precisely during implementation.
+\*Approximate values — compute precisely during implementation.
 
 ### Edge cases to validate
 
@@ -630,6 +630,7 @@ All use AFA = −2.77 sen/kWh. Expected values are computed manually and serve a
 ### Financial outputs for Page 3
 
 **Primary display (above the fold):**
+
 - Monthly bill with PV (RM) — the NEM bill
 - Monthly bill without PV (RM) — the baseline
 - Monthly savings (RM and %)
@@ -638,20 +639,21 @@ All use AFA = −2.77 sen/kWh. Expected values are computed manually and serve a
 - Estimated 10-year ROI (%)
 
 **Secondary display (expandable detail):**
+
 - Month-by-month table: consumption, generation, billable kWh, credit balance, baseline vs NEM bill, savings
 - Credit balance timeline showing accumulation and year-end forfeiture events
 - Bill component breakdown (energy, capacity, network, retail, AFA, EEI, RE Fund, SST)
 
 ### User-editable inputs and defaults
 
-| Input | Default | Range | Notes |
-|---|---|---|---|
-| Monthly consumption (kWh) | 600 | 100–3,000 | Pre-fill from user's TNB bill if available |
-| System capacity (kWp) | 4.0 | 1–10 | Constrained by phase (max 4 single / 10 three) |
-| Connection phase | Single | Single / Three | Determines capacity cap |
-| Annual yield (kWh/kWp) | 1,200 | 1,000–1,500 | Advanced slider, hidden by default |
-| System cost (RM) | 18,000 | 8,000–80,000 | For payback/ROI; can auto-estimate from kWp |
-| AFA rate (sen/kWh) | −2.77 | −10 to +10 | Advanced; update monthly |
+| Input                     | Default | Range          | Notes                                          |
+| ------------------------- | ------- | -------------- | ---------------------------------------------- |
+| Monthly consumption (kWh) | 600     | 100–3,000      | Pre-fill from user's TNB bill if available     |
+| System capacity (kWp)     | 4.0     | 1–10           | Constrained by phase (max 4 single / 10 three) |
+| Connection phase          | Single  | Single / Three | Determines capacity cap                        |
+| Annual yield (kWh/kWp)    | 1,200   | 1,000–1,500    | Advanced slider, hidden by default             |
+| System cost (RM)          | 18,000  | 8,000–80,000   | For payback/ROI; can auto-estimate from kWp    |
+| AFA rate (sen/kWh)        | −2.77   | −10 to +10     | Advanced; update monthly                       |
 
 ### What to exclude from MVP
 
@@ -676,8 +678,8 @@ The UI should display warning indicators at these consumption levels:
 1. "Estimates are based on published TNB tariff rates under Regulatory Period 4 (effective 1 July 2025) and NEM Rakyat 3.0 rules. Actual bills may vary due to billing cycle length, meter reading dates, and tariff adjustments."
 2. "The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes."
 3. "PETRA has indicated that Energy Efficiency Incentive (EEI) rates may be adjusted for NEM users. Current calculations use standard EEI rates pending official modification."
-5. "Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling, and equipment condition."
-6. "Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits."
+4. "Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling, and equipment condition."
+5. "Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits."
 
 ---
 
@@ -685,44 +687,44 @@ The UI should display warning indicators at these consumption levels:
 
 ### Primary regulatory sources
 
-| Source | URL | Content |
-|---|---|---|
-| NEM 3.0 Guidelines (GP/ST/No.27/2021) | seda.gov.my/reportal/wp-content/uploads/2021/01/NEM3-Guidelines.pdf | Full programme rules, definitions, eligibility |
-| SEDA NEM 3.0 FAQ | seda.gov.my/reportal/nem/nem3-faq/ | Contract duration, credit rules, offset mechanics |
-| Energy Commission (ST) NEM FAQ | st.gov.my/contents/files/highlights/2021-02-16/1613454154.pdf | Eligibility, capacity limits, geographic scope |
-| NEM Rakyat Contract (TNB) | seda.gov.my/reportal/wp-content/uploads/2021/03/NEM-Rakyat-Contract-TNB.pdf | Contractual terms, capacity limits |
-| SEDA NEM Main Page | seda.gov.my/reportal/nem/ | Programme overview, credit forfeiture |
-| SEDA Offset FAQ | seda.gov.my/misc/frequently-asked-questions/net-metering-nem-faq/ | 1:1 offset definition, descending order |
+| Source                                | URL                                                                         | Content                                           |
+| ------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------- |
+| NEM 3.0 Guidelines (GP/ST/No.27/2021) | seda.gov.my/reportal/wp-content/uploads/2021/01/NEM3-Guidelines.pdf         | Full programme rules, definitions, eligibility    |
+| SEDA NEM 3.0 FAQ                      | seda.gov.my/reportal/nem/nem3-faq/                                          | Contract duration, credit rules, offset mechanics |
+| Energy Commission (ST) NEM FAQ        | st.gov.my/contents/files/highlights/2021-02-16/1613454154.pdf               | Eligibility, capacity limits, geographic scope    |
+| NEM Rakyat Contract (TNB)             | seda.gov.my/reportal/wp-content/uploads/2021/03/NEM-Rakyat-Contract-TNB.pdf | Contractual terms, capacity limits                |
+| SEDA NEM Main Page                    | seda.gov.my/reportal/nem/                                                   | Programme overview, credit forfeiture             |
+| SEDA Offset FAQ                       | seda.gov.my/misc/frequently-asked-questions/net-metering-nem-faq/           | 1:1 offset definition, descending order           |
 
 ### Tariff and billing sources
 
-| Source | URL | Content |
-|---|---|---|
-| TNB Official Tariff Page | mytnb.com.my/tariff | RP4 tariff structure (note: may return 403; use cached data) |
-| myTNB Billing Components | mytnb.com.my/residential/understand-your-bill/billing-component | Old structure reference; KWTBB formula |
-| TNB RE Handbook (KWTBB) | Via anyflip.com/duyiz/ddgh | RE Fund calculation formula |
-| SoyaCincau Tariff Analysis (21 Jun 2025) | soyacincau.com/2025/06/21/tnb-domestic-electricity-tariff-structure-july-2025-impact-changes/ | Comprehensive new tariff breakdown |
-| paultan.org Tariff Calculation | paultan.org/2025/06/21/tnb-new-electricity-tariff-calculation-from-july-2025/ | Confirms threshold behavior rate behaviour |
-| paultan.org AFA Rates | paultan.org/2025/12/26/..., paultan.org/2026/02/03/... | Monthly AFA tracking |
+| Source                                   | URL                                                                                           | Content                                                      |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| TNB Official Tariff Page                 | mytnb.com.my/tariff                                                                           | RP4 tariff structure (note: may return 403; use cached data) |
+| myTNB Billing Components                 | mytnb.com.my/residential/understand-your-bill/billing-component                               | Old structure reference; KWTBB formula                       |
+| TNB RE Handbook (KWTBB)                  | Via anyflip.com/duyiz/ddgh                                                                    | RE Fund calculation formula                                  |
+| SoyaCincau Tariff Analysis (21 Jun 2025) | soyacincau.com/2025/06/21/tnb-domestic-electricity-tariff-structure-july-2025-impact-changes/ | Comprehensive new tariff breakdown                           |
+| paultan.org Tariff Calculation           | paultan.org/2025/06/21/tnb-new-electricity-tariff-calculation-from-july-2025/                 | Confirms threshold behavior rate behaviour                   |
+| paultan.org AFA Rates                    | paultan.org/2025/12/26/..., paultan.org/2026/02/03/...                                        | Monthly AFA tracking                                         |
 
 ### Post-2025 policy sources
 
-| Source | URL | Content |
-|---|---|---|
-| PETRA Statement (1 Jul 2025) | soyacincau.com/2025/07/01/petra-malaysia-home-solar-energy-offset-nem-july-2025/ | NEM offset retention under new tariff |
-| PETRA Statement (Lowyat) | lowyat.net/2025/357352/petra-rooftop-solar-offsets-to-continue/ | Energy + capacity + network offset confirmed |
-| pv magazine (2 Jul 2025) | pv-magazine.com/2025/07/02/malaysia-upgrades-net-metering-scheme-for-rooftop-pv/ | NEM scheme update, 700 MW quota |
-| SolarQuarter (3 Jul 2025) | solarquarter.com/2025/07/03/malaysia-extends-solar-credit-scheme-for-over-96000-rooftop-users/ | 12-month settlement uniformity |
+| Source                       | URL                                                                                            | Content                                      |
+| ---------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| PETRA Statement (1 Jul 2025) | soyacincau.com/2025/07/01/petra-malaysia-home-solar-energy-offset-nem-july-2025/               | NEM offset retention under new tariff        |
+| PETRA Statement (Lowyat)     | lowyat.net/2025/357352/petra-rooftop-solar-offsets-to-continue/                                | Energy + capacity + network offset confirmed |
+| pv magazine (2 Jul 2025)     | pv-magazine.com/2025/07/02/malaysia-upgrades-net-metering-scheme-for-rooftop-pv/               | NEM scheme update, 700 MW quota              |
+| SolarQuarter (3 Jul 2025)    | solarquarter.com/2025/07/03/malaysia-extends-solar-credit-scheme-for-over-96000-rooftop-users/ | 12-month settlement uniformity               |
 
 ### Solar irradiance sources
 
-| Source | Content |
-|---|---|
-| PVsyst Meteonorm (ResearchGate 2023 study) | Monthly GHI data for Malaysia; basis for distribution factors |
-| IEN Consultants, Kuala Lumpur | 1,200 kWh/kWp standard for KL |
-| Malaysian Meteorological Department (1993–2002 Subang data) | 4.39 kWh/m²/day average; ground-truth reference |
-| Shavalipour et al. 2013, Int. J. Photoenergy | Monthly irradiance range for Peninsular Malaysia |
-| SEDA PVMS | pvms.seda.gov.my — live monitoring of 150+ systems |
+| Source                                                      | Content                                                       |
+| ----------------------------------------------------------- | ------------------------------------------------------------- |
+| PVsyst Meteonorm (ResearchGate 2023 study)                  | Monthly GHI data for Malaysia; basis for distribution factors |
+| IEN Consultants, Kuala Lumpur                               | 1,200 kWh/kWp standard for KL                                 |
+| Malaysian Meteorological Department (1993–2002 Subang data) | 4.39 kWh/m²/day average; ground-truth reference               |
+| Shavalipour et al. 2013, Int. J. Photoenergy                | Monthly irradiance range for Peninsular Malaysia              |
+| SEDA PVMS                                                   | pvms.seda.gov.my — live monitoring of 150+ systems            |
 
 ### Key uncertainties flagged for future verification
 
@@ -735,12 +737,12 @@ The UI should display warning indicators at these consumption levels:
 ### Old tariff (pre-July 2025) — retained for reference only
 
 | Block | kWh range | Rate (sen/kWh) |
-|---|---|---|
-| 1 | 1–200 | 21.80 |
-| 2 | 201–300 | 33.40 |
-| 3 | 301–600 | 51.60 |
-| 4 | 601–900 | 54.60 |
-| 5 | 901+ | 57.10 |
+| ----- | --------- | -------------- |
+| 1     | 1–200     | 21.80          |
+| 2     | 201–300   | 33.40          |
+| 3     | 301–600   | 51.60          |
+| 4     | 601–900   | 54.60          |
+| 5     | 901+      | 57.10          |
 
 Minimum charge: RM3.00. This structure is no longer in effect and should not be used in the MVP unless explicitly modelling pre-July 2025 billing periods.
 

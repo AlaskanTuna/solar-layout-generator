@@ -74,7 +74,9 @@ export function DashboardPage() {
               <form onSubmit={handleCreateProject}>
                 <DialogHeader>
                   <DialogTitle>Create New Project</DialogTitle>
-                  <DialogDescription>Give your solar assessment project a name, then search for your building.</DialogDescription>
+                  <DialogDescription>
+                    Give your solar assessment project a name, then search for your building.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="mt-4 space-y-2">
                   <Label htmlFor="project-name">Project Name</Label>

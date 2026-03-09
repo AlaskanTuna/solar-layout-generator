@@ -97,12 +97,12 @@ Full-stack SaaS web application with a React frontend and Express.js backend, ba
 
 **Key files:**
 
-| File | Purpose |
-| ---- | ------- |
-| `Procfile` | Tells Heroku to start the backend: `web: npm run start --workspace=backend` |
-| `heroku-postbuild` (root `package.json`) | Runs after `npm install` — builds shared → Prisma → backend → frontend |
-| `env.ts` | Accepts Heroku's dynamic `PORT`; falls back to `BACKEND_PORT` for local dev |
-| `app.ts` | In production, serves `frontend/dist` as static files with React Router catch-all |
+| File                                     | Purpose                                                                           |
+| ---------------------------------------- | --------------------------------------------------------------------------------- |
+| `Procfile`                               | Tells Heroku to start the backend: `web: npm run start --workspace=backend`       |
+| `heroku-postbuild` (root `package.json`) | Runs after `npm install` — builds shared → Prisma → backend → frontend            |
+| `env.ts`                                 | Accepts Heroku's dynamic `PORT`; falls back to `BACKEND_PORT` for local dev       |
+| `app.ts`                                 | In production, serves `frontend/dist` as static files with React Router catch-all |
 
 **Setup steps (once credits are active):**
 
@@ -173,12 +173,12 @@ Created on Page 1 when user starts a new project. Updated on each workbench save
 
 ```typescript
 type PanelEdit = {
-	id: string; // "panel_0" — references enriched solarPanels[]
-	status: 'kept' | 'moved' | 'deleted';
-	center: { lat: number; lng: number }; // original or dragged position
-	rotation: number; // degrees, 0 if untouched
-	monthlyEnergyDcKwh: number[]; // 12 monthly kWh values, from monthlyFlux sampling
-};
+  id: string // "panel_0" — references enriched solarPanels[]
+  status: 'kept' | 'moved' | 'deleted'
+  center: { lat: number; lng: number } // original or dragged position
+  rotation: number // degrees, 0 if untouched
+  monthlyEnergyDcKwh: number[] // 12 monthly kWh values, from monthlyFlux sampling
+}
 ```
 
 ### 3.4 Tariff Config (Seeded)

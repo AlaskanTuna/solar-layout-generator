@@ -4,27 +4,28 @@ This file is a merged representation of a subset of the codebase, containing fil
 File Summary
 ================================================================
 
-Purpose:
---------
+## Purpose:
+
 This file contains a packed representation of the entire repository's contents.
 It is designed to be easily consumable by AI systems for analysis, code review,
 or other automated processes.
 
-File Format:
-------------
+## File Format:
+
 The content is organized as follows:
+
 1. This summary section
 2. Repository information
 3. Directory structure
 4. Multiple file entries, each consisting of:
-  a. A separator line (================)
-  b. The file path (File: path/to/file)
-  c. Another separator line
-  d. The full contents of the file
-  e. A blank line
+   a. A separator line (================)
+   b. The file path (File: path/to/file)
+   c. Another separator line
+   d. The full contents of the file
+   e. A blank line
 
-Usage Guidelines:
------------------
+## Usage Guidelines:
+
 - This file should be treated as read-only. Any changes should be made to the
   original repository files, not this packed version.
 - When processing this file, use the file path to distinguish
@@ -32,30 +33,29 @@ Usage Guidelines:
 - Be aware that this file may contain sensitive information. Handle it with
   the same level of security as you would the original repository.
 
-Notes:
-------
+## Notes:
+
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
 - Files matching these patterns are excluded: .github/, CLAUDE.md, AGENTS.md, GEMINI.md
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 
-Additional Info:
-----------------
+## Additional Info:
 
 ================================================================
 Directory Structure
 ================================================================
 src/
-  test/
-    debug_layout.py
-    panel_flux_aggregator.py
-  config.py
-  layout_compiler.py
-  main.py
-  solar_api.py
-  tif_to_png.py
-  utils.py
+test/
+debug_layout.py
+panel_flux_aggregator.py
+config.py
+layout_compiler.py
+main.py
+solar_api.py
+tif_to_png.py
+utils.py
 .env.example
 .gitignore
 README.md
@@ -68,6 +68,7 @@ Files
 ================
 File: src/test/debug_layout.py
 ================
+
 # src/test/debug_layout.py
 
 import json
@@ -79,19 +80,20 @@ import pyproj
 from panel_flux_aggregator import calculate_average_flux_for_panel
 
 # NOTE: Change these constants as needed for different test runs
+
 PANELS_TO_TEST = 63
 DATA_FOLDER_TIMESTAMP = "20260302_191246"
 
 def rotate_point(origin, point, angle_rad):
-    ox, oy = origin; px, py = point
-    qx = ox + math.cos(angle_rad) * (px - ox) - math.sin(angle_rad) * (py - oy)
-    qy = oy + math.sin(angle_rad) * (px - ox) + math.cos(angle_rad) * (py - oy)
-    return qx, qy
+ox, oy = origin; px, py = point
+qx = ox + math.cos(angle_rad) _ (px - ox) - math.sin(angle_rad) _ (py - oy)
+qy = oy + math.sin(angle_rad) _ (px - ox) + math.cos(angle_rad) _ (py - oy)
+return qx, qy
 
 def run_debug():
-    print("=" * 80)
-    print("SOLAR PANEL ENERGY VALIDATION: AREA-AVERAGE METHOD")
-    print("=" * 80)
+print("=" _ 80)
+print("SOLAR PANEL ENERGY VALIDATION: AREA-AVERAGE METHOD")
+print("=" _ 80)
 
     # Path setup
     base_dir = Path(__file__).resolve().parent.parent.parent
@@ -100,7 +102,7 @@ def run_debug():
     ref_tif_path = folder_path / "rgb.tif"
     if not ref_tif_path.exists(): ref_tif_path = folder_path / "dsm.tif"
     flux_tif_path = folder_path / "annual_flux.tif"
-    
+
     # Validation
     if not all([insights_path.exists(), ref_tif_path.exists(), flux_tif_path.exists()]):
         print("❌ ERROR: Missing required files (insights, reference TIF, or flux TIF).")
@@ -148,18 +150,18 @@ def run_debug():
         w_half, h_half = panel_w_px / 2, panel_h_px / 2
         corners = [(-w_half, -h_half), (w_half, -h_half), (w_half, h_half), (-w_half, h_half)]
         rotated_corners = [rotate_point((px, py), (px + x, py + y), rotation_rad) for x, y in corners]
-        
+
         # Area-average flux calculation
         avg_flux_value = calculate_average_flux_for_panel(rotated_corners, flux_band)
         calculated_kwh = avg_flux_value * (panel_capacity_watts / 1000.0)
-        
+
         # Calculate error metrics
         abs_diff = calculated_kwh - original_kwh
         pct_diff = (abs(abs_diff) / original_kwh) * 100
-        
+
         differences.append(pct_diff)
         absolute_errors.append(abs_diff)
-        
+
         # Compact per-panel output
         sign = "+" if abs_diff > 0 else ""
         print(f"Panel {idx:2d}: JSON={original_kwh:6.2f} kWh | Calculated={calculated_kwh:6.2f} kWh | "
@@ -170,7 +172,7 @@ def run_debug():
     max_pct_error = max(differences)
     min_pct_error = min(differences)
     avg_abs_error = sum(absolute_errors) / len(absolute_errors)
-    
+
     print("\n" + "=" * 80)
     print("VALIDATION SUMMARY")
     print("=" * 80)
@@ -180,18 +182,18 @@ def run_debug():
     print(f"Max Percent Error:            {max_pct_error:.4f}%")
     print(f"Average Absolute Error:       {avg_abs_error:+.2f} kWh")
     print("-" * 80)
-    
+
     # Count panels within different error thresholds
     within_1pct = sum(1 for d in differences if d < 1.0)
     within_2pct = sum(1 for d in differences if d < 2.0)
     within_5pct = sum(1 for d in differences if d < 5.0)
-    
+
     print("ERROR DISTRIBUTION:")
     print(f"  Within 1.0% error:          {within_1pct}/{len(differences)} panels ({within_1pct/len(differences)*100:.1f}%)")
     print(f"  Within 2.0% error:          {within_2pct}/{len(differences)} panels ({within_2pct/len(differences)*100:.1f}%)")
     print(f"  Within 5.0% error:          {within_5pct}/{len(differences)} panels ({within_5pct/len(differences)*100:.1f}%)")
     print("-" * 80)
-    
+
     # Final verdict
     if avg_pct_error < 0.5:
         print("✅ EXCELLENT: Area-average method matches Google's values with <0.5% error")
@@ -201,23 +203,23 @@ def run_debug():
         print("✅ GOOD: Area-average method achieves <2.0% average error")
     else:
         print("⚠️  REVIEW NEEDED: Average error exceeds 2.0%")
-    
+
     print("=" * 80)
 
-if __name__ == "__main__":
-    run_debug()
+if **name** == "**main**":
+run_debug()
 
 ================
 File: src/test/panel_flux_aggregator.py
 ================
+
 # src/test/panel_flux_aggregator.py
 
 import numpy as np
 
-
 def point_in_polygon(x: float, y: float, polygon: list[tuple[float, float]]) -> bool:
-    """
-    Check if a point is inside a polygon using the Ray Casting algorithm.
+"""
+Check if a point is inside a polygon using the Ray Casting algorithm.
 
     @args: x, y (point coords), polygon (list of corner tuples)
     @return: True if point is inside polygon
@@ -237,13 +239,12 @@ def point_in_polygon(x: float, y: float, polygon: list[tuple[float, float]]) -> 
         p1x, p1y = p2x, p2y
     return inside
 
-
 def calculate_average_flux_for_panel(
-    rotated_corners: list[tuple[float, float]],
-    flux_band: np.ndarray
+rotated_corners: list[tuple[float, float]],
+flux_band: np.ndarray
 ) -> float:
-    """
-    Compute the average flux within a panel footprint using integer-pixel sampling.
+"""
+Compute the average flux within a panel footprint using integer-pixel sampling.
 
     @args: rotated_corners (list of pixel coords), flux_band (2D numpy array)
     @return: average flux value (kWh/kW/year)
@@ -262,7 +263,7 @@ def calculate_average_flux_for_panel(
     max_y = min(map_height - 1, max_y)
 
     flux_values = []
-    
+
     # Iterate through every pixel in the bounding box
     for y in range(min_y, max_y + 1):
         for x in range(min_x, max_x + 1):
@@ -278,13 +279,14 @@ def calculate_average_flux_for_panel(
 ================
 File: src/config.py
 ================
+
 # src/config.py
 
 API_BASE = "https://solar.googleapis.com/v1"
 
 VALID_VIEWS = {
-    "BASIC": "IMAGERY_AND_ANNUAL_FLUX_LAYERS",
-    "FULL": "FULL_LAYERS",
+"BASIC": "IMAGERY_AND_ANNUAL_FLUX_LAYERS",
+"FULL": "FULL_LAYERS",
 }
 
 DEFAULT_REQUIRED_QUALITY = "BASE"
@@ -297,16 +299,17 @@ HTTP_RETRIES = 2
 RETRY_SLEEP = 1.2
 
 URL_FIELDS = {
-    "dsmUrl": "dsm.tif",
-    "rgbUrl": "rgb.tif",
-    "maskUrl": "mask.tif",
-    "annualFluxUrl": "annual_flux.tif",
-    "monthlyFluxUrl": "monthly_flux.tif",
+"dsmUrl": "dsm.tif",
+"rgbUrl": "rgb.tif",
+"maskUrl": "mask.tif",
+"annualFluxUrl": "annual_flux.tif",
+"monthlyFluxUrl": "monthly_flux.tif",
 }
 
 ================
 File: src/layout_compiler.py
 ================
+
 # src/layout_compiler.py
 
 import json
@@ -320,8 +323,8 @@ import pyproj
 from utils import log
 
 def rotate_point(origin, point, angle_rad):
-    """
-    Rotate a 2D point counterclockwise around an origin by angle_rad.
+"""
+Rotate a 2D point counterclockwise around an origin by angle_rad.
 
     @args: origin, point, angle_rad
     @return: rotated (x, y) tuple
@@ -334,8 +337,8 @@ def rotate_point(origin, point, angle_rad):
     return qx, qy
 
 def compile_layout(folder_path: Path):
-    """
-    Overlay predicted solar panel layouts onto PNG tiles in a data folder.
+"""
+Overlay predicted solar panel layouts onto PNG tiles in a data folder.
 
     @args: folder_path (Path)
     @return: None
@@ -343,7 +346,7 @@ def compile_layout(folder_path: Path):
     insights_path = folder_path / "buildingInsights.json"
     png_dir = folder_path / "png"
     compiled_dir = folder_path / "compiled"
-    
+
     ref_tif_path = folder_path / "rgb.tif"
     if not ref_tif_path.exists():
         ref_tif_path = folder_path / "dsm.tif"
@@ -357,13 +360,13 @@ def compile_layout(folder_path: Path):
     if not ref_tif_path.exists():
         log(f"⚠️ Reference GeoTIFF (rgb.tif or dsm.tif) not found. Skipping.")
         return
-        
+
     compiled_dir.mkdir(exist_ok=True)
     log(f"⏳ Outputting compiled images to: {compiled_dir}")
 
     with open(insights_path) as f:
         insights = json.load(f)
-    
+
     with rasterio.open(ref_tif_path) as src:
         transform = src.transform
         tif_crs = src.crs
@@ -400,7 +403,7 @@ def compile_layout(folder_path: Path):
         for panel in panels:
             center_lon, center_lat = panel["center"]["longitude"], panel["center"]["latitude"]
             projected_x, projected_y = transformer.transform(center_lon, center_lat)
-            
+
             # Use the robust rowcol method to get pixel coordinates
             row, col = rasterio.transform.rowcol(transform, projected_x, projected_y)
             px, py = col, row # Convert (row, col) to (x, y) for drawing
@@ -417,18 +420,19 @@ def compile_layout(folder_path: Path):
                 (-w_px_half, -h_px_half), (w_px_half, -h_px_half),
                 (w_px_half, h_px_half), (-w_px_half, h_px_half),
             ]
-            
+
             rotated_corners = [rotate_point((px, py), (px + x, py + y), total_rotation_rad) for x, y in corners]
-            
+
             draw.polygon(rotated_corners, fill=(0, 150, 255, 128), outline=(255, 255, 255, 200))
-        
+
         img.save(output_path)
-    
+
     log(f"✅ Successfully processed {len(all_png_files)} images.")
 
 ================
 File: src/main.py
 ================
+
 # src/main.py
 
 import sys
@@ -438,38 +442,39 @@ import textwrap
 from pathlib import Path
 
 from config import (
-    VALID_VIEWS,
-    DEFAULT_REQUIRED_QUALITY,
-    DEFAULT_VIEW_INPUT,
-    DEFAULT_PIXEL_SIZE_METERS,
+VALID_VIEWS,
+DEFAULT_REQUIRED_QUALITY,
+DEFAULT_VIEW_INPUT,
+DEFAULT_PIXEL_SIZE_METERS,
 )
 from solar_api import (
-    read_api_key,
-    build_datalayers_url,
-    build_building_insights_url,
-    http_get_json,
-    download_geo_tiffs,
-    geocode_address,
+read_api_key,
+build_datalayers_url,
+build_building_insights_url,
+http_get_json,
+download_geo_tiffs,
+geocode_address,
 )
 from utils import (
-    log,
-    now_local_str,
-    ensure_dir,
-    prompt_int,
-    prompt_str,
-    calculate_haversine_distance,
-    clear_screen,
+log,
+now_local_str,
+ensure_dir,
+prompt_int,
+prompt_str,
+calculate_haversine_distance,
+clear_screen,
 )
-# Import the new compiler function at the top
-try:
-    from layout_compiler import compile_layout
-except ImportError:
-    compile_layout = None
 
+# Import the new compiler function at the top
+
+try:
+from layout_compiler import compile_layout
+except ImportError:
+compile_layout = None
 
 def display_main_menu():
-    """
-    Display the main menu choices to the user.
+"""
+Display the main menu choices to the user.
 
     @args: None
     @return: None
@@ -484,10 +489,9 @@ def display_main_menu():
     log("4. Exit")
     log()
 
-
 def get_user_input(api_key: str) -> dict:
-    """
-    Prompt the user for a location and related options.
+"""
+Prompt the user for a location and related options.
 
     @args: api_key
     @return: dict with lat, lng, required_quality, view_choice, expanded_cov
@@ -559,10 +563,9 @@ def get_user_input(api_key: str) -> dict:
         "expanded_cov": expanded_cov,
     }
 
-
 def find_buildings(api_key: str):
-    """
-    Run the workflow that queries building insights, datalayers, and downloads GeoTIFFs.
+"""
+Run the workflow that queries building insights, datalayers, and downloads GeoTIFFs.
 
     @args: api_key
     @return: None
@@ -570,7 +573,7 @@ def find_buildings(api_key: str):
 
     out_dir = None
     success = False
-    
+
     try:
         user = get_user_input(api_key=api_key)
         stamp = now_local_str()
@@ -626,7 +629,7 @@ def find_buildings(api_key: str):
         log(f"    TIFFs: {imgs if imgs else 'None'}")
         log(f"    Hourly shade: {len(hrs)} file(s)")
         log("\nAll done!\n")
-        
+
         success = True
 
     except KeyboardInterrupt:
@@ -643,10 +646,9 @@ def find_buildings(api_key: str):
             except Exception as cleanup_error:
                 log(f"\n⚠️  Could not clean up folder: {cleanup_error}")
 
-
 def select_and_process_folder(process_function, function_name: str):
-    """
-    Prompt the user to choose a data subfolder and run process_function on it.
+"""
+Prompt the user to choose a data subfolder and run process_function on it.
 
     @args: process_function, function_name
     @return: None
@@ -654,7 +656,7 @@ def select_and_process_folder(process_function, function_name: str):
 
     try:
         data_dir = Path(__file__).resolve().parent.parent / "data"
-        
+
         if not data_dir.exists() or not any(data_dir.iterdir()):
             log(f"\n⚠️  No data folders found. Please run 'Find Buildings' first.\n")
             return
@@ -673,7 +675,7 @@ def select_and_process_folder(process_function, function_name: str):
         log()
 
         choice = prompt_int(f"Enter your choice [1-{len(folders) + 1}]: ")
-        
+
         if 1 <= choice <= len(folders):
             selected_folder = folders[choice - 1]
             log(f"\nProcessing folder: {selected_folder.name}\n")
@@ -688,10 +690,9 @@ def select_and_process_folder(process_function, function_name: str):
         log("\nERROR:")
         log(textwrap.indent(str(e), "  "))
 
-
 def main():
-    """
-    Main program loop — present menu and dispatch user choices.
+"""
+Main program loop — present menu and dispatch user choices.
 
     @args: None
     @return: None
@@ -703,21 +704,21 @@ def main():
         try:
             clear_screen()
             display_main_menu()
-            
+
             choice = prompt_int("Enter your choice: ")
-            
+
             if choice == 1:
                 if not api_key:
                     api_key = read_api_key()
                 log()
                 find_buildings(api_key)
                 input("\nPress Enter to continue...")
-                
+
             elif choice == 2:
                 from tif_to_png import process_folder
                 select_and_process_folder(process_folder, "convert to PNG")
                 input("\nPress Enter to continue...")
-                
+
             elif choice == 3:
                 if compile_layout is None:
                      log("\n⚠️ Could not import layout_compiler. Make sure src/layout_compiler.py exists.\n")
@@ -727,11 +728,11 @@ def main():
 
             elif choice == 4:
                 break
-                
+
             else:
                 log("\n⚠️  Invalid choice. Please select 1, 2, 3, or 4.\n")
                 input("Press Enter to continue...")
-                
+
         except KeyboardInterrupt:
             log("\n\nInterrupted by user. Exiting...")
             break
@@ -739,13 +740,13 @@ def main():
             log(f"\n⚠️  Unexpected error in main loop: {e}\n")
             input("Press Enter to continue...")
 
-
-if __name__ == "__main__":
-    main()
+if **name** == "**main**":
+main()
 
 ================
 File: src/solar_api.py
 ================
+
 # src/solar_api.py
 
 import os
@@ -758,22 +759,21 @@ import requests
 from dotenv import load_dotenv
 
 from config import (
-    API_BASE,
-    HTTP_TIMEOUT,
-    HTTP_RETRIES,
-    RETRY_SLEEP,
-    URL_FIELDS,
+API_BASE,
+HTTP_TIMEOUT,
+HTTP_RETRIES,
+RETRY_SLEEP,
+URL_FIELDS,
 )
 from utils import log, ensure_dir
 
-_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
-if _ENV_PATH.exists():
-    load_dotenv(dotenv_path=_ENV_PATH)
-
+\_ENV_PATH = Path(**file**).resolve().parent.parent / ".env"
+if \_ENV_PATH.exists():
+load_dotenv(dotenv_path=\_ENV_PATH)
 
 def join_query(url: str, extra_params: dict) -> str:
-    """
-    Merge extra_params into the query string of url and return the new URL.
+"""
+Merge extra_params into the query string of url and return the new URL.
 
     @args: url, extra_params
     @return: merged URL string
@@ -785,10 +785,9 @@ def join_query(url: str, extra_params: dict) -> str:
     new_query = urlencode(q, doseq=True)
     return urlunparse((u.scheme, u.netloc, u.path, u.params, new_query, u.fragment))
 
-
 def http_get_json(url: str, headers=None, api_key: str | None = None) -> dict:
-    """
-    Perform an HTTP GET and return parsed JSON, retrying on failure.
+"""
+Perform an HTTP GET and return parsed JSON, retrying on failure.
 
     @args: url, headers, api_key
     @return: parsed JSON dict
@@ -813,10 +812,9 @@ def http_get_json(url: str, headers=None, api_key: str | None = None) -> dict:
                 raise
     raise last
 
-
 def http_download_to_file(url: str, out_path: Path, headers=None, api_key: str | None = None):
-    """
-    Download a URL and stream it to out_path with retries.
+"""
+Download a URL and stream it to out_path with retries.
 
     @args: url, out_path, headers, api_key
     @return: None
@@ -843,10 +841,9 @@ def http_download_to_file(url: str, out_path: Path, headers=None, api_key: str |
                 raise
     raise last
 
-
 def read_api_key() -> str:
-    """
-    Read an API key from environment or prompt the user.
+"""
+Read an API key from environment or prompt the user.
 
     @args: None
     @return: API key string
@@ -862,18 +859,17 @@ def read_api_key() -> str:
         raise RuntimeError("API key is required.")
     return k
 
-
 def build_datalayers_url(
-    lat: float,
-    lng: float,
-    radius_m: int,
-    view_enum: str,
-    required_quality: str | None,
-    pixel_size_m: float | None,
-    expanded_cov: bool,
+lat: float,
+lng: float,
+radius_m: int,
+view_enum: str,
+required_quality: str | None,
+pixel_size_m: float | None,
+expanded_cov: bool,
 ):
-    """
-    Build a URL for the dataLayers:get API call with provided parameters.
+"""
+Build a URL for the dataLayers:get API call with provided parameters.
 
     @args: lat, lng, radius_m, view_enum, required_quality, pixel_size_m, expanded_cov
     @return: URL string
@@ -893,10 +889,9 @@ def build_datalayers_url(
         params["experiments"] = "EXPANDED_COVERAGE"
     return f"{API_BASE}/dataLayers:get?{urlencode(params)}"
 
-
 def build_building_insights_url(lat: float, lng: float, expanded_cov: bool, required_quality: str | None = None):
-    """
-    Build a URL for the buildingInsights:findClosest API call.
+"""
+Build a URL for the buildingInsights:findClosest API call.
 
     @args: lat, lng, expanded_cov, required_quality
     @return: URL string
@@ -912,10 +907,9 @@ def build_building_insights_url(lat: float, lng: float, expanded_cov: bool, requ
         params["experiments"] = "EXPANDED_COVERAGE"
     return f"{API_BASE}/buildingInsights:findClosest?{urlencode(params)}"
 
-
 def download_geo_tiffs(datalayers_json: dict, out_dir: Path, api_key: str):
-    """
-    Download GeoTIFFs referenced in the datalayers JSON into out_dir.
+"""
+Download GeoTIFFs referenced in the datalayers JSON into out_dir.
 
     @args: datalayers_json, out_dir, api_key
     @return: None
@@ -936,8 +930,8 @@ def download_geo_tiffs(datalayers_json: dict, out_dir: Path, api_key: str):
             http_download_to_file(u, shades_dir / fname, api_key=api_key)
 
 def geocode_address(query: str, api_key: str) -> list[dict]:
-    """
-    Geocode a query using the Google Geocoding API and return results.
+"""
+Geocode a query using the Google Geocoding API and return results.
 
     @args: query, api_key
     @return: list of result dicts
@@ -965,6 +959,7 @@ def geocode_address(query: str, api_key: str) -> list[dict]:
 ================
 File: src/tif_to_png.py
 ================
+
 # src/tif_to_png.py
 
 import re
@@ -979,10 +974,9 @@ from scipy.ndimage import zoom
 
 MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-
 def get_colormap(name: str):
-    """
-    Return a matplotlib colormap by name (custom 'flux' gradient supported).
+"""
+Return a matplotlib colormap by name (custom 'flux' gradient supported).
 
     @args: name (str)
     @return: matplotlib colormap
@@ -993,10 +987,9 @@ def get_colormap(name: str):
         return LinearSegmentedColormap.from_list("flux", colors, N=256)
     return plt.get_cmap("turbo" if name == "rainbow" else name)
 
-
 def normalize_array(a: np.ndarray, clip_percent: float = 2.0) -> np.ndarray:
-    """
-    Normalize an array to 0..1 by clipping outliers using percentiles.
+"""
+Normalize an array to 0..1 by clipping outliers using percentiles.
 
     @args: a (ndarray), clip_percent (float)
     @return: normalized ndarray (float32)
@@ -1010,12 +1003,11 @@ def normalize_array(a: np.ndarray, clip_percent: float = 2.0) -> np.ndarray:
     norm[~mask] = 0
     return norm.astype(np.float32)
 
-
 def add_legend_bar(img: np.ndarray, cmap, value_range: tuple[float, float], label: str,
-                   label_range: tuple[str, str] | None = None, bar_height: int = 20,
-                   bar_width: int = 200, margin: int = 15) -> np.ndarray:
-    """
-    Draw a horizontal legend bar on the image showing the colormap range.
+label_range: tuple[str, str] | None = None, bar_height: int = 20,
+bar_width: int = 200, margin: int = 15) -> np.ndarray:
+"""
+Draw a horizontal legend bar on the image showing the colormap range.
 
     @args: img, cmap, value_range, label, label_range, bar_height, bar_width, margin
     @return: modified image ndarray
@@ -1050,12 +1042,11 @@ def add_legend_bar(img: np.ndarray, cmap, value_range: tuple[float, float], labe
 
     return np.array(pil_img)
 
-
 def save_color_png(arr_0_1: np.ndarray, out_path: Path, cmap_name: str = "inferno",
-                   add_legend: bool = False, value_range: tuple[float, float] | None = None,
-                   label: str = "Value", label_range: tuple[str, str] | None = None) -> None:
-    """
-    Save a normalized 0..1 array to a colored PNG using the specified colormap.
+add_legend: bool = False, value_range: tuple[float, float] | None = None,
+label: str = "Value", label_range: tuple[str, str] | None = None) -> None:
+"""
+Save a normalized 0..1 array to a colored PNG using the specified colormap.
 
     @args: arr_0_1, out_path, cmap_name, add_legend, value_range, label, label_range
     @return: None
@@ -1068,10 +1059,9 @@ def save_color_png(arr_0_1: np.ndarray, out_path: Path, cmap_name: str = "infern
     Image.fromarray(img).save(out_path)
     print(f"✅ Saved {out_path}")
 
-
 def bitcount_uint32(x: np.ndarray) -> np.ndarray:
-    """
-    Count set bits for unsigned 32-bit integers elementwise.
+"""
+Count set bits for unsigned 32-bit integers elementwise.
 
     @args: x (ndarray)
     @return: float32 ndarray of bit counts
@@ -1084,10 +1074,9 @@ def bitcount_uint32(x: np.ndarray) -> np.ndarray:
         count[nz] += 1
     return count.astype(np.float32)
 
-
 def is_monthly_flux(src: rasterio.io.DatasetReader, tif_path: Path) -> bool:
-    """
-    Heuristically determine if a GeoTIFF represents monthly flux data.
+"""
+Heuristically determine if a GeoTIFF represents monthly flux data.
 
     @args: src, tif_path
     @return: bool
@@ -1095,10 +1084,9 @@ def is_monthly_flux(src: rasterio.io.DatasetReader, tif_path: Path) -> bool:
 
     return "monthly_flux" in tif_path.stem.lower() or (src.count == 12 and src.dtypes[0].startswith("float"))
 
-
 def is_hourly_shade(src: rasterio.io.DatasetReader, tif_path: Path) -> bool:
-    """
-    Heuristically determine if a GeoTIFF represents hourly shade (24 bands).
+"""
+Heuristically determine if a GeoTIFF represents hourly shade (24 bands).
 
     @args: src, tif_path
     @return: bool
@@ -1106,10 +1094,9 @@ def is_hourly_shade(src: rasterio.io.DatasetReader, tif_path: Path) -> bool:
 
     return tif_path.stem.lower().startswith("hourly_shade") or (src.count == 24 and src.dtypes[0].startswith("int"))
 
-
 def month_from_filename(tif_path: Path) -> str | None:
-    """
-    Extract a month name from a filename if it contains a two-digit month index.
+"""
+Extract a month name from a filename if it contains a two-digit month index.
 
     @args: tif_path
     @return: month string or None
@@ -1120,10 +1107,9 @@ def month_from_filename(tif_path: Path) -> str | None:
         return MONTH_NAMES[idx] if 0 <= idx < 12 else None
     return None
 
-
 def get_value_range(band: np.ndarray) -> tuple[float, float]:
-    """
-    Compute a clamped display range using 2nd and 98th percentiles of finite values.
+"""
+Compute a clamped display range using 2nd and 98th percentiles of finite values.
 
     @args: band
     @return: (min, max) tuple
@@ -1132,10 +1118,9 @@ def get_value_range(band: np.ndarray) -> tuple[float, float]:
     mask = np.isfinite(band)
     return (float(np.percentile(band[mask], 2)), float(np.percentile(band[mask], 98))) if mask.any() else (0.0, 1.0)
 
-
 def upscale_if_needed(band: np.ndarray, target_shape) -> np.ndarray:
-    """
-    Resize `band` with simple linear interpolation if `target_shape` differs.
+"""
+Resize `band` with simple linear interpolation if `target_shape` differs.
 
     @args: band, target_shape
     @return: resized ndarray
@@ -1146,10 +1131,9 @@ def upscale_if_needed(band: np.ndarray, target_shape) -> np.ndarray:
         return zoom(band, factors, order=1)
     return band
 
-
 def convert_monthly_flux(src: rasterio.io.DatasetReader, tif_path: Path, out_dir: Path, target_shape=None) -> None:
-    """
-    Convert a multi-band monthly flux TIFF into separate monthly PNGs.
+"""
+Convert a multi-band monthly flux TIFF into separate monthly PNGs.
 
     @args: src, tif_path, out_dir, target_shape
     @return: None
@@ -1162,10 +1146,9 @@ def convert_monthly_flux(src: rasterio.io.DatasetReader, tif_path: Path, out_dir
         save_color_png(normalize_array(band), out_dir / f"{tif_path.stem}_{i:02d}_{month}.png",
                       "flux", True, get_value_range(band), "Solar Flux", ("Shady", "Sunny"))
 
-
 def convert_hourly_shade(src: rasterio.io.DatasetReader, tif_path: Path, out_dir: Path, target_shape=None) -> None:
-    """
-    Convert hourly shade TIFF (24 bands) into per-hour PNGs.
+"""
+Convert hourly shade TIFF (24 bands) into per-hour PNGs.
 
     @args: src, tif_path, out_dir, target_shape
     @return: None
@@ -1178,10 +1161,9 @@ def convert_hourly_shade(src: rasterio.io.DatasetReader, tif_path: Path, out_dir
         norm = np.where(sunny_days >= 0, sunny_days / 31.0, 0).astype(np.float32)
         save_color_png(norm, out_dir / f"{tif_path.stem}_H{hour - 1:02d}_{mon}.png")
 
-
 def convert_rgb(src: rasterio.io.DatasetReader, tif_path: Path, out_dir: Path) -> None:
-    """
-    Convert multi-band RGB-like TIFF to an enhanced PNG.
+"""
+Convert multi-band RGB-like TIFF to an enhanced PNG.
 
     @args: src, tif_path, out_dir
     @return: None
@@ -1201,10 +1183,9 @@ def convert_rgb(src: rasterio.io.DatasetReader, tif_path: Path, out_dir: Path) -
     pil_img.save(out_dir / f"{tif_path.stem}.png")
     print(f"✅ Saved {out_dir / (tif_path.stem + '.png')} (enhanced)")
 
-
 def convert_singleband(src: rasterio.io.DatasetReader, tif_path: Path, out_dir: Path) -> None:
-    """
-    Convert a single-band raster to a colored PNG using heuristics for naming.
+"""
+Convert a single-band raster to a colored PNG using heuristics for naming.
 
     @args: src, tif_path, out_dir
     @return: None
@@ -1223,10 +1204,9 @@ def convert_singleband(src: rasterio.io.DatasetReader, tif_path: Path, out_dir: 
     val_range = get_value_range(band) if legend else None
     save_color_png(normalize_array(band), out_dir / f"{tif_path.stem}.png", cmap, legend, val_range, label, label_rng)
 
-
 def tif_to_png(tif_path: Path, out_dir: Path, target_shape=None) -> None:
-    """
-    Determine TIFF type and dispatch to the appropriate conversion routine.
+"""
+Determine TIFF type and dispatch to the appropriate conversion routine.
 
     @args: tif_path, out_dir, target_shape
     @return: None
@@ -1242,10 +1222,9 @@ def tif_to_png(tif_path: Path, out_dir: Path, target_shape=None) -> None:
         else:
             convert_singleband(src, tif_path, out_dir)
 
-
 def get_target_shape(tifs: list[Path]) -> tuple[int, int] | None:
-    """
-    Choose a target output shape for resampling based on priority filenames.
+"""
+Choose a target output shape for resampling based on priority filenames.
 
     @args: tifs
     @return: (height, width) or None
@@ -1260,10 +1239,9 @@ def get_target_shape(tifs: list[Path]) -> tuple[int, int] | None:
                     return shape
     return None
 
-
 def process_folder(root_dir: Path) -> None:
-    """
-    Convert all GeoTIFFs under `root_dir` into PNGs, placing outputs in `root_dir/png`.
+"""
+Convert all GeoTIFFs under `root_dir` into PNGs, placing outputs in `root_dir/png`.
 
     @args: root_dir
     @return: None
@@ -1283,10 +1261,9 @@ def process_folder(root_dir: Path) -> None:
         except Exception as e:
             print(f"⚠️ Failed to convert {tif}: {e}")
 
-
 def main() -> None:
-    """
-    CLI entrypoint to convert a folder of GeoTIFFs to PNGs.
+"""
+CLI entrypoint to convert a folder of GeoTIFFs to PNGs.
 
     @args: None
     @return: None
@@ -1301,13 +1278,13 @@ def main() -> None:
         sys.exit(1)
     process_folder(root_dir)
 
-
-if __name__ == "__main__":
-    main()
+if **name** == "**main**":
+main()
 
 ================
 File: src/utils.py
 ================
+
 # src/utils.py
 
 import datetime as dt
@@ -1315,50 +1292,43 @@ import math
 
 from pathlib import Path
 
-
 def log(msg=""):
-    print(msg, flush=True)
+print(msg, flush=True)
 
-
-def now_local_str():
-    return dt.datetime.now().strftime("%Y%m%d_%H%M%S")
-
+def now*local_str():
+return dt.datetime.now().strftime("%Y%m%d*%H%M%S")
 
 def ensure_dir(p: Path):
-    p.mkdir(parents=True, exist_ok=True)
-    return p
-
+p.mkdir(parents=True, exist_ok=True)
+return p
 
 def prompt_float(prompt: str, default: float | None = None) -> float:
-    s = input(prompt).strip()
-    if not s:
-        if default is None:
-            raise ValueError("No default provided and empty input.")
-        return float(default)
-    return float(s)
-
+s = input(prompt).strip()
+if not s:
+if default is None:
+raise ValueError("No default provided and empty input.")
+return float(default)
+return float(s)
 
 def prompt_int(prompt: str, default: int | None = None) -> int:
-    s = input(prompt).strip()
-    if not s:
-        if default is None:
-            raise ValueError("No default provided and empty input.")
-        return int(default)
-    return int(s)
-
+s = input(prompt).strip()
+if not s:
+if default is None:
+raise ValueError("No default provided and empty input.")
+return int(default)
+return int(s)
 
 def prompt_str(prompt: str, default: str | None = None, allowed: set[str] | None = None) -> str:
-    s = input(prompt).strip()
-    if not s and default is not None:
-        s = default
-    if allowed and s not in allowed:
-        raise ValueError(f"Value must be one of {sorted(allowed)} (got '{s}')")
-    return s
-
+s = input(prompt).strip()
+if not s and default is not None:
+s = default
+if allowed and s not in allowed:
+raise ValueError(f"Value must be one of {sorted(allowed)} (got '{s}')")
+return s
 
 def clear_screen():
-    """
-    Clear the terminal screen.
+"""
+Clear the terminal screen.
 
     @args: None
     @return: None
@@ -1366,10 +1336,9 @@ def clear_screen():
     import os
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
 def calculate_haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """
-    Calculate the distance between two lat/lon points in meters.
+"""
+Calculate the distance between two lat/lon points in meters.
 
     @args: lat1, lon1, lat2, lon2
     @return: distance in meters (float)
@@ -1386,8 +1355,8 @@ def calculate_haversine_distance(lat1: float, lon1: float, lat2: float, lon2: fl
     return R * c
 
 def get_meters_per_degree(lat: float) -> tuple[float, float]:
-    """
-    Calculate meters per degree for longitude and latitude at a given latitude.
+"""
+Calculate meters per degree for longitude and latitude at a given latitude.
 
     @args: lat
     @return: (meters_per_deg_lon, meters_per_deg_lat)
@@ -1405,14 +1374,15 @@ GOOGLE_SOLAR_API_KEY=your_api_key_here
 File: .gitignore
 ================
 .env
-*.json
+\*.json
 venv/
-__pycache__/
+**pycache**/
 data/
 
 ================
 File: README.md
 ================
+
 # Solar Layout Assessment Lite
 
 Python CLI tool that downloads solar potential data from the Google Solar API, converts GeoTIFFs to colorized PNGs, and overlays predicted solar panel layouts on those images. Each solar panel object size is fixed at 1.879m x 1.045m (H x W).
@@ -1524,8 +1494,6 @@ pillow==12.0.0
 matplotlib==3.10.7
 scipy>=1.11.0
 pyproj==3.6.1
-
-
 
 ================================================================
 End of Codebase

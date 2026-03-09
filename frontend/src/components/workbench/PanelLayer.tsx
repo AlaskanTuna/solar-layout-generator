@@ -22,7 +22,9 @@ type PanelLayerProps = {
 }
 
 function panelAnnualEnergy(panel: WorkbenchPanelState): number {
-  return panel.monthlyEnergyDcKwh.length > 0 ? annualEnergyFromMonthly(panel.monthlyEnergyDcKwh) : panel.yearlyEnergyDcKwh
+  return panel.monthlyEnergyDcKwh.length > 0
+    ? annualEnergyFromMonthly(panel.monthlyEnergyDcKwh)
+    : panel.yearlyEnergyDcKwh
 }
 
 function getPanelColor(value: number, min: number, max: number): string {

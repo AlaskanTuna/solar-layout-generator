@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  computeBill,
-  computeNemMonth,
-  lookupEeiRebate,
-  runAnnualSimulation,
-  type BillingConfig
-} from './billingEngine'
+import { computeBill, computeNemMonth, lookupEeiRebate, runAnnualSimulation, type BillingConfig } from './billingEngine'
 
 // ── Tariff config matching the seeded RP4-2025 data ──
 
@@ -143,7 +137,7 @@ describe('computeBill', () => {
     const bill = computeBill(500, config)
     expect(bill.energy).toBe(135.15)
     expect(bill.eeiRebate).toBe(60.0)
-    expect(bill.total).toBe(165.70)
+    expect(bill.total).toBe(165.7)
   })
 
   it('T4 baseline: 1600 kWh above cliff = RM918.53', () => {
