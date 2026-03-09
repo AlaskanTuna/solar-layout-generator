@@ -20,7 +20,65 @@ export const saveLayoutSchema = z.object({
   )
 })
 
+const billBreakdownSchema = z.object({
+  kwh: z.number(),
+  energy: z.number(),
+  capacity: z.number(),
+  network: z.number(),
+  retail: z.number(),
+  afa: z.number(),
+  eeiRebate: z.number(),
+  preTaxSubtotal: z.number(),
+  reFund: z.number(),
+  sst: z.number(),
+  total: z.number()
+})
+
+const monthlyBreakdownSchema = z.object({
+  month: z.number().int().min(1).max(12),
+  consumptionKwh: z.number(),
+  generationKwh: z.number(),
+  billableKwh: z.number(),
+  creditUsed: z.number(),
+  creditBalance: z.number(),
+  creditForfeited: z.number(),
+  baselineBill: billBreakdownSchema,
+  nemBill: billBreakdownSchema,
+  savingsRm: z.number()
+})
+
+const analysisConfigSchema = z
+  .object({
+    monthlyConsumptionKwh: z.number(),
+    connectionPhase: z.enum(['single', 'three']),
+    systemCostRm: z.number(),
+    afaRateSenPerKwh: z.number(),
+    systemKwp: z.number()
+  })
+  .passthrough()
+
+const analysisResultsSchema = z
+  .object({
+    monthlyBreakdown: z.array(monthlyBreakdownSchema),
+    annualTotals: z.object({
+      totalConsumptionKwh: z.number(),
+      totalGenerationKwh: z.number(),
+      totalBaselineRm: z.number(),
+      totalNemRm: z.number(),
+      totalSavingsRm: z.number(),
+      totalCreditsForfeitedKwh: z.number()
+    }),
+    averageMonthlySavingsRm: z.number(),
+    averageMonthlySavingsPct: z.number(),
+    paybackYears: z.number().nullable(),
+    tenYearNetBenefitRm: z.number(),
+    tenYearRoiPercent: z.number().nullable(),
+    carbonOffsetKg: z.number(),
+    activePanelCount: z.number().int().min(0)
+  })
+  .passthrough()
+
 export const saveAnalysisSchema = z.object({
-  analysisConfig: z.record(z.unknown()),
-  analysisResults: z.record(z.unknown())
+  analysisConfig: analysisConfigSchema,
+  analysisResults: analysisResultsSchema
 })

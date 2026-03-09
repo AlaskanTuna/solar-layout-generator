@@ -1,5 +1,11 @@
 ﻿# TEST - AGENT ONLY
 
+## [10/03/26] - Phase 3.1 QA Audit Fix Verification
+
+- Scenario: Verify the post-audit hardening pass for project save responses, save-analysis validation, threshold warnings, Workbench save cleanup, Analysis display fixes, and AFA input guidance.
+- Steps: Ran `npm install` once to restore the missing Rollup optional native dependency in the local Windows `node_modules`, then ran `npm exec --workspace=backend -- vitest run`, `npm run test --workspace=frontend`, and `npm run build`.
+- Result: Pass (backend Vitest: 5 files / 24 tests passed; frontend Vitest: 5 files / 47 tests passed; full monorepo build passed for shared, Prisma client generation, backend TypeScript build, and frontend production build). Frontend build still reports the existing Vite chunk-size warning for the main bundle; no new build regressions were introduced.
+
 ## [09/03/26] - Phase 3 Analysis + Workbench Frontend Verification
 
 - Scenario: Validate the Phase 3 frontend completion pass covering the new error boundary, Workbench batch save + roof-mask constraint, AnalysisPage billing UI, PDF export wiring, and analysis persistence path.

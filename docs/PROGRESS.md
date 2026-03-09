@@ -1,5 +1,15 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [10/03/26] - Phase 3.1: QA Audit Fixes
+
+- **Project save responses:** Updated backend `saveLayout` and `saveAnalysis` mutations to return `include: { location: true }`, so the Analysis page cache no longer loses location metadata after save and the PDF/report keeps showing the project coordinates.
+- **Save-analysis validation hardening:** Replaced the unstructured `z.record(z.unknown())` validator with typed-but-extensible Zod shapes for `analysisConfig`, `analysisResults`, monthly breakdown rows, and bill component objects. This now rejects malformed analysis payloads instead of silently accepting unusable shapes.
+- **Tariff fallback visibility:** Kept the existing tariff defaults fallback for backward compatibility, but the tariff route now logs a warning when the database row is missing `defaults`, making stale seed data visible instead of silent.
+- **Threshold warning accuracy:** Updated the Analysis warning builder to combine retail/AFA/SST messaging only when those thresholds truly match, and to emit separate warnings when the configured thresholds diverge. Added frontend tests for both the combined and split cases.
+- **Workbench save cleanup:** Removed the redundant local `updatePanelEnergies()` state write from the Workbench batch-save path because the user navigates away immediately after persisting the recomputed layout payload.
+- **Analysis display fixes:** Corrected the month table so "Net Import" now shows true `consumption - generation`, and expanded the "With Solar" bill breakdown to include retail, AFA, EEI rebate, and RE Fund line items alongside the NEM-specific credit values.
+- **AFA input guidance:** Kept support for negative AFA values (rebates), but constrained the input to a reasonable `-10` to `10` sen/kWh range and clarified the helper text so QA/users do not treat negative AFA as invalid.
+
 ## [09/03/26] - Phase 3: Error Boundary, Workbench Batch Save, Analysis Page
 
 - **Task 4 — React Error Boundary:** Added `frontend/src/components/AppErrorBoundary.tsx` and wrapped the app shell in `main.tsx` so root render/auth/query failures now show a recovery card with Reload and Return to Dashboard actions instead of a white screen. Also mounted the Sonner toaster at the root for later save/export feedback.

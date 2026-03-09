@@ -592,3 +592,68 @@
 - [x] On save success: show confirmation toast; update project status badge
 - [x] On revisit (status `analysis_saved`): load saved config into inputs, re-derive results reactively
 - [x] "Back to Workbench" link for layout adjustments
+
+## Phase 3.1: QA Audit Fixes
+
+### 1. Hardening: Project Save Response Consistency
+
+**Purpose/Issue:** `saveLayout` / `saveAnalysis` currently return a bare `Project`, which can drop the cached `location` relation needed by the AnalysisPage report/PDF after mutation.
+
+**Implementation:**
+
+- [x] Update backend project save services to include `location` in the mutation response
+- [x] Verify frontend cached project data still has the location payload after `Save Analysis`
+
+### 2. Hardening: Save Analysis Validation Shape
+
+**Purpose/Issue:** Backend save-analysis validation is too unstructured for the actual payload the frontend sends.
+
+**Implementation:**
+
+- [x] Add a partial but typed Zod schema for `analysisConfig`
+- [x] Add a partial but typed Zod schema for `analysisResults`
+- [x] Keep the validator flexible enough for future additive fields
+
+### 3. Hardening: Tariff Defaults Fallback Visibility
+
+**Purpose/Issue:** The tariff route silently falls back to inline defaults when the DB field is null.
+
+**Implementation:**
+
+- [x] Emit an explicit warning when the tariff defaults fallback path is used
+- [x] Keep the endpoint response shape unchanged for backward compatibility
+
+### 4. Refinement: Analysis Threshold Warning Accuracy
+
+**Purpose/Issue:** Threshold warning text currently assumes the retail/AFA/SST thresholds always match.
+
+**Implementation:**
+
+- [x] Split threshold warnings so retail, AFA, SST, and energy-cliff messaging stays accurate if config diverges
+- [x] Add/update focused tests for the warning builder
+
+### 5. Refinement: Workbench Save Ordering Cleanup
+
+**Purpose/Issue:** The batch-save path updates local panel energy state even though navigation happens immediately after persistence.
+
+**Implementation:**
+
+- [x] Remove the redundant state update during save if the persisted payload already carries the recomputed values
+
+### 6. Refinement: Analysis Results Presentation
+
+**Purpose/Issue:** The month table labels `billableKwh` as net import, and the NEM breakdown panel omits several bill components.
+
+**Implementation:**
+
+- [x] Correct the month table to display true net import
+- [x] Expand the "With Solar" breakdown to include retail, AFA, EEI rebate, and RE Fund line items
+
+### 7. Refinement: AFA Input Guidance
+
+**Purpose/Issue:** The AFA input currently accepts any numeric value without clarifying that negative values are valid rebates.
+
+**Implementation:**
+
+- [x] Constrain the input to a reasonable range without banning negative rebate values
+- [x] Add helper text clarifying that negative AFA represents a rebate

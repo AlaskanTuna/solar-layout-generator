@@ -131,10 +131,35 @@ export function buildAnalysisResults({
 export function buildThresholdWarnings(month: NemMonthResult, thresholds: TariffThresholds): string[] {
   const warnings: string[] = []
 
-  if (month.consumptionKwh > thresholds.retailWaiver && month.billableKwh <= thresholds.retailWaiver) {
+  const crossesBelow = (threshold: number) => month.consumptionKwh > threshold && month.billableKwh <= threshold
+  const retailTriggered = crossesBelow(thresholds.retailWaiver)
+  const afaTriggered = crossesBelow(thresholds.afaWaiver)
+  const sstTriggered = crossesBelow(thresholds.sstExemption)
+
+  if (
+    retailTriggered &&
+    afaTriggered &&
+    sstTriggered &&
+    thresholds.retailWaiver === thresholds.afaWaiver &&
+    thresholds.afaWaiver === thresholds.sstExemption
+  ) {
     warnings.push(
       `This month drops below ${thresholds.retailWaiver} kWh after NEM offset, so retail charge, AFA, and SST are waived.`
     )
+  } else {
+    if (retailTriggered) {
+      warnings.push(
+        `This month drops below ${thresholds.retailWaiver} kWh after NEM offset, so the retail charge is waived.`
+      )
+    }
+
+    if (afaTriggered) {
+      warnings.push(`This month drops below ${thresholds.afaWaiver} kWh after NEM offset, so AFA is waived.`)
+    }
+
+    if (sstTriggered) {
+      warnings.push(`This month drops below ${thresholds.sstExemption} kWh after NEM offset, so SST is waived.`)
+    }
   }
 
   if (month.consumptionKwh > thresholds.energyCliff && month.billableKwh <= thresholds.energyCliff) {

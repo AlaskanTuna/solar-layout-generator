@@ -15,6 +15,10 @@ tariffRouter.get(
       return
     }
 
+    if (!config.defaults) {
+      console.warn('[TariffConfig] defaults missing in database row, using inline fallback values')
+    }
+
     const response: TariffConfigResponse = {
       rates: config.rates as TariffConfigResponse['rates'],
       thresholds: config.thresholds as TariffConfigResponse['thresholds'],

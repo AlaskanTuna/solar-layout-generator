@@ -215,7 +215,6 @@ export function WorkbenchPage() {
     rotatePanel,
     deletePanel,
     updatePanelEnergy,
-    updatePanelEnergies,
     setVisibleCount,
     serializeLayout
   } = usePanelState({
@@ -477,8 +476,6 @@ export function WorkbenchPage() {
           `Batch recompute returned incomplete results for ${incompletePanels.length} panel(s). Please retry.`
         )
       }
-
-      updatePanelEnergies(batchResponse.results)
 
       const nextLayout = serializedLayout.map((panel) => {
         const monthlyEnergyDcKwh = energyByPanelId.get(panel.id)

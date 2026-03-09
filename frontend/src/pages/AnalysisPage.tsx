@@ -411,10 +411,14 @@ export function AnalysisPage() {
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
                   <Label>AFA Rate</Label>
-                  <p className="text-xs text-muted-foreground">Current Automatic Fuel Adjustment in sen/kWh.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
+                  </p>
                 </div>
                 <Input
                   type="number"
+                  min={-10}
+                  max={10}
                   step={0.01}
                   value={formState.afaRateSenPerKwh}
                   onChange={(event) =>
@@ -631,12 +635,28 @@ export function AnalysisPage() {
                       <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.energy)}</p>
                     </div>
                     <div>
+                      <p className="text-emerald-900/70">Retail</p>
+                      <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.retail)}</p>
+                    </div>
+                    <div>
                       <p className="text-emerald-900/70">Capacity</p>
                       <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.capacity)}</p>
                     </div>
                     <div>
+                      <p className="text-emerald-900/70">AFA</p>
+                      <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.afa)}</p>
+                    </div>
+                    <div>
                       <p className="text-emerald-900/70">Network</p>
                       <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.network)}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-900/70">EEI Rebate</p>
+                      <p className="font-semibold">-{formatCurrency(selectedMonth.nemBill.eeiRebate)}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-900/70">RE Fund</p>
+                      <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.reFund)}</p>
                     </div>
                     <div>
                       <p className="text-emerald-900/70">SST</p>
@@ -683,7 +703,9 @@ export function AnalysisPage() {
                           <td className="px-3 py-2 font-medium">{MONTH_LABELS[index]}</td>
                           <td className="px-3 py-2">{formatNumber(month.consumptionKwh, 'kWh')}</td>
                           <td className="px-3 py-2">{formatNumber(month.generationKwh, 'kWh')}</td>
-                          <td className="px-3 py-2">{formatNumber(month.billableKwh, 'kWh')}</td>
+                          <td className="px-3 py-2">
+                            {formatNumber(month.consumptionKwh - month.generationKwh, 'kWh')}
+                          </td>
                           <td className="px-3 py-2">{formatNumber(month.creditUsed, 'kWh')}</td>
                           <td className="px-3 py-2">{formatNumber(month.creditBalance, 'kWh')}</td>
                           <td className="px-3 py-2">{formatCurrency(month.baselineBill.total)}</td>

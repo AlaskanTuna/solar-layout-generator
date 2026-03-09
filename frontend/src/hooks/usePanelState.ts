@@ -138,21 +138,6 @@ export function usePanelState({
     updatePanelState(panelId, (panel) => ({ ...panel, monthlyEnergyDcKwh }))
   }
 
-  function updatePanelEnergies(results: Array<{ panelId: string; monthlyEnergyDcKwh: number[] }>) {
-    if (results.length === 0) {
-      return
-    }
-
-    const energyByPanelId = new Map(results.map((result) => [result.panelId, result.monthlyEnergyDcKwh]))
-
-    setPanels((current) =>
-      current.map((panel) => {
-        const monthlyEnergyDcKwh = energyByPanelId.get(panel.id)
-        return monthlyEnergyDcKwh ? { ...panel, monthlyEnergyDcKwh } : panel
-      })
-    )
-  }
-
   function getPanel(panelId: string) {
     return panelMap.get(panelId)
   }
@@ -194,7 +179,6 @@ export function usePanelState({
     rotatePanel,
     deletePanel,
     updatePanelEnergy,
-    updatePanelEnergies,
     setVisibleCount,
     serializeLayout
   }

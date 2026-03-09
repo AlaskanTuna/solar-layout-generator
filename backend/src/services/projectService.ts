@@ -31,7 +31,8 @@ export async function saveLayout(userId: string, projectId: string, editedLayout
     data: {
       editedLayout: editedLayout as unknown as Prisma.InputJsonValue,
       status: 'layout_saved'
-    }
+    },
+    include: { location: true }
   })
 }
 
@@ -49,6 +50,7 @@ export async function saveAnalysis(
       analysisConfig: analysisConfig as Prisma.InputJsonValue,
       analysisResults: analysisResults as Prisma.InputJsonValue,
       status: 'analysis_saved'
-    }
+    },
+    include: { location: true }
   })
 }
