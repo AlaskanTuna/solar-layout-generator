@@ -478,11 +478,11 @@
 
 **Implementation:**
 
-- [ ] On "Save & Continue", collect all active (non-deleted) panels into a batch recompute request
-- [ ] Call the new batch endpoint with all active panels' current center and rotation
-- [ ] Update each panel's `monthlyEnergyDcKwh` in state with the batch response before serializing and saving the layout
-- [ ] Show a progress indicator during the batch recompute (may take 8–15s for large rooftops)
-- [ ] Handle partial failures: if batch recompute fails, block save and show a retry option
+- [x] On "Save & Continue", collect all active (non-deleted) panels into a batch recompute request
+- [x] Call the new batch endpoint with all active panels' current center and rotation
+- [x] Update each panel's `monthlyEnergyDcKwh` in state with the batch response before serializing and saving the layout
+- [x] Show a progress indicator during the batch recompute (may take 8–15s for large rooftops)
+- [x] Handle partial failures: if batch recompute fails, block save and show a retry option
 
 ### 3. Refinement: Workbench Roof Mask Boundary
 
@@ -490,8 +490,8 @@
 
 **Implementation:**
 
-- [ ] Expose or derive usable roof/mask boundary data for the frontend so Workbench placement validation can reject panels dragged outside the valid rooftop area
-- [ ] Apply mask check alongside the existing image-bounds and overlap checks on drag-end
+- [x] Expose or derive usable roof/mask boundary data for the frontend so Workbench placement validation can reject panels dragged outside the valid rooftop area
+- [x] Apply mask check alongside the existing image-bounds and overlap checks on drag-end
 
 ### 4. Refinement: React Error Boundary
 
@@ -499,8 +499,8 @@
 
 **Implementation:**
 
-- [ ] Add a React error boundary component wrapping the app in `App.tsx` or `main.tsx`
-- [ ] Display a user-friendly fallback UI with a "Return to Dashboard" or "Reload" action
+- [x] Add a React error boundary component wrapping the app in `App.tsx` or `main.tsx`
+- [x] Display a user-friendly fallback UI with a "Return to Dashboard" or "Reload" action
 
 ### 5. Feature: Expand TariffConfig with Analysis Defaults
 
@@ -546,13 +546,13 @@
 
 **Implementation:**
 
-- [ ] Load project (with `editedLayout`) via `getProject()` on mount; redirect to workbench if status is still `draft`
-- [ ] Load tariff config via `getTariffConfig()` on mount (TanStack Query, cached)
-- [ ] Load location data via `getLocationData()` for `panelCapacityWatts` and `carbonOffsetFactorKgPerMwh`
-- [ ] Aggregate `monthlyEnergyDcKwh` across all active (non-deleted) panels → `monthlyGeneration[12]`
-- [ ] Compute system capacity: `activePanelCount × panelCapacityWatts / 1000` → `systemKwp`
-- [ ] User-editable inputs panel: monthly consumption (kWh, default 600), connection phase (single/three, default single), system cost (RM, default `systemKwp × systemCostPerKwp` from config), AFA rate (sen/kWh, default from config)
-- [ ] Re-run `runAnnualSimulation` reactively on any input change (useMemo or useEffect)
+- [x] Load project (with `editedLayout`) via `getProject()` on mount; redirect to workbench if status is still `draft`
+- [x] Load tariff config via `getTariffConfig()` on mount (TanStack Query, cached)
+- [x] Load location data via `getLocationData()` for `panelCapacityWatts` and `carbonOffsetFactorKgPerMwh`
+- [x] Aggregate `monthlyEnergyDcKwh` across all active (non-deleted) panels → `monthlyGeneration[12]`
+- [x] Compute system capacity: `activePanelCount × panelCapacityWatts / 1000` → `systemKwp`
+- [x] User-editable inputs panel: monthly consumption (kWh, default 600), connection phase (single/three, default single), system cost (RM, default `systemKwp × systemCostPerKwp` from config), AFA rate (sen/kWh, default from config)
+- [x] Re-run `runAnnualSimulation` reactively on any input change (useMemo or useEffect)
 
 ### 9. Feature: AnalysisPage — Results Display
 
@@ -560,14 +560,14 @@
 
 **Implementation:**
 
-- [ ] Hero metrics row: monthly average savings (RM and %), annual savings, simple payback period (years), 10-year net benefit, CO₂ offset (kg/year)
-- [ ] Install Recharts (`npm install recharts --workspace=frontend`)
-- [ ] Comparison bar chart: monthly bill without solar vs. with solar (12 months)
-- [ ] Cumulative savings line chart: running total over 12 months
-- [ ] Month-by-month breakdown table (expandable): consumption, generation, net import, credit used, credit balance, baseline bill, NEM bill, savings
-- [ ] Bill component breakdown section: energy, capacity, network, retail, AFA, EEI, RE Fund, SST for a selected month
-- [ ] Threshold crossing warnings: flag when NEM consumption crosses 600/1500 kWh boundaries
-- [ ] Disclaimer text on all financial figures
+- [x] Hero metrics row: monthly average savings (RM and %), annual savings, simple payback period (years), 10-year net benefit, CO₂ offset (kg/year)
+- [x] Install Recharts (`npm install recharts --workspace=frontend`)
+- [x] Comparison bar chart: monthly bill without solar vs. with solar (12 months)
+- [x] Cumulative savings line chart: running total over 12 months
+- [x] Month-by-month breakdown table (expandable): consumption, generation, net import, credit used, credit balance, baseline bill, NEM bill, savings
+- [x] Bill component breakdown section: energy, capacity, network, retail, AFA, EEI, RE Fund, SST for a selected month
+- [x] Threshold crossing warnings: flag when NEM consumption crosses 600/1500 kWh boundaries
+- [x] Disclaimer text on all financial figures
 
 ### 10. Feature: PDF Export
 
@@ -575,10 +575,10 @@
 
 **Implementation:**
 
-- [ ] Install `html2pdf.js` (`npm install html2pdf.js --workspace=frontend`)
-- [ ] Create a print-optimized report layout component (hidden or rendered off-screen) containing: system summary (kWp, panel count, location), financial highlights (annual savings, payback, ROI), month-by-month breakdown table, comparison chart snapshot, assumptions used, disclaimer
-- [ ] "Export PDF" button triggers `html2pdf()` on the report element with A4 page size
-- [ ] File name: `Solar_Analysis_{projectName}_{date}.pdf`
+- [x] Install `html2pdf.js` (`npm install html2pdf.js --workspace=frontend`)
+- [x] Create a print-optimized report layout component (hidden or rendered off-screen) containing: system summary (kWp, panel count, location), financial highlights (annual savings, payback, ROI), month-by-month breakdown table, comparison chart snapshot, assumptions used, disclaimer
+- [x] "Export PDF" button triggers `html2pdf()` on the report element with A4 page size
+- [x] File name: `Solar_Analysis_{projectName}_{date}.pdf`
 
 ### 11. Feature: Save Analysis + Navigation
 
@@ -586,9 +586,9 @@
 
 **Implementation:**
 
-- [ ] "Save Analysis" button → `PATCH /api/projects/:id/analysis` with `{ analysisConfig, analysisResults }`
-- [ ] `analysisConfig`: monthly consumption, connection phase, system cost, AFA rate, system kWp
-- [ ] `analysisResults`: monthly breakdown array, annual totals, payback, ROI, CO₂ offset
-- [ ] On save success: show confirmation toast; update project status badge
-- [ ] On revisit (status `analysis_saved`): load saved config into inputs, re-derive results reactively
-- [ ] "Back to Workbench" link for layout adjustments
+- [x] "Save Analysis" button → `PATCH /api/projects/:id/analysis` with `{ analysisConfig, analysisResults }`
+- [x] `analysisConfig`: monthly consumption, connection phase, system cost, AFA rate, system kWp
+- [x] `analysisResults`: monthly breakdown array, annual totals, payback, ROI, CO₂ offset
+- [x] On save success: show confirmation toast; update project status badge
+- [x] On revisit (status `analysis_saved`): load saved config into inputs, re-derive results reactively
+- [x] "Back to Workbench" link for layout adjustments

@@ -4,6 +4,7 @@ import {
   createCanvasGeo,
   getRectAabb,
   getRotatedRectPoints,
+  isPolygonInsideRasterMask,
   isAabbInsideStage,
   latLngToPixel,
   panelMetersToPixels,
@@ -47,5 +48,23 @@ describe('canvasTransforms', () => {
     expect(aabbsOverlap(aabb, neighbour)).toBe(true)
     expect(isAabbInsideStage(aabb, 1000, 1000)).toBe(true)
     expect(isAabbInsideStage({ minX: -1, maxX: 10, minY: 0, maxY: 10 }, 1000, 1000)).toBe(false)
+  })
+
+  it('detects whether a rotated panel polygon stays inside the roof mask', () => {
+    const mask = {
+      width: 12,
+      height: 12,
+      pixels: Uint8Array.from({ length: 144 }, (_, index) => {
+        const x = index % 12
+        const y = Math.floor(index / 12)
+        return x >= 2 && x <= 9 && y >= 2 && y <= 9 ? 1 : 0
+      })
+    }
+
+    const inside = getRotatedRectPoints(6, 6, 4, 2, 25)
+    const outside = getRotatedRectPoints(2.5, 2.5, 4, 2, 25)
+
+    expect(isPolygonInsideRasterMask(inside, mask)).toBe(true)
+    expect(isPolygonInsideRasterMask(outside, mask)).toBe(false)
   })
 })

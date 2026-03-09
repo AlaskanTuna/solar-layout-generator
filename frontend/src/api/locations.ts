@@ -23,6 +23,10 @@ export type LocationImageGeoTransform = {
 
 export type LocationDataWithGeoTransform = LocationDataResponse & {
   imageGeoTransform: LocationImageGeoTransform
+  roofMask: {
+    dataBase64: string
+    geoTransform: LocationImageGeoTransform
+  }
 }
 
 export function resolveLocation(req: ResolveLocationRequest) {

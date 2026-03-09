@@ -33,7 +33,9 @@ const POSITION_EPSILON = 1e-8
 const ROTATION_EPSILON = 1e-3
 
 function getPanelAnnualEnergy(panel: WorkbenchPanelState): number {
-  return panel.monthlyEnergyDcKwh.length > 0 ? annualEnergyFromMonthly(panel.monthlyEnergyDcKwh) : panel.yearlyEnergyDcKwh
+  return panel.monthlyEnergyDcKwh.length > 0
+    ? annualEnergyFromMonthly(panel.monthlyEnergyDcKwh)
+    : panel.yearlyEnergyDcKwh
 }
 
 export function usePanelState({
@@ -79,7 +81,8 @@ export function usePanelState({
 
     setPanels(nextPanels)
 
-    const savedActiveCount = parsedEdits.length > 0 ? nextPanels.filter((panel) => !panel.deleted).length : maxVisibleCount
+    const savedActiveCount =
+      parsedEdits.length > 0 ? nextPanels.filter((panel) => !panel.deleted).length : maxVisibleCount
     const nextVisibleCount = Math.max(minVisibleCount, Math.min(maxVisibleCount, savedActiveCount || maxVisibleCount))
     setVisibleCountState(nextVisibleCount)
   }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount])
@@ -135,6 +138,21 @@ export function usePanelState({
     updatePanelState(panelId, (panel) => ({ ...panel, monthlyEnergyDcKwh }))
   }
 
+  function updatePanelEnergies(results: Array<{ panelId: string; monthlyEnergyDcKwh: number[] }>) {
+    if (results.length === 0) {
+      return
+    }
+
+    const energyByPanelId = new Map(results.map((result) => [result.panelId, result.monthlyEnergyDcKwh]))
+
+    setPanels((current) =>
+      current.map((panel) => {
+        const monthlyEnergyDcKwh = energyByPanelId.get(panel.id)
+        return monthlyEnergyDcKwh ? { ...panel, monthlyEnergyDcKwh } : panel
+      })
+    )
+  }
+
   function getPanel(panelId: string) {
     return panelMap.get(panelId)
   }
@@ -176,6 +194,7 @@ export function usePanelState({
     rotatePanel,
     deletePanel,
     updatePanelEnergy,
+    updatePanelEnergies,
     setVisibleCount,
     serializeLayout
   }

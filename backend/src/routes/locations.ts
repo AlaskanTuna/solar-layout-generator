@@ -33,14 +33,18 @@ type LocationImageGeoTransformResponse = {
 
 type LocationDataRouteResponse = LocationDataResponse & {
   imageGeoTransform: LocationImageGeoTransformResponse
+  roofMask: {
+    dataBase64: string
+    geoTransform: LocationImageGeoTransformResponse
+  }
 }
 
 async function loadReferenceGeoTransform(location: {
   id: string
   dsmPath: string | null
 }): Promise<LocationImageGeoTransformResponse> {
-  const candidatePaths = [`locations/${location.id}/rgb.tif`, location.dsmPath].filter(
-    (path): path is string => Boolean(path)
+  const candidatePaths = [`locations/${location.id}/rgb.tif`, location.dsmPath].filter((path): path is string =>
+    Boolean(path)
   )
 
   let lastError: unknown = null
@@ -67,6 +71,44 @@ async function loadReferenceGeoTransform(location: {
     `Failed to load reference GeoTIFF for location ${location.id}: ${
       lastError instanceof Error ? lastError.message : 'unknown error'
     }`
+  )
+}
+
+async function loadRoofMask(location: {
+  id: string
+  maskPath: string | null
+}): Promise<LocationDataRouteResponse['roofMask']> {
+  const candidatePaths = [location.maskPath, `locations/${location.id}/mask.tif`].filter(
+    (path, index, array): path is string => Boolean(path) && array.indexOf(path) === index
+  )
+
+  let lastError: unknown = null
+
+  for (const storagePath of candidatePaths) {
+    try {
+      const buffer = await downloadFromStorage(storagePath)
+      const tiff = await GeoTIFF.fromArrayBuffer(buffer)
+      const image = await tiff.getImage()
+      const geo = setupGeoTransform(image)
+      const raster = await image.readRasters({ interleave: true })
+      const maskBytes = Uint8Array.from(raster as ArrayLike<number>, (value) => (Number(value) > 0 ? 1 : 0))
+
+      return {
+        dataBase64: Buffer.from(maskBytes).toString('base64'),
+        geoTransform: {
+          ...geo,
+          imageWidth: image.getWidth(),
+          imageHeight: image.getHeight()
+        }
+      }
+    } catch (error) {
+      lastError = error
+      console.warn(`[LocationData] failed to load roof mask path=${storagePath}`, error)
+    }
+  }
+
+  throw new Error(
+    `Failed to load roof mask for location ${location.id}: ${lastError instanceof Error ? lastError.message : 'unknown error'}`
   )
 }
 
@@ -125,7 +167,9 @@ locationsRouter.get(
       return
     }
     if (location.status !== 'ready') {
-      console.warn(`[LocationData] not ready user=${req.user!.id} location=${req.params.id as string} status=${location.status}`)
+      console.warn(
+        `[LocationData] not ready user=${req.user!.id} location=${req.params.id as string} status=${location.status}`
+      )
       res.status(409).json({ error: 'Location data not ready', status: location.status })
       return
     }
@@ -140,8 +184,17 @@ locationsRouter.get(
       return
     }
 
+    if (!location.maskPath) {
+      console.error(`[LocationData] missing maskPath for ready location=${location.id}`)
+      res.status(500).json({ error: 'Location roof mask is missing' })
+      return
+    }
+
     const rgbImageUrl = await getSignedUrl(location.rgbImageUrl)
-    const imageGeoTransform = await loadReferenceGeoTransform(location)
+    const [imageGeoTransform, roofMask] = await Promise.all([
+      loadReferenceGeoTransform(location),
+      loadRoofMask(location)
+    ])
     console.info(
       `[LocationData] user=${req.user!.id} location=${location.id} signedImage=true monthlyFlux=${Boolean(location.monthlyFluxPath)}`
     )
@@ -149,7 +202,8 @@ locationsRouter.get(
     const response: LocationDataRouteResponse = {
       buildingInsights: location.buildingInsightsJson as Record<string, unknown>,
       rgbImageUrl,
-      imageGeoTransform
+      imageGeoTransform,
+      roofMask
     }
     res.json(response)
   })

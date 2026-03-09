@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Image as KonvaImage, Layer, Stage } from 'react-konva'
-import { recomputeFlux } from '@/api/locations'
+import { recomputeFlux, recomputeFluxBatch } from '@/api/locations'
 import { saveLayout } from '@/api/projects'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +19,7 @@ import {
   getRectAabb,
   getRotatedRectPoints,
   isAabbInsideStage,
+  isPolygonInsideRasterMask,
   latLngToPixel,
   panelMetersToPixels,
   pixelToLatLng,
@@ -131,6 +132,17 @@ function getPanelAnnualEnergy(monthlyEnergyDcKwh: number[], yearlyEnergyDcKwh: n
   return monthlyEnergyDcKwh.length > 0 ? annualEnergyFromMonthly(monthlyEnergyDcKwh) : yearlyEnergyDcKwh
 }
 
+function getPlacementErrorMessage(reason: 'bounds' | 'mask' | 'overlap') {
+  switch (reason) {
+    case 'mask':
+      return 'That placement leaves the detected roof boundary.'
+    case 'overlap':
+      return 'That placement overlaps another panel.'
+    default:
+      return 'That placement leaves the roof image bounds.'
+  }
+}
+
 export function WorkbenchPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
@@ -140,11 +152,19 @@ export function WorkbenchPage() {
   const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null)
   const [pendingPanelId, setPendingPanelId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
   const [message, setMessage] = useState<UiMessage>(null)
   const [rotationInputValue, setRotationInputValue] = useState('')
 
-  const { project, buildingInsights, imageGeoTransform, rgbImageUrl, isLoading, error: dataError } =
-    useWorkbenchData(projectId)
+  const {
+    project,
+    buildingInsights,
+    imageGeoTransform,
+    roofMask,
+    rgbImageUrl,
+    isLoading,
+    error: dataError
+  } = useWorkbenchData(projectId)
   const { image: backgroundImage, imageError } = useLoadedImage(rgbImageUrl)
   const error = dataError ?? (imageError ? new Error(imageError) : null)
   const stageSize = useStageSize(containerRef, backgroundImage)
@@ -165,6 +185,22 @@ export function WorkbenchPage() {
       geo
     )
   }, [buildingInsights, geo])
+  const maskGeo = useMemo(() => {
+    if (!roofMask) {
+      return null
+    }
+
+    return createCanvasGeo(roofMask.geoTransform, roofMask.width, roofMask.height)
+  }, [roofMask])
+  const maskPanelDimensions = useMemo(() => {
+    if (!buildingInsights || !maskGeo) return null
+
+    return panelMetersToPixels(
+      buildingInsights.solarPotential.panelWidthMeters,
+      buildingInsights.solarPotential.panelHeightMeters,
+      maskGeo
+    )
+  }, [buildingInsights, maskGeo])
   const stageReady = stageSize.width > 0 && stageSize.height > 0 && !!geo && !!panelDimensions
 
   const {
@@ -179,6 +215,7 @@ export function WorkbenchPage() {
     rotatePanel,
     deletePanel,
     updatePanelEnergy,
+    updatePanelEnergies,
     setVisibleCount,
     serializeLayout
   } = usePanelState({
@@ -190,7 +227,7 @@ export function WorkbenchPage() {
     carbonOffsetFactorKgPerMwh: buildingInsights?.solarPotential.carbonOffsetFactorKgPerMwh ?? 0
   })
 
-  const selectedPanel = selectedPanelId ? getPanel(selectedPanelId) ?? null : null
+  const selectedPanel = selectedPanelId ? (getPanel(selectedPanelId) ?? null) : null
 
   const renderPanels = useMemo(() => {
     if (!geo) return []
@@ -254,7 +291,12 @@ export function WorkbenchPage() {
     error
   ])
 
-  function getPlacementAabb(panelId: string, center: { lat: number; lng: number }, rotation: number, canvasGeo: CanvasGeo) {
+  function getPlacementAabb(
+    panelId: string,
+    center: { lat: number; lng: number },
+    rotation: number,
+    canvasGeo: CanvasGeo
+  ) {
     if (!panelDimensions) return null
 
     const pixelCenter = latLngToPixel(center.lat, center.lng, canvasGeo)
@@ -269,28 +311,48 @@ export function WorkbenchPage() {
     return getRectAabb(points)
   }
 
-  function isPlacementValid(panelId: string, center: { lat: number; lng: number }, rotation: number) {
-    if (!geo || !panelDimensions) return false
+  function getPlacementError(panelId: string, center: { lat: number; lng: number }, rotation: number) {
+    if (!geo || !panelDimensions) return 'bounds' as const
 
     const proposedAabb = getPlacementAabb(panelId, center, rotation, geo)
-    if (!proposedAabb) return false
+    if (!proposedAabb) return 'bounds' as const
 
     if (!isAabbInsideStage(proposedAabb, stageSize.width, stageSize.height)) {
-      return false
+      return 'bounds' as const
+    }
+
+    if (roofMask && maskGeo && maskPanelDimensions) {
+      const maskCenter = latLngToPixel(center.lat, center.lng, maskGeo)
+      const maskPoints = getRotatedRectPoints(
+        maskCenter.x,
+        maskCenter.y,
+        maskPanelDimensions.width,
+        maskPanelDimensions.height,
+        rotation
+      )
+
+      if (!isPolygonInsideRasterMask(maskPoints, roofMask)) {
+        return 'mask' as const
+      }
     }
 
     for (const otherPanel of visiblePanels) {
       if (otherPanel.id === panelId) continue
       const otherAabb = getPlacementAabb(otherPanel.id, otherPanel.center, otherPanel.rotation, geo)
       if (otherAabb && aabbsOverlap(proposedAabb, otherAabb)) {
-        return false
+        return 'overlap' as const
       }
     }
 
-    return true
+    return null
   }
 
-  async function recomputePanel(panelId: string, center: { lat: number; lng: number }, rotation: number, rollback: () => void) {
+  async function recomputePanel(
+    panelId: string,
+    center: { lat: number; lng: number },
+    rotation: number,
+    rollback: () => void
+  ) {
     if (!project) return
 
     setPendingPanelId(panelId)
@@ -322,9 +384,10 @@ export function WorkbenchPage() {
     if (!panel) return
 
     const nextCenter = pixelToLatLng(position.x, position.y, geo)
-    if (!isPlacementValid(panelId, nextCenter, panel.rotation)) {
+    const placementError = getPlacementError(panelId, nextCenter, panel.rotation)
+    if (placementError) {
       resetPosition()
-      setMessage({ tone: 'error', text: 'That placement overlaps another panel or leaves the roof image bounds.' })
+      setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
       return
     }
 
@@ -355,8 +418,9 @@ export function WorkbenchPage() {
     if (!selectedPanel) return
 
     const nextRotation = ((value % 360) + 360) % 360
-    if (!isPlacementValid(selectedPanel.id, selectedPanel.center, nextRotation)) {
-      setMessage({ tone: 'error', text: 'That rotation overlaps another panel or leaves the roof image bounds.' })
+    const placementError = getPlacementError(selectedPanel.id, selectedPanel.center, nextRotation)
+    if (placementError) {
+      setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
       return
     }
 
@@ -377,20 +441,64 @@ export function WorkbenchPage() {
   }
 
   async function handleSave() {
-    if (!projectId) return
+    if (!projectId || !project) return
 
     setIsSaving(true)
+    setIsBatchRecomputing(true)
     setMessage(null)
 
     try {
-      await saveLayout(projectId, { editedLayout: serializeLayout() })
+      const serializedLayout = serializeLayout()
+      const activePanels = serializedLayout.filter((panel) => panel.status !== 'deleted')
+
+      setMessage({
+        tone: 'info',
+        text: `Recomputing monthly energy for ${activePanels.length} active panels before saving...`
+      })
+
+      const batchResponse = await recomputeFluxBatch(project.locationId, {
+        panels: activePanels.map((panel) => ({
+          panelId: panel.id,
+          center: panel.center,
+          rotation: panel.rotation
+        }))
+      })
+
+      const energyByPanelId = new Map(
+        batchResponse.results.map((result) => [result.panelId, result.monthlyEnergyDcKwh] as const)
+      )
+      const incompletePanels = activePanels.filter((panel) => {
+        const monthlyEnergyDcKwh = energyByPanelId.get(panel.id)
+        return !monthlyEnergyDcKwh || monthlyEnergyDcKwh.length !== 12
+      })
+
+      if (incompletePanels.length > 0) {
+        throw new Error(
+          `Batch recompute returned incomplete results for ${incompletePanels.length} panel(s). Please retry.`
+        )
+      }
+
+      updatePanelEnergies(batchResponse.results)
+
+      const nextLayout = serializedLayout.map((panel) => {
+        const monthlyEnergyDcKwh = energyByPanelId.get(panel.id)
+        return monthlyEnergyDcKwh ? { ...panel, monthlyEnergyDcKwh } : panel
+      })
+
+      setIsBatchRecomputing(false)
+      setMessage({ tone: 'info', text: 'Saving the refreshed layout to your project...' })
+      await saveLayout(projectId, { editedLayout: nextLayout })
       navigate(`/project/${projectId}/analysis`)
     } catch (saveError) {
       setMessage({
         tone: 'error',
-        text: saveError instanceof Error ? saveError.message : 'Failed to save the current layout'
+        text:
+          saveError instanceof Error
+            ? saveError.message
+            : 'Failed to recompute and save the current layout. Please retry.'
       })
     } finally {
+      setIsBatchRecomputing(false)
       setIsSaving(false)
     }
   }
@@ -560,7 +668,7 @@ export function WorkbenchPage() {
                   <Link to="/dashboard">Back to Dashboard</Link>
                 </Button>
                 <Button onClick={handleSave} disabled={isSaving || pendingPanelId !== null}>
-                  {isSaving ? 'Saving...' : 'Save & Continue'}
+                  {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
                 </Button>
               </div>
             </CardContent>
@@ -577,7 +685,11 @@ export function WorkbenchPage() {
                     Drag panels, rotate the selected panel, and prune the array before analysis.
                   </CardDescription>
                 </div>
-                {pendingPanelId && <Badge className="bg-amber-600 text-white hover:bg-amber-600">Recomputing</Badge>}
+                {(pendingPanelId || isBatchRecomputing) && (
+                  <Badge className="bg-amber-600 text-white hover:bg-amber-600">
+                    {isBatchRecomputing ? 'Batch Recompute' : 'Recomputing'}
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent className="p-4">
@@ -586,7 +698,11 @@ export function WorkbenchPage() {
                 className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-[radial-gradient(circle_at_top_left,#fefce8,transparent_30%),linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-2"
               >
                 {stageReady && panelDimensions ? (
-                  <Stage width={stageSize.width} height={stageSize.height} className="overflow-hidden rounded-xl shadow-lg">
+                  <Stage
+                    width={stageSize.width}
+                    height={stageSize.height}
+                    className="overflow-hidden rounded-xl shadow-lg"
+                  >
                     <Layer listening={false}>
                       <KonvaImage image={backgroundImage} width={stageSize.width} height={stageSize.height} />
                     </Layer>

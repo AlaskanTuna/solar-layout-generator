@@ -1,5 +1,11 @@
 ﻿# TEST - AGENT ONLY
 
+## [09/03/26] - Phase 3 Analysis + Workbench Frontend Verification
+
+- Scenario: Validate the Phase 3 frontend completion pass covering the new error boundary, Workbench batch save + roof-mask constraint, AnalysisPage billing UI, PDF export wiring, and analysis persistence path.
+- Steps: Ran `npm run test --workspace=frontend` and `npm run build` from the repo root.
+- Result: Pass (frontend Vitest: 4 files / 44 tests passed; full monorepo build passed for shared, Prisma client generation, backend TypeScript build, and frontend production build). Frontend build still reports a Vite chunk-size warning because the main bundle is ~2.48 MB after adding charts/PDF tooling; functionality is unaffected, but code-splitting is a follow-up consideration.
+
 ## [08/03/26] - Phase 2.5 Location Cache Smoke Test
 
 - Scenario: Validate the new location-cache smoke script structure before using a live Solar API-backed coordinate.
@@ -51,6 +57,3 @@
 - Scenario: Validate coordinate transforms, panel geometry, and flux sampling math.
 - Steps: Ran `npx vitest run backend/src/geo/` â€” 3 test files, 18 tests.
 - Result: Pass (18/18). Tests cover pointInPolygon (inside/outside/rotated), calculateAverageFlux (uniform/non-uniform/clipping/empty), latLngToPixel/pixelToLatLng roundtrip, metersToPixels, rotatePoint (0Â°/90Â°/180Â°), getRotatedCorners (0Â°/90Â°/45Â°).
-
-
-
