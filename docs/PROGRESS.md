@@ -7,6 +7,7 @@
 - The script then creates a first project, repeats the same resolve flow with the same coordinates, creates a second project, and asserts both project flows land on the same cached `locationId` without increasing the number of `Location` rows in the coordinate tolerance window.
 - Added a warm-cache override (`CACHE_ALLOW_WARM=1`) so the same script can verify reuse behavior on an already-cached coordinate during troubleshooting, while cold-cache mode intentionally fails fast if the coordinate has already been cached.
 - Verification so far is a shell syntax pass only (`bash -n tests/smoke/smoke-location-cache.sh`); the live Solar API-backed smoke run is intentionally left to the user so it can be pointed at a chosen test coordinate.
+- Further manual testing by ZJ confirmed that cached location does not consume additional Solar API endpoint calls.
 
 ## [07/03/26] - Phase 2.4: Workbench Rendering Alignment
 
