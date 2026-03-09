@@ -1,5 +1,13 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [09/03/26] - Phase 3: Batch Recompute, TariffConfig Defaults, Billing Engine
+
+- **Task 1 — Batch Recompute Endpoint:** Added `POST /api/locations/:locationId/panels/recompute-batch` that downloads the `monthly_flux.tif` once, pre-reads all 12 bands into memory via `preloadFluxRasters()`, then processes N panels using `computeMonthlyEnergyFromRasters()` (pure, no I/O per panel). Added `fluxRecomputeBatchSchema` (Zod, max 500 panels), `FluxRecomputeBatchRequest`/`FluxRecomputeBatchResponse` shared types, and `recomputeFluxBatch()` frontend API client. Existing single-panel endpoint unchanged.
+- **Task 5 — TariffConfig Defaults:** Added `defaults` JSON column to `TariffConfig` Prisma model (`db push`). Updated `seed.ts` with `nemCapSinglePhaseKw` (5), `nemCapThreePhaseKw` (12.5), `systemCostPerKwp` (4500), `annualYieldPerKwp` (1200). Re-seeded. Typed `TariffRates`, `TariffThresholds`, `TariffDefaults` in `shared/index.ts` (replaces `Record<string, unknown>`). Updated `GET /api/tariff/config` to return the new `defaults` field with hardcoded fallback for unseeded rows.
+- **Task 6 — Billing Engine:** Created `frontend/src/lib/billingEngine.ts` with `computeBill()` (10-step baseline), `lookupEeiRebate()`, `computeNemMonth()` (credit carry-forward + December forfeiture), and `runAnnualSimulation()` (12-month loop). All tariff parameters sourced from `BillingConfig` at runtime — zero hardcoded rates. Line items rounded individually to match real utility billing.
+- **Task 7 — Billing Engine Tests:** Created `frontend/src/lib/billingEngine.test.ts` with 36 tests covering golden cases T1–T5, T10, EEI bracket lookups, threshold boundaries (300/600/601/1500/1501 kWh), credit carry-forward, December forfeiture, annual simulation invariants. All golden cases match Knowledge Vault within RM0.01 (two 1-cent diffs documented as KV manual rounding errors in energy component for 640 kWh).
+- **Verification:** 24 backend tests pass, 43 frontend tests pass (7 existing + 36 new), full build (shared → Prisma → backend → frontend) succeeds.
+
 ## [08/03/26] - Phase 2.5: Location Cache Smoke Test
 
 - Added `tests/smoke/smoke-location-cache.sh` to exercise the real Page 1 cache path through the backend rather than calling Google Solar directly, since the cache behavior under test lives behind `POST /api/locations/resolve`.

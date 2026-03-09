@@ -16,14 +16,16 @@ async function main() {
       rates: RATES,
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
-      afaRateDefault: -2.77
+      afaRateDefault: -2.77,
+      defaults: DEFAULTS
     },
     create: {
       tariffVersion: 'RP4-2025',
       rates: RATES,
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
-      afaRateDefault: -2.77
+      afaRateDefault: -2.77,
+      defaults: DEFAULTS
     }
   })
 
@@ -49,6 +51,14 @@ const THRESHOLDS = {
   sstExemption: 600, // kWh — below this, SST = 0
   eeiCutoff: 1000, // kWh — above this, no EEI rebate
   reFundExemption: 300 // kWh — below this, no RE Fund
+}
+
+// Analysis defaults (adjustable without code changes)
+const DEFAULTS = {
+  nemCapSinglePhaseKw: 5,
+  nemCapThreePhaseKw: 12.5,
+  systemCostPerKwp: 4500, // RM per kWp
+  annualYieldPerKwp: 1200 // kWh per kWp
 }
 
 // EEI lookup: [upperBoundKwh, rebateSenPerKwh]

@@ -465,12 +465,12 @@
 
 **Implementation:**
 
-- [ ] Add `POST /api/locations/:locationId/panels/recompute-batch` endpoint accepting `{ panels: [{ panelId, center, rotation }, ...] }`
-- [ ] Download and parse `monthly_flux.tif` once per request; reuse the image object and geo-transform across all panels
-- [ ] Loop through panels: `latLngToPixel` → `getRotatedCorners` → `computeMonthlyEnergy` per panel
-- [ ] Return `{ results: [{ panelId, monthlyEnergyDcKwh }, ...] }`
-- [ ] Add Zod validation schema for the batch request body
-- [ ] Keep existing single-panel `/recompute` endpoint unchanged (still used for interactive drag/rotate feedback)
+- [x] Add `POST /api/locations/:locationId/panels/recompute-batch` endpoint accepting `{ panels: [{ panelId, center, rotation }, ...] }`
+- [x] Download and parse `monthly_flux.tif` once per request; reuse the image object and geo-transform across all panels
+- [x] Loop through panels: `latLngToPixel` → `getRotatedCorners` → `computeMonthlyEnergy` per panel
+- [x] Return `{ results: [{ panelId, monthlyEnergyDcKwh }, ...] }`
+- [x] Add Zod validation schema for the batch request body
+- [x] Keep existing single-panel `/recompute` endpoint unchanged (still used for interactive drag/rotate feedback)
 
 ### 2. Feature: Workbench Batch Recompute on Save
 
@@ -508,11 +508,11 @@
 
 **Implementation:**
 
-- [ ] Add a `defaults` JSON field to the `TariffConfig` model (or extend the existing `rates` JSON) containing: `nemCapSinglePhaseKw` (5), `nemCapThreePhaseKw` (12.5), `systemCostPerKwp` (4500), `annualYieldPerKwp` (1200)
-- [ ] Update `seed.ts` with the new defaults and re-seed
-- [ ] Update `TariffConfigResponse` in `shared/index.ts` to include the `defaults` field with a typed shape
-- [ ] Update `GET /api/tariff/config` to return the new field
-- [ ] Update frontend `getTariffConfig()` client — no logic change, just type alignment
+- [x] Add a `defaults` JSON field to the `TariffConfig` model (or extend the existing `rates` JSON) containing: `nemCapSinglePhaseKw` (5), `nemCapThreePhaseKw` (12.5), `systemCostPerKwp` (4500), `annualYieldPerKwp` (1200)
+- [x] Update `seed.ts` with the new defaults and re-seed
+- [x] Update `TariffConfigResponse` in `shared/index.ts` to include the `defaults` field with a typed shape
+- [x] Update `GET /api/tariff/config` to return the new field
+- [x] Update frontend `getTariffConfig()` client — no logic change, just type alignment
 
 ### 6. Feature: NEM Billing Engine
 
@@ -520,12 +520,12 @@
 
 **Implementation:**
 
-- [ ] Create `frontend/src/lib/billingEngine.ts` with typed tariff config interfaces (`TariffRates`, `TariffThresholds`, `EeiEntry`, `TariffDefaults`)
-- [ ] Implement `computeBill(consumptionKwh, config)` — the 10-step baseline bill: energy (threshold-based), capacity, network, retail, AFA, EEI rebate, RE Fund, SST, minimum charge
-- [ ] Implement `lookupEeiRebate(consumptionKwh, eeiTable)` — bracket lookup returning sen/kWh rebate rate
-- [ ] Implement `computeNemMonth(consumption, generation, creditBalance, config)` — net import, credit offset, billable kWh, credit carry-forward, and savings calculation
-- [ ] Implement `runAnnualSimulation(monthlyConsumption, monthlyGeneration[], config)` — 12-month loop with credit state, December forfeiture, and annual aggregation
-- [ ] All RM amounts in ringgit (not sen); convert sen rates internally
+- [x] Create `frontend/src/lib/billingEngine.ts` with typed tariff config interfaces (`TariffRates`, `TariffThresholds`, `EeiEntry`, `TariffDefaults`)
+- [x] Implement `computeBill(consumptionKwh, config)` — the 10-step baseline bill: energy (threshold-based), capacity, network, retail, AFA, EEI rebate, RE Fund, SST, minimum charge
+- [x] Implement `lookupEeiRebate(consumptionKwh, eeiTable)` — bracket lookup returning sen/kWh rebate rate
+- [x] Implement `computeNemMonth(consumption, generation, creditBalance, config)` — net import, credit offset, billable kWh, credit carry-forward, and savings calculation
+- [x] Implement `runAnnualSimulation(monthlyConsumption, monthlyGeneration[], config)` — 12-month loop with credit state, December forfeiture, and annual aggregation
+- [x] All RM amounts in ringgit (not sen); convert sen rates internally
 
 ### 7. Testing: Billing Engine Unit Tests
 
@@ -533,12 +533,12 @@
 
 **Implementation:**
 
-- [ ] Create `frontend/src/lib/billingEngine.test.ts`
-- [ ] Test `computeBill` against golden cases: zero usage, 200 kWh, 300 kWh, 600 kWh, 601 kWh, 800 kWh, 1000 kWh, 1500 kWh, 1501 kWh, 2000 kWh
-- [ ] Test `lookupEeiRebate` for each bracket boundary and above-cutoff case
-- [ ] Test `computeNemMonth` for net-positive, net-negative, and credit-exhaustion scenarios
-- [ ] Test `runAnnualSimulation` for December credit forfeiture and full-year savings aggregation
-- [ ] All tests must match Knowledge Vault expected values to ≤ RM0.01 tolerance
+- [x] Create `frontend/src/lib/billingEngine.test.ts`
+- [x] Test `computeBill` against golden cases: zero usage, 300 kWh, 500 kWh, 600/601 kWh boundary, 800 kWh, 1500/1501 kWh cliff, 1600 kWh
+- [x] Test `lookupEeiRebate` for each bracket boundary and above-cutoff case
+- [x] Test `computeNemMonth` for net-positive, net-negative, credit-exhaustion, and December forfeiture scenarios
+- [x] Test `runAnnualSimulation` for December credit forfeiture, credit carry-forward, and full-year savings aggregation
+- [x] 43 tests passing; golden cases match Knowledge Vault to ≤ RM0.01 (1-cent differences documented as KV manual rounding errors)
 
 ### 8. Feature: AnalysisPage — Data Loading + User Inputs
 

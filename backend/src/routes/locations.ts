@@ -3,18 +3,19 @@ import * as GeoTIFF from 'geotiff'
 import { requireAuth } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
-import { resolveLocationSchema, fluxRecomputeSchema } from '../validators/locations.js'
+import { resolveLocationSchema, fluxRecomputeSchema, fluxRecomputeBatchSchema } from '../validators/locations.js'
 import * as locationService from '../services/locationService.js'
 import { downloadFromStorage, getSignedUrl } from '../services/storageService.js'
 import { parsePanelSpecs } from '../services/buildingInsightsService.js'
 import { setupGeoTransform, latLngToPixel, metersToPixels } from '../geo/transforms.js'
 import { getRotatedCorners } from '../geo/panelGeometry.js'
-import { computeMonthlyEnergy } from '../geo/fluxSampler.js'
+import { computeMonthlyEnergy, preloadFluxRasters, computeMonthlyEnergyFromRasters } from '../geo/fluxSampler.js'
 import type {
   ResolveLocationResponse,
   LocationStatusResponse,
   LocationDataResponse,
-  FluxRecomputeResponse
+  FluxRecomputeResponse,
+  FluxRecomputeBatchResponse
 } from '@shared/types'
 
 export const locationsRouter = Router()
@@ -201,6 +202,64 @@ locationsRouter.post(
 
     const response: FluxRecomputeResponse = { panelId, monthlyEnergyDcKwh }
     console.info(`[FluxRecompute] success panel=${panelId} months=${monthlyEnergyDcKwh.length}`)
+    res.json(response)
+  })
+)
+
+// POST /api/locations/:locationId/panels/recompute-batch
+locationsRouter.post(
+  '/:locationId/panels/recompute-batch',
+  requireAuth,
+  validate(fluxRecomputeBatchSchema),
+  asyncHandler(async (req, res) => {
+    const { panels } = req.body
+    console.info(
+      `[FluxRecomputeBatch] user=${req.user!.id} location=${req.params.locationId as string} panels=${panels.length}`
+    )
+
+    const location = await locationService.getLocationDataForUser(req.user!.id, req.params.locationId as string)
+    if (!location || location.status !== 'ready') {
+      console.warn(
+        `[FluxRecomputeBatch] unavailable user=${req.user!.id} location=${req.params.locationId as string} status=${location?.status ?? 'missing'}`
+      )
+      res.status(404).json({ error: 'Location not found or not ready' })
+      return
+    }
+    if (!location.monthlyFluxPath) {
+      console.error(`[FluxRecomputeBatch] missing monthly flux data for location=${location.id}`)
+      res.status(404).json({ error: 'Monthly flux data not available' })
+      return
+    }
+
+    const panelSpecs = parsePanelSpecs(location.buildingInsightsJson)
+    if (!panelSpecs) {
+      console.error(`[FluxRecomputeBatch] invalid building insights for location=${location.id}`)
+      res.status(500).json({ error: 'Invalid building insights data for location' })
+      return
+    }
+
+    // Download and parse GeoTIFF once, pre-read all 12 bands
+    const fluxBuffer = await downloadFromStorage(location.monthlyFluxPath)
+    const tiff = await GeoTIFF.fromArrayBuffer(fluxBuffer)
+    const image = await tiff.getImage()
+    const geo = setupGeoTransform(image)
+    const rasters = await preloadFluxRasters(image)
+
+    const widthPx = metersToPixels(panelSpecs.panelWidthMeters, geo)
+    const heightPx = metersToPixels(panelSpecs.panelHeightMeters, geo)
+
+    // Process each panel from pre-loaded rasters (no additional I/O)
+    const results: FluxRecomputeResponse[] = []
+    for (const panel of panels) {
+      const { px, py } = latLngToPixel(panel.center.lat, panel.center.lng, geo)
+      const rotationRad = (panel.rotation * Math.PI) / 180
+      const corners = getRotatedCorners(px, py, widthPx, heightPx, rotationRad)
+      const monthlyEnergyDcKwh = computeMonthlyEnergyFromRasters(rasters, corners, panelSpecs.panelCapacityWatts)
+      results.push({ panelId: panel.panelId, monthlyEnergyDcKwh })
+    }
+
+    const response: FluxRecomputeBatchResponse = { results }
+    console.info(`[FluxRecomputeBatch] success panels=${results.length}`)
     res.json(response)
   })
 )

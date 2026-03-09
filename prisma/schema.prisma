@@ -57,4 +57,5 @@ model TariffConfig {
   thresholds      Json
   eeiTable        Json
   afaRateDefault  Float
+  defaults        Json?
 }

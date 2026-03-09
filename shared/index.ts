@@ -49,6 +49,14 @@ export type FluxRecomputeResponse = {
   monthlyEnergyDcKwh: number[]
 }
 
+export type FluxRecomputeBatchRequest = {
+  panels: FluxRecomputeRequest[]
+}
+
+export type FluxRecomputeBatchResponse = {
+  results: FluxRecomputeResponse[]
+}
+
 export type CreateProjectRequest = {
   name: string
   locationId: string
@@ -63,11 +71,39 @@ export type SaveAnalysisRequest = {
   analysisResults: Record<string, unknown>
 }
 
+export type TariffRates = {
+  energyLow: number
+  energyHigh: number
+  capacity: number
+  network: number
+  retailChargeRm: number
+  sstRate: number
+  reFundRate: number
+  minChargeRm: number
+}
+
+export type TariffThresholds = {
+  energyCliff: number
+  retailWaiver: number
+  afaWaiver: number
+  sstExemption: number
+  eeiCutoff: number
+  reFundExemption: number
+}
+
+export type TariffDefaults = {
+  nemCapSinglePhaseKw: number
+  nemCapThreePhaseKw: number
+  systemCostPerKwp: number
+  annualYieldPerKwp: number
+}
+
 export type TariffConfigResponse = {
-  rates: Record<string, unknown>
-  thresholds: Record<string, unknown>
-  eeiTable: Record<string, unknown>
+  rates: TariffRates
+  thresholds: TariffThresholds
+  eeiTable: [number, number][]
   afaRateDefault: number
+  defaults: TariffDefaults
 }
 
 export type HealthResponse = {

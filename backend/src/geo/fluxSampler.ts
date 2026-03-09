@@ -72,3 +72,37 @@ export async function computeMonthlyEnergy(
 
   return monthlyEnergyDcKwh
 }
+
+export interface PreloadedFluxRasters {
+  bands: ArrayLike<number>[]
+  width: number
+  height: number
+}
+
+export async function preloadFluxRasters(image: GeoTIFFImage): Promise<PreloadedFluxRasters> {
+  const width = image.getWidth()
+  const height = image.getHeight()
+  const bands: ArrayLike<number>[] = []
+
+  for (let band = 0; band < 12; band++) {
+    const rasters = await image.readRasters({ samples: [band] })
+    bands.push(rasters[0] as Float32Array)
+  }
+
+  return { bands, width, height }
+}
+
+export function computeMonthlyEnergyFromRasters(
+  rasters: PreloadedFluxRasters,
+  corners: [number, number][],
+  panelCapacityWatts: number
+): number[] {
+  const monthlyEnergyDcKwh: number[] = []
+
+  for (let band = 0; band < 12; band++) {
+    const avgFlux = calculateAverageFlux(corners, rasters.bands[band], rasters.width, rasters.height)
+    monthlyEnergyDcKwh.push(avgFlux * (panelCapacityWatts / 1000))
+  }
+
+  return monthlyEnergyDcKwh
+}

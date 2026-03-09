@@ -14,3 +14,7 @@ export const fluxRecomputeSchema = z.object({
   }),
   rotation: z.number()
 })
+
+export const fluxRecomputeBatchSchema = z.object({
+  panels: z.array(fluxRecomputeSchema).min(1).max(500)
+})
