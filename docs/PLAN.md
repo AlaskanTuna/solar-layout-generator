@@ -459,16 +459,41 @@
 
 ## Phase 3: Frontend - Billing Engine, Page 3, PDF Export
 
-### 1. Refinement: Workbench Placement + Energy Consistency
+### 1. Feature: Batch Recompute Endpoint
 
-**Purpose/Issue:** Phase 2 Workbench currently constrains panels to the RGB image bounds and overlap checks, but not the true roof mask boundary. In addition, untouched panels still rely on their original annual yield until recompute produces monthly values, which needs a defined AnalysisPage strategy before edited layouts are consumed downstream.
+**Purpose/Issue:** The current single-panel recompute endpoint downloads the full `monthly_flux.tif` from Supabase Storage on every call. To populate `monthlyEnergyDcKwh` for all active panels accurately (not just moved ones), a batch endpoint is needed that loads the GeoTIFF once and processes N panels in a single request.
 
 **Implementation:**
 
-- [ ] Expose or derive usable roof/mask boundary data for the frontend so Workbench placement validation can reject panels outside the valid rooftop area instead of only outside the image bounds
-- [ ] Define and implement how Analysis consumes `editedLayout` when some panels have not been recomputed in Phase 2, so monthly energy data is consistent for both untouched and edited panels
+- [ ] Add `POST /api/locations/:locationId/panels/recompute-batch` endpoint accepting `{ panels: [{ panelId, center, rotation }, ...] }`
+- [ ] Download and parse `monthly_flux.tif` once per request; reuse the image object and geo-transform across all panels
+- [ ] Loop through panels: `latLngToPixel` → `getRotatedCorners` → `computeMonthlyEnergy` per panel
+- [ ] Return `{ results: [{ panelId, monthlyEnergyDcKwh }, ...] }`
+- [ ] Add Zod validation schema for the batch request body
+- [ ] Keep existing single-panel `/recompute` endpoint unchanged (still used for interactive drag/rotate feedback)
 
-### 2. Refinement: React Error Boundary
+### 2. Feature: Workbench Batch Recompute on Save
+
+**Purpose/Issue:** After Phase 2, only dragged/rotated panels have `monthlyEnergyDcKwh` populated. All active panels need accurate monthly energy data derived from the actual `monthly_flux.tif` before the layout is saved and consumed by the AnalysisPage.
+
+**Implementation:**
+
+- [ ] On "Save & Continue", collect all active (non-deleted) panels into a batch recompute request
+- [ ] Call the new batch endpoint with all active panels' current center and rotation
+- [ ] Update each panel's `monthlyEnergyDcKwh` in state with the batch response before serializing and saving the layout
+- [ ] Show a progress indicator during the batch recompute (may take 8–15s for large rooftops)
+- [ ] Handle partial failures: if batch recompute fails, block save and show a retry option
+
+### 3. Refinement: Workbench Roof Mask Boundary
+
+**Purpose/Issue:** Phase 2 Workbench constrains panels to the RGB image bounds and overlap checks, but not the true roof mask boundary. Panels can currently be placed outside the valid rooftop area.
+
+**Implementation:**
+
+- [ ] Expose or derive usable roof/mask boundary data for the frontend so Workbench placement validation can reject panels dragged outside the valid rooftop area
+- [ ] Apply mask check alongside the existing image-bounds and overlap checks on drag-end
+
+### 4. Refinement: React Error Boundary
 
 **Purpose/Issue:** QA Phase 2 follow-up #6 — no top-level error boundary exists. If `AuthProvider` or any root-level query throws, users see a white screen with no recovery path.
 
@@ -476,3 +501,94 @@
 
 - [ ] Add a React error boundary component wrapping the app in `App.tsx` or `main.tsx`
 - [ ] Display a user-friendly fallback UI with a "Return to Dashboard" or "Reload" action
+
+### 5. Feature: Expand TariffConfig with Analysis Defaults
+
+**Purpose/Issue:** The billing engine needs several analysis-level defaults (NEM capacity caps, default system cost, default annual yield) that should be adjustable via the seed script or Supabase dashboard — not hardcoded in frontend source code.
+
+**Implementation:**
+
+- [ ] Add a `defaults` JSON field to the `TariffConfig` model (or extend the existing `rates` JSON) containing: `nemCapSinglePhaseKw` (5), `nemCapThreePhaseKw` (12.5), `systemCostPerKwp` (4500), `annualYieldPerKwp` (1200)
+- [ ] Update `seed.ts` with the new defaults and re-seed
+- [ ] Update `TariffConfigResponse` in `shared/index.ts` to include the `defaults` field with a typed shape
+- [ ] Update `GET /api/tariff/config` to return the new field
+- [ ] Update frontend `getTariffConfig()` client — no logic change, just type alignment
+
+### 6. Feature: NEM Billing Engine
+
+**Purpose/Issue:** Core client-side billing simulation per TRD §6.3. All parameters sourced from `TariffConfig` at runtime — zero hardcoded rates.
+
+**Implementation:**
+
+- [ ] Create `frontend/src/lib/billingEngine.ts` with typed tariff config interfaces (`TariffRates`, `TariffThresholds`, `EeiEntry`, `TariffDefaults`)
+- [ ] Implement `computeBill(consumptionKwh, config)` — the 10-step baseline bill: energy (threshold-based), capacity, network, retail, AFA, EEI rebate, RE Fund, SST, minimum charge
+- [ ] Implement `lookupEeiRebate(consumptionKwh, eeiTable)` — bracket lookup returning sen/kWh rebate rate
+- [ ] Implement `computeNemMonth(consumption, generation, creditBalance, config)` — net import, credit offset, billable kWh, credit carry-forward, and savings calculation
+- [ ] Implement `runAnnualSimulation(monthlyConsumption, monthlyGeneration[], config)` — 12-month loop with credit state, December forfeiture, and annual aggregation
+- [ ] All RM amounts in ringgit (not sen); convert sen rates internally
+
+### 7. Testing: Billing Engine Unit Tests
+
+**Purpose/Issue:** The Knowledge Vault provides 10 golden test cases (T1–T10) with expected RM values. These must pass before AnalysisPage is built.
+
+**Implementation:**
+
+- [ ] Create `frontend/src/lib/billingEngine.test.ts`
+- [ ] Test `computeBill` against golden cases: zero usage, 200 kWh, 300 kWh, 600 kWh, 601 kWh, 800 kWh, 1000 kWh, 1500 kWh, 1501 kWh, 2000 kWh
+- [ ] Test `lookupEeiRebate` for each bracket boundary and above-cutoff case
+- [ ] Test `computeNemMonth` for net-positive, net-negative, and credit-exhaustion scenarios
+- [ ] Test `runAnnualSimulation` for December credit forfeiture and full-year savings aggregation
+- [ ] All tests must match Knowledge Vault expected values to ≤ RM0.01 tolerance
+
+### 8. Feature: AnalysisPage — Data Loading + User Inputs
+
+**Purpose/Issue:** Page 3 shell — loads project, tariff config, and edited layout; provides user-editable assumption inputs that reactively re-run the billing engine.
+
+**Implementation:**
+
+- [ ] Load project (with `editedLayout`) via `getProject()` on mount; redirect to workbench if status is still `draft`
+- [ ] Load tariff config via `getTariffConfig()` on mount (TanStack Query, cached)
+- [ ] Load location data via `getLocationData()` for `panelCapacityWatts` and `carbonOffsetFactorKgPerMwh`
+- [ ] Aggregate `monthlyEnergyDcKwh` across all active (non-deleted) panels → `monthlyGeneration[12]`
+- [ ] Compute system capacity: `activePanelCount × panelCapacityWatts / 1000` → `systemKwp`
+- [ ] User-editable inputs panel: monthly consumption (kWh, default 600), connection phase (single/three, default single), system cost (RM, default `systemKwp × systemCostPerKwp` from config), AFA rate (sen/kWh, default from config)
+- [ ] Re-run `runAnnualSimulation` reactively on any input change (useMemo or useEffect)
+
+### 9. Feature: AnalysisPage — Results Display
+
+**Purpose/Issue:** Present billing simulation results with hero metrics, comparison charts, and detailed breakdown.
+
+**Implementation:**
+
+- [ ] Hero metrics row: monthly average savings (RM and %), annual savings, simple payback period (years), 10-year net benefit, CO₂ offset (kg/year)
+- [ ] Install Recharts (`npm install recharts --workspace=frontend`)
+- [ ] Comparison bar chart: monthly bill without solar vs. with solar (12 months)
+- [ ] Cumulative savings line chart: running total over 12 months
+- [ ] Month-by-month breakdown table (expandable): consumption, generation, net import, credit used, credit balance, baseline bill, NEM bill, savings
+- [ ] Bill component breakdown section: energy, capacity, network, retail, AFA, EEI, RE Fund, SST for a selected month
+- [ ] Threshold crossing warnings: flag when NEM consumption crosses 600/1500 kWh boundaries
+- [ ] Disclaimer text on all financial figures
+
+### 10. Feature: PDF Export
+
+**Purpose/Issue:** Client-side PDF report generation for the user to download and share.
+
+**Implementation:**
+
+- [ ] Install `html2pdf.js` (`npm install html2pdf.js --workspace=frontend`)
+- [ ] Create a print-optimized report layout component (hidden or rendered off-screen) containing: system summary (kWp, panel count, location), financial highlights (annual savings, payback, ROI), month-by-month breakdown table, comparison chart snapshot, assumptions used, disclaimer
+- [ ] "Export PDF" button triggers `html2pdf()` on the report element with A4 page size
+- [ ] File name: `Solar_Analysis_{projectName}_{date}.pdf`
+
+### 11. Feature: Save Analysis + Navigation
+
+**Purpose/Issue:** Persist the analysis configuration and computed results to the backend so the project status advances to `analysis_saved` and results are viewable on return.
+
+**Implementation:**
+
+- [ ] "Save Analysis" button → `PATCH /api/projects/:id/analysis` with `{ analysisConfig, analysisResults }`
+- [ ] `analysisConfig`: monthly consumption, connection phase, system cost, AFA rate, system kWp
+- [ ] `analysisResults`: monthly breakdown array, annual totals, payback, ROI, CO₂ offset
+- [ ] On save success: show confirmation toast; update project status badge
+- [ ] On revisit (status `analysis_saved`): load saved config into inputs, re-derive results reactively
+- [ ] "Back to Workbench" link for layout adjustments
