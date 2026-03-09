@@ -69,42 +69,42 @@ Backend responds to `GET /api/health`. Prisma client is generated and can query 
 
 ### Week 2 (10 Mar -- 16 Mar): Auth Middleware + Project CRUD + Tariff Endpoints
 
-- [ ] Implement Supabase Auth JWT verification middleware for Express.
-- [ ] Implement project CRUD endpoints:
+- [x] Implement Supabase Auth JWT verification middleware for Express.
+- [x] Implement project CRUD endpoints:
   - `POST /api/projects` (create project).
   - `GET /api/projects` (list user's projects).
   - `GET /api/projects/:id` (get project details).
   - `PATCH /api/projects/:id/layout` (save edited layout).
   - `PATCH /api/projects/:id/analysis` (save analysis config and results).
-- [ ] Implement Zod request validation schemas for all endpoints.
-- [ ] Seed tariff configuration data (`prisma db seed`) with post-July 2025 RP4 tariff rates and EEI table from the Knowledge Vault.
-- [ ] Implement `GET /api/tariff/config` endpoint.
-- [ ] Test all endpoints manually with a REST client (Postman, Thunder Client or similar).
+- [x] Implement Zod request validation schemas for all endpoints.
+- [x] Seed tariff configuration data (`prisma db seed`) with post-July 2025 RP4 tariff rates and EEI table from the Knowledge Vault.
+- [x] Implement `GET /api/tariff/config` endpoint.
+- [x] Test all endpoints manually with a REST client (Postman, Thunder Client or similar).
 
 ### Week 3 (17 Mar -- 23 Mar): Solar API Fetch Pipeline
 
-- [ ] Implement `POST /api/locations/resolve` endpoint.
-- [ ] Build cache-check logic (coordinate tolerance matching against existing Location records).
-- [ ] On cache miss: call `buildingInsights` endpoint, enrich `solarPanels[]` with deterministic panel IDs, store enriched JSON in Location record.
-- [ ] On cache miss: call `dataLayers` endpoint, download GeoTIFFs (RGB, monthlyFlux, mask, annualFlux, DSM) to Supabase Storage.
-- [ ] Convert RGB GeoTIFF to PNG/WebP using `sharp`; store the derived image URL on the Location record.
-- [ ] Mark location status transitions: `processing` -> `ready` or `failed`.
-- [ ] Implement `GET /api/locations/:id/status` endpoint (for frontend polling).
-- [ ] Implement `GET /api/locations/:id/data` endpoint (returns enriched buildingInsights JSON + RGB image URL).
-- [ ] Handle error cases: Solar API failure, no building found, low imagery quality, network timeout.
-- [ ] Test the full pipeline with at least 3 different Malaysian addresses; record confirmed working locations for later testing.
+- [x] Implement `POST /api/locations/resolve` endpoint.
+- [x] Build cache-check logic (coordinate tolerance matching against existing Location records).
+- [x] On cache miss: call `buildingInsights` endpoint, enrich `solarPanels[]` with deterministic panel IDs, store enriched JSON in Location record.
+- [x] On cache miss: call `dataLayers` endpoint, download GeoTIFFs (RGB, monthlyFlux, mask, annualFlux, DSM) to Supabase Storage.
+- [x] Convert RGB GeoTIFF to PNG/WebP using `sharp`; store the derived image URL on the Location record.
+- [x] Mark location status transitions: `processing` -> `ready` or `failed`.
+- [x] Implement `GET /api/locations/:id/status` endpoint (for frontend polling).
+- [x] Implement `GET /api/locations/:id/data` endpoint (returns enriched buildingInsights JSON + RGB image URL).
+- [x] Handle error cases: Solar API failure, no building found, low imagery quality, network timeout.
+- [x] Test the full pipeline with at least 3 different Malaysian addresses; record confirmed working locations for later testing.
 
 ### Week 4 (24 Mar -- 30 Mar): Flux Recomputation Endpoint + Unit Tests
 
-- [ ] Implement `POST /api/locations/:locationId/panels/recompute` endpoint.
-  - [ ] Read `monthlyFlux.tif` (12 bands) from Supabase Storage using `geotiff.js`.
-  - [ ] Implement coordinate transforms (`proj4`): lat/lng to GeoTIFF pixel coordinates and back.
-  - [ ] Compute rotated panel footprint (4 corners in pixel space).
-  - [ ] Implement point-in-polygon flux sampling across the rotated rectangle for each of the 12 monthly bands.
-  - [ ] Return `monthlyEnergyDcKwh[12]` array.
-- [ ] Cross-validate recomputed values against the Python prototype output (target: less than 1% error).
-- [ ] Write unit tests for flux sampling math (`fluxSampler.test.ts`): point-in-polygon, average flux, kWh conversion.
-- [ ] Write unit tests for coordinate transform utilities.
+- [x] Implement `POST /api/locations/:locationId/panels/recompute` endpoint.
+  - [x] Read `monthlyFlux.tif` (12 bands) from Supabase Storage using `geotiff.js`.
+  - [x] Implement coordinate transforms (`proj4`): lat/lng to GeoTIFF pixel coordinates and back.
+  - [x] Compute rotated panel footprint (4 corners in pixel space).
+  - [x] Implement point-in-polygon flux sampling across the rotated rectangle for each of the 12 monthly bands.
+  - [x] Return `monthlyEnergyDcKwh[12]` array.
+- [x] Cross-validate recomputed values against the Python prototype output (target: less than 1% error).
+- [x] Write unit tests for flux sampling math (`fluxSampler.test.ts`): point-in-polygon, average flux, kWh conversion.
+- [x] Write unit tests for coordinate transform utilities.
 
 ### Exit Criteria
 
@@ -120,39 +120,39 @@ All API endpoints are functional and return correct responses. The Solar API fet
 
 ### Week 5 (31 Mar -- 6 Apr): Auth UI + Dashboard + Page 1
 
-- [ ] Build Sign Up and Sign In pages using Supabase Auth client SDK.
-- [ ] Implement protected route wrapper: unauthenticated users redirect to sign-in.
-- [ ] Set up TanStack Query for data fetching and caching.
-- [ ] Build Dashboard page:
-  - [ ] List the user's projects (from `GET /api/projects`).
-  - [ ] "Create New Project" button and flow (project name input, calls `POST /api/projects`, navigates to Page 1).
-- [ ] Build Page 1 (MapPage):
-  - [ ] Integrate `@googlemaps/js-api-loader` and Google Maps Autocomplete.
-  - [ ] Render an interactive map; centre on search result.
-  - [ ] "Is this your building?" confirmation dialog; lock confirmed lat/lng to the project.
-  - [ ] On confirmation, call `POST /api/locations/resolve`.
-  - [ ] Implement loading state with polling (`GET /api/locations/:id/status`).
-  - [ ] On `ready`: navigate to Page 2. On `failed`: show error message, allow retry.
+- [x] Build Sign Up and Sign In pages using Supabase Auth client SDK.
+- [x] Implement protected route wrapper: unauthenticated users redirect to sign-in.
+- [x] Set up TanStack Query for data fetching and caching.
+- [x] Build Dashboard page:
+  - [x] List the user's projects (from `GET /api/projects`).
+  - [x] "Create New Project" button and flow (project name input, calls `POST /api/projects`, navigates to Page 1).
+- [x] Build Page 1 (MapPage):
+  - [x] Integrate `@googlemaps/js-api-loader` and Google Maps Autocomplete.
+  - [x] Render an interactive map; centre on search result.
+  - [x] "Is this your building?" confirmation dialog; lock confirmed lat/lng to the project.
+  - [x] On confirmation, call `POST /api/locations/resolve`.
+  - [x] Implement loading state with polling (`GET /api/locations/:id/status`).
+  - [x] On `ready`: navigate to Page 2. On `failed`: show error message, allow retry.
 
 ### Week 6 (7 Apr -- 13 Apr): Page 2 — Canvas Rendering + Basic Interactions
 
-- [ ] Set up Konva.js + react-konva on WorkbenchPage.
-- [ ] Load cached RGB image as canvas background from `GET /api/locations/:id/data`.
-- [ ] Implement coordinate transform utilities on the frontend (lat/lng to canvas pixel position).
-- [ ] Render solar panels as interactive Konva rectangles, positioned from enriched `solarPanels[]`.
-- [ ] Implement panel quantity slider (min 4, max `maxArrayPanelsCount`); panels ordered by yield descending.
-- [ ] Implement panel deletion (select + delete).
-- [ ] Display the current total estimated annual yield based on active panels.
+- [x] Set up Konva.js + react-konva on WorkbenchPage.
+- [x] Load cached RGB image as canvas background from `GET /api/locations/:id/data`.
+- [x] Implement coordinate transform utilities on the frontend (lat/lng to canvas pixel position).
+- [x] Render solar panels as interactive Konva rectangles, positioned from enriched `solarPanels[]`.
+- [x] Implement panel quantity slider (min 4, max `maxArrayPanelsCount`); panels ordered by yield descending.
+- [x] Implement panel deletion (select + delete).
+- [x] Display the current total estimated annual yield based on active panels.
 
 ### Week 7 (14 Apr -- 20 Apr): Page 2 — Drag, Rotate, Flux Recomputation
 
-- [ ] Implement panel drag (constrained within the mask boundary).
-- [ ] Implement panel rotation (0--360 degrees).
-- [ ] Implement overlap prevention: reject drag/rotate if bounding box intersects another panel; snap back to previous position.
-- [ ] Wire drag-end and rotate-end events to call `POST /api/locations/:locationId/panels/recompute`.
-- [ ] Update the displayed total yield in real time after recomputation response.
-- [ ] Implement "Save and Continue" button: persist `editedLayout` (array of PanelEdit objects) via `PATCH /api/projects/:id/layout`.
-- [ ] Navigate to Page 3 on save.
+- [x] Implement panel drag (constrained within the mask boundary).
+- [x] Implement panel rotation (0--360 degrees).
+- [x] Implement overlap prevention: reject drag/rotate if bounding box intersects another panel; snap back to previous position.
+- [x] Wire drag-end and rotate-end events to call `POST /api/locations/:locationId/panels/recompute`.
+- [x] Update the displayed total yield in real time after recomputation response.
+- [x] Implement "Save and Continue" button: persist `editedLayout` (array of PanelEdit objects) via `PATCH /api/projects/:id/layout`.
+- [x] Navigate to Page 3 on save.
 
 ### Exit Criteria
 

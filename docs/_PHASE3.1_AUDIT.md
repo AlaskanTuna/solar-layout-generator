@@ -246,3 +246,22 @@ const analysisConfigSchema = z
 | S3.8  | Info     | 5       | ✅ Correct (caveat) | TariffConfig defaults wired end-to-end                         |
 | S3.9  | Info     | 6       | ✅ Correct          | Billing engine matches TRD §6.3                                |
 | S3.10 | Info     | 7       | ✅ Correct          | 43 unit tests, golden cases match KV                           |
+
+---
+
+## Reassessment — 10 Mar 2026 (Post PG Fix Pass)
+
+PG implemented Phase 3.1 QA Audit Fixes (PLAN.md §3.1, tasks 1–7). All 8 actionable findings have been addressed and verified against the updated source files. Frontend tests increased from 44 → 47 (3 new threshold warning tests). Full build passes.
+
+| Finding | Fix Applied                                                                                                                                                                                                                                | QA Verdict              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| S1.1    | `include: { location: true }` added to both `saveLayout` and `saveAnalysis` in `projectService.ts`                                                                                                                                         | ✅ Resolved             |
+| S1.2    | Replaced `z.record(z.unknown())` with typed schemas: `billBreakdownSchema`, `monthlyBreakdownSchema`, `analysisConfigSchema`, `analysisResultsSchema` — all with `.passthrough()` for forward compatibility                                | ✅ Resolved             |
+| S1.3    | `buildThresholdWarnings` now checks whether retail/AFA/SST thresholds match before combining into one message; emits separate warnings when they diverge                                                                                   | ✅ Resolved             |
+| S1.4    | `console.warn` emitted when tariff `defaults` is null and fallback is used; functional response unchanged for backward compat                                                                                                              | ✅ Resolved             |
+| S2.1    | Redundant `updatePanelEnergies()` call removed from the Workbench batch-save path                                                                                                                                                          | ✅ Resolved             |
+| S2.2    | "Net Import" column now renders true `month.consumptionKwh - month.generationKwh` instead of `billableKwh`                                                                                                                                 | ✅ Resolved             |
+| S2.3    | "With Solar" breakdown now shows all 8 bill components (energy, retail, capacity, AFA, network, EEI rebate, RE Fund, SST) alongside NEM credit fields                                                                                      | ✅ Resolved             |
+| S2.4    | AFA input now uses `min={-10} max={10} step={0.01}` with helper text: _"Negative values represent a rebate."_ Original `min={0}` recommendation was incorrect — negative AFA is a valid rebate per billing engine tests (`afaRate: -2.77`) | ✅ Resolved (corrected) |
+
+> **Phase 3.1 QA Status: All findings resolved.** Remaining step: manual frontend QA testing of the implemented changes before Phase 4 planning.
