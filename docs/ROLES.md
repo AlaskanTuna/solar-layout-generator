@@ -11,9 +11,9 @@ Defines every participant's role, responsibilities, and boundaries in this proje
 | `ZJ`     | Project Owner     | FYP Student                             |
 | `PL`     | Planner           | Claude Code                             |
 | `PG`     | Programmer        | Codex (PRIMARY) / Claude Code (COMPLEX) |
-| `QA`     | QA Reviewer       | GitHub Copilot                          |
-| `AD`     | Technical Advisor | GitHub Copilot                          |
-| <Others> | Assistant         | GitHub Copilot                          |
+| `QA`     | QA Reviewer       | ANY                                     |
+| `AD`     | Technical Advisor | ANY                                     |
+| <Others> | Assistant         | ANY                                     |
 
 > **NOTE:** Roles may subject to timely adjustments.
 
