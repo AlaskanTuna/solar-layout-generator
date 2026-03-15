@@ -657,3 +657,17 @@
 
 - [x] Constrain the input to a reasonable range without banning negative rebate values
 - [x] Add helper text clarifying that negative AFA represents a rebate
+
+## Phase 3.2: Database Reconciliation
+
+### 1. Hardening: TariffConfig Migration Ledger + Seed Workflow
+
+**Purpose/Issue:** The live Supabase database had the `TariffConfig.defaults` column and `tariffVersion` unique index, but the committed Prisma migration history was incomplete/out of sync. The normal `npm run db:seed` flow was also failing in this checkout because the `tsx`/`esbuild` runner was using the wrong platform binary.
+
+**Implementation:**
+
+- [x] Add a committed Prisma migration for `TariffConfig.defaults`
+- [x] Reconcile the live database migration ledger so Prisma records the already-existing `tariffVersion` unique-index migration as applied
+- [x] Update Prisma seed execution to run with Node directly instead of `tsx`, avoiding the copied-`node_modules` esbuild platform mismatch
+- [x] Verify `npm run db:seed` succeeds against Supabase
+- [x] Verify `prisma migrate status` reports the Supabase schema is up to date

@@ -19,7 +19,7 @@
     "zod": "^3.24.4"
   },
   "prisma": {
-    "seed": "node ../node_modules/tsx/dist/cli.mjs ../prisma/seed.ts"
+    "seed": "node ../prisma/seed.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

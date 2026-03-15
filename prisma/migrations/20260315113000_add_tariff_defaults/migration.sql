@@ -1,0 +1,2 @@
+ALTER TABLE "TariffConfig"
+ADD COLUMN IF NOT EXISTS "defaults" JSONB;

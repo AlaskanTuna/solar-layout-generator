@@ -1,5 +1,11 @@
 ﻿# TEST - AGENT ONLY
 
+## [15/03/26] - Phase 3.2 Database Reconciliation Verification
+
+- Scenario: Verify that Prisma migration history, the live Supabase schema, and the tariff seed workflow are back in sync after the tariff-defaults drift fix.
+- Steps: Ran `npm run db:seed`, `npx prisma migrate resolve --applied 20260305000001_add_tariff_version_unique --schema prisma/schema.prisma`, `npx prisma migrate deploy --schema prisma/schema.prisma`, and `npx prisma migrate status --schema prisma/schema.prisma`. Queried `_prisma_migrations` and `TariffConfig` via Prisma to confirm the applied migrations list and seeded `defaults` payload.
+- Result: Pass (`npm run db:seed` now succeeds; Prisma migration status reports "Database schema is up to date"; `_prisma_migrations` contains all 3 committed migrations; `TariffConfig` row `RP4-2025` still includes the expected `defaults` JSON). Seed execution still emits Prisma's `package.json#prisma` deprecation warning and Node's typeless-package warning for `prisma/seed.ts`, but these are warnings only and do not block execution.
+
 ## [10/03/26] - Phase 3.1 QA Audit Fix Verification
 
 - Scenario: Verify the post-audit hardening pass for project save responses, save-analysis validation, threshold warnings, Workbench save cleanup, Analysis display fixes, and AFA input guidance.

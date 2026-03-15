@@ -1,5 +1,12 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [15/03/26] - Phase 3.2: Database Reconciliation
+
+- Added committed Prisma migration `20260315113000_add_tariff_defaults` so the `TariffConfig.defaults` column is now represented in repo history instead of existing only in the live database schema.
+- Reconciled the live Supabase `_prisma_migrations` ledger: the previously manual `20260305000001_add_tariff_version_unique` change is now recorded as applied, and the new defaults migration was deployed successfully.
+- Updated Prisma seeding to run via `node ../prisma/seed.ts` instead of the `tsx` runner, which removes the Windows/Linux `esbuild` binary mismatch that was breaking `npm run db:seed` in this checkout.
+- Re-verified the live tariff config row after reconciliation: `RP4-2025` is present and still contains the expected `defaults` JSON payload used by the Analysis page.
+
 ## [10/03/26] - Phase 3.1: QA Audit Fixes
 
 - **Project save responses:** Updated backend `saveLayout` and `saveAnalysis` mutations to return `include: { location: true }`, so the Analysis page cache no longer loses location metadata after save and the PDF/report keeps showing the project coordinates.
