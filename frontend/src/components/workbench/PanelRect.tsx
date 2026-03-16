@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Rect } from 'react-konva'
 
 type PanelRectProps = {
@@ -16,6 +17,12 @@ type PanelRectProps = {
   onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
 }
 
+function getCursor(disabled: boolean, selected: boolean): string {
+  if (disabled) return 'not-allowed'
+  if (selected) return 'move'
+  return 'pointer'
+}
+
 export function PanelRect({
   id,
   x,
@@ -31,6 +38,21 @@ export function PanelRect({
   onSelect,
   onDragEnd
 }: PanelRectProps) {
+  const [hovered, setHovered] = useState(false)
+
+  const opacity = disabled ? 0.5 : hovered && !selected ? 0.96 : 0.92
+
+  const stroke = selected
+    ? '#ffffff'
+    : hovered
+      ? 'rgba(255, 255, 255, 0.6)'
+      : '#292524'
+
+  const strokeWidth = selected ? 2.5 : hovered ? 1.5 : 1
+
+  const shadowBlur = selected ? 16 : hovered ? 8 : 4
+  const shadowOpacity = selected ? 0.45 : hovered ? 0.25 : 0.18
+
   return (
     <Rect
       x={x}
@@ -41,17 +63,27 @@ export function PanelRect({
       offsetY={height / 2}
       rotation={rotation}
       fill={fill}
-      opacity={0.92}
-      stroke={selected ? '#fafaf9' : '#292524'}
-      strokeWidth={selected ? 2.5 : 1}
+      opacity={opacity}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
       cornerRadius={4}
-      shadowBlur={selected ? 12 : 4}
-      shadowOpacity={selected ? 0.35 : 0.18}
+      shadowBlur={shadowBlur}
+      shadowOpacity={shadowOpacity}
       draggable={!disabled}
       dragBoundFunc={(position) => ({
         x: Math.min(stageWidth - width / 2, Math.max(width / 2, position.x)),
         y: Math.min(stageHeight - height / 2, Math.max(height / 2, position.y))
       })}
+      onMouseEnter={(event) => {
+        setHovered(true)
+        const container = event.target.getStage()?.container()
+        if (container) container.style.cursor = getCursor(disabled, selected)
+      }}
+      onMouseLeave={(event) => {
+        setHovered(false)
+        const container = event.target.getStage()?.container()
+        if (container) container.style.cursor = 'default'
+      }}
       onClick={() => onSelect(id)}
       onTap={() => onSelect(id)}
       onDragStart={() => onSelect(id)}

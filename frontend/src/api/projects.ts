@@ -37,6 +37,12 @@ export function getProject(id: string) {
   return apiFetch<ProjectResponse>(`/projects/${id}`)
 }
 
+export function deleteProject(id: string) {
+  return apiFetch<{ success: boolean }>(`/projects/${id}`, {
+    method: 'DELETE'
+  })
+}
+
 export function saveLayout(id: string, req: SaveLayoutRequest) {
   return apiFetch<ProjectResponse>(`/projects/${id}/layout`, {
     method: 'PATCH',

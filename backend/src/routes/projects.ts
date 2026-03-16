@@ -47,6 +47,22 @@ projectsRouter.get(
   })
 )
 
+// DELETE /api/projects/:id
+projectsRouter.delete(
+  '/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    console.info(`[ProjectDelete] user=${req.user!.id} project=${req.params.id as string}`)
+    const deleted = await projectService.deleteProject(req.user!.id, req.params.id as string)
+    if (!deleted) {
+      console.warn(`[ProjectDelete] not found user=${req.user!.id} project=${req.params.id as string}`)
+      res.status(404).json({ error: 'Project not found' })
+      return
+    }
+    res.json({ success: true })
+  })
+)
+
 // PATCH /api/projects/:id/layout
 projectsRouter.patch(
   '/:id/layout',

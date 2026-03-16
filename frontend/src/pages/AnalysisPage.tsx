@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   ANALYSIS_DISCLAIMERS,
   MONTH_LABELS,
@@ -36,6 +37,7 @@ import {
 } from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
+import { InfoTooltip } from '@/components/InfoTooltip'
 
 const currencyFormatter = new Intl.NumberFormat('en-MY', {
   style: 'currency',
@@ -259,13 +261,44 @@ export function AnalysisPage() {
 
   if (projectQuery.isLoading || tariffQuery.isLoading || locationQuery.isLoading || !formState || !buildingInsights) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex items-center justify-center gap-3 py-10">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
-            <p className="text-sm text-muted-foreground">Preparing the financial analysis...</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
+          <aside className="xl:w-[24rem] xl:min-w-[24rem]">
+            <Card className="border-stone-200 bg-white/92 shadow-sm">
+              <CardHeader className="space-y-3">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-full" />
+                <div className="grid grid-cols-2 gap-2">
+                  <Skeleton className="h-16 rounded-lg" />
+                  <Skeleton className="h-16 rounded-lg" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-20 rounded-xl" />
+                <Skeleton className="h-20 rounded-xl" />
+                <Skeleton className="h-20 rounded-xl" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          </aside>
+          <section className="min-w-0 flex-1 space-y-6">
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[0, 1, 2].map((i) => (
+                <Card key={i}>
+                  <CardContent className="py-6">
+                    <Skeleton className="mx-auto h-4 w-20" />
+                    <Skeleton className="mx-auto mt-2 h-8 w-28" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <Card>
+              <CardContent className="py-6">
+                <Skeleton className="h-64 w-full rounded-lg" />
+              </CardContent>
+            </Card>
+          </section>
+        </div>
       </div>
     )
   }
@@ -347,7 +380,10 @@ export function AnalysisPage() {
 
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
-                  <Label>Monthly Consumption</Label>
+                  <Label>
+                    Monthly Consumption
+                    <InfoTooltip text="Your average monthly electricity usage in kWh. Check your TNB bill for this figure. The same value is applied to all 12 months." />
+                  </Label>
                   <p className="text-xs text-muted-foreground">
                     Average monthly household usage applied across the 12-month simulation.
                   </p>
@@ -369,7 +405,10 @@ export function AnalysisPage() {
 
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
-                  <Label>Connection Phase</Label>
+                  <Label>
+                    Connection Phase
+                    <InfoTooltip text="Single phase is standard for most Malaysian homes. Three phase is common for larger properties. This determines the NEM capacity cap." />
+                  </Label>
                   <p className="text-xs text-muted-foreground">
                     Capacity cap: {phaseCapacityCapKw || 0} kW for the selected connection type.
                   </p>
@@ -390,7 +429,10 @@ export function AnalysisPage() {
 
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
-                  <Label>System Cost</Label>
+                  <Label>
+                    System Cost
+                    <InfoTooltip text="Total estimated installation cost in RM. Default is RM 4,500 per kWp. Adjust based on actual installer quotes." />
+                  </Label>
                   <p className="text-xs text-muted-foreground">
                     Used for payback and 10-year net benefit calculations.
                   </p>
@@ -410,7 +452,10 @@ export function AnalysisPage() {
 
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
-                  <Label>AFA Rate</Label>
+                  <Label>
+                    AFA Rate
+                    <InfoTooltip text="Automatic Fuel Adjustment surcharge (or rebate if negative) in sen/kWh, set periodically by the government." />
+                  </Label>
                   <p className="text-xs text-muted-foreground">
                     Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
                   </p>

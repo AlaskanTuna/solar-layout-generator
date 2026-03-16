@@ -36,6 +36,13 @@ export async function saveLayout(userId: string, projectId: string, editedLayout
   })
 }
 
+export async function deleteProject(userId: string, projectId: string) {
+  const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
+  if (!project) return null
+  await prisma.project.delete({ where: { id: projectId } })
+  return project
+}
+
 export async function saveAnalysis(
   userId: string,
   projectId: string,

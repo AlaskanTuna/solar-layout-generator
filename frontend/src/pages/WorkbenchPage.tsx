@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Slider } from '@/components/ui/slider'
 import { usePanelState } from '@/hooks/usePanelState'
 import { useWorkbenchData } from '@/hooks/useWorkbenchData'
@@ -25,6 +26,7 @@ import {
   pixelToLatLng,
   type CanvasGeo
 } from '@/lib/canvasTransforms'
+import { InfoTooltip } from '@/components/InfoTooltip'
 import { cn } from '@/lib/utils'
 
 type UiMessage = {
@@ -521,13 +523,42 @@ export function WorkbenchPage() {
 
   if (isLoading || !project || !buildingInsights || !backgroundImage) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex items-center justify-center gap-3 py-10">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
-            <p className="text-sm text-muted-foreground">Preparing the workbench...</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
+          <aside className="xl:w-[22rem] xl:min-w-[22rem]">
+            <Card className="border-stone-200 bg-white/90 shadow-sm">
+              <CardHeader className="space-y-3">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-full" />
+                <div className="grid grid-cols-2 gap-2">
+                  <Skeleton className="h-16 rounded-lg" />
+                  <Skeleton className="h-16 rounded-lg" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-24 rounded-xl" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          </aside>
+          <section className="min-w-0 flex-1">
+            <Card className="overflow-hidden border-stone-200 bg-white/90 shadow-sm">
+              <CardHeader className="border-b border-stone-200 bg-stone-50/70">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="mt-1 h-4 w-72" />
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
+                    Loading rooftop image...
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        </div>
       </div>
     )
   }
@@ -576,7 +607,10 @@ export function WorkbenchPage() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Panel Quantity</Label>
+                  <Label>
+                    Panel Quantity
+                    <InfoTooltip text="Adjust how many panels to include. Higher-yield panels are kept first when you reduce the count." />
+                  </Label>
                   <span className="text-sm text-muted-foreground">
                     {visiblePanels.length} / {maxVisibleCount}
                   </span>
@@ -602,7 +636,10 @@ export function WorkbenchPage() {
 
               <div className="space-y-3 rounded-xl border border-stone-200 bg-stone-50/80 p-4">
                 <div className="flex items-center justify-between">
-                  <Label>Selected Panel</Label>
+                  <Label>
+                    Selected Panel
+                    <InfoTooltip text="Click any panel on the canvas to select it. You can then rotate or delete it." />
+                  </Label>
                   <span className="text-sm font-medium">{selectedPanel?.id ?? 'None'}</span>
                 </div>
 
@@ -622,7 +659,10 @@ export function WorkbenchPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="panel-rotation">Rotate Panel</Label>
+                  <Label htmlFor="panel-rotation">
+                    Rotate Panel
+                    <InfoTooltip text="Enter a rotation angle (0–359°). The panel's energy yield is recomputed after each change." />
+                  </Label>
                   <Input
                     id="panel-rotation"
                     type="number"

@@ -7,8 +7,12 @@ import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
+import { AlertTriangle, ArrowLeft, Loader2, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
+
+const PROCESSING_TIMEOUT_MS = 120_000
 
 const MALAYSIA_CENTER = { lat: 3.14, lng: 101.69 }
 
@@ -80,6 +84,20 @@ export function MapPage() {
     setErrorMessage(statusError instanceof Error ? statusError.message : 'Failed to check rooftop analysis status')
     setPhase('failed')
   }, [phase, statusError])
+
+  // Processing timeout — prevent infinite spinner
+  useEffect(() => {
+    if (phase !== 'processing') return
+
+    const timeout = window.setTimeout(() => {
+      setErrorMessage(
+        'Rooftop analysis is taking longer than expected. The Google Solar API may be slow or this location may not have sufficient data. Please try again or try a different address.'
+      )
+      setPhase('failed')
+    }, PROCESSING_TIMEOUT_MS)
+
+    return () => window.clearTimeout(timeout)
+  }, [phase])
 
   const finalizeNewProject = useCallback(
     async (readyLocationId: string) => {
@@ -240,10 +258,23 @@ export function MapPage() {
 
   if (mapsError) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Card>
-          <CardContent className="py-8 text-center">
-            <p className="text-destructive">Failed to load Google Maps: {mapsError}</p>
+      <div className="flex h-screen items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="space-y-4 py-8 text-center">
+            <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
+            <p className="font-medium">Failed to load Google Maps</p>
+            <p className="text-sm text-muted-foreground">{mapsError}</p>
+            <div className="flex justify-center gap-2">
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Reload Page
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/dashboard">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -296,10 +327,12 @@ export function MapPage() {
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
           <Card className="w-96 shadow-lg">
             <CardContent className="flex items-center gap-3 py-4">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-900" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
               <div>
                 <p className="text-sm font-medium">Analyzing your rooftop...</p>
-                <p className="text-sm text-muted-foreground">This may take a moment.</p>
+                <p className="text-sm text-muted-foreground">
+                  Fetching satellite data and solar potential. This usually takes 15–30 seconds.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -311,10 +344,22 @@ export function MapPage() {
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
           <Card className="w-96 shadow-lg">
             <CardContent className="py-4">
-              <p className="text-sm text-destructive">{errorMessage}</p>
-              <Button variant="outline" onClick={handleRetry} className="mt-3 w-full">
-                Try a Different Location
-              </Button>
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                <p className="text-sm text-destructive">{errorMessage}</p>
+              </div>
+              <div className="mt-3 flex gap-2">
+                <Button variant="outline" onClick={handleRetry} className="flex-1">
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Try Another Location
+                </Button>
+                <Button variant="outline" asChild className="flex-1">
+                  <Link to="/dashboard">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
