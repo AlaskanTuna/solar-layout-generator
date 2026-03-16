@@ -38,6 +38,7 @@ Pre-distilled reference implementations ported from the validated Python prototy
 | `geotiff-coordinate-transforms` | Converting lat/lng ↔ GeoTIFF pixels, panel rotation math, dimension conversion              |
 | `flux-sampling`                 | Point-in-polygon, area-average flux, monthly kWh computation for moved panels               |
 | `solar-api-pipeline`            | buildingInsights + dataLayers API calls, GeoTIFF download, panel enrichment, RGB conversion |
+| `project-scaffolding`           | Bootstrapping a new project from zero — research, docs, and repo scaffold via 3 gated phases |
 
 ## Commands
 
