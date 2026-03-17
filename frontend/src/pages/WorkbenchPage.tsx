@@ -585,7 +585,9 @@ export function WorkbenchPage() {
                 <div className="rounded-lg bg-stone-100 p-3">
                   <p className="text-stone-500">
                     CO₂ Offset
-                    <InfoTooltip text={`Estimated using a factor of ${buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor for this region.`} />
+                    <InfoTooltip
+                      text={`Estimated using a factor of ${buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor for this region.`}
+                    />
                   </p>
                   <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
                 </div>
@@ -691,8 +693,9 @@ export function WorkbenchPage() {
                         text={
                           selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
                             ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                                .map((month, i) =>
-                                  `${month}: ${formatNumber(selectedPanel.monthlyEnergyDcKwh[i] ?? 0)} kWh`
+                                .map(
+                                  (month, i) =>
+                                    `${month}: ${formatNumber(selectedPanel.monthlyEnergyDcKwh[i] ?? 0)} kWh`
                                 )
                                 .join('\n')
                             : 'Monthly data not yet computed'
@@ -713,7 +716,9 @@ export function WorkbenchPage() {
                       Rotate Panel
                       <InfoTooltip text="Drag to set rotation angle (0–359°). The panel's energy yield is recomputed after each change." />
                     </Label>
-                    <span className="text-sm font-medium">{selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}</span>
+                    <span className="text-sm font-medium">
+                      {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
+                    </span>
                   </div>
                   <Slider
                     value={[selectedPanel?.rotation ?? 0]}
@@ -764,7 +769,11 @@ export function WorkbenchPage() {
                 </div>
                 {(pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
                   <Badge className="bg-amber-600 text-white hover:bg-amber-600">
-                    {isBatchRecomputing ? 'Batch Recompute' : initialBatchStatus === 'loading' ? 'Computing Monthly Data' : 'Recomputing'}
+                    {isBatchRecomputing
+                      ? 'Batch Recompute'
+                      : initialBatchStatus === 'loading'
+                        ? 'Computing Monthly Data'
+                        : 'Recomputing'}
                   </Badge>
                 )}
               </div>

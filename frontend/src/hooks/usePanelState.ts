@@ -179,10 +179,7 @@ export function usePanelState({
     return new Set(ids)
   }, [panelMap, visibleCount])
 
-  const visiblePanels = useMemo(
-    () => panels.filter((panel) => activePanelIds.has(panel.id)),
-    [panels, activePanelIds]
-  )
+  const visiblePanels = useMemo(() => panels.filter((panel) => activePanelIds.has(panel.id)), [panels, activePanelIds])
 
   const totalAnnualYield = useMemo(
     () => visiblePanels.reduce((sum, panel) => sum + getPanelAnnualEnergy(panel), 0),

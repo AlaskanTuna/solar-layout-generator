@@ -42,11 +42,7 @@ export function PanelRect({
 
   const opacity = disabled ? 0.5 : hovered && !selected ? 0.96 : 0.92
 
-  const stroke = selected
-    ? '#ffffff'
-    : hovered
-      ? 'rgba(255, 255, 255, 0.6)'
-      : '#292524'
+  const stroke = selected ? '#ffffff' : hovered ? 'rgba(255, 255, 255, 0.6)' : '#292524'
 
   const strokeWidth = selected ? 2.5 : hovered ? 1.5 : 1
 

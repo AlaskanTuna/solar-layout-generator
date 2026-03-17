@@ -208,7 +208,10 @@ export function DashboardPage() {
                     <Clock className="h-3.5 w-3.5" />
                     <span>Updated {formatRelativeDate(project.updatedAt)}</span>
                     <span className="mx-1">·</span>
-                    <span>Created {new Date(project.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })}</span>
+                    <span>
+                      Created{' '}
+                      {new Date(project.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
