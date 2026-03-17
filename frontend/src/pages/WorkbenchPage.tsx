@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Slider } from '@/components/ui/slider'
-import { usePanelState } from '@/hooks/usePanelState'
+import { usePanelState, type BatchRecomputeStatus } from '@/hooks/usePanelState'
 import { useWorkbenchData } from '@/hooks/useWorkbenchData'
 import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
 import {
@@ -154,6 +154,7 @@ export function WorkbenchPage() {
   const [pendingPanelId, setPendingPanelId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
+  const [initialBatchStatus, setInitialBatchStatus] = useState<BatchRecomputeStatus>('idle')
   const [message, setMessage] = useState<UiMessage>(null)
 
   const {
@@ -219,11 +220,13 @@ export function WorkbenchPage() {
     serializeLayout
   } = usePanelState({
     projectId,
+    locationId: project?.locationId,
     solarPanels: buildingInsights?.solarPotential.solarPanels ?? [],
     roofSegments: buildingInsights?.solarPotential.roofSegmentStats ?? [],
     editedLayout: project?.editedLayout ?? null,
     maxArrayPanelsCount: buildingInsights?.solarPotential.maxArrayPanelsCount ?? 0,
-    carbonOffsetFactorKgPerMwh: buildingInsights?.solarPotential.carbonOffsetFactorKgPerMwh ?? 0
+    carbonOffsetFactorKgPerMwh: buildingInsights?.solarPotential.carbonOffsetFactorKgPerMwh ?? 0,
+    onBatchRecomputeStatusChange: setInitialBatchStatus
   })
 
   const selectedPanel = selectedPanelId ? (getPanel(selectedPanelId) ?? null) : null
@@ -605,6 +608,18 @@ export function WorkbenchPage() {
               </details>
             </CardHeader>
             <CardContent className="space-y-6">
+              {initialBatchStatus === 'loading' && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+                  Computing monthly energy data for all panels...
+                </div>
+              )}
+
+              {initialBatchStatus === 'error' && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                  Could not compute monthly energy breakdown. Annual estimates will be used instead.
+                </div>
+              )}
+
               {message && (
                 <div
                   className={cn(
@@ -747,9 +762,9 @@ export function WorkbenchPage() {
                     Drag panels, rotate the selected panel, and prune the array before analysis.
                   </CardDescription>
                 </div>
-                {(pendingPanelId || isBatchRecomputing) && (
+                {(pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
                   <Badge className="bg-amber-600 text-white hover:bg-amber-600">
-                    {isBatchRecomputing ? 'Batch Recompute' : 'Recomputing'}
+                    {isBatchRecomputing ? 'Batch Recompute' : initialBatchStatus === 'loading' ? 'Computing Monthly Data' : 'Recomputing'}
                   </Badge>
                 )}
               </div>

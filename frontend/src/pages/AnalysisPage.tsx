@@ -612,6 +612,7 @@ export function AnalysisPage() {
               </CardContent>
             </Card>
 
+            {viewMode === 'advanced' && (
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardHeader>
                 <CardTitle>Cumulative Savings</CardTitle>
@@ -636,9 +637,10 @@ export function AnalysisPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+            )}
           </div>
 
-          {(() => {
+          {viewMode === 'advanced' && (() => {
             const round2 = (v: number) => Math.round(v * 100) / 100
             const netBenefit1yr = round2(simulation.totalSavingsRm * 1 - formState.systemCostRm)
             const netBenefit5yr = round2(simulation.totalSavingsRm * 5 - formState.systemCostRm)

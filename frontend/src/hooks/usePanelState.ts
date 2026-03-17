@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PanelEdit } from '@shared/types'
+import { recomputeFluxBatch } from '@/api/locations'
 import {
   annualEnergyFromMonthly,
   getInitialPanelRotation,
@@ -20,13 +21,17 @@ export type WorkbenchPanelState = {
   deleted: boolean
 }
 
+export type BatchRecomputeStatus = 'idle' | 'loading' | 'done' | 'error'
+
 type UsePanelStateArgs = {
   projectId: string | undefined
+  locationId: string | undefined
   solarPanels: SolarPanel[]
   roofSegments: RoofSegment[]
   editedLayout: unknown
   maxArrayPanelsCount: number
   carbonOffsetFactorKgPerMwh: number
+  onBatchRecomputeStatusChange?: (status: BatchRecomputeStatus) => void
 }
 
 const POSITION_EPSILON = 1e-8
@@ -40,15 +45,18 @@ function getPanelAnnualEnergy(panel: WorkbenchPanelState): number {
 
 export function usePanelState({
   projectId,
+  locationId,
   solarPanels,
   roofSegments,
   editedLayout,
   maxArrayPanelsCount,
-  carbonOffsetFactorKgPerMwh
+  carbonOffsetFactorKgPerMwh,
+  onBatchRecomputeStatusChange
 }: UsePanelStateArgs) {
   const [panels, setPanels] = useState<WorkbenchPanelState[]>([])
   const [visibleCount, setVisibleCountState] = useState(0)
   const initializedProjectIdRef = useRef<string | null>(null)
+  const batchRecomputedProjectIdRef = useRef<string | null>(null)
   const stableOrderRef = useRef<string[]>([])
 
   const parsedEdits = useMemo(() => parsePanelEdits(editedLayout), [editedLayout])
@@ -61,6 +69,7 @@ export function usePanelState({
       setPanels((prev) => (prev.length === 0 ? prev : []))
       setVisibleCountState((prev) => (prev === 0 ? prev : 0))
       initializedProjectIdRef.current = null
+      batchRecomputedProjectIdRef.current = null
       return
     }
 
@@ -97,6 +106,58 @@ export function usePanelState({
     const nextVisibleCount = Math.max(minVisibleCount, Math.min(maxVisibleCount, savedActiveCount || maxVisibleCount))
     setVisibleCountState(nextVisibleCount)
   }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount])
+
+  // Auto-recompute monthly energy for panels that only have yearly data
+  useEffect(() => {
+    if (!projectId || !locationId || panels.length === 0) return
+    if (initializedProjectIdRef.current !== projectId) return
+    if (batchRecomputedProjectIdRef.current === projectId) return
+
+    const panelsNeedingMonthly = panels.filter((p) => !p.deleted && p.monthlyEnergyDcKwh.length === 0)
+    if (panelsNeedingMonthly.length === 0) {
+      batchRecomputedProjectIdRef.current = projectId
+      return
+    }
+
+    batchRecomputedProjectIdRef.current = projectId
+    const controller = new AbortController()
+
+    async function runBatchRecompute() {
+      onBatchRecomputeStatusChange?.('loading')
+      try {
+        const response = await recomputeFluxBatch(locationId!, {
+          panels: panelsNeedingMonthly.map((p) => ({
+            panelId: p.id,
+            center: p.center,
+            rotation: p.rotation
+          }))
+        })
+        if (!controller.signal.aborted) {
+          const energyMap = new Map(response.results.map((r) => [r.panelId, r.monthlyEnergyDcKwh]))
+          setPanels((current) =>
+            current.map((panel) => {
+              const monthly = energyMap.get(panel.id)
+              return monthly && monthly.length === 12 ? { ...panel, monthlyEnergyDcKwh: monthly } : panel
+            })
+          )
+          onBatchRecomputeStatusChange?.('done')
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          if (import.meta.env.DEV) {
+            console.warn('[usePanelState] Initial batch recompute failed:', err)
+          }
+          onBatchRecomputeStatusChange?.('error')
+        }
+      }
+    }
+
+    void runBatchRecompute()
+
+    return () => {
+      controller.abort()
+    }
+  }, [projectId, locationId, panels, onBatchRecomputeStatusChange])
 
   const orderedPanels = useMemo(
     () => [...panels].sort((a, b) => getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a)),
