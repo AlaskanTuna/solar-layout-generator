@@ -25,6 +25,7 @@ export type ParsedBuildingInsights = {
     panelCapacityWatts: number
     maxArrayPanelsCount: number
     carbonOffsetFactorKgPerMwh: number
+    panelLifetimeYears: number | null
     roofSegmentStats: RoofSegment[]
     solarPanels: SolarPanel[]
   }
@@ -136,6 +137,7 @@ export function parseBuildingInsights(raw: unknown): ParsedBuildingInsights | nu
       panelCapacityWatts,
       maxArrayPanelsCount: getNumber(solarPotentialRaw.maxArrayPanelsCount) ?? solarPanels.length,
       carbonOffsetFactorKgPerMwh: getNumber(solarPotentialRaw.carbonOffsetFactorKgPerMwh) ?? 0,
+      panelLifetimeYears: getNumber(solarPotentialRaw.panelLifetimeYears),
       roofSegmentStats,
       solarPanels
     }

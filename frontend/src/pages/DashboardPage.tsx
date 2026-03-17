@@ -20,7 +20,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Plus, LogOut, Trash2, Clock } from 'lucide-react'
+import { Plus, LogOut, Trash2, Clock, Home } from 'lucide-react'
 import { toast } from 'sonner'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -141,6 +141,10 @@ export function DashboardPage() {
               </form>
             </DialogContent>
           </Dialog>
+          <Button variant="outline" onClick={() => navigate('/')}>
+            <Home className="mr-2 h-4 w-4" />
+            Home
+          </Button>
           <Button variant="outline" onClick={() => signOut()}>
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out

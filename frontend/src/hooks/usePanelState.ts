@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PanelEdit } from '@shared/types'
 import {
   annualEnergyFromMonthly,
@@ -48,6 +48,7 @@ export function usePanelState({
 }: UsePanelStateArgs) {
   const [panels, setPanels] = useState<WorkbenchPanelState[]>([])
   const [visibleCount, setVisibleCountState] = useState(0)
+  const initializedProjectIdRef = useRef<string | null>(null)
 
   const parsedEdits = useMemo(() => parsePanelEdits(editedLayout), [editedLayout])
 
@@ -58,8 +59,14 @@ export function usePanelState({
     if (!projectId || solarPanels.length === 0) {
       setPanels((prev) => (prev.length === 0 ? prev : []))
       setVisibleCountState((prev) => (prev === 0 ? prev : 0))
+      initializedProjectIdRef.current = null
       return
     }
+
+    // Only initialize once per project to prevent TanStack Query refetches
+    // from overwriting in-progress local edits (drag, rotate, delete)
+    if (initializedProjectIdRef.current === projectId) return
+    initializedProjectIdRef.current = projectId
 
     const editById = new Map(parsedEdits.map((edit) => [edit.id, edit]))
 
@@ -132,6 +139,7 @@ export function usePanelState({
 
   function deletePanel(panelId: string) {
     updatePanelState(panelId, (panel) => ({ ...panel, deleted: true }))
+    setVisibleCountState((current) => Math.max(minVisibleCount, current - 1))
   }
 
   function updatePanelEnergy(panelId: string, monthlyEnergyDcKwh: number[]) {

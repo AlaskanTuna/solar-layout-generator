@@ -412,7 +412,7 @@ export function WorkbenchPage() {
 
     rotationTimeoutRef.current = setTimeout(() => {
       void recomputePanel(panelId, center, rotation, () => rotatePanel(panelId, previousRotation))
-    }, 300)
+    }, 1000)
   }
 
   function handleRotationInput(value: number) {
@@ -578,7 +578,7 @@ export function WorkbenchPage() {
                   <CardTitle className="text-xl">{project.name}</CardTitle>
                   <CardDescription>Adjust the suggested layout before moving to financial analysis.</CardDescription>
                 </div>
-                <Badge variant="secondary">Phase 2</Badge>
+                {/* Badge removed — not needed for user-facing UI */}
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="rounded-lg bg-stone-100 p-3">
@@ -590,6 +590,27 @@ export function WorkbenchPage() {
                   <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground">
+                CO₂ offset is estimated using a factor of{' '}
+                {buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor
+                for this region.
+              </p>
+              <details className="rounded-lg border border-stone-200 bg-stone-50/80 text-sm">
+                <summary className="cursor-pointer px-3 py-2 font-medium text-stone-700 select-none">
+                  Panel Specifications
+                </summary>
+                <div className="space-y-1 border-t border-stone-200 px-3 py-2 text-stone-600">
+                  <p>
+                    Dimensions: {buildingInsights.solarPotential.panelWidthMeters} &times;{' '}
+                    {buildingInsights.solarPotential.panelHeightMeters} m
+                  </p>
+                  <p>Capacity: {buildingInsights.solarPotential.panelCapacityWatts} W</p>
+                  <p>Max panels (API): {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
+                  {buildingInsights.solarPotential.panelLifetimeYears != null && (
+                    <p>Lifespan: {buildingInsights.solarPotential.panelLifetimeYears} years</p>
+                  )}
+                </div>
+              </details>
             </CardHeader>
             <CardContent className="space-y-6">
               {message && (
@@ -656,6 +677,27 @@ export function WorkbenchPage() {
                       {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
                     </p>
                   </div>
+                  <div>
+                    <p className="text-xs text-stone-500">
+                      Avg Monthly Yield
+                      <InfoTooltip
+                        text={
+                          selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
+                            ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                                .map((month, i) =>
+                                  `${month}: ${formatNumber(selectedPanel.monthlyEnergyDcKwh[i] ?? 0)} kWh`
+                                )
+                                .join('\n')
+                            : 'Monthly data not yet computed'
+                        }
+                      />
+                    </p>
+                    <p className="text-sm font-semibold">
+                      {selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
+                        ? `${formatNumber(selectedAnnualEnergy! / 12)} kWh`
+                        : '—'}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -686,7 +728,7 @@ export function WorkbenchPage() {
                     }}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Rotation changes are debounced by 300ms before recompute.
+                    Rotation changes are debounced by 1s before recompute.
                   </p>
                 </div>
 

@@ -97,6 +97,39 @@ function buildSavePayload(formState: AnalysisFormState, systemKwp: number, analy
   }
 }
 
+function getRoiCondition(paybackYears: number | null) {
+  if (paybackYears === null || paybackYears > 25) {
+    return {
+      label: 'Poor',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100 text-red-700',
+      description: 'Your system may not pay for itself within its expected lifespan.'
+    }
+  }
+  if (paybackYears > 12) {
+    return {
+      label: 'Fair',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100 text-amber-700',
+      description: 'Moderate return. Consider optimizing panel layout or reducing system cost.'
+    }
+  }
+  if (paybackYears > 6) {
+    return {
+      label: 'Good',
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-100 text-emerald-700',
+      description: 'Solid investment with returns within a reasonable timeframe.'
+    }
+  }
+  return {
+    label: 'Excellent',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-100 text-emerald-700',
+    description: 'Outstanding return. This system pays for itself quickly.'
+  }
+}
+
 function formatTooltipCurrency(value: unknown) {
   if (typeof value === 'number') {
     return formatCurrency(value)
@@ -120,6 +153,7 @@ export function AnalysisPage() {
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(0)
   const [isExporting, setIsExporting] = useState(false)
   const [formState, setFormState] = useState<AnalysisFormState | null>(null)
+  const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('simple')
 
   const projectQuery = useQuery({
     queryKey: ['project', projectId],
@@ -226,6 +260,7 @@ export function AnalysisPage() {
       queryClient.setQueryData(['project', projectId], updatedProject)
       void queryClient.invalidateQueries({ queryKey: ['projects'] })
       toast.success('Analysis saved to your project')
+      navigate('/dashboard')
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : 'Failed to save the analysis')
@@ -242,6 +277,15 @@ export function AnalysisPage() {
 
     setIsExporting(true)
     try {
+      // html2canvas cannot parse oklch() colors — override with hex equivalents on the PDF container
+      const pdfRoot = reportRef.current
+      const prevStyle = pdfRoot.getAttribute('style') ?? ''
+      pdfRoot.style.setProperty('--background', '#ffffff')
+      pdfRoot.style.setProperty('--foreground', '#0a0a0a')
+      pdfRoot.style.setProperty('--muted-foreground', '#737373')
+      pdfRoot.style.setProperty('--border', '#e5e5e5')
+      pdfRoot.style.setProperty('--card', '#ffffff')
+
       await html2pdf()
         .set({
           margin: [10, 10, 10, 10],
@@ -250,8 +294,15 @@ export function AnalysisPage() {
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         })
-        .from(reportRef.current)
+        .from(pdfRoot)
         .save()
+
+      // Restore original styles
+      if (prevStyle) {
+        pdfRoot.setAttribute('style', prevStyle)
+      } else {
+        pdfRoot.removeAttribute('style')
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to export the PDF report')
     } finally {
@@ -381,25 +432,25 @@ export function AnalysisPage() {
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
                   <Label>
-                    Monthly Consumption
-                    <InfoTooltip text="Your average monthly electricity usage in kWh. Check your TNB bill for this figure. The same value is applied to all 12 months." />
+                    Monthly Electricity Consumption (kWh)
+                    <InfoTooltip text="Your average monthly electricity usage in kWh. Check your TNB bill for the 'kWh Usage' figure. The same value is applied to all 12 months." />
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Average monthly household usage applied across the 12-month simulation.
+                    Enter the kWh amount from your TNB bill, not the RM amount.
                   </p>
                 </div>
                 <Input
-                  type="number"
-                  min={0}
-                  step={10}
-                  value={formState.monthlyConsumptionKwh}
-                  onChange={(event) =>
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="e.g. 600"
+                  value={formState.monthlyConsumptionKwh === 0 ? '' : String(formState.monthlyConsumptionKwh)}
+                  onChange={(event) => {
+                    const raw = event.target.value.replace(/[^0-9]/g, '')
                     setFormState((current) =>
-                      current
-                        ? { ...current, monthlyConsumptionKwh: Math.max(0, Number(event.target.value) || 0) }
-                        : current
+                      current ? { ...current, monthlyConsumptionKwh: raw === '' ? 0 : Number(raw) } : current
                     )
-                  }
+                  }}
                 />
               </div>
 
@@ -438,15 +489,17 @@ export function AnalysisPage() {
                   </p>
                 </div>
                 <Input
-                  type="number"
-                  min={0}
-                  step={100}
-                  value={formState.systemCostRm}
-                  onChange={(event) =>
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="e.g. 15000"
+                  value={formState.systemCostRm === 0 ? '' : String(formState.systemCostRm)}
+                  onChange={(event) => {
+                    const raw = event.target.value.replace(/[^0-9]/g, '')
                     setFormState((current) =>
-                      current ? { ...current, systemCostRm: Math.max(0, Number(event.target.value) || 0) } : current
+                      current ? { ...current, systemCostRm: raw === '' ? 0 : Number(raw) } : current
                     )
-                  }
+                  }}
                 />
               </div>
 
@@ -461,16 +514,19 @@ export function AnalysisPage() {
                   </p>
                 </div>
                 <Input
-                  type="number"
-                  min={-10}
-                  max={10}
-                  step={0.01}
-                  value={formState.afaRateSenPerKwh}
-                  onChange={(event) =>
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="e.g. 3.70"
+                  value={formState.afaRateSenPerKwh === 0 ? '' : String(formState.afaRateSenPerKwh)}
+                  onChange={(event) => {
+                    const raw = event.target.value.replace(/[^0-9.\-]/g, '')
+                    const parsed = parseFloat(raw)
                     setFormState((current) =>
-                      current ? { ...current, afaRateSenPerKwh: Number(event.target.value) || 0 } : current
+                      current
+                        ? { ...current, afaRateSenPerKwh: raw === '' || raw === '-' ? 0 : Number.isFinite(parsed) ? parsed : current.afaRateSenPerKwh }
+                        : current
                     )
-                  }
+                  }}
                 />
               </div>
 
@@ -490,6 +546,23 @@ export function AnalysisPage() {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-6">
+          <div className="inline-flex rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm">
+            <button
+              type="button"
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
+              onClick={() => setViewMode('simple')}
+            >
+              Simple
+            </button>
+            <button
+              type="button"
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'advanced' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
+              onClick={() => setViewMode('advanced')}
+            >
+              Advanced
+            </button>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
@@ -513,13 +586,18 @@ export function AnalysisPage() {
               <CardContent className="space-y-1 p-5">
                 <p className="text-sm text-muted-foreground">Simple Payback</p>
                 <p className="text-2xl font-semibold">{formatNumber(analysisResults.paybackYears, 'years')}</p>
-                <p className="text-sm text-muted-foreground">System cost {formatCurrency(formState.systemCostRm)}</p>
+                <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${getRoiCondition(analysisResults.paybackYears).bgColor}`}>
+                  {getRoiCondition(analysisResults.paybackYears).label}
+                </span>
+                <p className="text-xs text-muted-foreground">{getRoiCondition(analysisResults.paybackYears).description}</p>
               </CardContent>
             </Card>
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
                 <p className="text-sm text-muted-foreground">10-Year Net Benefit</p>
-                <p className="text-2xl font-semibold">{formatCurrency(analysisResults.tenYearNetBenefitRm)}</p>
+                <p className={`text-2xl font-semibold ${analysisResults.tenYearNetBenefitRm !== null && analysisResults.tenYearNetBenefitRm >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                  {formatCurrency(analysisResults.tenYearNetBenefitRm)}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   ROI {formatNumber(analysisResults.tenYearRoiPercent, '%')}
                 </p>
@@ -583,6 +661,7 @@ export function AnalysisPage() {
             </Card>
           </div>
 
+          {viewMode === 'advanced' && (
           <Card className="border-stone-200 bg-white/90 shadow-sm">
             <CardHeader className="space-y-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -716,7 +795,9 @@ export function AnalysisPage() {
               </CardContent>
             )}
           </Card>
+          )}
 
+          {viewMode === 'advanced' && (
           <Card className="border-stone-200 bg-white/90 shadow-sm">
             <CardHeader>
               <CardTitle>Month-by-Month Breakdown</CardTitle>
@@ -766,6 +847,7 @@ export function AnalysisPage() {
               </details>
             </CardContent>
           </Card>
+          )}
 
           <Card className="border-stone-200 bg-white/90 shadow-sm">
             <CardHeader>
