@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(frontendDist))
 
   // Catch-all: send non-API requests to index.html for React Router
-  app.get('*', (_req, res) => {
+  app.get('{*path}', (_req, res) => {
     res.sendFile(path.join(frontendDist, 'index.html'))
   })
 }
