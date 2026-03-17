@@ -6,6 +6,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Legend,
   Line,
   LineChart,
@@ -18,7 +19,6 @@ import { toast } from 'sonner'
 import { getLocationData } from '@/api/locations'
 import { getProject, saveAnalysis } from '@/api/projects'
 import { getTariffConfig } from '@/api/tariff'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -154,6 +154,7 @@ export function AnalysisPage() {
   const [isExporting, setIsExporting] = useState(false)
   const [formState, setFormState] = useState<AnalysisFormState | null>(null)
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('simple')
+  const [benefitPeriod, setBenefitPeriod] = useState<1 | 5 | 10>(10)
 
   const projectQuery = useQuery({
     queryKey: ['project', projectId],
@@ -204,14 +205,18 @@ export function AnalysisPage() {
     if (initializedProjectIdRef.current === projectId) return
 
     const savedConfig = parseSavedAnalysisConfig(projectQuery.data.analysisConfig)
+    const localPanelCapacity = buildingInsights.solarPotential.panelCapacityWatts ?? 0
+    const localPanels = parsePanelEdits(projectQuery.data.editedLayout).filter((p) => p.status !== 'deleted')
+    const localSystemKwp = Math.round(((localPanels.length * localPanelCapacity) / 1000) * 100) / 100
     setFormState({
       monthlyConsumptionKwh: savedConfig?.monthlyConsumptionKwh ?? 600,
       connectionPhase: savedConfig?.connectionPhase ?? 'single',
-      systemCostRm: savedConfig?.systemCostRm ?? Math.round(systemKwp * tariffQuery.data.defaults.systemCostPerKwp),
+      systemCostRm:
+        savedConfig?.systemCostRm ?? Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp),
       afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault
     })
     initializedProjectIdRef.current = projectId
-  }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights, systemKwp])
+  }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights])
 
   const billingConfig = useMemo(() => {
     if (!tariffQuery.data || !formState) return null
@@ -277,15 +282,6 @@ export function AnalysisPage() {
 
     setIsExporting(true)
     try {
-      // html2canvas cannot parse oklch() colors — override with hex equivalents on the PDF container
-      const pdfRoot = reportRef.current
-      const prevStyle = pdfRoot.getAttribute('style') ?? ''
-      pdfRoot.style.setProperty('--background', '#ffffff')
-      pdfRoot.style.setProperty('--foreground', '#0a0a0a')
-      pdfRoot.style.setProperty('--muted-foreground', '#737373')
-      pdfRoot.style.setProperty('--border', '#e5e5e5')
-      pdfRoot.style.setProperty('--card', '#ffffff')
-
       await html2pdf()
         .set({
           margin: [10, 10, 10, 10],
@@ -294,15 +290,8 @@ export function AnalysisPage() {
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         })
-        .from(pdfRoot)
+        .from(reportRef.current)
         .save()
-
-      // Restore original styles
-      if (prevStyle) {
-        pdfRoot.setAttribute('style', prevStyle)
-      } else {
-        pdfRoot.removeAttribute('style')
-      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to export the PDF report')
     } finally {
@@ -399,9 +388,6 @@ export function AnalysisPage() {
                     Adjust assumptions and review the NEM billing outcome before saving.
                   </CardDescription>
                 </div>
-                <Badge variant="secondary">
-                  {projectQuery.data.status === 'analysis_saved' ? 'Analysis Saved' : 'Layout Saved'}
-                </Badge>
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="rounded-lg bg-stone-100 p-3">
@@ -503,32 +489,34 @@ export function AnalysisPage() {
                 />
               </div>
 
-              <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
-                <div className="space-y-1">
-                  <Label>
-                    AFA Rate
-                    <InfoTooltip text="Automatic Fuel Adjustment surcharge (or rebate if negative) in sen/kWh, set periodically by the government." />
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
-                  </p>
+              {viewMode === 'advanced' && (
+                <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+                  <div className="space-y-1">
+                    <Label>
+                      AFA Rate
+                      <InfoTooltip text="Automatic Fuel Adjustment surcharge (or rebate if negative) in sen/kWh, set periodically by the government." />
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
+                    </p>
+                  </div>
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="e.g. 3.70"
+                    value={formState.afaRateSenPerKwh === 0 ? '' : String(formState.afaRateSenPerKwh)}
+                    onChange={(event) => {
+                      const raw = event.target.value.replace(/[^0-9.\-]/g, '')
+                      const parsed = parseFloat(raw)
+                      setFormState((current) =>
+                        current
+                          ? { ...current, afaRateSenPerKwh: raw === '' || raw === '-' ? 0 : Number.isFinite(parsed) ? parsed : current.afaRateSenPerKwh }
+                          : current
+                      )
+                    }}
+                  />
                 </div>
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="e.g. 3.70"
-                  value={formState.afaRateSenPerKwh === 0 ? '' : String(formState.afaRateSenPerKwh)}
-                  onChange={(event) => {
-                    const raw = event.target.value.replace(/[^0-9.\-]/g, '')
-                    const parsed = parseFloat(raw)
-                    setFormState((current) =>
-                      current
-                        ? { ...current, afaRateSenPerKwh: raw === '' || raw === '-' ? 0 : Number.isFinite(parsed) ? parsed : current.afaRateSenPerKwh }
-                        : current
-                    )
-                  }}
-                />
-              </div>
+              )}
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <Button variant="outline" asChild>
@@ -563,7 +551,7 @@ export function AnalysisPage() {
             </button>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
                 <p className="text-sm text-muted-foreground">Average Monthly Savings</p>
@@ -594,17 +582,6 @@ export function AnalysisPage() {
             </Card>
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
-                <p className="text-sm text-muted-foreground">10-Year Net Benefit</p>
-                <p className={`text-2xl font-semibold ${analysisResults.tenYearNetBenefitRm !== null && analysisResults.tenYearNetBenefitRm >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
-                  {formatCurrency(analysisResults.tenYearNetBenefitRm)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  ROI {formatNumber(analysisResults.tenYearRoiPercent, '%')}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-stone-200 bg-white/90 shadow-sm">
-              <CardContent className="space-y-1 p-5">
                 <p className="text-sm text-muted-foreground">CO2 Offset</p>
                 <p className="text-2xl font-semibold">{formatNumber(analysisResults.carbonOffsetKg, 'kg/year')}</p>
                 <p className="text-sm text-muted-foreground">
@@ -614,7 +591,7 @@ export function AnalysisPage() {
             </Card>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-6">
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardHeader>
                 <CardTitle>Monthly Bill Comparison</CardTitle>
@@ -660,6 +637,70 @@ export function AnalysisPage() {
               </CardContent>
             </Card>
           </div>
+
+          {(() => {
+            const round2 = (v: number) => Math.round(v * 100) / 100
+            const netBenefit1yr = round2(simulation.totalSavingsRm * 1 - formState.systemCostRm)
+            const netBenefit5yr = round2(simulation.totalSavingsRm * 5 - formState.systemCostRm)
+            const netBenefit10yr = round2(simulation.totalSavingsRm * 10 - formState.systemCostRm)
+            const netBenefitData = [
+              { period: '1 Year', value: netBenefit1yr },
+              { period: '5 Years', value: netBenefit5yr },
+              { period: '10 Years', value: netBenefit10yr }
+            ]
+            const selectedBenefit =
+              benefitPeriod === 1 ? netBenefit1yr : benefitPeriod === 5 ? netBenefit5yr : netBenefit10yr
+
+            return (
+              <Card className="border-stone-200 bg-white/90 shadow-sm">
+                <CardHeader>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <CardTitle>Net Benefit Projection</CardTitle>
+                      <CardDescription>Projected net benefit after deducting system cost.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm text-muted-foreground">Period</Label>
+                      <select
+                        className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                        value={benefitPeriod}
+                        onChange={(e) => setBenefitPeriod(Number(e.target.value) as 1 | 5 | 10)}
+                      >
+                        <option value={1}>1-Year</option>
+                        <option value={5}>5-Year</option>
+                        <option value={10}>10-Year</option>
+                      </select>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="rounded-lg bg-stone-50 p-4 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      {benefitPeriod}-Year Net Benefit
+                    </p>
+                    <p className={`text-3xl font-semibold ${selectedBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                      {formatCurrency(selectedBenefit)}
+                    </p>
+                  </div>
+                  <div className="h-[260px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={netBenefitData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="period" />
+                        <YAxis tickFormatter={(value) => `RM${value}`} />
+                        <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
+                        <Bar dataKey="value" name="Net Benefit" radius={[4, 4, 0, 0]}>
+                          {netBenefitData.map((entry, index) => (
+                            <Cell key={index} fill={entry.value >= 0 ? '#15803d' : '#dc2626'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })()}
 
           {viewMode === 'advanced' && (
           <Card className="border-stone-200 bg-white/90 shadow-sm">

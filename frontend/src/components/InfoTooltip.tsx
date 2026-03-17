@@ -10,7 +10,7 @@ export function InfoTooltip({ text }: { text: string }) {
             <Info className="h-3.5 w-3.5" />
           </button>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-xs text-xs">
+        <TooltipContent side="top" className="max-w-xs whitespace-pre-line text-xs">
           {text}
         </TooltipContent>
       </Tooltip>

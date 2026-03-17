@@ -7,7 +7,6 @@ import { PanelLayer } from '@/components/workbench/PanelLayer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Slider } from '@/components/ui/slider'
@@ -156,7 +155,6 @@ export function WorkbenchPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
   const [message, setMessage] = useState<UiMessage>(null)
-  const [rotationInputValue, setRotationInputValue] = useState('')
 
   const {
     project,
@@ -257,10 +255,6 @@ export function WorkbenchPage() {
       }
     }
   }, [])
-
-  useEffect(() => {
-    setRotationInputValue(selectedPanel ? String(Math.round(selectedPanel.rotation)) : '')
-  }, [selectedPanel?.id, selectedPanel?.rotation])
 
   useEffect(() => {
     if (!import.meta.env.DEV) return
@@ -586,15 +580,13 @@ export function WorkbenchPage() {
                   <p className="mt-1 text-lg font-semibold">{formatNumber(totalAnnualYield)} kWh</p>
                 </div>
                 <div className="rounded-lg bg-stone-100 p-3">
-                  <p className="text-stone-500">CO₂ Offset</p>
+                  <p className="text-stone-500">
+                    CO₂ Offset
+                    <InfoTooltip text={`Estimated using a factor of ${buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor for this region.`} />
+                  </p>
                   <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                CO₂ offset is estimated using a factor of{' '}
-                {buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor
-                for this region.
-              </p>
               <details className="rounded-lg border border-stone-200 bg-stone-50/80 text-sm">
                 <summary className="cursor-pointer px-3 py-2 font-medium text-stone-700 select-none">
                   Panel Specifications
@@ -701,35 +693,26 @@ export function WorkbenchPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="panel-rotation">
-                    Rotate Panel
-                    <InfoTooltip text="Enter a rotation angle (0–359°). The panel's energy yield is recomputed after each change." />
-                  </Label>
-                  <Input
-                    id="panel-rotation"
-                    type="number"
+                  <div className="flex items-center justify-between">
+                    <Label>
+                      Rotate Panel
+                      <InfoTooltip text="Drag to set rotation angle (0–359°). The panel's energy yield is recomputed after each change." />
+                    </Label>
+                    <span className="text-sm font-medium">{selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}</span>
+                  </div>
+                  <Slider
+                    value={[selectedPanel?.rotation ?? 0]}
                     min={0}
                     max={359}
                     step={5}
-                    value={rotationInputValue}
                     disabled={!selectedPanel || pendingPanelId === selectedPanel.id}
-                    onChange={(event) => {
-                      const rawValue = event.target.value
-                      setRotationInputValue(rawValue)
-
-                      if (rawValue === '') return
-
-                      const nextValue = Number(rawValue)
-                      if (!Number.isFinite(nextValue)) return
-
-                      const normalizedValue = ((nextValue % 360) + 360) % 360
-                      setRotationInputValue(String(Math.round(normalizedValue)))
-                      handleRotationInput(normalizedValue)
+                    onValueChange={(value) => {
+                      const nextValue = value[0]
+                      if (typeof nextValue === 'number') {
+                        handleRotationInput(nextValue)
+                      }
                     }}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Rotation changes are debounced by 1s before recompute.
-                  </p>
                 </div>
 
                 <Button

@@ -49,6 +49,7 @@ export function usePanelState({
   const [panels, setPanels] = useState<WorkbenchPanelState[]>([])
   const [visibleCount, setVisibleCountState] = useState(0)
   const initializedProjectIdRef = useRef<string | null>(null)
+  const stableOrderRef = useRef<string[]>([])
 
   const parsedEdits = useMemo(() => parsePanelEdits(editedLayout), [editedLayout])
 
@@ -88,6 +89,9 @@ export function usePanelState({
 
     setPanels(nextPanels)
 
+    const sorted = [...nextPanels].sort((a, b) => getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a))
+    stableOrderRef.current = sorted.map((p) => p.id)
+
     const savedActiveCount =
       parsedEdits.length > 0 ? nextPanels.filter((panel) => !panel.deleted).length : maxVisibleCount
     const nextVisibleCount = Math.max(minVisibleCount, Math.min(maxVisibleCount, savedActiveCount || maxVisibleCount))
@@ -99,21 +103,25 @@ export function usePanelState({
     [panels]
   )
 
-  const activePanelIds = useMemo(() => {
-    const ids = orderedPanels
-      .filter((panel) => !panel.deleted)
-      .slice(0, visibleCount)
-      .map((panel) => panel.id)
+  const panelMap = useMemo(() => new Map(panels.map((panel) => [panel.id, panel])), [panels])
 
+  const deletedCount = useMemo(() => panels.filter((p) => p.deleted).length, [panels])
+  const effectiveMaxVisibleCount = Math.max(minVisibleCount, maxVisibleCount - deletedCount)
+
+  const activePanelIds = useMemo(() => {
+    const ids = stableOrderRef.current
+      .filter((id) => {
+        const panel = panelMap.get(id)
+        return panel && !panel.deleted
+      })
+      .slice(0, visibleCount)
     return new Set(ids)
-  }, [orderedPanels, visibleCount])
+  }, [panelMap, visibleCount])
 
   const visiblePanels = useMemo(
-    () => orderedPanels.filter((panel) => activePanelIds.has(panel.id)),
-    [orderedPanels, activePanelIds]
+    () => panels.filter((panel) => activePanelIds.has(panel.id)),
+    [panels, activePanelIds]
   )
-
-  const panelMap = useMemo(() => new Map(panels.map((panel) => [panel.id, panel])), [panels])
 
   const totalAnnualYield = useMemo(
     () => visiblePanels.reduce((sum, panel) => sum + getPanelAnnualEnergy(panel), 0),
@@ -151,7 +159,7 @@ export function usePanelState({
   }
 
   function setVisibleCount(count: number) {
-    setVisibleCountState(Math.max(minVisibleCount, Math.min(maxVisibleCount, count)))
+    setVisibleCountState(Math.max(minVisibleCount, Math.min(effectiveMaxVisibleCount, count)))
   }
 
   function serializeLayout(): PanelEdit[] {
@@ -178,7 +186,7 @@ export function usePanelState({
     visiblePanels,
     visibleCount,
     minVisibleCount,
-    maxVisibleCount,
+    maxVisibleCount: effectiveMaxVisibleCount,
     totalAnnualYield,
     totalCarbonOffsetKg,
     activePanelIds,

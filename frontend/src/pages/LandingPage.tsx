@@ -20,7 +20,6 @@ export function LandingPage() {
   const { session, loading } = useAuth()
 
   if (loading) return null
-  if (session) return <Navigate to="/dashboard" replace />
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -38,16 +37,26 @@ export function LandingPage() {
           Malaysian NEM Rakyat 3.0 tariff rates — in minutes, not days.
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
-          <Link to="/sign-up">
-            <Button size="lg" className="w-full sm:w-auto">
-              Get Started Free
-            </Button>
-          </Link>
-          <Link to="/sign-in">
-            <Button variant="outline" size="lg" className="w-full sm:w-auto">
-              Sign In
-            </Button>
-          </Link>
+          {session ? (
+            <Link to="/dashboard">
+              <Button size="lg" className="w-full sm:w-auto">
+                Go to Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/sign-up">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Get Started Free
+                </Button>
+              </Link>
+              <Link to="/sign-in">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  Sign In
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </section>
 
