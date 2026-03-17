@@ -146,24 +146,37 @@ solar-layout-generator/
 ├── prisma/
 │   ├── schema.prisma       # Database schema
 │   └── seed.ts             # Tariff data seeding
-├── tests/
-│   └── smoke/              # Smoke test scripts
-└── docs/                   # Project documentation (PRD, TRD, etc.)
+└── tests/
+    └── smoke/              # Smoke test scripts
 ```
 
 ---
 
-## Deployment (Heroku)
+## Heroku Deployment
 
-The app is configured for Heroku deployment with a single web dyno:
+The app is configured for Heroku deployment with a single web dyno.
+
+### Deploy Commands
 
 ```bash
+# Initial setup
 heroku create <app-name>
-heroku config:set NODE_ENV=production GOOGLE_SOLAR_API_KEY=... GOOGLE_MAPS_API_KEY=... # (set all env vars)
+heroku config:push -f .env          # make sure .env is filled with credentials
 git push heroku main
+heroku open                         # or click URL manually
+```
+
+### Rebuild and Redeploy Commands
+
+```bash
+npm run build --workspace=backend   # rebuild backend dist
+git add . && git commit -m "..."    # commit changes
+git push heroku main                # deploy to Heroku
 ```
 
 The `heroku-postbuild` script builds all workspaces. The Express server serves the frontend static files in production.
+
+> **Note:** This project uses Express 5 with `path-to-regexp` v8+, which requires named catch-all parameters (e.g. `'{*path}'` instead of `'*'`).
 
 ---
 
