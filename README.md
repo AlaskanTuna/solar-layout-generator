@@ -115,6 +115,7 @@ The frontend proxies `/api` requests to the backend in development.
 | `npm run dev:backend`  | Start backend only                    |
 | `npm run dev:frontend` | Start frontend only                   |
 | `npm run build`        | Build all workspaces for production   |
+| `npm test`             | Run frontend + backend unit tests     |
 | `npm run format`       | Run Prettier across the repo          |
 | `npm run db:migrate`   | Run Prisma migrations                 |
 | `npm run db:seed`      | Seed tariff config data               |
@@ -156,25 +157,49 @@ solar-layout-generator/
 
 The app is configured for Heroku deployment with a single web dyno.
 
-### Deploy Commands
+### Recommended: GitHub Actions CI/CD
+
+The repo now includes [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+
+It behaves like this:
+
+- Pull requests run install, build, and unit tests only
+- Pushes to `main` run the same CI checks, then deploy the passing commit to Heroku automatically
+- Deployment still uses your existing Heroku Git app endpoint, so Heroku continues to build the app with the current `Procfile` and `heroku-postbuild`
+
+Before the workflow can deploy, add these GitHub repository secrets:
+
+- `HEROKU_API_KEY`: your Heroku API key
+- `HEROKU_APP_NAME`: your Heroku app name, for example `solar-layout-generator`
+
+After that, your normal release flow becomes:
+
+```bash
+git push origin <branch>    # open a PR as usual
+# merge into main
+# GitHub Actions runs CI and deploys to Heroku automatically
+```
+
+### Initial Heroku setup
+
+These commands are still useful once when creating the app or updating config vars manually:
 
 ```bash
 # Initial setup
 heroku create <app-name>
 heroku config:push -f .env          # make sure .env is filled with credentials
-git push heroku main
 heroku open                         # or click URL manually
 ```
 
-### Rebuild and Redeploy Commands
+### Manual Fallback Deploy
 
 ```bash
-npm run build --workspace=backend   # rebuild backend dist
-git add . && git commit -m "..."    # commit changes
 git push heroku main                # deploy to Heroku
 ```
 
-The `heroku-postbuild` script builds all workspaces. The Express server serves the frontend static files in production.
+With the workflow configured, you should not need `git push heroku main` for normal releases. Keep it only as an emergency/manual fallback.
+
+The `heroku-postbuild` script still builds all workspaces on Heroku. The Express server serves the frontend static files in production.
 
 > **Note:** This project uses Express 5 with `path-to-regexp` v8+, which requires named catch-all parameters (e.g. `'{*path}'` instead of `'*'`).
 
@@ -184,7 +209,7 @@ The `heroku-postbuild` script builds all workspaces. The Express server serves t
 
 ```bash
 # Run all unit tests
-npx vitest
+npm test
 
 # Run backend tests only
 npm exec --workspace=backend -- vitest run
