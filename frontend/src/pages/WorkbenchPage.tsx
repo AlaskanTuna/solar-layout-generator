@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } fro
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Image as KonvaImage, Layer, Stage } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
-import { recomputeFlux, recomputeFluxBatch } from '@/api/locations'
+import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
 import { saveLayout } from '@/api/projects'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
 import { Badge } from '@/components/ui/badge'
@@ -39,7 +39,7 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-MY', { maximumFractionDigits: 1 }).format(value)
 }
 
-function useLoadedImage(src: string) {
+function useLoadedImage(src: string | undefined) {
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
 
@@ -163,6 +163,9 @@ export function WorkbenchPage() {
   const [isModelRecomputing, setIsModelRecomputing] = useState(false)
   const [stageScale, setStageScale] = useState(1)
   const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 })
+  const [overlayMode, setOverlayMode] = useState<'rgb' | 'annual-flux' | 'dsm'>('rgb')
+  const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null)
+  const [isOverlayLoading, setIsOverlayLoading] = useState(false)
 
   const {
     project,
@@ -174,6 +177,8 @@ export function WorkbenchPage() {
     error: dataError
   } = useWorkbenchData(projectId)
   const { image: backgroundImage, imageError } = useLoadedImage(rgbImageUrl)
+  const { image: overlayImage } = useLoadedImage(overlayMode !== 'rgb' ? (overlayImageUrl ?? undefined) : undefined)
+  const displayImage = overlayMode !== 'rgb' && overlayImage ? overlayImage : backgroundImage
   const error = dataError ?? (imageError ? new Error(imageError) : null)
   const stageSize = useStageSize(containerRef, backgroundImage)
 
@@ -226,6 +231,7 @@ export function WorkbenchPage() {
     carbonOffsetFactorKgPerMwh: buildingInsights?.solarPotential.carbonOffsetFactorKgPerMwh ?? 0,
     panelWidthM: selectedPanelModel.widthM,
     panelHeightM: selectedPanelModel.heightM,
+    panelCapacityWp: selectedPanelModel.capacityWp,
     onBatchRecomputeStatusChange: setInitialBatchStatus
   })
 
@@ -362,7 +368,8 @@ export function WorkbenchPage() {
         center,
         rotation,
         widthM: selectedPanelModel.widthM,
-        heightM: selectedPanelModel.heightM
+        heightM: selectedPanelModel.heightM,
+        capacityWp: selectedPanelModel.capacityWp
       })
       updatePanelEnergy(result.panelId, result.monthlyEnergyDcKwh)
       setMessage(null)
@@ -440,6 +447,31 @@ export function WorkbenchPage() {
     setMessage(null)
   }
 
+  useEffect(() => {
+    if (overlayMode === 'rgb' || !project?.locationId) {
+      setOverlayImageUrl(null)
+      return
+    }
+    let cancelled = false
+    setIsOverlayLoading(true)
+    getOverlayUrl(project.locationId, overlayMode)
+      .then((data) => {
+        if (!cancelled) setOverlayImageUrl(data.url)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOverlayImageUrl(null)
+          setMessage({ tone: 'error', text: `Failed to load ${overlayMode} overlay` })
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsOverlayLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [overlayMode, project?.locationId])
+
   async function handleModelChange(nextModelId: string) {
     const prevModelId = selectedPanelModelId
     setSelectedPanelModelId(nextModelId)
@@ -458,7 +490,8 @@ export function WorkbenchPage() {
           center: panel.center,
           rotation: panel.rotation,
           widthM: nextModel.widthM,
-          heightM: nextModel.heightM
+          heightM: nextModel.heightM,
+          capacityWp: nextModel.capacityWp
         }))
       })
 
@@ -552,7 +585,8 @@ export function WorkbenchPage() {
           center: panel.center,
           rotation: panel.rotation,
           widthM: selectedPanelModel.widthM,
-          heightM: selectedPanelModel.heightM
+          heightM: selectedPanelModel.heightM,
+          capacityWp: selectedPanelModel.capacityWp
         }))
       })
 
@@ -911,7 +945,7 @@ export function WorkbenchPage() {
                       className="overflow-hidden rounded-xl shadow-lg"
                     >
                       <Layer listening={false}>
-                        <KonvaImage image={backgroundImage} width={stageSize.width} height={stageSize.height} />
+                        <KonvaImage image={displayImage ?? undefined} width={stageSize.width} height={stageSize.height} />
                       </Layer>
                       <PanelLayer
                         panels={renderPanels}
@@ -954,9 +988,29 @@ export function WorkbenchPage() {
                           {Math.round(stageScale * 100)}%
                         </span>
                       )}
+                      <div className="mt-2 border-t border-stone-200 pt-2">
+                        <select
+                          value={overlayMode}
+                          onChange={(e) => setOverlayMode(e.target.value as 'rgb' | 'annual-flux' | 'dsm')}
+                          className="w-full rounded-md bg-white/90 px-1.5 py-1 text-xs shadow-md"
+                          title="Switch overlay view"
+                        >
+                          <option value="rgb">RGB</option>
+                          <option value="annual-flux">Flux</option>
+                          <option value="dsm">DSM</option>
+                        </select>
+                      </div>
                     </div>
 
-                    {/* Model recompute overlay */}
+                    {/* Loading overlays */}
+                    {isOverlayLoading && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
+                        <div className="flex items-center gap-3 rounded-lg bg-white/90 px-5 py-3 text-sm font-medium shadow-lg">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
+                          Loading overlay...
+                        </div>
+                      </div>
+                    )}
                     {isModelRecomputing && (
                       <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
                         <div className="flex items-center gap-3 rounded-lg bg-white/90 px-5 py-3 text-sm font-medium shadow-lg">

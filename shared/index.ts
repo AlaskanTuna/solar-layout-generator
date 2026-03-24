@@ -44,6 +44,7 @@ export type FluxRecomputeRequest = {
   rotation: number
   widthM?: number
   heightM?: number
+  capacityWp?: number
 }
 
 export type FluxRecomputeResponse = {

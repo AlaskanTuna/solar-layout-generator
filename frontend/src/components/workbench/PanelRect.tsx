@@ -44,7 +44,7 @@ export function PanelRect({
 
   const stroke = selected ? '#ffffff' : hovered ? 'rgba(255, 255, 255, 0.6)' : '#292524'
 
-  const strokeWidth = selected ? 2.5 : hovered ? 1.5 : 1
+  const strokeWidth = selected ? 1.5 : hovered ? 1 : 1
 
   const shadowBlur = selected ? 16 : hovered ? 8 : 4
   const shadowOpacity = selected ? 0.45 : hovered ? 0.25 : 0.18
@@ -62,7 +62,7 @@ export function PanelRect({
       opacity={opacity}
       stroke={stroke}
       strokeWidth={strokeWidth}
-      cornerRadius={4}
+      cornerRadius={0}
       shadowBlur={shadowBlur}
       shadowOpacity={shadowOpacity}
       draggable={!disabled}

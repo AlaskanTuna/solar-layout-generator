@@ -1,5 +1,12 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [24/03/26] - Phase 4.3b: Model Capacity Passthrough, Panel Styling, and Overlay Views
+
+- **Capacity-Aware Recompute:** Added optional `capacityWp` to `FluxRecomputeRequest`. Both single and batch recompute endpoints now use the selected panel model's capacity (e.g., 440Wp for Jinko) instead of always using the Google API default (400Wp). Switching from Google Default to Jinko now produces ~10% higher kWh values as expected.
+- **Panel Styling:** Changed panel rectangles to sharp corners (`cornerRadius: 0`) for realistic solar panel appearance. Reduced selection outline from 2.5px to 1.5px for less obstruction during fine adjustments. Updated color scheme from red-green gradient to blue gradient (dark blue → mid blue → light blue) based on annual yield.
+- **Overlay View Dropdown:** Added RGB/Annual Flux/DSM overlay switcher below the zoom controls. Backend endpoint `GET /api/locations/:locationId/overlay/:type` converts GeoTIFF to colorized PNG (heatmap for flux, grayscale for DSM), resized to match RGB dimensions, and cached in Supabase Storage. Loading overlay shows a spinner on the canvas.
+- **Verification:** `tsc -b` clean across all 3 workspaces. 47 frontend tests pass, 24 backend tests pass.
+
 ## [24/03/26] - Phase 4.3: Workbench UX Fixes and Enhancements
 
 - **Panel Orientation Fix:** Fixed horizontal flip bug where saved landscape panels rendered as portrait. Root cause: `panelModels.ts` used `widthM=long side, heightM=short side` but the Google Solar API convention is `panelWidthMeters=short side, panelHeightMeters=long side`. Swapped all model dimensions to match API convention. Updated Google Default model to match actual API response (1.045×1.879m, 400Wp).

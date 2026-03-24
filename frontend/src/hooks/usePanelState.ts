@@ -33,6 +33,7 @@ type UsePanelStateArgs = {
   carbonOffsetFactorKgPerMwh: number
   panelWidthM?: number
   panelHeightM?: number
+  panelCapacityWp?: number
   onBatchRecomputeStatusChange?: (status: BatchRecomputeStatus) => void
 }
 
@@ -55,6 +56,7 @@ export function usePanelState({
   carbonOffsetFactorKgPerMwh,
   panelWidthM,
   panelHeightM,
+  panelCapacityWp,
   onBatchRecomputeStatusChange
 }: UsePanelStateArgs) {
   const [panels, setPanels] = useState<WorkbenchPanelState[]>([])
@@ -135,7 +137,8 @@ export function usePanelState({
             center: p.center,
             rotation: p.rotation,
             ...(panelWidthM != null && { widthM: panelWidthM }),
-            ...(panelHeightM != null && { heightM: panelHeightM })
+            ...(panelHeightM != null && { heightM: panelHeightM }),
+            ...(panelCapacityWp != null && { capacityWp: panelCapacityWp })
           }))
         })
         if (!controller.signal.aborted) {

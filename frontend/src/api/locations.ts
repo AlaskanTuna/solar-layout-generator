@@ -57,3 +57,7 @@ export function recomputeFluxBatch(locationId: string, req: FluxRecomputeBatchRe
     body: JSON.stringify(req)
   })
 }
+
+export function getOverlayUrl(locationId: string, type: 'annual-flux' | 'dsm') {
+  return apiFetch<{ url: string }>(`/locations/${locationId}/overlay/${type}`)
+}

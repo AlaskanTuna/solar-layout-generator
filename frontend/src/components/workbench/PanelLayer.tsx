@@ -29,13 +29,26 @@ function panelAnnualEnergy(panel: WorkbenchPanelState): number {
 
 function getPanelColor(value: number, min: number, max: number): string {
   if (min === max) {
-    return 'rgba(20, 184, 166, 0.78)'
+    return 'rgba(59, 130, 246, 0.78)'
   }
 
   const ratio = (value - min) / (max - min)
-  const red = Math.round(239 - ratio * 165)
-  const green = Math.round(68 + ratio * 125)
-  const blue = Math.round(68 + ratio * 58)
+
+  // Three-stop blue gradient: blue-900 → blue-500 → blue-300
+  let red: number, green: number, blue: number
+  if (ratio < 0.5) {
+    // Low-to-mid: blue-900 (30, 58, 138) → blue-500 (59, 130, 246)
+    const t = ratio / 0.5
+    red = Math.round(30 + t * (59 - 30))
+    green = Math.round(58 + t * (130 - 58))
+    blue = Math.round(138 + t * (246 - 138))
+  } else {
+    // Mid-to-high: blue-500 (59, 130, 246) → blue-300 (147, 197, 253)
+    const t = (ratio - 0.5) / 0.5
+    red = Math.round(59 + t * (147 - 59))
+    green = Math.round(130 + t * (197 - 130))
+    blue = Math.round(246 + t * (253 - 246))
+  }
 
   return `rgba(${red}, ${green}, ${blue}, 0.78)`
 }

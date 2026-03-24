@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import * as GeoTIFF from 'geotiff'
+import sharp from 'sharp'
 import { requireAuth } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { resolveLocationSchema, fluxRecomputeSchema, fluxRecomputeBatchSchema } from '../validators/locations.js'
 import * as locationService from '../services/locationService.js'
-import { downloadFromStorage, getSignedUrl } from '../services/storageService.js'
+import { downloadFromStorage, getSignedUrl, uploadToStorage } from '../services/storageService.js'
 import { parsePanelSpecs } from '../services/buildingInsightsService.js'
 import { setupGeoTransform, latLngToPixel, metersToPixels } from '../geo/transforms.js'
 import { getRotatedCorners } from '../geo/panelGeometry.js'
@@ -209,13 +210,146 @@ locationsRouter.get(
   })
 )
 
+// GET /api/locations/:locationId/overlay/:type
+locationsRouter.get(
+  '/:locationId/overlay/:type',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const overlayType = req.params.type as string
+    if (overlayType !== 'annual-flux' && overlayType !== 'dsm') {
+      res.status(400).json({ error: 'Invalid overlay type. Must be "annual-flux" or "dsm".' })
+      return
+    }
+
+    const location = await locationService.getLocationDataForUser(req.user!.id, req.params.locationId as string)
+    if (!location || location.status !== 'ready') {
+      res.status(404).json({ error: 'Location not found or not ready' })
+      return
+    }
+
+    const tifPath = overlayType === 'annual-flux' ? location.annualFluxPath : location.dsmPath
+    if (!tifPath) {
+      res.status(404).json({ error: `${overlayType} layer not available for this location` })
+      return
+    }
+
+    // Check for cached PNG
+    const cachedPngPath = tifPath.replace('.tif', '_overlay.png')
+    try {
+      const cachedUrl = await getSignedUrl(cachedPngPath)
+      res.json({ url: cachedUrl })
+      return
+    } catch {
+      // No cached PNG, generate it
+    }
+
+    // Download and convert GeoTIFF to colorized PNG
+    const tifBuffer = await downloadFromStorage(tifPath)
+    const tiff = await GeoTIFF.fromArrayBuffer(tifBuffer)
+    const image = await tiff.getImage()
+    const width = image.getWidth()
+    const height = image.getHeight()
+    const rasters = await image.readRasters({ samples: [0] })
+    const data = rasters[0] as Float32Array
+
+    // Find min/max for normalization (skip nodata/zero values)
+    let min = Infinity
+    let max = -Infinity
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] > 0) {
+        if (data[i] < min) min = data[i]
+        if (data[i] > max) max = data[i]
+      }
+    }
+    if (min === Infinity) {
+      min = 0
+      max = 1
+    }
+
+    // Colorize: annual-flux uses blue→cyan→yellow→red heatmap, DSM uses grayscale
+    const pixels = Buffer.alloc(width * height * 4)
+    for (let i = 0; i < data.length; i++) {
+      const offset = i * 4
+      if (data[i] <= 0) {
+        pixels[offset] = 0
+        pixels[offset + 1] = 0
+        pixels[offset + 2] = 0
+        pixels[offset + 3] = 0
+        continue
+      }
+      const ratio = Math.max(0, Math.min(1, (data[i] - min) / (max - min)))
+
+      if (overlayType === 'annual-flux') {
+        let r: number, g: number, b: number
+        if (ratio < 0.33) {
+          const t = ratio / 0.33
+          r = Math.round(30 * (1 - t) + 0 * t)
+          g = Math.round(58 * (1 - t) + 180 * t)
+          b = Math.round(138 * (1 - t) + 220 * t)
+        } else if (ratio < 0.66) {
+          const t = (ratio - 0.33) / 0.33
+          r = Math.round(0 * (1 - t) + 245 * t)
+          g = Math.round(180 * (1 - t) + 200 * t)
+          b = Math.round(220 * (1 - t) + 50 * t)
+        } else {
+          const t = (ratio - 0.66) / 0.34
+          r = Math.round(245 * (1 - t) + 220 * t)
+          g = Math.round(200 * (1 - t) + 50 * t)
+          b = Math.round(50 * (1 - t) + 30 * t)
+        }
+        pixels[offset] = r
+        pixels[offset + 1] = g
+        pixels[offset + 2] = b
+        pixels[offset + 3] = 220
+      } else {
+        const v = Math.round(ratio * 255)
+        pixels[offset] = v
+        pixels[offset + 1] = v
+        pixels[offset + 2] = v
+        pixels[offset + 3] = 255
+      }
+    }
+
+    // Resize to match RGB image dimensions
+    let targetWidth = width
+    let targetHeight = height
+    if (location.rgbImageUrl) {
+      try {
+        const rgbTifPath = location.rgbImageUrl.replace('.png', '.tif')
+        const rgbBuffer = await downloadFromStorage(rgbTifPath)
+        const rgbTiff = await GeoTIFF.fromArrayBuffer(rgbBuffer)
+        const rgbImage = await rgbTiff.getImage()
+        targetWidth = rgbImage.getWidth()
+        targetHeight = rgbImage.getHeight()
+      } catch {
+        // Fall back to native GeoTIFF dimensions
+      }
+    }
+
+    const pngBuffer = await sharp(pixels, { raw: { width, height, channels: 4 } })
+      .resize(targetWidth, targetHeight, { fit: 'fill' })
+      .png()
+      .toBuffer()
+
+    // Cache in storage
+    try {
+      await uploadToStorage(cachedPngPath, pngBuffer, 'image/png')
+    } catch {
+      // Non-fatal
+    }
+
+    const signedUrl = await getSignedUrl(cachedPngPath)
+    res.json({ url: signedUrl })
+  })
+)
+
 // POST /api/locations/:locationId/panels/recompute
 locationsRouter.post(
   '/:locationId/panels/recompute',
   requireAuth,
   validate(fluxRecomputeSchema),
   asyncHandler(async (req, res) => {
-    const { panelId, center, rotation, widthM, heightM } = req.body
+    const { panelId, center, rotation, widthM, heightM, capacityWp } = req.body
     console.info(
       `[FluxRecompute] user=${req.user!.id} location=${req.params.locationId as string} panel=${panelId} rotation=${rotation.toFixed(2)}`
     )
@@ -252,7 +386,11 @@ locationsRouter.post(
 
     const rotationRad = (rotation * Math.PI) / 180
     const corners = getRotatedCorners(px, py, widthPx, heightPx, rotationRad)
-    const monthlyEnergyDcKwh = await computeMonthlyEnergy(image, corners, panelSpecs.panelCapacityWatts)
+    const monthlyEnergyDcKwh = await computeMonthlyEnergy(
+      image,
+      corners,
+      capacityWp ?? panelSpecs.panelCapacityWatts
+    )
 
     const response: FluxRecomputeResponse = { panelId, monthlyEnergyDcKwh }
     console.info(`[FluxRecompute] success panel=${panelId} months=${monthlyEnergyDcKwh.length}`)
@@ -310,7 +448,11 @@ locationsRouter.post(
       const wPx = panel.widthM ? metersToPixels(panel.widthM, geo) : defaultWidthPx
       const hPx = panel.heightM ? metersToPixels(panel.heightM, geo) : defaultHeightPx
       const corners = getRotatedCorners(px, py, wPx, hPx, rotationRad)
-      const monthlyEnergyDcKwh = computeMonthlyEnergyFromRasters(rasters, corners, panelSpecs.panelCapacityWatts)
+      const monthlyEnergyDcKwh = computeMonthlyEnergyFromRasters(
+        rasters,
+        corners,
+        panel.capacityWp ?? panelSpecs.panelCapacityWatts
+      )
       results.push({ panelId: panel.panelId, monthlyEnergyDcKwh })
     }
 
