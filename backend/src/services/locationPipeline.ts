@@ -37,8 +37,6 @@ async function convertRgbToPng(rgbTifBuffer: ArrayBuffer | Buffer): Promise<Buff
   }
 
   return sharp(pixels, { raw: { width, height, channels: 3 } })
-    .sharpen({ sigma: 2, m1: 1.5, m2: 0.7 })
-    .linear(1.1, 0)
     .png()
     .toBuffer()
 }

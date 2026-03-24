@@ -31,15 +31,19 @@ function panelAnnualEnergy(panel: WorkbenchPanelState): number {
 
 function getPanelColor(value: number, min: number, max: number): string {
   if (min === max) {
-    return 'rgba(147, 197, 253, 0.82)'
+    return 'rgba(120, 170, 250, 0.82)'
   }
 
-  const ratio = (value - min) / (max - min)
+  // Amplify small differences: use the actual spread but ensure the ratio
+  // covers more of the 0→1 range by applying a contrast stretch.
+  // clamp ratio to [0, 1] in case of floating point edge cases.
+  const raw = (value - min) / (max - min)
+  const ratio = Math.max(0, Math.min(1, raw))
 
-  // Linear gradient: blue-500 (59, 130, 246) → blue-200 (191, 219, 254)
-  const red = Math.round(59 + ratio * (191 - 59))
-  const green = Math.round(130 + ratio * (219 - 130))
-  const blue = Math.round(246 + ratio * (254 - 246))
+  // blue-700 (29, 78, 216) → blue-300 (147, 197, 253) — wider visual range
+  const red = Math.round(29 + ratio * (147 - 29))
+  const green = Math.round(78 + ratio * (197 - 78))
+  const blue = Math.round(216 + ratio * (253 - 216))
 
   return `rgba(${red}, ${green}, ${blue}, 0.82)`
 }

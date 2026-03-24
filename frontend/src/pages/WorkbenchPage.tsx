@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { Image as KonvaImage, Layer, Stage } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
@@ -149,6 +150,7 @@ function getPlacementErrorMessage(reason: 'bounds' | 'mask' | 'overlap') {
 export function WorkbenchPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const containerRef = useRef<HTMLDivElement>(null)
   const rotationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -648,7 +650,8 @@ export function WorkbenchPage() {
 
       setIsBatchRecomputing(false)
       setMessage({ tone: 'info', text: 'Saving the refreshed layout to your project...' })
-      await saveLayout(projectId, { editedLayout: nextLayout, selectedPanelModelId })
+      const updatedProject = await saveLayout(projectId, { editedLayout: nextLayout, selectedPanelModelId })
+      queryClient.setQueryData(['project', projectId], updatedProject)
       navigate(`/project/${projectId}/analysis`)
     } catch (saveError) {
       setMessage({
@@ -1003,24 +1006,30 @@ export function WorkbenchPage() {
                     <div className="absolute right-4 top-4 flex flex-col gap-1">
                       <button
                         onClick={handleZoomIn}
-                        className="flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
-                        title="Zoom in"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
                       >
                         +
+                        <span className="pointer-events-none absolute -left-16 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          Zoom in
+                        </span>
                       </button>
                       <button
                         onClick={handleZoomOut}
-                        className="flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
-                        title="Zoom out"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
                       >
                         −
+                        <span className="pointer-events-none absolute -left-18 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          Zoom out
+                        </span>
                       </button>
                       <button
                         onClick={handleZoomReset}
-                        className="flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-xs font-medium shadow-md hover:bg-white"
-                        title="Reset zoom"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-xs font-medium shadow-md hover:bg-white"
                       >
                         1:1
+                        <span className="pointer-events-none absolute -left-20 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          Reset zoom
+                        </span>
                       </button>
                       {stageScale !== 1 && (
                         <span className="mt-1 text-center text-xs text-stone-500">
@@ -1031,15 +1040,17 @@ export function WorkbenchPage() {
                         <button
                           onClick={() => setOverlayExpanded((v) => !v)}
                           className={cn(
-                            'flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white',
+                            'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white',
                             overlayExpanded && 'ring-1 ring-stone-400'
                           )}
-                          title={overlayExpanded ? 'Hide overlays' : 'Show overlays'}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                             <circle cx="12" cy="12" r="3" />
                           </svg>
+                          <span className="pointer-events-none absolute -left-18 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            {overlayExpanded ? 'Hide overlays' : 'Overlays'}
+                          </span>
                         </button>
                         {overlayExpanded && (
                           <div className="mt-1 flex flex-col gap-1">
@@ -1047,7 +1058,7 @@ export function WorkbenchPage() {
                               onClick={() => setOverlayMode('rgb')}
                               className={cn(
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'rgb' ? 'ring-2 ring-stone-900 ring-offset-1' : ''
+                                overlayMode === 'rgb' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
                               )}
                               style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
                               title="RGB"
@@ -1060,7 +1071,7 @@ export function WorkbenchPage() {
                               onClick={() => setOverlayMode('annual-flux')}
                               className={cn(
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'annual-flux' ? 'ring-2 ring-stone-900 ring-offset-1' : ''
+                                overlayMode === 'annual-flux' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
                               )}
                               style={{ background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)' }}
                               title="Annual Flux"
@@ -1073,7 +1084,7 @@ export function WorkbenchPage() {
                               onClick={() => setOverlayMode('dsm')}
                               className={cn(
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'dsm' ? 'ring-2 ring-stone-900 ring-offset-1' : ''
+                                overlayMode === 'dsm' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
                               )}
                               style={{ background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)' }}
                               title="DSM"
