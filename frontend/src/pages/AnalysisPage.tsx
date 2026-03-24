@@ -420,16 +420,21 @@ export function AnalysisPage() {
                 </div>
               </div>
               {selectedPanelModel && (
-                <div className="rounded-lg bg-stone-100 px-3 py-2 text-sm">
-                  <p className="text-stone-500">Panel Model</p>
-                  <p className="mt-0.5 font-medium">
+                <details className="rounded-lg border border-stone-200 bg-stone-50/80 text-sm">
+                  <summary className="cursor-pointer px-3 py-2 font-medium text-stone-700 select-none">
                     {selectedPanelModel.name} — {selectedPanelModel.capacityWp}Wp
-                  </p>
-                  <p className="text-xs text-stone-400">
-                    {selectedPanelModel.widthM} &times; {selectedPanelModel.heightM} m &middot;{' '}
-                    {(selectedPanelModel.efficiency * 100).toFixed(1)}% efficiency
-                  </p>
-                </div>
+                  </summary>
+                  <div className="space-y-1 border-t border-stone-200 px-3 py-2 text-stone-600">
+                    <p>
+                      Dimensions: {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
+                    </p>
+                    <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
+                    <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
+                    {selectedPanelModel.costPerWp > 0 && (
+                      <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>
+                    )}
+                  </div>
+                </details>
               )}
             </CardHeader>
             <CardContent className="space-y-4">
@@ -1037,7 +1042,7 @@ export function AnalysisPage() {
                   {selectedPanelModel && (
                     <p>
                       Panel model: {selectedPanelModel.name} ({selectedPanelModel.capacityWp}Wp,{' '}
-                      {selectedPanelModel.widthM} &times; {selectedPanelModel.heightM} m)
+                      {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m)
                     </p>
                   )}
                   <p>Monthly consumption: {formatNumber(formState.monthlyConsumptionKwh, 'kWh')}</p>

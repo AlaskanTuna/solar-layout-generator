@@ -1,5 +1,14 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [24/03/26] - Phase 4.3: Workbench UX Fixes and Enhancements
+
+- **Panel Orientation Fix:** Fixed horizontal flip bug where saved landscape panels rendered as portrait. Root cause: `panelModels.ts` used `widthM=long side, heightM=short side` but the Google Solar API convention is `panelWidthMeters=short side, panelHeightMeters=long side`. Swapped all model dimensions to match API convention. Updated Google Default model to match actual API response (1.045×1.879m, 400Wp).
+- **Recalculate on Model Change:** Changing the panel model dropdown now triggers a batch flux recompute for all visible panels with the new model's dimensions. Shows a semi-transparent loading overlay on the canvas during recalculation. On failure, reverts the dropdown to the previous model and shows an error message.
+- **AnalysisPage Panel Model Collapsible:** Replaced the static panel model info card with a `<details>` collapsible matching the WorkbenchPage "Panel Specifications" style (bordered, expandable summary with model name).
+- **Taller Canvas:** Increased WorkbenchPage canvas area from `min-h-[420px]` to `min-h-[60vh]` and raised the `maxHeight` ceiling in `useStageSize` from `innerHeight - 240` to `innerHeight - 160` so the satellite image fills more of the viewport.
+- **Canvas Zoom:** Added zoom in/out/reset buttons (top-right corner), mouse wheel zoom (centered on cursor position), stage panning when zoomed in (draggable stage), and zoom percentage indicator. Zoom range: 50%–300%.
+- **Verification:** `tsc -b` clean across all 3 workspaces. 47 frontend tests pass, 24 backend tests pass.
+
 ## [24/03/26] - Phase 4.2 Task 4: Seed AFA Default in Production
 
 - Ran `npm run db:seed` against production Supabase database. The upsert updated the existing RP4-2025 tariff config row with `afaRateDefault: -2.15` (previously -2.77).

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Image as KonvaImage, Layer, Stage } from 'react-konva'
+import type { KonvaEventObject } from 'konva/lib/Node'
 import { recomputeFlux, recomputeFluxBatch } from '@/api/locations'
 import { saveLayout } from '@/api/projects'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
@@ -106,7 +107,7 @@ function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTM
 
     const update = () => {
       const maxWidth = Math.max(element.clientWidth - 16, 1)
-      const maxHeight = Math.max(window.innerHeight - 240, 280)
+      const maxHeight = Math.max(window.innerHeight - 160, 400)
       const scale = Math.min(maxWidth / image.width, maxHeight / image.height, 1)
 
       setSize({
@@ -159,6 +160,9 @@ export function WorkbenchPage() {
   const [message, setMessage] = useState<UiMessage>(null)
   const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
   const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
+  const [isModelRecomputing, setIsModelRecomputing] = useState(false)
+  const [stageScale, setStageScale] = useState(1)
+  const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 })
 
   const {
     project,
@@ -436,6 +440,96 @@ export function WorkbenchPage() {
     setMessage(null)
   }
 
+  async function handleModelChange(nextModelId: string) {
+    const prevModelId = selectedPanelModelId
+    setSelectedPanelModelId(nextModelId)
+
+    if (!project || visiblePanels.length === 0) return
+
+    setIsModelRecomputing(true)
+    setMessage({ tone: 'info', text: 'Recalculating energy for new panel dimensions...' })
+
+    const nextModel = getPanelModel(nextModelId) ?? PANEL_MODELS[1]!
+
+    try {
+      const batchResponse = await recomputeFluxBatch(project.locationId, {
+        panels: visiblePanels.map((panel) => ({
+          panelId: panel.id,
+          center: panel.center,
+          rotation: panel.rotation,
+          widthM: nextModel.widthM,
+          heightM: nextModel.heightM
+        }))
+      })
+
+      for (const result of batchResponse.results) {
+        if (result.monthlyEnergyDcKwh.length === 12) {
+          updatePanelEnergy(result.panelId, result.monthlyEnergyDcKwh)
+        }
+      }
+      setMessage(null)
+    } catch (err) {
+      setSelectedPanelModelId(prevModelId)
+      setMessage({
+        tone: 'error',
+        text: err instanceof Error ? err.message : 'Failed to recalculate energy. Reverted panel model.'
+      })
+    } finally {
+      setIsModelRecomputing(false)
+    }
+  }
+
+  const MIN_ZOOM = 0.5
+  const MAX_ZOOM = 3
+
+  const handleWheel = useCallback(
+    (e: KonvaEventObject<WheelEvent>) => {
+      e.evt.preventDefault()
+      const stage = e.target.getStage()
+      const pointer = stage?.getPointerPosition()
+      if (!pointer) return
+
+      const direction = e.evt.deltaY > 0 ? -1 : 1
+      const factor = 1.1
+      const newScale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, stageScale * Math.pow(factor, direction)))
+
+      const mousePointTo = {
+        x: (pointer.x - stagePosition.x) / stageScale,
+        y: (pointer.y - stagePosition.y) / stageScale
+      }
+
+      setStageScale(newScale)
+      setStagePosition({
+        x: pointer.x - mousePointTo.x * newScale,
+        y: pointer.y - mousePointTo.y * newScale
+      })
+    },
+    [stageScale, stagePosition]
+  )
+
+  function handleZoomIn() {
+    const newScale = Math.min(MAX_ZOOM, stageScale * 1.25)
+    const cx = stageSize.width / 2
+    const cy = stageSize.height / 2
+    const mousePointTo = { x: (cx - stagePosition.x) / stageScale, y: (cy - stagePosition.y) / stageScale }
+    setStageScale(newScale)
+    setStagePosition({ x: cx - mousePointTo.x * newScale, y: cy - mousePointTo.y * newScale })
+  }
+
+  function handleZoomOut() {
+    const newScale = Math.max(MIN_ZOOM, stageScale / 1.25)
+    const cx = stageSize.width / 2
+    const cy = stageSize.height / 2
+    const mousePointTo = { x: (cx - stagePosition.x) / stageScale, y: (cy - stagePosition.y) / stageScale }
+    setStageScale(newScale)
+    setStagePosition({ x: cx - mousePointTo.x * newScale, y: cy - mousePointTo.y * newScale })
+  }
+
+  function handleZoomReset() {
+    setStageScale(1)
+    setStagePosition({ x: 0, y: 0 })
+  }
+
   async function handleSave() {
     if (!projectId || !project) return
 
@@ -598,7 +692,7 @@ export function WorkbenchPage() {
                 </summary>
                 <div className="space-y-1 border-t border-stone-200 px-3 py-2 text-stone-600">
                   <p>
-                    Dimensions: {selectedPanelModel.widthM} &times; {selectedPanelModel.heightM} m
+                    Dimensions: {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
                   </p>
                   <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
                   <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
@@ -639,11 +733,12 @@ export function WorkbenchPage() {
               <div className="space-y-3">
                 <Label>
                   Panel Model
-                  <InfoTooltip text="Select the solar panel model to use for cost and capacity calculations. This does not change the roof layout dimensions in this version." />
+                  <InfoTooltip text="Select the solar panel model. Changing the model updates panel dimensions on the canvas and recalculates energy yield for all panels." />
                 </Label>
                 <select
                   value={selectedPanelModelId}
-                  onChange={(e) => setSelectedPanelModelId(e.target.value)}
+                  onChange={(e) => handleModelChange(e.target.value)}
+                  disabled={isModelRecomputing || isSaving}
                   className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-stone-500 focus:outline-none focus:ring-1 focus:ring-stone-500"
                 >
                   {PANEL_MODELS.map((model) => (
@@ -800,29 +895,77 @@ export function WorkbenchPage() {
             <CardContent className="p-4">
               <div
                 ref={containerRef}
-                className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-[radial-gradient(circle_at_top_left,#fefce8,transparent_30%),linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-2"
+                className="relative flex min-h-[60vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-[radial-gradient(circle_at_top_left,#fefce8,transparent_30%),linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-2"
               >
                 {stageReady && panelDimensions ? (
-                  <Stage
-                    width={stageSize.width}
-                    height={stageSize.height}
-                    className="overflow-hidden rounded-xl shadow-lg"
-                  >
-                    <Layer listening={false}>
-                      <KonvaImage image={backgroundImage} width={stageSize.width} height={stageSize.height} />
-                    </Layer>
-                    <PanelLayer
-                      panels={renderPanels}
-                      panelWidth={panelDimensions.width}
-                      panelHeight={panelDimensions.height}
-                      selectedPanelId={selectedPanelId}
-                      stageWidth={stageSize.width}
-                      stageHeight={stageSize.height}
-                      disabledPanelId={pendingPanelId}
-                      onSelect={setSelectedPanelId}
-                      onDragEnd={handlePanelDragEnd}
-                    />
-                  </Stage>
+                  <>
+                    <Stage
+                      width={stageSize.width}
+                      height={stageSize.height}
+                      scaleX={stageScale}
+                      scaleY={stageScale}
+                      x={stagePosition.x}
+                      y={stagePosition.y}
+                      draggable={stageScale > 1}
+                      onWheel={handleWheel}
+                      className="overflow-hidden rounded-xl shadow-lg"
+                    >
+                      <Layer listening={false}>
+                        <KonvaImage image={backgroundImage} width={stageSize.width} height={stageSize.height} />
+                      </Layer>
+                      <PanelLayer
+                        panels={renderPanels}
+                        panelWidth={panelDimensions.width}
+                        panelHeight={panelDimensions.height}
+                        selectedPanelId={selectedPanelId}
+                        stageWidth={stageSize.width}
+                        stageHeight={stageSize.height}
+                        disabledPanelId={pendingPanelId}
+                        onSelect={setSelectedPanelId}
+                        onDragEnd={handlePanelDragEnd}
+                      />
+                    </Stage>
+
+                    {/* Zoom controls */}
+                    <div className="absolute right-4 top-4 flex flex-col gap-1">
+                      <button
+                        onClick={handleZoomIn}
+                        className="flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
+                        title="Zoom in"
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={handleZoomOut}
+                        className="flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
+                        title="Zoom out"
+                      >
+                        −
+                      </button>
+                      <button
+                        onClick={handleZoomReset}
+                        className="flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-xs font-medium shadow-md hover:bg-white"
+                        title="Reset zoom"
+                      >
+                        1:1
+                      </button>
+                      {stageScale !== 1 && (
+                        <span className="mt-1 text-center text-xs text-stone-500">
+                          {Math.round(stageScale * 100)}%
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Model recompute overlay */}
+                    {isModelRecomputing && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
+                        <div className="flex items-center gap-3 rounded-lg bg-white/90 px-5 py-3 text-sm font-medium shadow-lg">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
+                          Recalculating energy for new panel dimensions...
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />

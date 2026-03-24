@@ -1,22 +1,25 @@
 import type { PanelModel } from './index'
 
+// IMPORTANT: widthM = short side, heightM = long side
+// This matches the Google Solar API convention (panelWidthMeters < panelHeightMeters)
+// and the solar industry convention (module width = narrow side).
 export const PANEL_MODELS: PanelModel[] = [
   {
     id: 'google-default',
     name: 'Google Solar API Default',
     manufacturer: 'Google',
-    widthM: 1.65,
-    heightM: 0.99,
-    capacityWp: 250,
-    efficiency: 0.153,
+    widthM: 1.045,
+    heightM: 1.879,
+    capacityWp: 400,
+    efficiency: 0.204,
     costPerWp: 0
   },
   {
     id: 'jinko-tiger-neo',
     name: 'Jinko Tiger Neo',
     manufacturer: 'Jinko Solar',
-    widthM: 1.762,
-    heightM: 1.134,
+    widthM: 1.134,
+    heightM: 1.762,
     capacityWp: 440,
     efficiency: 0.2202,
     costPerWp: 2.2
@@ -25,8 +28,8 @@ export const PANEL_MODELS: PanelModel[] = [
     id: 'longi-himo6',
     name: 'LONGi Hi-MO 6',
     manufacturer: 'LONGi',
-    widthM: 1.722,
-    heightM: 1.134,
+    widthM: 1.134,
+    heightM: 1.722,
     capacityWp: 430,
     efficiency: 0.22,
     costPerWp: 2.1
@@ -35,8 +38,8 @@ export const PANEL_MODELS: PanelModel[] = [
     id: 'ja-deepblue4',
     name: 'JA Solar DeepBlue 4.0',
     manufacturer: 'JA Solar',
-    widthM: 1.762,
-    heightM: 1.134,
+    widthM: 1.134,
+    heightM: 1.762,
     capacityWp: 450,
     efficiency: 0.228,
     costPerWp: 2.3
@@ -45,8 +48,8 @@ export const PANEL_MODELS: PanelModel[] = [
     id: 'canadian-hihero',
     name: 'Canadian Solar HiHero',
     manufacturer: 'Canadian Solar',
-    widthM: 1.722,
-    heightM: 1.134,
+    widthM: 1.134,
+    heightM: 1.722,
     capacityWp: 440,
     efficiency: 0.225,
     costPerWp: 2.3
@@ -55,8 +58,8 @@ export const PANEL_MODELS: PanelModel[] = [
     id: 'trina-vertex-s',
     name: 'Trina Vertex S+',
     manufacturer: 'Trina Solar',
-    widthM: 1.762,
-    heightM: 1.134,
+    widthM: 1.134,
+    heightM: 1.762,
     capacityWp: 440,
     efficiency: 0.22,
     costPerWp: 2.15
