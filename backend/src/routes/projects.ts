@@ -72,7 +72,12 @@ projectsRouter.patch(
     console.info(
       `[ProjectSaveLayout] user=${req.user!.id} project=${req.params.id as string} panels=${req.body.editedLayout.length}`
     )
-    const updated = await projectService.saveLayout(req.user!.id, req.params.id as string, req.body.editedLayout)
+    const updated = await projectService.saveLayout(
+      req.user!.id,
+      req.params.id as string,
+      req.body.editedLayout,
+      req.body.selectedPanelModelId
+    )
     if (!updated) {
       console.warn(`[ProjectSaveLayout] not found user=${req.user!.id} project=${req.params.id as string}`)
       res.status(404).json({ error: 'Project not found' })

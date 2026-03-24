@@ -23,13 +23,23 @@ export async function getProject(userId: string, projectId: string) {
   })
 }
 
-export async function saveLayout(userId: string, projectId: string, editedLayout: PanelEdit[]) {
+export async function saveLayout(
+  userId: string,
+  projectId: string,
+  editedLayout: PanelEdit[],
+  selectedPanelModelId?: string
+) {
   const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
   if (!project) return null
+
+  const existingConfig = (project.analysisConfig as Record<string, unknown>) ?? {}
+  const nextAnalysisConfig = selectedPanelModelId ? { ...existingConfig, selectedPanelModelId } : existingConfig
+
   return prisma.project.update({
     where: { id: projectId },
     data: {
       editedLayout: editedLayout as unknown as Prisma.InputJsonValue,
+      analysisConfig: nextAnalysisConfig as Prisma.InputJsonValue,
       status: 'layout_saved'
     },
     include: { location: true }

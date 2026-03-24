@@ -38,6 +38,7 @@ import {
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
 import { InfoTooltip } from '@/components/InfoTooltip'
+import { getPanelModel } from '@shared/types'
 
 const currencyFormatter = new Intl.NumberFormat('en-MY', {
   style: 'currency',
@@ -208,12 +209,28 @@ export function AnalysisPage() {
     const localPanelCapacity = buildingInsights.solarPotential.panelCapacityWatts ?? 0
     const localPanels = parsePanelEdits(projectQuery.data.editedLayout).filter((p) => p.status !== 'deleted')
     const localSystemKwp = Math.round(((localPanels.length * localPanelCapacity) / 1000) * 100) / 100
+
+    // Compute system cost from selected panel model if available, otherwise fall back to tariff default
+    let defaultSystemCostRm: number
+    const savedModelId =
+      projectQuery.data.analysisConfig &&
+      typeof projectQuery.data.analysisConfig === 'object' &&
+      'selectedPanelModelId' in projectQuery.data.analysisConfig
+        ? (projectQuery.data.analysisConfig as Record<string, unknown>).selectedPanelModelId
+        : undefined
+    const panelModel = typeof savedModelId === 'string' ? getPanelModel(savedModelId) : undefined
+    if (panelModel && panelModel.costPerWp > 0) {
+      defaultSystemCostRm = Math.round(localPanels.length * panelModel.capacityWp * panelModel.costPerWp)
+    } else {
+      defaultSystemCostRm = Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp)
+    }
+
     setFormState({
       monthlyConsumptionKwh: savedConfig?.monthlyConsumptionKwh ?? 600,
       connectionPhase: savedConfig?.connectionPhase ?? 'single',
-      systemCostRm:
-        savedConfig?.systemCostRm ?? Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp),
-      afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault
+      systemCostRm: savedConfig?.systemCostRm ?? defaultSystemCostRm,
+      afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault,
+      degradationRate: savedConfig?.degradationRate ?? 0.005
     })
     initializedProjectIdRef.current = projectId
   }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights])
@@ -241,7 +258,8 @@ export function AnalysisPage() {
       simulation,
       systemCostRm: formState.systemCostRm,
       carbonOffsetFactorKgPerMwh,
-      activePanelCount: activePanels.length
+      activePanelCount: activePanels.length,
+      degradationRate: formState.degradationRate
     })
   }, [activePanels.length, carbonOffsetFactorKgPerMwh, formState, simulation])
 
@@ -490,40 +508,75 @@ export function AnalysisPage() {
               </div>
 
               {viewMode === 'advanced' && (
-                <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
-                  <div className="space-y-1">
-                    <Label>
-                      AFA Rate
-                      <InfoTooltip text="Automatic Fuel Adjustment surcharge (or rebate if negative) in sen/kWh, set periodically by the government." />
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
-                    </p>
+                <>
+                  <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+                    <div className="space-y-1">
+                      <Label>
+                        AFA Rate
+                        <InfoTooltip text="Automatic Fuel Adjustment surcharge (or rebate if negative) in sen/kWh, set periodically by the government." />
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
+                      </p>
+                    </div>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="e.g. 3.70"
+                      value={formState.afaRateSenPerKwh === 0 ? '' : String(formState.afaRateSenPerKwh)}
+                      onChange={(event) => {
+                        const raw = event.target.value.replace(/[^0-9.\-]/g, '')
+                        const parsed = parseFloat(raw)
+                        setFormState((current) =>
+                          current
+                            ? {
+                                ...current,
+                                afaRateSenPerKwh:
+                                  raw === '' || raw === '-'
+                                    ? 0
+                                    : Number.isFinite(parsed)
+                                      ? parsed
+                                      : current.afaRateSenPerKwh
+                              }
+                            : current
+                        )
+                      }}
+                    />
                   </div>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="e.g. 3.70"
-                    value={formState.afaRateSenPerKwh === 0 ? '' : String(formState.afaRateSenPerKwh)}
-                    onChange={(event) => {
-                      const raw = event.target.value.replace(/[^0-9.\-]/g, '')
-                      const parsed = parseFloat(raw)
-                      setFormState((current) =>
-                        current
-                          ? {
-                              ...current,
-                              afaRateSenPerKwh:
-                                raw === '' || raw === '-'
-                                  ? 0
-                                  : Number.isFinite(parsed)
-                                    ? parsed
-                                    : current.afaRateSenPerKwh
-                            }
-                          : current
-                      )
-                    }}
-                  />
-                </div>
+
+                  <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+                    <div className="space-y-1">
+                      <Label>
+                        Panel Degradation
+                        <InfoTooltip text="Annual generation decline rate. N-type panels: ~0.5%/yr. Older PERC panels: ~0.7%/yr." />
+                      </Label>
+                      <p className="text-xs text-muted-foreground">%/year — affects payback and 10-year projections</p>
+                    </div>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="e.g. 0.5"
+                      value={formState.degradationRate === 0 ? '' : String(Math.round(formState.degradationRate * 10000) / 100)}
+                      onChange={(event) => {
+                        const raw = event.target.value.replace(/[^0-9.]/g, '')
+                        const parsed = parseFloat(raw)
+                        setFormState((current) =>
+                          current
+                            ? {
+                                ...current,
+                                degradationRate:
+                                  raw === ''
+                                    ? 0
+                                    : Number.isFinite(parsed)
+                                      ? parsed / 100
+                                      : current.degradationRate
+                              }
+                            : current
+                        )
+                      }}
+                    />
+                  </div>
+                </>
               )}
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">

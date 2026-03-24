@@ -64,6 +64,7 @@ export type CreateProjectRequest = {
 
 export type SaveLayoutRequest = {
   editedLayout: PanelEdit[]
+  selectedPanelModelId?: string
 }
 
 export type SaveAnalysisRequest = {
@@ -109,3 +110,18 @@ export type TariffConfigResponse = {
 export type HealthResponse = {
   status: 'ok'
 }
+
+// ── Panel Model ──
+
+export interface PanelModel {
+  id: string
+  name: string
+  manufacturer: string
+  widthM: number
+  heightM: number
+  capacityWp: number
+  efficiency: number
+  costPerWp: number // RM per Wp
+}
+
+export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelModels'

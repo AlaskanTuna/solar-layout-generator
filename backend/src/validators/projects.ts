@@ -17,7 +17,8 @@ export const saveLayoutSchema = z.object({
       rotation: z.number(),
       monthlyEnergyDcKwh: z.array(z.number())
     })
-  )
+  ),
+  selectedPanelModelId: z.string().optional()
 })
 
 const billBreakdownSchema = z.object({

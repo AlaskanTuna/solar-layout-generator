@@ -27,6 +27,7 @@ import {
 } from '@/lib/canvasTransforms'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { cn } from '@/lib/utils'
+import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
 
 type UiMessage = {
   tone: 'error' | 'info'
@@ -156,6 +157,8 @@ export function WorkbenchPage() {
   const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
   const [initialBatchStatus, setInitialBatchStatus] = useState<BatchRecomputeStatus>('idle')
   const [message, setMessage] = useState<UiMessage>(null)
+  const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
+  const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
 
   const {
     project,
@@ -483,7 +486,7 @@ export function WorkbenchPage() {
 
       setIsBatchRecomputing(false)
       setMessage({ tone: 'info', text: 'Saving the refreshed layout to your project...' })
-      await saveLayout(projectId, { editedLayout: nextLayout })
+      await saveLayout(projectId, { editedLayout: nextLayout, selectedPanelModelId })
       navigate(`/project/${projectId}/analysis`)
     } catch (saveError) {
       setMessage({
@@ -598,10 +601,11 @@ export function WorkbenchPage() {
                 </summary>
                 <div className="space-y-1 border-t border-stone-200 px-3 py-2 text-stone-600">
                   <p>
-                    Dimensions: {buildingInsights.solarPotential.panelWidthMeters} &times;{' '}
-                    {buildingInsights.solarPotential.panelHeightMeters} m
+                    Dimensions: {selectedPanelModel.widthM} &times; {selectedPanelModel.heightM} m
                   </p>
-                  <p>Capacity: {buildingInsights.solarPotential.panelCapacityWatts} W</p>
+                  <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
+                  <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
+                  {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
                   <p>Max panels (API): {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
                   {buildingInsights.solarPotential.panelLifetimeYears != null && (
                     <p>Lifespan: {buildingInsights.solarPotential.panelLifetimeYears} years</p>
@@ -634,6 +638,24 @@ export function WorkbenchPage() {
                   {message.text}
                 </div>
               )}
+
+              <div className="space-y-3">
+                <Label>
+                  Panel Model
+                  <InfoTooltip text="Select the solar panel model to use for cost and capacity calculations. This does not change the roof layout dimensions in this version." />
+                </Label>
+                <select
+                  value={selectedPanelModelId}
+                  onChange={(e) => setSelectedPanelModelId(e.target.value)}
+                  className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-stone-500 focus:outline-none focus:ring-1 focus:ring-stone-500"
+                >
+                  {PANEL_MODELS.filter((m) => m.id !== 'google-default').map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.name} — {model.capacityWp}Wp
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
