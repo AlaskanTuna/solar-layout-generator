@@ -484,6 +484,7 @@ export function WorkbenchPage() {
     if (stageScale >= 1) return
 
     zoomSnapTimerRef.current = setTimeout(() => {
+      // 1s debounce before snapping back to 1:1
       const duration = 300
       const startScale = stageScale
       const startPos = { ...stagePosition }
@@ -501,7 +502,7 @@ export function WorkbenchPage() {
         if (t < 1) requestAnimationFrame(animate)
       }
       requestAnimationFrame(animate)
-    }, 3000)
+    }, 1000)
 
     return () => {
       if (zoomSnapTimerRef.current) clearTimeout(zoomSnapTimerRef.current)
@@ -1046,7 +1047,7 @@ export function WorkbenchPage() {
                               onClick={() => setOverlayMode('rgb')}
                               className={cn(
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'rgb' ? 'ring-2 ring-stone-900 ring-offset-1' : 'hover:ring-1 hover:ring-stone-400'
+                                overlayMode === 'rgb' ? 'ring-2 ring-stone-900 ring-offset-1' : ''
                               )}
                               style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
                               title="RGB"
@@ -1059,7 +1060,7 @@ export function WorkbenchPage() {
                               onClick={() => setOverlayMode('annual-flux')}
                               className={cn(
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'annual-flux' ? 'ring-2 ring-stone-900 ring-offset-1' : 'hover:ring-1 hover:ring-stone-400'
+                                overlayMode === 'annual-flux' ? 'ring-2 ring-stone-900 ring-offset-1' : ''
                               )}
                               style={{ background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)' }}
                               title="Annual Flux"
@@ -1072,7 +1073,7 @@ export function WorkbenchPage() {
                               onClick={() => setOverlayMode('dsm')}
                               className={cn(
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'dsm' ? 'ring-2 ring-stone-900 ring-offset-1' : 'hover:ring-1 hover:ring-stone-400'
+                                overlayMode === 'dsm' ? 'ring-2 ring-stone-900 ring-offset-1' : ''
                               )}
                               style={{ background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)' }}
                               title="DSM"
@@ -1107,7 +1108,7 @@ export function WorkbenchPage() {
                     {/* Vertical legend for overlay views */}
                     {overlayMode !== 'rgb' && !isOverlayLoading && (
                       <div className="absolute bottom-4 left-4 z-10">
-                        <div className="flex items-end gap-2 rounded-lg bg-black/60 px-2.5 py-2 backdrop-blur-sm">
+                        <div className="rounded-lg bg-black/60 px-2.5 py-2 backdrop-blur-sm">
                           <div className="flex flex-col items-center gap-1">
                             <span className="text-[9px] font-medium text-white/90">
                               {overlayMode === 'annual-flux' ? 'Sunny' : 'High'}
@@ -1126,12 +1127,6 @@ export function WorkbenchPage() {
                               {overlayMode === 'annual-flux' ? 'Shady' : 'Low'}
                             </span>
                           </div>
-                          <span
-                            className="text-[10px] font-medium text-white/80"
-                            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.05em' }}
-                          >
-                            {overlayMode === 'annual-flux' ? 'Solar Flux' : 'Altitude'}
-                          </span>
                         </div>
                       </div>
                     )}
