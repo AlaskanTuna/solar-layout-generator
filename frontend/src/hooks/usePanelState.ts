@@ -247,6 +247,12 @@ export function usePanelState({
     })
   }
 
+  const allPanelsEnergyRange = useMemo(() => {
+    const energies = panels.filter((p) => !p.deleted).map((p) => getPanelAnnualEnergy(p))
+    if (energies.length === 0) return { min: 0, max: 0 }
+    return { min: Math.min(...energies), max: Math.max(...energies) }
+  }, [panels])
+
   return {
     panels,
     orderedPanels,
@@ -257,6 +263,7 @@ export function usePanelState({
     totalAnnualYield,
     totalCarbonOffsetKg,
     activePanelIds,
+    allPanelsEnergyRange,
     getPanel,
     movePanel,
     rotatePanel,

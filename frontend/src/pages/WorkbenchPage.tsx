@@ -214,6 +214,7 @@ export function WorkbenchPage() {
     maxVisibleCount,
     totalAnnualYield,
     totalCarbonOffsetKg,
+    allPanelsEnergyRange,
     getPanel,
     movePanel,
     rotatePanel,
@@ -955,6 +956,8 @@ export function WorkbenchPage() {
                         stageWidth={stageSize.width}
                         stageHeight={stageSize.height}
                         disabledPanelId={pendingPanelId}
+                        energyMin={allPanelsEnergyRange.min}
+                        energyMax={allPanelsEnergyRange.max}
                         onSelect={setSelectedPanelId}
                         onDragEnd={handlePanelDragEnd}
                       />
@@ -988,17 +991,46 @@ export function WorkbenchPage() {
                           {Math.round(stageScale * 100)}%
                         </span>
                       )}
-                      <div className="mt-2 border-t border-stone-200 pt-2">
-                        <select
-                          value={overlayMode}
-                          onChange={(e) => setOverlayMode(e.target.value as 'rgb' | 'annual-flux' | 'dsm')}
-                          className="w-full rounded-md bg-white/90 px-1.5 py-1 text-xs shadow-md"
-                          title="Switch overlay view"
+                      <div className="mt-2 flex flex-col gap-1 border-t border-stone-200 pt-2">
+                        <button
+                          onClick={() => setOverlayMode('rgb')}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                            overlayMode === 'rgb' ? 'ring-2 ring-stone-900 ring-offset-1' : 'hover:ring-1 hover:ring-stone-400'
+                          )}
+                          style={{ background: 'linear-gradient(135deg, #2d6a4f, #40916c, #52b788, #74c0fc, #845ef7, #e64980)' }}
+                          title="RGB"
                         >
-                          <option value="rgb">RGB</option>
-                          <option value="annual-flux">Flux</option>
-                          <option value="dsm">DSM</option>
-                        </select>
+                          <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            RGB
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setOverlayMode('annual-flux')}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                            overlayMode === 'annual-flux' ? 'ring-2 ring-stone-900 ring-offset-1' : 'hover:ring-1 hover:ring-stone-400'
+                          )}
+                          style={{ background: 'linear-gradient(135deg, #000000, #800080, #dc1e1e, #fadc32, #ffffff)' }}
+                          title="Annual Flux"
+                        >
+                          <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            Flux
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setOverlayMode('dsm')}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                            overlayMode === 'dsm' ? 'ring-2 ring-stone-900 ring-offset-1' : 'hover:ring-1 hover:ring-stone-400'
+                          )}
+                          style={{ background: 'linear-gradient(135deg, #0000b4, #00b4dc, #00c800, #f0f000, #dc0000)' }}
+                          title="DSM"
+                        >
+                          <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            DSM
+                          </span>
+                        </button>
                       </div>
                     </div>
 
@@ -1016,6 +1048,30 @@ export function WorkbenchPage() {
                         <div className="flex items-center gap-3 rounded-lg bg-white/90 px-5 py-3 text-sm font-medium shadow-lg">
                           <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
                           Recalculating energy for new panel dimensions...
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Legend bar for overlay views */}
+                    {overlayMode !== 'rgb' && !isOverlayLoading && (
+                      <div className="absolute bottom-4 left-4 z-10">
+                        <div className="rounded-lg bg-black/60 px-3 py-2 backdrop-blur-sm">
+                          <div
+                            className="h-4 w-[200px] rounded-sm"
+                            style={{
+                              background:
+                                overlayMode === 'annual-flux'
+                                  ? 'linear-gradient(to right, #000000, #800080, #dc1e1e, #fadc32, #ffffff)'
+                                  : 'linear-gradient(to right, #0000b4, #00b4dc, #00c800, #f0f000, #dc0000)'
+                            }}
+                          />
+                          <div className="mt-1 flex items-center justify-between text-[10px] font-medium text-white">
+                            <span>{overlayMode === 'annual-flux' ? 'Shady' : 'Low'}</span>
+                            <span className="text-[11px]">
+                              {overlayMode === 'annual-flux' ? 'Solar Flux' : 'Altitude'}
+                            </span>
+                            <span>{overlayMode === 'annual-flux' ? 'Sunny' : 'High'}</span>
+                          </div>
                         </div>
                       </div>
                     )}

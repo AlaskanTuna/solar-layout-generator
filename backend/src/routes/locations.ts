@@ -266,7 +266,41 @@ locationsRouter.get(
       max = 1
     }
 
-    // Colorize: annual-flux uses blue→cyan→yellow→red heatmap, DSM uses grayscale
+    // Colorize with multi-stop colormaps
+    function lerpColor(
+      ratio: number,
+      stops: { pos: number; r: number; g: number; b: number }[]
+    ): [number, number, number] {
+      for (let i = 0; i < stops.length - 1; i++) {
+        if (ratio <= stops[i + 1].pos) {
+          const t = (ratio - stops[i].pos) / (stops[i + 1].pos - stops[i].pos)
+          return [
+            Math.round(stops[i].r + t * (stops[i + 1].r - stops[i].r)),
+            Math.round(stops[i].g + t * (stops[i + 1].g - stops[i].g)),
+            Math.round(stops[i].b + t * (stops[i + 1].b - stops[i].b))
+          ]
+        }
+      }
+      const last = stops[stops.length - 1]
+      return [last.r, last.g, last.b]
+    }
+
+    const fluxStops = [
+      { pos: 0.0, r: 0, g: 0, b: 0 },
+      { pos: 0.25, r: 128, g: 0, b: 128 },
+      { pos: 0.5, r: 220, g: 30, b: 30 },
+      { pos: 0.75, r: 250, g: 220, b: 50 },
+      { pos: 1.0, r: 255, g: 255, b: 255 }
+    ]
+
+    const dsmStops = [
+      { pos: 0.0, r: 0, g: 0, b: 180 },
+      { pos: 0.25, r: 0, g: 180, b: 220 },
+      { pos: 0.5, r: 0, g: 200, b: 0 },
+      { pos: 0.75, r: 240, g: 240, b: 0 },
+      { pos: 1.0, r: 220, g: 0, b: 0 }
+    ]
+
     const pixels = Buffer.alloc(width * height * 4)
     for (let i = 0; i < data.length; i++) {
       const offset = i * 4
@@ -278,36 +312,12 @@ locationsRouter.get(
         continue
       }
       const ratio = Math.max(0, Math.min(1, (data[i] - min) / (max - min)))
-
-      if (overlayType === 'annual-flux') {
-        let r: number, g: number, b: number
-        if (ratio < 0.33) {
-          const t = ratio / 0.33
-          r = Math.round(30 * (1 - t) + 0 * t)
-          g = Math.round(58 * (1 - t) + 180 * t)
-          b = Math.round(138 * (1 - t) + 220 * t)
-        } else if (ratio < 0.66) {
-          const t = (ratio - 0.33) / 0.33
-          r = Math.round(0 * (1 - t) + 245 * t)
-          g = Math.round(180 * (1 - t) + 200 * t)
-          b = Math.round(220 * (1 - t) + 50 * t)
-        } else {
-          const t = (ratio - 0.66) / 0.34
-          r = Math.round(245 * (1 - t) + 220 * t)
-          g = Math.round(200 * (1 - t) + 50 * t)
-          b = Math.round(50 * (1 - t) + 30 * t)
-        }
-        pixels[offset] = r
-        pixels[offset + 1] = g
-        pixels[offset + 2] = b
-        pixels[offset + 3] = 220
-      } else {
-        const v = Math.round(ratio * 255)
-        pixels[offset] = v
-        pixels[offset + 1] = v
-        pixels[offset + 2] = v
-        pixels[offset + 3] = 255
-      }
+      const stops = overlayType === 'annual-flux' ? fluxStops : dsmStops
+      const [r, g, b] = lerpColor(ratio, stops)
+      pixels[offset] = r
+      pixels[offset + 1] = g
+      pixels[offset + 2] = b
+      pixels[offset + 3] = 230
     }
 
     // Resize to match RGB image dimensions
