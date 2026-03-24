@@ -108,7 +108,7 @@ function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTM
     const update = () => {
       const maxWidth = Math.max(element.clientWidth - 16, 1)
       const maxHeight = Math.max(window.innerHeight - 160, 400)
-      const scale = Math.min(maxWidth / image.width, maxHeight / image.height, 1)
+      const scale = Math.min(maxWidth / image.width, maxHeight / image.height)
 
       setSize({
         width: Math.max(1, Math.round(image.width * scale)),
