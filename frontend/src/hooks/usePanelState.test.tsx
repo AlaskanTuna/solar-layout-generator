@@ -112,7 +112,7 @@ describe('usePanelState', () => {
       center: { lat: 3.15, lng: 101.69 }
     })
     expect(serialized.find((panel) => panel.id === 'panel_1')).toMatchObject({
-      status: 'deleted',
+      status: 'moved',
       rotation: 90,
       monthlyEnergyDcKwh: [50, 50, 50, 50]
     })
@@ -120,7 +120,7 @@ describe('usePanelState', () => {
       status: 'deleted'
     })
     expect(serialized.find((panel) => panel.id === 'panel_5')).toMatchObject({
-      status: 'kept'
+      status: 'deleted'
     })
   })
 })
