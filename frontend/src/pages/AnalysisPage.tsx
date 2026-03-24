@@ -419,6 +419,18 @@ export function AnalysisPage() {
                   <p className="mt-1 text-lg font-semibold">{activePanels.length}</p>
                 </div>
               </div>
+              {selectedPanelModel && (
+                <div className="rounded-lg bg-stone-100 px-3 py-2 text-sm">
+                  <p className="text-stone-500">Panel Model</p>
+                  <p className="mt-0.5 font-medium">
+                    {selectedPanelModel.name} — {selectedPanelModel.capacityWp}Wp
+                  </p>
+                  <p className="text-xs text-stone-400">
+                    {selectedPanelModel.widthM} &times; {selectedPanelModel.heightM} m &middot;{' '}
+                    {(selectedPanelModel.efficiency * 100).toFixed(1)}% efficiency
+                  </p>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               {panelsMissingMonthlyEnergy.length > 0 && (
@@ -998,6 +1010,11 @@ export function AnalysisPage() {
                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">System Summary</p>
                 <p className="mt-3 text-lg font-semibold">{formatNumber(systemKwp, 'kWp')}</p>
                 <p className="text-sm text-stone-500">{activePanels.length} active panels</p>
+                {selectedPanelModel && (
+                  <p className="text-sm text-stone-500">
+                    {selectedPanelModel.name} ({selectedPanelModel.capacityWp}Wp)
+                  </p>
+                )}
               </div>
               <div className="rounded-2xl bg-stone-100 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Financial Highlights</p>
@@ -1017,6 +1034,12 @@ export function AnalysisPage() {
               <div className="rounded-2xl border border-stone-200 p-4">
                 <h2 className="text-lg font-semibold">Assumptions Used</h2>
                 <div className="mt-4 space-y-2 text-sm">
+                  {selectedPanelModel && (
+                    <p>
+                      Panel model: {selectedPanelModel.name} ({selectedPanelModel.capacityWp}Wp,{' '}
+                      {selectedPanelModel.widthM} &times; {selectedPanelModel.heightM} m)
+                    </p>
+                  )}
                   <p>Monthly consumption: {formatNumber(formState.monthlyConsumptionKwh, 'kWh')}</p>
                   <p>Connection phase: {formState.connectionPhase === 'single' ? 'Single phase' : 'Three phase'}</p>
                   <p>System cost: {formatCurrency(formState.systemCostRm)}</p>

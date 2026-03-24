@@ -1,5 +1,11 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [24/03/26] - Phase 4.2 Task 3: AnalysisPage Panel Model Display
+
+- **Main UI:** Added a panel model info card below the System Size / Active Panels grid in the AnalysisPage sidebar, showing model name, capacity (Wp), dimensions, and efficiency.
+- **PDF Export:** Added panel model name and capacity to the System Summary card and panel model specs (name, capacity, dimensions) to the Assumptions Used section.
+- **Verification:** `tsc -b` clean. 47 frontend tests pass.
+
 ## [24/03/26] - Phase 4.2 Task 2: Backend Recompute with Explicit Panel Dimensions
 
 - **Shared Types:** Added optional `widthM`/`heightM` fields to `FluxRecomputeRequest` in `shared/index.ts`.

@@ -827,8 +827,8 @@
 
 **Implementation:**
 
-- [ ] Display selected panel model name, capacity, and dimensions in the AnalysisPage system summary section
-- [ ] Include panel model specs in the PDF export report
+- [x] Display selected panel model name, capacity, and dimensions in the AnalysisPage system summary section
+- [x] Include panel model specs in the PDF export report (System Summary card + Assumptions section)
 
 ### 4. Maintenance: Seed AFA Default in Production
 
