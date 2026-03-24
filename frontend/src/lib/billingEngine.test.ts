@@ -88,8 +88,11 @@ describe('computeBill', () => {
     expect(bill.kwh).toBe(0)
   })
 
-  it('T1 baseline: 800 kWh = RM342.33', () => {
-    // Scenario A from Knowledge Vault §7
+  it('T1 baseline: 800 kWh = RM323.30 (SST prorated)', () => {
+    // Scenario A from Knowledge Vault §7, SST prorated to >600 kWh portion
+    // sstFraction = (800-600)/800 = 0.25
+    // sst = 0.08 * (311.28 + 5.69) * 0.25 = 6.34
+    // total = round5sen(311.28 + 5.69 + 6.34) = round5sen(323.31) = 323.30
     const bill = computeBill(800, config)
     expect(bill.energy).toBe(216.24)
     expect(bill.capacity).toBe(36.4)
@@ -99,8 +102,8 @@ describe('computeBill', () => {
     expect(bill.eeiRebate).toBe(32.0)
     expect(bill.preTaxSubtotal).toBe(311.28)
     expect(bill.reFund).toBe(5.69)
-    expect(bill.sst).toBe(25.36)
-    expect(bill.total).toBe(342.33)
+    expect(bill.sst).toBe(6.34)
+    expect(bill.total).toBe(323.3)
   })
 
   it('T1 NEM billable: 320 kWh = RM77.25', () => {
@@ -118,8 +121,9 @@ describe('computeBill', () => {
     expect(bill.total).toBe(77.25)
   })
 
-  it('T2 baseline: 300 kWh = RM65.79', () => {
-    // Scenario B baseline
+  it('T2 baseline: 300 kWh = RM65.80 (5-sen rounded)', () => {
+    // Scenario B baseline — SST exempt (≤600), total rounded to nearest 5 sen
+    // round5sen(65.79) = 65.80
     const bill = computeBill(300, config)
     expect(bill.energy).toBe(81.09)
     expect(bill.capacity).toBe(13.65)
@@ -129,7 +133,7 @@ describe('computeBill', () => {
     expect(bill.eeiRebate).toBe(67.5)
     expect(bill.reFund).toBe(0) // ≤300 kWh → exempt
     expect(bill.sst).toBe(0)
-    expect(bill.total).toBe(65.79)
+    expect(bill.total).toBe(65.8)
   })
 
   it('T3 baseline: 500 kWh = RM165.70', () => {
@@ -140,8 +144,12 @@ describe('computeBill', () => {
     expect(bill.total).toBe(165.7)
   })
 
-  it('T4 baseline: 1600 kWh above cliff = RM918.53', () => {
+  it('T4 baseline: 1600 kWh above cliff = RM893.00 (SST prorated)', () => {
     // Scenario C baseline — crosses 1500 kWh cliff
+    // sstFraction = (1600-600)/1600 = 0.625
+    // preTax = 836.56, reFund = 13.93
+    // sst = 0.08 * (836.56 + 13.93) * 0.625 = 42.52
+    // total = round5sen(836.56 + 13.93 + 42.52) = round5sen(893.01) = 893.00
     const bill = computeBill(1600, config)
     expect(bill.energy).toBe(592.48) // ALL at 37.03 sen
     expect(bill.capacity).toBe(72.8)
@@ -149,17 +157,19 @@ describe('computeBill', () => {
     expect(bill.retail).toBe(10.0)
     expect(bill.afa).toBe(-44.32)
     expect(bill.eeiRebate).toBe(0) // >1000 kWh
-    expect(bill.total).toBe(918.53)
+    expect(bill.total).toBe(893)
   })
 
-  it('T4 NEM billable: 640 kWh below cliff', () => {
+  it('T4 NEM billable: 640 kWh below cliff = RM234.35 (SST prorated)', () => {
     // Scenario C NEM — dropped below 1500
-    // 640 * 27.03 / 100 = 172.992 → 172.99 (KV wrote 173.00 — manual rounding)
+    // sstFraction = (640-600)/640 = 0.0625
+    // preTax = 228.62, reFund = 4.55
+    // sst = 0.08 * (228.62 + 4.55) * 0.0625 = 1.17
+    // total = round5sen(228.62 + 4.55 + 1.17) = round5sen(234.34) = 234.35
     const bill = computeBill(640, config)
     expect(bill.energy).toBe(172.99)
     expect(bill.eeiRebate).toBe(48.0)
-    // Total recalculated with correct energy rounding
-    expect(bill.total).toBeCloseTo(251.83, 0)
+    expect(bill.total).toBe(234.35)
   })
 
   it('T7: exactly 1500 kWh stays at low energy rate', () => {
@@ -211,14 +221,14 @@ describe('computeBill', () => {
 // ── computeNemMonth — golden test cases ──
 
 describe('computeNemMonth', () => {
-  it('T1: 800 kWh consumption, 480 kWh generation, 0 credit → savings RM265.08', () => {
+  it('T1: 800 kWh consumption, 480 kWh generation, 0 credit → savings RM246.05', () => {
     const result = computeNemMonth(800, 480, 0, config, 3)
     expect(result.billableKwh).toBe(320)
     expect(result.creditUsed).toBe(0)
     expect(result.creditBalance).toBe(0)
-    expect(result.baselineBill.total).toBe(342.33)
+    expect(result.baselineBill.total).toBe(323.3)
     expect(result.nemBill.total).toBe(77.25)
-    expect(result.savingsRm).toBe(265.08)
+    expect(result.savingsRm).toBe(246.05)
   })
 
   it('T2: 300 kWh consumption, 480 kWh generation, 50 credit → surplus, credit = 230', () => {
@@ -226,9 +236,9 @@ describe('computeNemMonth', () => {
     expect(result.billableKwh).toBe(0)
     expect(result.creditUsed).toBe(0)
     expect(result.creditBalance).toBe(230)
-    expect(result.baselineBill.total).toBe(65.79)
+    expect(result.baselineBill.total).toBe(65.8)
     expect(result.nemBill.total).toBe(3.0)
-    expect(result.savingsRm).toBe(62.79)
+    expect(result.savingsRm).toBe(62.8)
   })
 
   it('T3: December forfeiture — 500 kWh, 365 gen, 200 credit', () => {
@@ -247,11 +257,10 @@ describe('computeNemMonth', () => {
   it('T4: cliff crossing — 1600 kWh, 960 gen, 0 credit', () => {
     const result = computeNemMonth(1600, 960, 0, config, 3)
     expect(result.billableKwh).toBe(640)
-    expect(result.baselineBill.total).toBe(918.53)
-    // 640 * 27.03 / 100 = 172.992 → 172.99; KV wrote 173.00 (manual rounding)
-    // Cascading 1-cent difference: 251.82 vs KV's 251.83
-    expect(result.nemBill.total).toBe(251.82)
-    expect(result.savingsRm).toBe(666.71)
+    expect(result.baselineBill.total).toBe(893)
+    // SST prorated: 640 kWh NEM bill = 234.35
+    expect(result.nemBill.total).toBe(234.35)
+    expect(result.savingsRm).toBe(658.65)
   })
 
   it('T5: zero consumption, zero generation', () => {
