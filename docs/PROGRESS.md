@@ -1,5 +1,10 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [24/03/26] - Phase 4.2 Task 4: Seed AFA Default in Production
+
+- Ran `npm run db:seed` against production Supabase database. The upsert updated the existing RP4-2025 tariff config row with `afaRateDefault: -2.15` (previously -2.77).
+- Verified via Prisma query: `afaRateDefault: -2.15` confirmed in the live database.
+
 ## [24/03/26] - Phase 4.2 Task 3: AnalysisPage Panel Model Display
 
 - **Main UI:** Added a panel model info card below the System Size / Active Panels grid in the AnalysisPage sidebar, showing model name, capacity (Wp), dimensions, and efficiency.

@@ -836,8 +836,8 @@
 
 **Implementation:**
 
-- [ ] Run `npx prisma db seed` against production database, or manually update the AFA default in the Supabase dashboard
-- [ ] Verify the tariff config endpoint returns the updated AFA default
+- [x] Run `npx prisma db seed` against production database (upsert updated the existing RP4-2025 row)
+- [x] Verify the tariff config returns the updated AFA default (-2.15 sen/kWh confirmed via Prisma query)
 
 ## Phase 5: Post-MVP Enhancements and Polish
 
