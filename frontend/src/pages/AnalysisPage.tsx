@@ -188,7 +188,16 @@ export function AnalysisPage() {
     [activePanels]
   )
   const monthlyGeneration = useMemo(() => aggregateMonthlyGeneration(activePanels), [activePanels])
-  const panelCapacityWatts = buildingInsights?.solarPotential.panelCapacityWatts ?? 0
+  const savedPanelModelId = useMemo(() => {
+    const cfg = projectQuery.data?.analysisConfig
+    if (cfg && typeof cfg === 'object' && 'selectedPanelModelId' in cfg) {
+      const id = (cfg as Record<string, unknown>).selectedPanelModelId
+      return typeof id === 'string' ? id : undefined
+    }
+    return undefined
+  }, [projectQuery.data?.analysisConfig])
+  const selectedPanelModel = savedPanelModelId ? getPanelModel(savedPanelModelId) : undefined
+  const panelCapacityWatts = selectedPanelModel?.capacityWp ?? buildingInsights?.solarPotential.panelCapacityWatts ?? 0
   const systemKwp = useMemo(
     () => Math.round(((activePanels.length * panelCapacityWatts) / 1000) * 100) / 100,
     [activePanels.length, panelCapacityWatts]
@@ -206,21 +215,14 @@ export function AnalysisPage() {
     if (initializedProjectIdRef.current === projectId) return
 
     const savedConfig = parseSavedAnalysisConfig(projectQuery.data.analysisConfig)
-    const localPanelCapacity = buildingInsights.solarPotential.panelCapacityWatts ?? 0
     const localPanels = parsePanelEdits(projectQuery.data.editedLayout).filter((p) => p.status !== 'deleted')
+    const localPanelCapacity = selectedPanelModel?.capacityWp ?? buildingInsights.solarPotential.panelCapacityWatts ?? 0
     const localSystemKwp = Math.round(((localPanels.length * localPanelCapacity) / 1000) * 100) / 100
 
     // Compute system cost from selected panel model if available, otherwise fall back to tariff default
     let defaultSystemCostRm: number
-    const savedModelId =
-      projectQuery.data.analysisConfig &&
-      typeof projectQuery.data.analysisConfig === 'object' &&
-      'selectedPanelModelId' in projectQuery.data.analysisConfig
-        ? (projectQuery.data.analysisConfig as Record<string, unknown>).selectedPanelModelId
-        : undefined
-    const panelModel = typeof savedModelId === 'string' ? getPanelModel(savedModelId) : undefined
-    if (panelModel && panelModel.costPerWp > 0) {
-      defaultSystemCostRm = Math.round(localPanels.length * panelModel.capacityWp * panelModel.costPerWp)
+    if (selectedPanelModel && selectedPanelModel.costPerWp > 0) {
+      defaultSystemCostRm = Math.round(localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp)
     } else {
       defaultSystemCostRm = Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp)
     }
@@ -233,7 +235,7 @@ export function AnalysisPage() {
       degradationRate: savedConfig?.degradationRate ?? 0.005
     })
     initializedProjectIdRef.current = projectId
-  }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights])
+  }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights, selectedPanelModel])
 
   const billingConfig = useMemo(() => {
     if (!tariffQuery.data || !formState) return null

@@ -182,13 +182,9 @@ export function WorkbenchPage() {
   }, [imageGeoTransform, stageSize])
 
   const panelDimensions = useMemo(() => {
-    if (!buildingInsights || !geo) return null
-    return panelMetersToPixels(
-      buildingInsights.solarPotential.panelWidthMeters,
-      buildingInsights.solarPotential.panelHeightMeters,
-      geo
-    )
-  }, [buildingInsights, geo])
+    if (!geo) return null
+    return panelMetersToPixels(selectedPanelModel.widthM, selectedPanelModel.heightM, geo)
+  }, [selectedPanelModel, geo])
   const maskGeo = useMemo(() => {
     if (!roofMask) {
       return null
@@ -197,14 +193,9 @@ export function WorkbenchPage() {
     return createCanvasGeo(roofMask.geoTransform, roofMask.width, roofMask.height)
   }, [roofMask])
   const maskPanelDimensions = useMemo(() => {
-    if (!buildingInsights || !maskGeo) return null
-
-    return panelMetersToPixels(
-      buildingInsights.solarPotential.panelWidthMeters,
-      buildingInsights.solarPotential.panelHeightMeters,
-      maskGeo
-    )
-  }, [buildingInsights, maskGeo])
+    if (!maskGeo) return null
+    return panelMetersToPixels(selectedPanelModel.widthM, selectedPanelModel.heightM, maskGeo)
+  }, [selectedPanelModel, maskGeo])
   const stageReady = stageSize.width > 0 && stageSize.height > 0 && !!geo && !!panelDimensions
 
   const {
@@ -649,7 +640,7 @@ export function WorkbenchPage() {
                   onChange={(e) => setSelectedPanelModelId(e.target.value)}
                   className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-stone-500 focus:outline-none focus:ring-1 focus:ring-stone-500"
                 >
-                  {PANEL_MODELS.filter((m) => m.id !== 'google-default').map((model) => (
+                  {PANEL_MODELS.map((model) => (
                     <option key={model.id} value={model.id}>
                       {model.name} — {model.capacityWp}Wp
                     </option>

@@ -42,6 +42,16 @@ export const PANEL_MODELS: PanelModel[] = [
     costPerWp: 2.3
   },
   {
+    id: 'canadian-hihero',
+    name: 'Canadian Solar HiHero',
+    manufacturer: 'Canadian Solar',
+    widthM: 1.722,
+    heightM: 1.134,
+    capacityWp: 440,
+    efficiency: 0.225,
+    costPerWp: 2.3
+  },
+  {
     id: 'trina-vertex-s',
     name: 'Trina Vertex S+',
     manufacturer: 'Trina Solar',
