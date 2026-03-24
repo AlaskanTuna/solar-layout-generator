@@ -9,6 +9,7 @@ export type AnalysisConfig = {
   systemCostRm: number
   afaRateSenPerKwh: number
   systemKwp: number
+  degradationRate: number // e.g. 0.005 = 0.5%/year
 }
 
 export type AnalysisResultsRecord = {
@@ -78,13 +79,15 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   const systemCostRm = getNumber(raw.systemCostRm)
   const afaRateSenPerKwh = getNumber(raw.afaRateSenPerKwh)
   const systemKwp = getNumber(raw.systemKwp)
+  const degradationRate = getNumber(raw.degradationRate)
 
   return {
     ...(monthlyConsumptionKwh !== null ? { monthlyConsumptionKwh } : {}),
     ...(connectionPhase ? { connectionPhase } : {}),
     ...(systemCostRm !== null ? { systemCostRm } : {}),
     ...(afaRateSenPerKwh !== null ? { afaRateSenPerKwh } : {}),
-    ...(systemKwp !== null ? { systemKwp } : {})
+    ...(systemKwp !== null ? { systemKwp } : {}),
+    ...(degradationRate !== null ? { degradationRate } : {})
   }
 }
 
@@ -92,20 +95,43 @@ export function buildAnalysisResults({
   simulation,
   systemCostRm,
   carbonOffsetFactorKgPerMwh,
-  activePanelCount
+  activePanelCount,
+  degradationRate = 0.005
 }: {
   simulation: AnnualSimulationResult
   systemCostRm: number
   carbonOffsetFactorKgPerMwh: number
   activePanelCount: number
+  degradationRate?: number
 }): AnalysisResultsRecord {
-  const averageMonthlySavingsRm = round2(simulation.totalSavingsRm / 12)
+  const year1Savings = simulation.totalSavingsRm
+  const averageMonthlySavingsRm = round2(year1Savings / 12)
   const averageMonthlySavingsPct =
-    simulation.totalBaselineRm > 0 ? round2((simulation.totalSavingsRm / simulation.totalBaselineRm) * 100) : 0
-  const paybackYears = simulation.totalSavingsRm > 0 ? round2(systemCostRm / simulation.totalSavingsRm) : null
-  const tenYearNetBenefitRm = round2(simulation.totalSavingsRm * 10 - systemCostRm)
+    simulation.totalBaselineRm > 0 ? round2((year1Savings / simulation.totalBaselineRm) * 100) : 0
+
+  // Degradation-aware payback: iterate year-by-year
+  let paybackYears: number | null = null
+  if (year1Savings > 0) {
+    let cumulative = 0
+    for (let yr = 1; yr <= 50; yr++) {
+      cumulative += year1Savings * Math.pow(1 - degradationRate, yr - 1)
+      if (cumulative >= systemCostRm) {
+        paybackYears = round2(yr - 1 + (systemCostRm - (cumulative - year1Savings * Math.pow(1 - degradationRate, yr - 1))) / (year1Savings * Math.pow(1 - degradationRate, yr - 1)))
+        break
+      }
+    }
+  }
+
+  // Degradation-aware 10-year totals
+  let tenYearSavings = 0
+  for (let yr = 1; yr <= 10; yr++) {
+    tenYearSavings += year1Savings * Math.pow(1 - degradationRate, yr - 1)
+  }
+  tenYearSavings = round2(tenYearSavings)
+
+  const tenYearNetBenefitRm = round2(tenYearSavings - systemCostRm)
   const tenYearRoiPercent =
-    systemCostRm > 0 ? round2(((simulation.totalSavingsRm * 10 - systemCostRm) / systemCostRm) * 100) : null
+    systemCostRm > 0 ? round2(((tenYearSavings - systemCostRm) / systemCostRm) * 100) : null
   const carbonOffsetKg = round2((simulation.totalGenerationKwh / 1000) * carbonOffsetFactorKgPerMwh)
 
   return {

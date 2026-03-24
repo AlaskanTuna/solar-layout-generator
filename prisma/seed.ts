@@ -16,7 +16,7 @@ async function main() {
       rates: RATES,
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
-      afaRateDefault: -2.77,
+      afaRateDefault: -2.15,
       defaults: DEFAULTS
     },
     create: {
@@ -24,7 +24,7 @@ async function main() {
       rates: RATES,
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
-      afaRateDefault: -2.77,
+      afaRateDefault: -2.15,
       defaults: DEFAULTS
     }
   })

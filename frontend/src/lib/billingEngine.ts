@@ -54,6 +54,10 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100
 }
 
+function round5sen(n: number): number {
+  return Math.round(n * 20) / 20
+}
+
 /**
  * Look up EEI rebate rate (sen/kWh) for a given consumption level.
  * The table is sorted ascending by upper-bound kWh.
@@ -130,11 +134,12 @@ export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
   // 8. RE Fund — exempt at or below threshold (from rounded base charges)
   const reFund = kwh > thresholds.reFundExemption ? round2(rates.reFundRate * (rEnergy + rCapacity + rNetwork)) : 0
 
-  // 9. SST — exempt at or below threshold (from rounded subtotal + RE Fund)
-  const sst = kwh > thresholds.sstExemption ? round2(rates.sstRate * (preTaxSubtotal + reFund)) : 0
+  // 9. SST — exempt at or below threshold; prorated to >600 kWh portion only
+  const sstFraction = kwh > thresholds.sstExemption ? (kwh - thresholds.sstExemption) / kwh : 0
+  const sst = sstFraction > 0 ? round2(rates.sstRate * (preTaxSubtotal + reFund) * sstFraction) : 0
 
-  // 10. Total with minimum charge floor
-  const total = round2(Math.max(preTaxSubtotal + reFund + sst, rates.minChargeRm))
+  // 10. Total with minimum charge floor, rounded to nearest 5 sen
+  const total = round5sen(Math.max(preTaxSubtotal + reFund + sst, rates.minChargeRm))
 
   return {
     kwh: round2(kwh),
