@@ -42,6 +42,8 @@ export type FluxRecomputeRequest = {
   panelId: string
   center: { lat: number; lng: number }
   rotation: number
+  widthM?: number
+  heightM?: number
 }
 
 export type FluxRecomputeResponse = {

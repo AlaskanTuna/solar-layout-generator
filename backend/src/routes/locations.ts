@@ -215,7 +215,7 @@ locationsRouter.post(
   requireAuth,
   validate(fluxRecomputeSchema),
   asyncHandler(async (req, res) => {
-    const { panelId, center, rotation } = req.body
+    const { panelId, center, rotation, widthM, heightM } = req.body
     console.info(
       `[FluxRecompute] user=${req.user!.id} location=${req.params.locationId as string} panel=${panelId} rotation=${rotation.toFixed(2)}`
     )
@@ -247,8 +247,8 @@ locationsRouter.post(
     const geo = setupGeoTransform(image)
 
     const { px, py } = latLngToPixel(center.lat, center.lng, geo)
-    const widthPx = metersToPixels(panelSpecs.panelWidthMeters, geo)
-    const heightPx = metersToPixels(panelSpecs.panelHeightMeters, geo)
+    const widthPx = metersToPixels(widthM ?? panelSpecs.panelWidthMeters, geo)
+    const heightPx = metersToPixels(heightM ?? panelSpecs.panelHeightMeters, geo)
 
     const rotationRad = (rotation * Math.PI) / 180
     const corners = getRotatedCorners(px, py, widthPx, heightPx, rotationRad)
@@ -299,15 +299,17 @@ locationsRouter.post(
     const geo = setupGeoTransform(image)
     const rasters = await preloadFluxRasters(image)
 
-    const widthPx = metersToPixels(panelSpecs.panelWidthMeters, geo)
-    const heightPx = metersToPixels(panelSpecs.panelHeightMeters, geo)
+    const defaultWidthPx = metersToPixels(panelSpecs.panelWidthMeters, geo)
+    const defaultHeightPx = metersToPixels(panelSpecs.panelHeightMeters, geo)
 
     // Process each panel from pre-loaded rasters (no additional I/O)
     const results: FluxRecomputeResponse[] = []
     for (const panel of panels) {
       const { px, py } = latLngToPixel(panel.center.lat, panel.center.lng, geo)
       const rotationRad = (panel.rotation * Math.PI) / 180
-      const corners = getRotatedCorners(px, py, widthPx, heightPx, rotationRad)
+      const wPx = panel.widthM ? metersToPixels(panel.widthM, geo) : defaultWidthPx
+      const hPx = panel.heightM ? metersToPixels(panel.heightM, geo) : defaultHeightPx
+      const corners = getRotatedCorners(px, py, wPx, hPx, rotationRad)
       const monthlyEnergyDcKwh = computeMonthlyEnergyFromRasters(rasters, corners, panelSpecs.panelCapacityWatts)
       results.push({ panelId: panel.panelId, monthlyEnergyDcKwh })
     }

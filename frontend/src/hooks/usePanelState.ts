@@ -31,6 +31,8 @@ type UsePanelStateArgs = {
   editedLayout: unknown
   maxArrayPanelsCount: number
   carbonOffsetFactorKgPerMwh: number
+  panelWidthM?: number
+  panelHeightM?: number
   onBatchRecomputeStatusChange?: (status: BatchRecomputeStatus) => void
 }
 
@@ -51,6 +53,8 @@ export function usePanelState({
   editedLayout,
   maxArrayPanelsCount,
   carbonOffsetFactorKgPerMwh,
+  panelWidthM,
+  panelHeightM,
   onBatchRecomputeStatusChange
 }: UsePanelStateArgs) {
   const [panels, setPanels] = useState<WorkbenchPanelState[]>([])
@@ -129,7 +133,9 @@ export function usePanelState({
           panels: panelsNeedingMonthly.map((p) => ({
             panelId: p.id,
             center: p.center,
-            rotation: p.rotation
+            rotation: p.rotation,
+            ...(panelWidthM != null && { widthM: panelWidthM }),
+            ...(panelHeightM != null && { heightM: panelHeightM })
           }))
         })
         if (!controller.signal.aborted) {

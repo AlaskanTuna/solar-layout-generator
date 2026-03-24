@@ -815,10 +815,11 @@
 
 **Implementation:**
 
-- [ ] Update `recompute-flux-batch` endpoint to accept optional `widthM`/`heightM` parameters
-- [ ] When provided, use explicit dimensions instead of Solar API cached values for corner computation
-- [ ] Update frontend to pass selected model's dimensions in recompute-batch requests
-- [ ] Trigger batch flux recompute when panel model selection changes (dimensions affect energy output)
+- [x] Update `recompute-flux-batch` endpoint to accept optional `widthM`/`heightM` parameters
+- [x] When provided, use explicit dimensions instead of Solar API cached values for corner computation
+- [x] Update single-panel `/recompute` endpoint to accept optional `widthM`/`heightM` parameters
+- [x] Update frontend to pass selected model's dimensions in all recompute requests (single, batch on save, initial batch in usePanelState)
+- [x] Batch flux recompute on "Save & Continue" already uses selected model dimensions; no auto-recompute on model change (user may switch multiple times before saving)
 
 ### 3. Refinement: AnalysisPage Panel Model Display
 

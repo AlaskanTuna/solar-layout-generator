@@ -1,5 +1,16 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [24/03/26] - Phase 4.2 Task 2: Backend Recompute with Explicit Panel Dimensions
+
+- **Shared Types:** Added optional `widthM`/`heightM` fields to `FluxRecomputeRequest` in `shared/index.ts`.
+- **Backend Validator:** Added optional `widthM`/`heightM` (positive number) to Zod schemas for both single and batch recompute endpoints.
+- **Backend Route:** Both `/recompute` and `/recompute-batch` now use request-provided `widthM`/`heightM` when available, falling back to `buildingInsightsJson` values. Batch endpoint computes default pixel dimensions once and overrides per-panel when explicit dimensions are provided.
+- **Frontend Passthrough:** All three recompute call sites now pass the selected panel model's dimensions:
+  - Single-panel recompute on drag/rotate (WorkbenchPage `recomputePanel`)
+  - Batch recompute on "Save & Continue" (WorkbenchPage `handleSaveAndContinue`)
+  - Initial batch recompute on page load (`usePanelState` hook)
+- **Verification:** `tsc -b` clean across all 3 workspaces. 47 frontend tests pass, 24 backend tests pass.
+
 ## [24/03/26] - Phase 4.2 Task 1: Panel Model List Fixes + Dimension-Aware Rendering
 
 - **Google Default Model Visible:** Removed the `.filter()` that excluded the Google Solar API Default model from the WorkbenchPage panel model dropdown. All 6 models are now selectable.

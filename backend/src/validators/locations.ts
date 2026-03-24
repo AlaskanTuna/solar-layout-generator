@@ -12,7 +12,9 @@ export const fluxRecomputeSchema = z.object({
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180)
   }),
-  rotation: z.number()
+  rotation: z.number(),
+  widthM: z.number().positive().optional(),
+  heightM: z.number().positive().optional()
 })
 
 export const fluxRecomputeBatchSchema = z.object({

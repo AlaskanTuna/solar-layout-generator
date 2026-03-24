@@ -220,6 +220,8 @@ export function WorkbenchPage() {
     editedLayout: project?.editedLayout ?? null,
     maxArrayPanelsCount: buildingInsights?.solarPotential.maxArrayPanelsCount ?? 0,
     carbonOffsetFactorKgPerMwh: buildingInsights?.solarPotential.carbonOffsetFactorKgPerMwh ?? 0,
+    panelWidthM: selectedPanelModel.widthM,
+    panelHeightM: selectedPanelModel.heightM,
     onBatchRecomputeStatusChange: setInitialBatchStatus
   })
 
@@ -354,7 +356,9 @@ export function WorkbenchPage() {
       const result = await recomputeFlux(project.locationId, {
         panelId,
         center,
-        rotation
+        rotation,
+        widthM: selectedPanelModel.widthM,
+        heightM: selectedPanelModel.heightM
       })
       updatePanelEnergy(result.panelId, result.monthlyEnergyDcKwh)
       setMessage(null)
@@ -452,7 +456,9 @@ export function WorkbenchPage() {
         panels: activePanels.map((panel) => ({
           panelId: panel.id,
           center: panel.center,
-          rotation: panel.rotation
+          rotation: panel.rotation,
+          widthM: selectedPanelModel.widthM,
+          heightM: selectedPanelModel.heightM
         }))
       })
 
