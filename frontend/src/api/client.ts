@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 
 export class ApiError extends Error {
   constructor(
@@ -11,6 +11,7 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const supabase = getSupabase()
   const {
     data: { session }
   } = await supabase.auth.getSession()
