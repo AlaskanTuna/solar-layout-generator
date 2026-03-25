@@ -23,7 +23,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   ANALYSIS_DISCLAIMERS,
   MONTH_LABELS,
@@ -42,7 +41,10 @@ import {
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { ChevronDown, ChevronRight, X } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
+import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
+import { LoadingOverlay } from '@/components/LoadingOverlay'
+import { GuidedTour, type TourStep } from '@/components/GuidedTour'
 import { getPanelModel } from '@shared/types'
 
 const currencyFormatter = new Intl.NumberFormat('en-MY', {
@@ -94,6 +96,87 @@ const NEM_TOOLTIPS: Record<string, string> = {
   creditUsed: 'Excess solar credits from previous months applied to reduce this month\'s bill.',
   creditBalance: 'Unused solar credits carried forward to offset future months\' bills.',
   creditForfeited: 'Credits that expired at year-end (December) — NEM credits cannot be carried into the next year.'
+}
+
+const ANALYSIS_TOUR_STEPS: TourStep[] = [
+  {
+    title: 'Welcome to your Solar Analysis',
+    description:
+      'This page estimates how much you could save on your electricity bill with solar panels. Let\'s walk through the key sections.'
+  },
+  {
+    target: '[data-tour="consumption-input"]',
+    title: 'Your Electricity Usage',
+    description:
+      'Enter your average monthly kWh from your TNB bill. This is the most important input — it determines your baseline bill and potential savings.'
+  },
+  {
+    target: '[data-tour="view-toggle"]',
+    title: 'Simple vs Advanced View',
+    description:
+      'Simple view shows your key savings at a glance. Switch to Advanced for full tariff breakdowns, bill components, and system assumptions.'
+  },
+  {
+    target: '[data-tour="hero-cards"]',
+    title: 'Your Savings Summary',
+    description:
+      'These cards show your average monthly savings, annual savings, payback period, and carbon offset. Hover the info icons for explanations.'
+  },
+  {
+    target: '[data-tour="export-pdf"]',
+    title: 'Export Your Report',
+    description: 'When you\'re satisfied with the analysis, export a PDF report to share with installers or family.'
+  }
+]
+
+function azimuthToCompass(deg: number): string {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+  return directions[Math.round(((deg % 360) + 360) % 360 / 45) % 8]
+}
+
+/** Controlled text input for degradation rate that preserves intermediate states like "0." */
+function DegradationInput({ value, onChange }: { value: number; onChange: (rate: number) => void }) {
+  const [text, setText] = useState(() => (value === 0 ? '' : String(Math.round(value * 10000) / 100)))
+  const [focused, setFocused] = useState(false)
+
+  // Sync external value changes when not focused
+  useEffect(() => {
+    if (!focused) setText(value === 0 ? '' : String(Math.round(value * 10000) / 100))
+  }, [value, focused])
+
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      placeholder="e.g. 0.5"
+      value={text}
+      onFocus={() => setFocused(true)}
+      onBlur={() => {
+        setFocused(false)
+        const parsed = parseFloat(text)
+        if (text === '' || !Number.isFinite(parsed)) {
+          onChange(0)
+          setText('')
+        } else {
+          onChange(parsed / 100)
+          setText(String(Math.round((parsed / 100) * 10000) / 100))
+        }
+      }}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/[^0-9.]/g, '')
+        // Prevent multiple dots
+        const parts = raw.split('.')
+        const sanitized = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : raw
+        setText(sanitized)
+        const parsed = parseFloat(sanitized)
+        if (sanitized === '' || sanitized === '.') {
+          onChange(0)
+        } else if (Number.isFinite(parsed)) {
+          onChange(parsed / 100)
+        }
+      }}
+    />
+  )
 }
 
 function buildChartData(simulation: ReturnType<typeof runAnnualSimulation>) {
@@ -180,7 +263,6 @@ export function AnalysisPage() {
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('simple')
   const [benefitPeriod, setBenefitPeriod] = useState<1 | 5 | 10>(10)
   const [monthTableOpen, setMonthTableOpen] = useState(false)
-  const [showBanner, setShowBanner] = useState(() => !localStorage.getItem('slg-onboarding-dismissed-analysis'))
 
   const projectQuery = useQuery({
     queryKey: ['project', projectId],
@@ -258,7 +340,10 @@ export function AnalysisPage() {
       systemCostRm: savedConfig?.systemCostRm ?? defaultSystemCostRm,
       afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault,
       degradationRate: savedConfig?.degradationRate ?? 0.005,
-      consumptionProfile: savedConfig?.consumptionProfile ?? 'flat'
+      consumptionProfile: savedConfig?.consumptionProfile ?? 'flat',
+      performanceRatio: savedConfig?.performanceRatio ?? 0.8,
+      assumedLosses: savedConfig?.assumedLosses ?? 0.2,
+      dcAcRatio: savedConfig?.dcAcRatio ?? 1.2
     })
     initializedProjectIdRef.current = projectId
   }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights, selectedPanelModel])
@@ -357,45 +442,13 @@ export function AnalysisPage() {
 
   if (projectQuery.isLoading || tariffQuery.isLoading || locationQuery.isLoading || !formState || !buildingInsights) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
-          <aside className="xl:w-[24rem] xl:min-w-[24rem]">
-            <Card className="border-stone-200 bg-white/92 shadow-sm">
-              <CardHeader className="space-y-3">
-                <Skeleton className="h-6 w-40" />
-                <Skeleton className="h-4 w-full" />
-                <div className="grid grid-cols-2 gap-2">
-                  <Skeleton className="h-16 rounded-lg" />
-                  <Skeleton className="h-16 rounded-lg" />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-20 rounded-xl" />
-                <Skeleton className="h-20 rounded-xl" />
-                <Skeleton className="h-20 rounded-xl" />
-                <Skeleton className="h-10 w-full" />
-              </CardContent>
-            </Card>
-          </aside>
-          <section className="min-w-0 flex-1 space-y-6">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[0, 1, 2].map((i) => (
-                <Card key={i}>
-                  <CardContent className="py-6">
-                    <Skeleton className="mx-auto h-4 w-20" />
-                    <Skeleton className="mx-auto mt-2 h-8 w-28" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <Card>
-              <CardContent className="py-6">
-                <Skeleton className="h-64 w-full rounded-lg" />
-              </CardContent>
-            </Card>
-          </section>
-        </div>
-      </div>
+      <LoadingOverlay
+        hints={[
+          'Loading your analysis...',
+          'Preparing tariff data...',
+          'Crunching the numbers for your solar savings...'
+        ]}
+      />
     )
   }
 
@@ -433,24 +486,7 @@ export function AnalysisPage() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
-      {showBanner && (
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 pt-4">
-          <div className="flex-1 rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-700">
-            <span className="mr-2 font-medium text-stone-500">Step 3 of 3</span>
-            See how much you could save on your electricity bill with solar — adjust your usage below.
-          </div>
-          <button
-            type="button"
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
-            onClick={() => {
-              localStorage.setItem('slg-onboarding-dismissed-analysis', 'true')
-              setShowBanner(false)
-            }}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
+      <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
         <aside className="xl:w-[24rem] xl:min-w-[24rem]">
           <Card className="border-stone-200 bg-white/92 shadow-sm">
@@ -509,11 +545,16 @@ export function AnalysisPage() {
                 </div>
               )}
 
-              <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+              <div data-tour="consumption-input" className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
                   <Label>
                     Monthly Electricity Consumption (kWh)
-                    <InfoTooltip text="Your average monthly electricity usage in kWh. Check your TNB bill for the 'kWh Usage' figure. The same value is applied to all 12 months." />
+                    <InfoTooltip>
+                      <div className="space-y-1.5">
+                        <p>Your average monthly electricity usage in kWh. Look for "Purata Penggunaan" on your TNB bill:</p>
+                        <img src={tnbBillImg} alt="TNB bill showing average kWh usage" className="w-full rounded" />
+                      </div>
+                    </InfoTooltip>
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     Enter the kWh amount from your TNB bill, not the RM amount.
@@ -592,7 +633,7 @@ export function AnalysisPage() {
                 <div className="space-y-1">
                   <Label>
                     System Cost
-                    <InfoTooltip text="Total estimated installation cost in RM. Default is RM 4,500 per kWp. Adjust based on actual installer quotes." />
+                    <InfoTooltip text="Total estimated installation cost. When a panel model is selected, this is calculated as panels × panel capacity × cost per watt. Otherwise falls back to RM 4,500/kWp. Adjust based on actual installer quotes." />
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     Used for payback and 10-year net benefit calculations.
@@ -654,33 +695,65 @@ export function AnalysisPage() {
                     <div className="space-y-1">
                       <Label>
                         Panel Degradation
-                        <InfoTooltip text="Annual generation decline rate. N-type panels: ~0.5%/yr. Older PERC panels: ~0.7%/yr." />
+                        <InfoTooltip text="Annual generation decline rate. A higher rate means your panels produce less each year, reducing long-term savings and extending payback. N-type panels: ~0.5%/yr. Older PERC panels: ~0.7%/yr." />
                       </Label>
                       <p className="text-xs text-muted-foreground">%/year — affects payback and 10-year projections</p>
                     </div>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="e.g. 0.5"
-                      value={formState.degradationRate === 0 ? '' : String(Math.round(formState.degradationRate * 10000) / 100)}
-                      onChange={(event) => {
-                        const raw = event.target.value.replace(/[^0-9.]/g, '')
-                        const parsed = parseFloat(raw)
-                        setFormState((current) =>
-                          current
-                            ? {
-                                ...current,
-                                degradationRate:
-                                  raw === ''
-                                    ? 0
-                                    : Number.isFinite(parsed)
-                                      ? parsed / 100
-                                      : current.degradationRate
-                              }
-                            : current
-                        )
-                      }}
+                    <DegradationInput
+                      value={formState.degradationRate}
+                      onChange={(rate) => setFormState((c) => (c ? { ...c, degradationRate: rate } : c))}
                     />
+                  </div>
+
+                  <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+                    <Label className="text-xs font-medium text-stone-500">System Assumptions</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">PR (%)</Label>
+                        <Input
+                          type="number"
+                          min={50}
+                          max={100}
+                          step={1}
+                          value={Math.round(formState.performanceRatio * 100)}
+                          onChange={(e) => {
+                            const v = Number(e.target.value)
+                            if (v >= 50 && v <= 100)
+                              setFormState((c) => (c ? { ...c, performanceRatio: v / 100 } : c))
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">Losses (%)</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={50}
+                          step={1}
+                          value={Math.round(formState.assumedLosses * 100)}
+                          onChange={(e) => {
+                            const v = Number(e.target.value)
+                            if (v >= 0 && v <= 50)
+                              setFormState((c) => (c ? { ...c, assumedLosses: v / 100 } : c))
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">DC/AC</Label>
+                        <Input
+                          type="number"
+                          min={1.0}
+                          max={2.0}
+                          step={0.1}
+                          value={formState.dcAcRatio}
+                          onChange={(e) => {
+                            const v = Number(e.target.value)
+                            if (v >= 1.0 && v <= 2.0)
+                              setFormState((c) => (c ? { ...c, dcAcRatio: v } : c))
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
@@ -689,7 +762,7 @@ export function AnalysisPage() {
                 <Button variant="outline" asChild>
                   <Link to={`/project/${projectId}/workbench`}>Back to Workbench</Link>
                 </Button>
-                <Button variant="outline" onClick={handleExportPdf} disabled={isExporting}>
+                <Button data-tour="export-pdf" variant="outline" onClick={handleExportPdf} disabled={isExporting}>
                   {isExporting ? 'Exporting PDF...' : 'Export PDF'}
                 </Button>
                 <Button onClick={() => void handleSaveAnalysis()} disabled={saveMutation.isPending}>
@@ -701,7 +774,7 @@ export function AnalysisPage() {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-6">
-          <div className="inline-flex rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm">
+          <div data-tour="view-toggle" className="inline-flex rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm">
             <button
               type="button"
               className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
@@ -721,7 +794,7 @@ export function AnalysisPage() {
             Simple shows key savings figures. Advanced adds tariff breakdowns, projections, and system details.
           </p>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div data-tour="hero-cards" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
                 <p className="text-sm text-muted-foreground">
@@ -837,10 +910,10 @@ export function AnalysisPage() {
               const netBenefit5yr = round2(computeDegradedSavings(year1Savings, dr, 5) - formState.systemCostRm)
               const netBenefit10yr = round2(computeDegradedSavings(year1Savings, dr, 10) - formState.systemCostRm)
               const netBenefitData = [
-                { period: '1 Year', value: netBenefit1yr },
-                { period: '5 Years', value: netBenefit5yr },
-                { period: '10 Years', value: netBenefit10yr }
-              ]
+                benefitPeriod === 1 && { period: '1 Year', value: netBenefit1yr },
+                benefitPeriod === 5 && { period: '5 Years', value: netBenefit5yr },
+                benefitPeriod === 10 && { period: '10 Years', value: netBenefit10yr }
+              ].filter(Boolean) as { period: string; value: number }[]
               const selectedBenefit =
                 benefitPeriod === 1 ? netBenefit1yr : benefitPeriod === 5 ? netBenefit5yr : netBenefit10yr
 
@@ -912,7 +985,7 @@ export function AnalysisPage() {
                       Performance Ratio
                       <InfoTooltip text="The percentage of theoretical solar output your system actually delivers, accounting for real-world inefficiencies." />
                     </p>
-                    <p className="mt-1 text-lg font-semibold">80%</p>
+                    <p className="mt-1 text-lg font-semibold">{Math.round(formState.performanceRatio * 100)}%</p>
                     <p className="text-xs text-stone-400">Typical for Malaysian residential systems</p>
                   </div>
                   <div className="rounded-lg bg-stone-50 p-3">
@@ -922,7 +995,10 @@ export function AnalysisPage() {
                   </div>
                   {buildingInsights.solarPotential.panelLifetimeYears && (
                     <div className="rounded-lg bg-stone-50 p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Panel Lifetime</p>
+                      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                        Panel Lifetime
+                        <InfoTooltip text="How long the panels are expected to generate electricity. Payback must happen within this period for the investment to be worthwhile." />
+                      </p>
                       <p className="mt-1 text-lg font-semibold">
                         {buildingInsights.solarPotential.panelLifetimeYears} years
                       </p>
@@ -933,10 +1009,11 @@ export function AnalysisPage() {
                     <div className="rounded-lg bg-stone-50 p-3">
                       <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
                         Roof Azimuth / Pitch
-                        <InfoTooltip text="Azimuth is the compass direction your roof faces (180° = south). Pitch is the roof's tilt angle from horizontal." />
+                        <InfoTooltip text="Azimuth is the compass direction your roof faces: 0° = North, 90° = East, 180° = South, 270° = West. In Malaysia, south-facing roofs get the most sunlight. Pitch is how steep your roof is — 0° is flat, 45° is a steep slope." />
                       </p>
                       <p className="mt-1 text-lg font-semibold">
-                        {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}° /{' '}
+                        {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}° (
+                        {azimuthToCompass(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}) /{' '}
                         {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].pitchDegrees)}°
                       </p>
                       <p className="text-xs text-stone-400">Primary roof segment (from Solar API)</p>
@@ -947,7 +1024,7 @@ export function AnalysisPage() {
                       Assumed Losses
                       <InfoTooltip text="Energy lost to dust, wiring, inverter conversion, and heat — typically around 20% for residential systems." />
                     </p>
-                    <p className="mt-1 text-lg font-semibold">~20%</p>
+                    <p className="mt-1 text-lg font-semibold">{Math.round(formState.assumedLosses * 100)}%</p>
                     <p className="text-xs text-stone-400">Soiling, cable, inverter, temperature</p>
                   </div>
                   <div className="rounded-lg bg-stone-50 p-3">
@@ -955,7 +1032,7 @@ export function AnalysisPage() {
                       DC/AC Ratio
                       <InfoTooltip text="The ratio of panel capacity to inverter capacity. A ratio of 1.2 means slightly more panel power than the inverter can handle at peak, which maximises output across the day." />
                     </p>
-                    <p className="mt-1 text-lg font-semibold">1.2</p>
+                    <p className="mt-1 text-lg font-semibold">{formState.dcAcRatio}</p>
                     <p className="text-xs text-stone-400">Standard residential inverter sizing</p>
                   </div>
                 </div>
@@ -1035,7 +1112,10 @@ export function AnalysisPage() {
                       </div>
                     </div>
                     <div className="mt-4 border-t border-stone-200 pt-3">
-                      <p className="text-sm text-stone-500">Total</p>
+                      <p className="text-sm text-stone-500">
+                        Total
+                        <InfoTooltip text="Energy + Capacity + Network + Retail + AFA − EEI Rebate + RE Fund + SST" />
+                      </p>
                       <p className="text-xl font-semibold">{formatCurrency(selectedMonth.baselineBill.total)}</p>
                     </div>
                   </div>
@@ -1094,9 +1174,15 @@ export function AnalysisPage() {
                       </div>
                     </div>
                     <div className="mt-4 border-t border-emerald-200 pt-3">
-                      <p className="text-sm text-emerald-900/70">Savings</p>
+                      <p className="text-sm text-emerald-900/70">
+                        Total
+                        <InfoTooltip text={`${formatCurrency(selectedMonth.baselineBill.total)} (without solar) − ${formatCurrency(selectedMonth.savingsRm)} (savings) = ${formatCurrency(selectedMonth.nemBill.total)}`} />
+                      </p>
                       <p className="text-xl font-semibold text-emerald-950">
-                        {formatCurrency(selectedMonth.savingsRm)}
+                        {formatCurrency(selectedMonth.nemBill.total)}
+                      </p>
+                      <p className="text-xs text-emerald-700">
+                        You save {formatCurrency(selectedMonth.savingsRm)} this month
                       </p>
                     </div>
                   </div>
@@ -1133,7 +1219,7 @@ export function AnalysisPage() {
                           <th className="px-3 py-2 font-medium">Credit Balance</th>
                           <th className="px-3 py-2 font-medium">Baseline Bill</th>
                           <th className="px-3 py-2 font-medium">NEM Bill</th>
-                          <th className="px-3 py-2 font-medium">Savings</th>
+                          <th className="px-3 py-2 font-medium">Total Savings</th>
                         </tr>
                       </thead>
                       <tbody>

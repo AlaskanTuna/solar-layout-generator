@@ -1,5 +1,36 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
-import { X } from 'lucide-react'
+import { LoadingOverlay } from '@/components/LoadingOverlay'
+import { GuidedTour, type TourStep } from '@/components/GuidedTour'
+
+const WORKBENCH_TOUR_STEPS: TourStep[] = [
+  {
+    title: 'Welcome to the Roof Layout Workbench',
+    description:
+      'This is your rooftop with solar panels placed by satellite analysis. You can adjust the layout before moving to financial analysis.'
+  },
+  {
+    target: '[data-tour="panel-model"]',
+    title: 'Choose Your Panel Model',
+    description: 'Select from different solar panel models. Changing the model updates panel dimensions and energy yield.'
+  },
+  {
+    target: '[data-tour="panel-count"]',
+    title: 'Adjust Panel Count',
+    description:
+      'Use the slider to add or remove panels. Higher-yield panels are kept first when you reduce the count.'
+  },
+  {
+    target: '[data-tour="canvas"]',
+    title: 'Your Roof Canvas',
+    description:
+      'Click any panel to select it. Drag to reposition. Use the rotation slider in the sidebar to adjust angle. Press Delete to remove a panel.'
+  },
+  {
+    target: '[data-tour="save-continue"]',
+    title: 'Save & Continue',
+    description: 'When you\'re happy with the layout, click here to save and move to the financial analysis page.'
+  }
+]
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { Image as KonvaImage, Layer, Stage } from 'react-konva'
@@ -11,7 +42,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Slider } from '@/components/ui/slider'
 import { usePanelState, type BatchRecomputeStatus } from '@/hooks/usePanelState'
 import { useWorkbenchData } from '@/hooks/useWorkbenchData'
@@ -167,7 +197,6 @@ export function WorkbenchPage() {
   const [stageScale, setStageScale] = useState(1)
   const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 })
   const [overlayMode, setOverlayMode] = useState<'rgb' | 'annual-flux' | 'dsm'>('rgb')
-  const [showBanner, setShowBanner] = useState(() => !localStorage.getItem('slg-onboarding-dismissed-workbench'))
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null)
   const [overlayExpanded, setOverlayExpanded] = useState(false)
   const zoomSnapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -690,43 +719,13 @@ export function WorkbenchPage() {
 
   if (isLoading || !project || !buildingInsights || !backgroundImage) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
-          <aside className="xl:w-[22rem] xl:min-w-[22rem]">
-            <Card className="border-stone-200 bg-white/90 shadow-sm">
-              <CardHeader className="space-y-3">
-                <Skeleton className="h-6 w-40" />
-                <Skeleton className="h-4 w-full" />
-                <div className="grid grid-cols-2 gap-2">
-                  <Skeleton className="h-16 rounded-lg" />
-                  <Skeleton className="h-16 rounded-lg" />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-24 rounded-xl" />
-                <Skeleton className="h-10 w-full" />
-              </CardContent>
-            </Card>
-          </aside>
-          <section className="min-w-0 flex-1">
-            <Card className="overflow-hidden border-stone-200 bg-white/90 shadow-sm">
-              <CardHeader className="border-b border-stone-200 bg-stone-50/70">
-                <Skeleton className="h-5 w-48" />
-                <Skeleton className="mt-1 h-4 w-72" />
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
-                    Loading rooftop image...
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        </div>
-      </div>
+      <LoadingOverlay
+        hints={[
+          'Loading your rooftop image...',
+          'Mapping solar panels to your roof...',
+          'Preparing the layout workbench...'
+        ]}
+      />
     )
   }
 
@@ -736,24 +735,7 @@ export function WorkbenchPage() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
-      {showBanner && (
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 pt-4">
-          <div className="flex-1 rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-700">
-            <span className="mr-2 font-medium text-stone-500">Step 2 of 3</span>
-            Drag, rotate, or remove the solar panels on your roof, then click Save & Continue.
-          </div>
-          <button
-            type="button"
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
-            onClick={() => {
-              localStorage.setItem('slg-onboarding-dismissed-workbench', 'true')
-              setShowBanner(false)
-            }}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
+      <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
         <aside className="xl:w-[22rem] xl:min-w-[22rem]">
           <Card className="border-stone-200 bg-white/90 shadow-sm">
@@ -830,7 +812,7 @@ export function WorkbenchPage() {
                 </div>
               )}
 
-              <div className="space-y-3">
+              <div data-tour="panel-model" className="space-y-3">
                 <Label>
                   Panel Model
                   <InfoTooltip text="Select the solar panel model. Changing the model updates panel dimensions on the canvas and recalculates energy yield for all panels." />
@@ -849,7 +831,7 @@ export function WorkbenchPage() {
                 </select>
               </div>
 
-              <div className="space-y-3">
+              <div data-tour="panel-count" className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>
                     Panel Quantity
@@ -963,7 +945,7 @@ export function WorkbenchPage() {
                 <Button variant="outline" asChild>
                   <Link to="/dashboard">Back to Dashboard</Link>
                 </Button>
-                <Button onClick={handleSave} disabled={isSaving || pendingPanelId !== null}>
+                <Button data-tour="save-continue" onClick={handleSave} disabled={isSaving || pendingPanelId !== null}>
                   {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
                 </Button>
               </div>
@@ -972,7 +954,7 @@ export function WorkbenchPage() {
         </aside>
 
         <section className="min-w-0 flex-1">
-          <Card className="overflow-hidden border-stone-200 bg-white/90 shadow-sm">
+          <Card data-tour="canvas" className="overflow-hidden border-stone-200 bg-white/90 shadow-sm">
             <CardHeader className="border-b border-stone-200 bg-stone-50/70">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>

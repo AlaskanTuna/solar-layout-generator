@@ -933,7 +933,56 @@
 
 ## Phase 5: Post-MVP Enhancements and Polish
 
-### 1. Enhancement: Dashboard Improvements
+### 1. Fix: AnalysisPage Bug Fixes and Quick Improvements
+
+**Purpose/Issue:** Multiple issues identified during manual testing: Net Benefit Projection graph always shows all 3 periods regardless of filter, degradation input won't accept values starting with 0, system cost tooltip is misleading, bill breakdown display requires mental math, and several tooltips need clarification.
+
+**Implementation:**
+
+- [x] Fix Net Benefit Projection graph: filter `netBenefitData` by selected `benefitPeriod` so the chart shows only the selected period's bar
+- [x] Fix degradation input: preserve raw text during editing to allow intermediate states like "0." before completing "0.5"
+- [x] Update System Cost tooltip to explain panel-model-based calculation (`panels × Wp × cost/Wp`) vs the flat RM4,500/kWp fallback
+- [x] Update Degradation tooltip to mention its effect on Net Benefit Projection and payback calculations
+- [x] Update Roof Azimuth/Pitch tooltip: add compass direction label (e.g., "357° ≈ North") and explain pitch as roof steepness
+- [x] Add Panel Lifetime tooltip explaining why it matters for payback and ROI
+- [x] Bill Component Breakdown: right side ("With Solar") should show the post-savings total, not the savings amount; add tooltip beside both "Total" labels showing the calculation formula
+- [x] Rename "Savings" to "Total Savings" in the Month-by-Month Breakdown table
+- [x] Add TNB bill reference image (`assets/tnb-bill-avg-kwh.png`) to the Monthly Consumption tooltip
+
+### 2. Feature: Configurable System Assumptions
+
+**Purpose/Issue:** System Assumptions card shows hardcoded values (PR 80%, losses 20%, DC/AC 1.2). These should be editable in Advanced view so users can adjust based on their specific system. Changes must reflect in the System Assumptions card and any downstream calculations.
+
+**Implementation:**
+
+- [x] Add `performanceRatio`, `assumedLosses`, and `dcAcRatio` to `AnalysisConfig` type and form state with sensible defaults
+- [x] Add input fields for these values in the Advanced view sidebar (near existing degradation input)
+- [x] Update the System Assumptions card to display the current form values instead of hardcoded constants
+- [x] Persist these values in the analysis config save payload
+
+### 3. Feature: Frosted Loading Screen
+
+**Purpose/Issue:** Page transitions show blank loading skeletons. Replace with a visually polished frosted blur overlay with a spinner and rotating hint text for a smoother experience.
+
+**Implementation:**
+
+- [x] Create a reusable `LoadingOverlay` component: frosted `backdrop-blur` overlay, centered spinner, and cycling hint sentences with soft fade-in/out
+- [x] Define hint text arrays per page (e.g., "Your rooftop is being analysed...", "Mapping solar panels to your roof...")
+- [x] Replace loading skeleton/guard returns in WorkbenchPage and AnalysisPage with `LoadingOverlay`
+
+### 4. Feature: Guided Tour Onboarding System
+
+**Purpose/Issue:** Current onboarding banners are passive — users dismiss them without reading. Replace with an interactive guided tour modal that walks users through key UI elements step by step, with a floating '?' button to retrigger the tour.
+
+**Implementation:**
+
+- [x] Build a `GuidedTour` component: floating positioned modal with title, description, Back/Next navigation, close button inside the modal, highlight/point at target elements
+- [x] Define per-page tour step sequences (MapPage: search bar; WorkbenchPage: panel model, count, canvas, save; AnalysisPage: consumption input, view toggle, hero cards, export)
+- [x] Add a floating '?' icon button at the bottom-right of every page to retrigger the tour
+- [x] Remove old localStorage-based onboarding banners from MapPage, WorkbenchPage, and AnalysisPage
+- [x] Auto-show tour on first visit (use localStorage to track whether tour has been completed per page)
+
+### 5. Enhancement: Dashboard Improvements
 
 **Purpose/Issue:** Dashboard currently shows basic project cards. Improve UX before UAT participants see it.
 

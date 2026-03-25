@@ -1,7 +1,8 @@
+import { type ReactNode } from 'react'
 import { Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-export function InfoTooltip({ text }: { text: string }) {
+export function InfoTooltip({ text, children }: { text?: string; children?: ReactNode }) {
   return (
     <TooltipProvider delayDuration={200}>
       <Tooltip>
@@ -11,7 +12,7 @@ export function InfoTooltip({ text }: { text: string }) {
           </button>
         </TooltipTrigger>
         <TooltipContent side="top" className="max-w-xs whitespace-pre-line text-xs">
-          {text}
+          {children ?? text}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -11,6 +11,9 @@ export type AnalysisConfig = {
   systemKwp: number
   degradationRate: number // e.g. 0.005 = 0.5%/year
   consumptionProfile: ConsumptionProfile
+  performanceRatio: number // e.g. 0.80 = 80%
+  assumedLosses: number // e.g. 0.20 = 20%
+  dcAcRatio: number // e.g. 1.2
 }
 
 export type AnalysisResultsRecord = {
@@ -123,6 +126,9 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   const systemKwp = getNumber(raw.systemKwp)
   const degradationRate = getNumber(raw.degradationRate)
   const consumptionProfile = getConsumptionProfile(raw.consumptionProfile)
+  const performanceRatio = getNumber(raw.performanceRatio)
+  const assumedLosses = getNumber(raw.assumedLosses)
+  const dcAcRatio = getNumber(raw.dcAcRatio)
 
   return {
     ...(monthlyConsumptionKwh !== null ? { monthlyConsumptionKwh } : {}),
@@ -131,7 +137,10 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
     ...(afaRateSenPerKwh !== null ? { afaRateSenPerKwh } : {}),
     ...(systemKwp !== null ? { systemKwp } : {}),
     ...(degradationRate !== null ? { degradationRate } : {}),
-    ...(consumptionProfile ? { consumptionProfile } : {})
+    ...(consumptionProfile ? { consumptionProfile } : {}),
+    ...(performanceRatio !== null ? { performanceRatio } : {}),
+    ...(assumedLosses !== null ? { assumedLosses } : {}),
+    ...(dcAcRatio !== null ? { dcAcRatio } : {})
   }
 }
 

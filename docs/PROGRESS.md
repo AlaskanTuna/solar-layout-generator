@@ -1,5 +1,13 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [25/03/26] - Phase 5: Post-MVP Enhancements and Polish
+
+- **Bug Fixes (5.1):** Fixed Net Benefit Projection graph to filter by selected period (was showing all 3 bars). Created `DegradationInput` component with local text state to allow typing "0.5" without fighting the formatter. Updated System Cost tooltip to explain panel-model-based calculation. Improved degradation, azimuth/pitch (with compass direction label like "357° (N)"), and panel lifetime tooltips. Changed "With Solar" bill breakdown to show post-savings total with formula tooltip instead of savings amount. Renamed "Savings" to "Total Savings" in month-by-month table. Added TNB bill reference image to consumption tooltip (extended `InfoTooltip` to support children/ReactNode).
+- **Configurable System Assumptions (5.2):** Added `performanceRatio`, `assumedLosses`, and `dcAcRatio` to `AnalysisConfig`. Added compact 3-column input grid in Advanced sidebar. System Assumptions card now reflects live form values instead of hardcoded constants.
+- **Frosted Loading Screen (5.3):** Created `LoadingOverlay` component with `backdrop-blur`, spinning loader, and cycling hint text (3s interval, 300ms fade). Replaced skeleton loading guards in WorkbenchPage and AnalysisPage.
+- **Guided Tour System (5.4):** Built `GuidedTour` component with positioned floating modal, Back/Next/Done navigation, backdrop blur, scroll-to-target, and floating `?` trigger button. Defined per-page tour steps: MapPage (2 steps), WorkbenchPage (5 steps), AnalysisPage (5 steps). Added `data-tour` attributes to key elements. Removed old localStorage-based onboarding banners from all 3 pages.
+- **Verification:** Frontend TSC clean. 94 frontend tests pass. Cleaned up unused Skeleton and X imports.
+
 ## [25/03/26] - Phase 4.4: Tooltip & Guidance Pass (Ease-of-Use)
 
 - **Page Onboarding Banners:** Added dismissable first-visit banners to MapPage ("Step 1 of 3"), WorkbenchPage ("Step 2 of 3"), and AnalysisPage ("Step 3 of 3") with localStorage persistence so they only show once. Styled as soft stone-50 banners with X dismiss button.
