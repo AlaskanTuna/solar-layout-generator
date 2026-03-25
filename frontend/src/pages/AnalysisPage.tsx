@@ -42,7 +42,7 @@ import {
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, X } from 'lucide-react'
 import { getPanelModel } from '@shared/types'
 
 const currencyFormatter = new Intl.NumberFormat('en-MY', {
@@ -76,6 +76,24 @@ function sanitizeFileName(value: string) {
 function buildPdfFileName(projectName: string) {
   const date = new Date().toISOString().slice(0, 10)
   return `Solar_Analysis_${sanitizeFileName(projectName) || 'Project'}_${date}.pdf`
+}
+
+const BILL_TOOLTIPS: Record<string, string> = {
+  energy: 'The base electricity charge, calculated from your kWh usage at TNB\'s tiered rates.',
+  capacity: 'A fixed charge based on your connection capacity, applied to usage above 600 kWh.',
+  network: 'Covers the cost of maintaining the electricity grid that delivers power to your home.',
+  retail: 'An additional surcharge applied to usage above 600 kWh.',
+  afa: 'Automatic Fuel Adjustment — a government-set surcharge (or rebate) that reflects fuel cost changes.',
+  eeiRebate: 'Energy Efficiency Incentive — a rebate that rewards lower electricity consumption.',
+  reFund: 'Renewable Energy Fund — a 1.6% levy that funds Malaysia\'s renewable energy development.',
+  sst: 'Sales and Service Tax (8%) — applies only when monthly usage exceeds 600 kWh.'
+}
+
+const NEM_TOOLTIPS: Record<string, string> = {
+  billableKwh: 'Your consumption minus solar generation — this is what TNB actually charges you for.',
+  creditUsed: 'Excess solar credits from previous months applied to reduce this month\'s bill.',
+  creditBalance: 'Unused solar credits carried forward to offset future months\' bills.',
+  creditForfeited: 'Credits that expired at year-end (December) — NEM credits cannot be carried into the next year.'
 }
 
 function buildChartData(simulation: ReturnType<typeof runAnnualSimulation>) {
@@ -162,6 +180,7 @@ export function AnalysisPage() {
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('simple')
   const [benefitPeriod, setBenefitPeriod] = useState<1 | 5 | 10>(10)
   const [monthTableOpen, setMonthTableOpen] = useState(false)
+  const [showBanner, setShowBanner] = useState(() => !localStorage.getItem('slg-onboarding-dismissed-analysis'))
 
   const projectQuery = useQuery({
     queryKey: ['project', projectId],
@@ -414,6 +433,24 @@ export function AnalysisPage() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
+      {showBanner && (
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 pt-4">
+          <div className="flex-1 rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-700">
+            <span className="mr-2 font-medium text-stone-500">Step 3 of 3</span>
+            See how much you could save on your electricity bill with solar — adjust your usage below.
+          </div>
+          <button
+            type="button"
+            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+            onClick={() => {
+              localStorage.setItem('slg-onboarding-dismissed-analysis', 'true')
+              setShowBanner(false)
+            }}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
         <aside className="xl:w-[24rem] xl:min-w-[24rem]">
           <Card className="border-stone-200 bg-white/92 shadow-sm">
@@ -428,7 +465,10 @@ export function AnalysisPage() {
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="rounded-lg bg-stone-100 p-3">
-                  <p className="text-stone-500">System Size</p>
+                  <p className="text-stone-500">
+                    System Size
+                    <InfoTooltip text="Kilowatt-peak (kWp) — the maximum power your solar system can produce under ideal sunlight conditions." />
+                  </p>
                   <p className="mt-1 text-lg font-semibold">{formatNumber(systemKwp, 'kWp')}</p>
                 </div>
                 <div className="rounded-lg bg-stone-100 p-3">
@@ -677,11 +717,17 @@ export function AnalysisPage() {
               Advanced
             </button>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Simple shows key savings figures. Advanced adds tariff breakdowns, projections, and system details.
+          </p>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
-                <p className="text-sm text-muted-foreground">Average Monthly Savings</p>
+                <p className="text-sm text-muted-foreground">
+                  Average Monthly Savings
+                  <InfoTooltip text="How much less you'd pay each month on average compared to not having solar." />
+                </p>
                 <p className="text-2xl font-semibold">{formatCurrency(analysisResults.averageMonthlySavingsRm)}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatNumber(analysisResults.averageMonthlySavingsPct, '%')}
@@ -690,7 +736,10 @@ export function AnalysisPage() {
             </Card>
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
-                <p className="text-sm text-muted-foreground">Annual Savings</p>
+                <p className="text-sm text-muted-foreground">
+                  Annual Savings
+                  <InfoTooltip text="Total savings across the full year — your bill without solar minus your bill with solar." />
+                </p>
                 <p className="text-2xl font-semibold">{formatCurrency(analysisResults.annualTotals.totalSavingsRm)}</p>
                 <p className="text-sm text-muted-foreground">
                   Baseline {formatCurrency(analysisResults.annualTotals.totalBaselineRm)}
@@ -699,7 +748,10 @@ export function AnalysisPage() {
             </Card>
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
-                <p className="text-sm text-muted-foreground">Simple Payback</p>
+                <p className="text-sm text-muted-foreground">
+                  Simple Payback
+                  <InfoTooltip text="How many years until your savings cover the cost of installing the system." />
+                </p>
                 <p className="text-2xl font-semibold">{formatNumber(analysisResults.paybackYears, 'years')}</p>
                 <span
                   className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${getRoiCondition(analysisResults.paybackYears).bgColor}`}
@@ -713,7 +765,10 @@ export function AnalysisPage() {
             </Card>
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardContent className="space-y-1 p-5">
-                <p className="text-sm text-muted-foreground">CO2 Offset</p>
+                <p className="text-sm text-muted-foreground">
+                  CO2 Offset
+                  <InfoTooltip text="The amount of carbon dioxide emissions avoided by generating clean solar energy instead of using grid power." />
+                </p>
                 <p className="text-2xl font-semibold">{formatNumber(analysisResults.carbonOffsetKg, 'kg/year')}</p>
                 <p className="text-sm text-muted-foreground">
                   Generation {formatNumber(analysisResults.annualTotals.totalGenerationKwh, 'kWh/year')}
@@ -726,7 +781,9 @@ export function AnalysisPage() {
             <Card className="border-stone-200 bg-white/90 shadow-sm">
               <CardHeader>
                 <CardTitle>Monthly Bill Comparison</CardTitle>
-                <CardDescription>Baseline bill versus post-solar NEM bill for each month.</CardDescription>
+                <CardDescription>
+                  Your estimated monthly bill without solar (baseline) versus with solar for each month.
+                </CardDescription>
               </CardHeader>
               <CardContent className="h-[340px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -747,7 +804,7 @@ export function AnalysisPage() {
               <Card className="border-stone-200 bg-white/90 shadow-sm">
                 <CardHeader>
                   <CardTitle>Cumulative Savings</CardTitle>
-                  <CardDescription>Running savings over the settlement year.</CardDescription>
+                  <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
                 </CardHeader>
                 <CardContent className="h-[340px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -793,7 +850,9 @@ export function AnalysisPage() {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <CardTitle>Net Benefit Projection</CardTitle>
-                        <CardDescription>Projected net benefit after deducting system cost.</CardDescription>
+                        <CardDescription>
+                          How much you gain (or lose) after subtracting the cost of installing your solar system.
+                        </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
                         <Label className="text-sm text-muted-foreground">Period</Label>
@@ -849,7 +908,10 @@ export function AnalysisPage() {
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Performance Ratio</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                      Performance Ratio
+                      <InfoTooltip text="The percentage of theoretical solar output your system actually delivers, accounting for real-world inefficiencies." />
+                    </p>
                     <p className="mt-1 text-lg font-semibold">80%</p>
                     <p className="text-xs text-stone-400">Typical for Malaysian residential systems</p>
                   </div>
@@ -871,6 +933,7 @@ export function AnalysisPage() {
                     <div className="rounded-lg bg-stone-50 p-3">
                       <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
                         Roof Azimuth / Pitch
+                        <InfoTooltip text="Azimuth is the compass direction your roof faces (180° = south). Pitch is the roof's tilt angle from horizontal." />
                       </p>
                       <p className="mt-1 text-lg font-semibold">
                         {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}° /{' '}
@@ -880,12 +943,18 @@ export function AnalysisPage() {
                     </div>
                   )}
                   <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Assumed Losses</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                      Assumed Losses
+                      <InfoTooltip text="Energy lost to dust, wiring, inverter conversion, and heat — typically around 20% for residential systems." />
+                    </p>
                     <p className="mt-1 text-lg font-semibold">~20%</p>
                     <p className="text-xs text-stone-400">Soiling, cable, inverter, temperature</p>
                   </div>
                   <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">DC/AC Ratio</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                      DC/AC Ratio
+                      <InfoTooltip text="The ratio of panel capacity to inverter capacity. A ratio of 1.2 means slightly more panel power than the inverter can handle at peak, which maximises output across the day." />
+                    </p>
                     <p className="mt-1 text-lg font-semibold">1.2</p>
                     <p className="text-xs text-stone-400">Standard residential inverter sizing</p>
                   </div>
@@ -900,7 +969,9 @@ export function AnalysisPage() {
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <CardTitle>Bill Component Breakdown</CardTitle>
-                    <CardDescription>Select a month to inspect the exact tariff components.</CardDescription>
+                    <CardDescription>
+                      See how your TNB bill is calculated — select a month to compare charges with and without solar.
+                    </CardDescription>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {MONTH_LABELS.map((label, index) => (
@@ -928,37 +999,38 @@ export function AnalysisPage() {
                 <CardContent className="grid gap-6 lg:grid-cols-2">
                   <div className="rounded-xl border border-stone-200 bg-stone-50/70 p-4">
                     <h3 className="text-sm font-semibold text-stone-900">Without Solar</h3>
+                    <p className="text-xs text-stone-400">What you'd pay at full consumption</p>
                     <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-stone-500">Energy</p>
+                        <p className="text-stone-500">Energy <InfoTooltip text={BILL_TOOLTIPS.energy} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.energy)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">Capacity</p>
+                        <p className="text-stone-500">Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.capacity)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">Network</p>
+                        <p className="text-stone-500">Network <InfoTooltip text={BILL_TOOLTIPS.network} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.network)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">Retail</p>
+                        <p className="text-stone-500">Retail <InfoTooltip text={BILL_TOOLTIPS.retail} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.retail)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">AFA</p>
+                        <p className="text-stone-500">AFA <InfoTooltip text={BILL_TOOLTIPS.afa} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.afa)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">EEI Rebate</p>
+                        <p className="text-stone-500">EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} /></p>
                         <p className="font-semibold">-{formatCurrency(selectedMonth.baselineBill.eeiRebate)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">RE Fund</p>
+                        <p className="text-stone-500">RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.reFund)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">SST</p>
+                        <p className="text-stone-500">SST <InfoTooltip text={BILL_TOOLTIPS.sst} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.sst)}</p>
                       </div>
                     </div>
@@ -970,53 +1042,54 @@ export function AnalysisPage() {
 
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
                     <h3 className="text-sm font-semibold text-emerald-950">With Solar</h3>
+                    <p className="text-xs text-emerald-800/50">Your bill after solar offsets your usage under NEM</p>
                     <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-emerald-900/70">Billable kWh</p>
+                        <p className="text-emerald-900/70">Billable kWh <InfoTooltip text={NEM_TOOLTIPS.billableKwh} /></p>
                         <p className="font-semibold">{formatNumber(selectedMonth.billableKwh, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Credit Used</p>
+                        <p className="text-emerald-900/70">Credit Used <InfoTooltip text={NEM_TOOLTIPS.creditUsed} /></p>
                         <p className="font-semibold">{formatNumber(selectedMonth.creditUsed, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Credit Balance</p>
+                        <p className="text-emerald-900/70">Credit Balance <InfoTooltip text={NEM_TOOLTIPS.creditBalance} /></p>
                         <p className="font-semibold">{formatNumber(selectedMonth.creditBalance, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Credit Forfeited</p>
+                        <p className="text-emerald-900/70">Credit Forfeited <InfoTooltip text={NEM_TOOLTIPS.creditForfeited} /></p>
                         <p className="font-semibold">{formatNumber(selectedMonth.creditForfeited, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Energy</p>
+                        <p className="text-emerald-900/70">Energy <InfoTooltip text={BILL_TOOLTIPS.energy} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.energy)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Retail</p>
+                        <p className="text-emerald-900/70">Retail <InfoTooltip text={BILL_TOOLTIPS.retail} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.retail)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Capacity</p>
+                        <p className="text-emerald-900/70">Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.capacity)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">AFA</p>
+                        <p className="text-emerald-900/70">AFA <InfoTooltip text={BILL_TOOLTIPS.afa} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.afa)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Network</p>
+                        <p className="text-emerald-900/70">Network <InfoTooltip text={BILL_TOOLTIPS.network} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.network)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">EEI Rebate</p>
+                        <p className="text-emerald-900/70">EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} /></p>
                         <p className="font-semibold">-{formatCurrency(selectedMonth.nemBill.eeiRebate)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">RE Fund</p>
+                        <p className="text-emerald-900/70">RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.reFund)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">SST</p>
+                        <p className="text-emerald-900/70">SST <InfoTooltip text={BILL_TOOLTIPS.sst} /></p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.sst)}</p>
                       </div>
                     </div>

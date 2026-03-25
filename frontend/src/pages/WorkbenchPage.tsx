@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { X } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { Image as KonvaImage, Layer, Stage } from 'react-konva'
@@ -166,6 +167,7 @@ export function WorkbenchPage() {
   const [stageScale, setStageScale] = useState(1)
   const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 })
   const [overlayMode, setOverlayMode] = useState<'rgb' | 'annual-flux' | 'dsm'>('rgb')
+  const [showBanner, setShowBanner] = useState(() => !localStorage.getItem('slg-onboarding-dismissed-workbench'))
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null)
   const [overlayExpanded, setOverlayExpanded] = useState(false)
   const zoomSnapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -734,6 +736,24 @@ export function WorkbenchPage() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
+      {showBanner && (
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 pt-4">
+          <div className="flex-1 rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-700">
+            <span className="mr-2 font-medium text-stone-500">Step 2 of 3</span>
+            Drag, rotate, or remove the solar panels on your roof, then click Save & Continue.
+          </div>
+          <button
+            type="button"
+            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+            onClick={() => {
+              localStorage.setItem('slg-onboarding-dismissed-workbench', 'true')
+              setShowBanner(false)
+            }}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
         <aside className="xl:w-[22rem] xl:min-w-[22rem]">
           <Card className="border-stone-200 bg-white/90 shadow-sm">
@@ -741,13 +761,19 @@ export function WorkbenchPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <CardTitle className="text-xl">{project.name}</CardTitle>
-                  <CardDescription>Adjust the suggested layout before moving to financial analysis.</CardDescription>
+                  <CardDescription>
+                    Adjust the suggested layout before moving to financial analysis. Use the slider to add or remove
+                    panels. Click a panel on the canvas to select it, then rotate or delete it.
+                  </CardDescription>
                 </div>
                 {/* Badge removed — not needed for user-facing UI */}
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="rounded-lg bg-stone-100 p-3">
-                  <p className="text-stone-500">Annual Yield</p>
+                  <p className="text-stone-500">
+                    Annual Yield
+                    <InfoTooltip text="Total estimated electricity your panels will generate in a year." />
+                  </p>
                   <p className="mt-1 text-lg font-semibold">{formatNumber(totalAnnualYield)} kWh</p>
                 </div>
                 <div className="rounded-lg bg-stone-100 p-3">

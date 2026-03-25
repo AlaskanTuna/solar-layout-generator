@@ -1,5 +1,13 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [25/03/26] - Phase 4.4: Tooltip & Guidance Pass (Ease-of-Use)
+
+- **Page Onboarding Banners:** Added dismissable first-visit banners to MapPage ("Step 1 of 3"), WorkbenchPage ("Step 2 of 3"), and AnalysisPage ("Step 3 of 3") with localStorage persistence so they only show once. Styled as soft stone-50 banners with X dismiss button.
+- **Section Guidance Text:** Added muted description below Simple/Advanced toggle explaining each mode. Updated Bill Component Breakdown, Monthly Bill Comparison, Cumulative Savings, and Net Benefit Projection card descriptions to use plain language instead of jargon. Added "What you'd pay at full consumption" / "Your bill after solar offsets your usage under NEM" subtitles to the Without/With Solar sections. Added sidebar interaction guidance to WorkbenchPage.
+- **InfoTooltips (~25 new):** Added tooltips to all 4 hero metric cards (Average Monthly Savings, Annual Savings, Simple Payback, CO2 Offset). Added kWp definition to sidebar System Size. Defined `BILL_TOOLTIPS` and `NEM_TOOLTIPS` lookup constants — applied to all 8 bill component labels in both Without Solar and With Solar columns, plus 4 NEM credit terms (Billable kWh, Credit Used, Credit Balance, Credit Forfeited). Added tooltips to 4 System Assumptions values (Performance Ratio, Azimuth/Pitch, Losses, DC/AC Ratio). Added Annual Yield tooltip on WorkbenchPage.
+- **UAT Coverage:** Addresses UAT 1 #1 (Critical), UAT 1 #2 (High), UAT 1 #3 (High), UAT 2 #2 (Medium), UAT 2 #3 (High), UAT 2 #5 (Medium).
+- **Verification:** Frontend TSC clean. 94 frontend tests pass.
+
 ## [25/03/26] - Phase 4.3: AnalysisPage UAT 3 Fixes
 
 - **Degradation Bug Fix (UAT #1):** Extracted `computeDegradedSavings()` helper in `analysis.ts`. Net Benefit Projection card (Advanced view) now applies `year1Savings × (1 - degradationRate)^(yr-1)` compounding for 1yr/5yr/10yr periods instead of simple multiplication. Refactored `buildAnalysisResults()` to use the same helper for consistency.

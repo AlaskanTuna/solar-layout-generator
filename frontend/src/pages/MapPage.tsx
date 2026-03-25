@@ -7,7 +7,7 @@ import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
-import { AlertTriangle, ArrowLeft, Loader2, MapPin } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Loader2, MapPin, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
@@ -40,6 +40,7 @@ export function MapPage() {
   const [selectedPlace, setSelectedPlace] = useState<{ lat: number; lng: number; address: string } | null>(null)
   const [locationId, setLocationId] = useState<string | null>(initialDraft?.locationId ?? null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [showBanner, setShowBanner] = useState(() => !localStorage.getItem('slg-onboarding-dismissed-map'))
 
   useEffect(() => {
     if (!isNewProject) return
@@ -295,6 +296,27 @@ export function MapPage() {
           <div className="h-12" />
         </div>
       </div>
+
+      {showBanner && (
+        <div className="pointer-events-none absolute inset-x-0 top-20 z-10 flex justify-center px-4">
+          <div className="pointer-events-auto flex max-w-md items-center gap-2 rounded-lg border border-stone-200 bg-stone-50/95 px-4 py-2.5 text-sm text-stone-700 shadow-sm backdrop-blur">
+            <div className="flex-1">
+              <span className="mr-2 font-medium text-stone-500">Step 1 of 3</span>
+              Search for your home address to analyse your rooftop's solar potential.
+            </div>
+            <button
+              type="button"
+              className="rounded-md p-1 text-stone-400 hover:bg-stone-200 hover:text-stone-600"
+              onClick={() => {
+                localStorage.setItem('slg-onboarding-dismissed-map', 'true')
+                setShowBanner(false)
+              }}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-background">

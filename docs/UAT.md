@@ -35,9 +35,9 @@
 
 | #   | Page/Feature            | Feedback                                                                                                         | Severity | Status |
 | --- | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | -------- | ------ |
-| 1   | WorkbenchPage (general) | User got stuck — did not understand what the page is for, what the green shapes (panels) are, or what to do next | Critical | Open   |
-| 2   | WorkbenchPage (panels)  | Panel objects on the canvas are not self-explanatory; no guidance on drag/rotate/delete interactions             | High     | Open   |
-| 3   | WorkbenchPage (flow)    | No clear indication of the next step or how to proceed from the workbench to the analysis page                   | High     | Open   |
+| 1   | WorkbenchPage (general) | User got stuck — did not understand what the page is for, what the green shapes (panels) are, or what to do next | Critical | Resolved (25/03/26) |
+| 2   | WorkbenchPage (panels)  | Panel objects on the canvas are not self-explanatory; no guidance on drag/rotate/delete interactions             | High     | Resolved (25/03/26) |
+| 3   | WorkbenchPage (flow)    | No clear indication of the next step or how to proceed from the workbench to the analysis page                   | High     | Resolved (25/03/26) |
 
 **General Comments:** User described feeling "blurry" on what to do. The workbench page currently provides no onboarding, tooltips, or contextual guidance for non-technical users. This directly conflicts with PRD NFR-2 (guided steps for non-technical users).
 
@@ -78,10 +78,10 @@ The page dumps all complexity at once with no scaffolding. The UX guideline for 
 | #   | Page/Feature                  | Feedback                                                                                                                                                                                                                                    | Severity | Status |
 | --- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------ |
 | 1   | Dashboard ↔ AnalysisPage      | Status mismatch: dashboard showed "Layout Saved" while analysis page said "Analysis Ready"; only after clicking Save Analysis did dashboard update to "Analysis Complete". Confuses whether numbers are actually saved                      | High     | Open   |
-| 2   | AnalysisPage (density)        | Page does too much on one screen — month-by-month table plus inline printable-report content makes it long and dense. Keep decision summary on-screen, push report content behind export/expandable section                                 | Medium   | Open   |
-| 3   | WorkbenchPage (guidance)      | Interaction model still feels technical. Shows panel count, yield, rotation, annual output — good data, but needs guidance for non-specialists: what to do first, what a "good" adjustment looks like, what controls mean in plain language | High     | Open   |
-| 4   | WorkbenchPage (panel visuals) | Panel objects are visually misleading — rounded green rectangles do not resemble actual solar panels. Should have sharp/rectangular edges and solar-panel colouring (dark blue → light blue, varying by irradiance)                         | Medium   | Open   |
-| 5   | MapPage (reassurance)         | Search box is visible but opens onto a bare map view with little reassurance about what to do next or what the app expects from the user                                                                                                    | Medium   | Open   |
+| 2   | AnalysisPage (density)        | Page does too much on one screen — month-by-month table plus inline printable-report content makes it long and dense. Keep decision summary on-screen, push report content behind export/expandable section                                 | Medium   | Resolved (25/03/26) |
+| 3   | WorkbenchPage (guidance)      | Interaction model still feels technical. Shows panel count, yield, rotation, annual output — good data, but needs guidance for non-specialists: what to do first, what a "good" adjustment looks like, what controls mean in plain language | High     | Resolved (25/03/26) |
+| 4   | WorkbenchPage (panel visuals) | Panel objects are visually misleading — rounded green rectangles do not resemble actual solar panels. Should have sharp/rectangular edges and solar-panel colouring (dark blue → light blue, varying by irradiance)                         | Medium   | Resolved (24/03/26) |
+| 5   | MapPage (reassurance)         | Search box is visible but opens onto a bare map view with little reassurance about what to do next or what the app expects from the user                                                                                                    | Medium   | Resolved (25/03/26) |
 
 **General Comments:** As a retired installer, the participant valued the analysis page's transparency and immediate feedback loop. Main concerns are flow clarity (status consistency across pages) and the gap between the data-rich workbench and a layperson's comprehension. Panel visual fidelity also undermines credibility.
 

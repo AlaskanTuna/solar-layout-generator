@@ -893,6 +893,44 @@
 - [x] When Seasonal is selected, multiply base consumption by monthly factors before passing to the simulation
 - [x] Persist the profile choice in `analysisConfig`
 
+## Phase 4.4: Tooltip & Guidance Pass (Ease-of-Use)
+
+### 1. Feature: Page Onboarding Banners
+
+**Purpose/Issue:** All three UAT participants struggled with page purpose and flow. No page explains what it does or where the user is in the workflow. Two users independently flagged the workbench as opaque (UAT 1 #1 Critical, UAT 2 #3 High) and the map page as bare (UAT 2 #5 Medium).
+
+**Implementation:**
+
+- [x] Add a dismissable onboarding banner to MapPage with step indicator: "Step 1 of 3 — Search for your home address to analyse your rooftop's solar potential."
+- [x] Add a dismissable onboarding banner to WorkbenchPage with step indicator: "Step 2 of 3 — Drag, rotate, or remove the solar panels on your roof, then click Save & Continue."
+- [x] Add a dismissable onboarding banner to AnalysisPage with step indicator: "Step 3 of 3 — See how much you could save on your electricity bill with solar — adjust your usage below."
+- [x] Persist dismissed state in `localStorage` (`slg-onboarding-dismissed-{page}`) so banners only show on first visit
+
+### 2. Feature: Section Guidance Text
+
+**Purpose/Issue:** Section headings use technical language that assumes domain knowledge. Bill breakdown labels like "Capacity" and "Retail" are unexplained. The Simple/Advanced toggle offers no context on what each mode provides. WorkbenchPage sidebar controls lack plain-language guidance (UAT 1 #2, UAT 2 #3).
+
+**Implementation:**
+
+- [x] Add muted text below Simple/Advanced toggle: "Simple shows key savings figures. Advanced adds tariff breakdowns, projections, and system details."
+- [x] Change Bill Component Breakdown description to: "See how your TNB bill is calculated — select a month to compare charges with and without solar."
+- [x] Add subtitles to "Without Solar" ("What you'd pay at full consumption") and "With Solar" ("Your bill after solar generation offsets your usage under NEM") subheadings
+- [x] Update chart descriptions: Monthly Bill Comparison, Cumulative Savings, Net Benefit Projection — replace jargon with plain language
+- [x] Add sidebar guidance text to WorkbenchPage: "Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it."
+
+### 3. Feature: InfoTooltips for Technical Terms (~25 new)
+
+**Purpose/Issue:** ~22 technical terms shown to users without explanation. Bill components (Energy, Capacity, Network, Retail, AFA, EEI Rebate, RE Fund, SST), NEM credit terms, hero metrics, system assumptions, and the kWp unit are all unexplained. A solar engineer found the numbers accurate but a homeowner could not understand them.
+
+**Implementation:**
+
+- [x] Add tooltips to 4 hero metric cards: Average Monthly Savings, Annual Savings, Simple Payback, CO2 Offset
+- [x] Add tooltip to sidebar System Size explaining kWp
+- [x] Define `BILL_COMPONENT_TOOLTIPS` lookup constant for 8 bill components (Energy, Capacity, Network, Retail, AFA, EEI Rebate, RE Fund, SST) — apply to labels in both "Without Solar" and "With Solar" columns
+- [x] Add tooltips to 4 NEM credit terms in "With Solar" section: Billable kWh, Credit Used, Credit Balance, Credit Forfeited
+- [x] Add tooltips to 4 System Assumptions values: Performance Ratio, Roof Azimuth/Pitch, Assumed Losses, DC/AC Ratio
+- [x] Add tooltip to WorkbenchPage Annual Yield label
+
 ## Phase 5: Post-MVP Enhancements and Polish
 
 ### 1. Enhancement: Dashboard Improvements
