@@ -68,6 +68,25 @@ Temporary Items
 .Trash-*
 .nfs*
 
+# TypeScript build output (tsc -b emits alongside source files)
+# ==========================================================
+*.d.ts
+*.d.ts.map
+*.js.map
+# Allow config files that are legitimately JS
+!.eslintrc.cjs
+!vite.config.js
+!tailwind.config.js
+!postcss.config.js
+!components.json
+# Compiled JS from TS sources in src/ dirs
+backend/src/**/*.js
+frontend/src/**/*.js
+shared/*.js
+prisma/seed.js
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
 # Node.js
 # =======
 
