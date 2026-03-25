@@ -1,4 +1,21 @@
-﻿# PROGRESS - AGENT ONLY
+﻿# PROGRESS (AGENT ONLY)
+
+> Refer to `docs/plan.md` when recording completed tasks.
+
+---
+
+<!-- Record latest from here onwards. -->
+
+## [26/03/26] - Phase 5 (continued): Guided Tour Polish, Visual Improvements, Navigation
+
+- **Guided Tour Polish:** Removed frosted blur backdrop, improved modal positioning with scroll-into-view + rAF delay. Added detailed tour steps: MapPage 3, WorkbenchPage 5, AnalysisPage 6 steps with richer descriptions for laypeople.
+- **TNB Bill Image Popup:** Created `ImagePopup` component — clickable enlargement overlay. Used in consumption tooltip.
+- **System Cost:** Renamed to "System Cost (RM)", tooltip now shows dynamic formula from panel model data.
+- **Monthly Bill Chart:** Changed bar palette to orange (without solar) / green (with solar) for a solar feel.
+- **Net Benefit Rework:** Scrapped period selector, now shows Year 1–10 bars. Fixed Y-axis overflow with explicit width.
+- **System Assumptions:** PR/Losses linked dynamically (100% complement). Losses beside PR in text card. Sidebar label bolded with tooltip.
+- **Month-by-Month Table:** Swapped columns to "NEM Savings" and "Total Bill" (bold green).
+- **Navigation:** Added "Back to Map" (WorkbenchPage), "Back to Dashboard" (AnalysisPage). Moved sidebar descriptions to more compact locations. LoadingOverlay on all 3 pages.
 
 ## [25/03/26] - Phase 5: Post-MVP Enhancements and Polish
 
@@ -19,7 +36,7 @@
 ## [25/03/26] - Phase 4.3: AnalysisPage UAT 3 Fixes
 
 - **Degradation Bug Fix (UAT #1):** Extracted `computeDegradedSavings()` helper in `analysis.ts`. Net Benefit Projection card (Advanced view) now applies `year1Savings × (1 - degradationRate)^(yr-1)` compounding for 1yr/5yr/10yr periods instead of simple multiplication. Refactored `buildAnalysisResults()` to use the same helper for consistency.
-- **Month Tab Selection (UAT #2):** Investigated rendering path — code logic is correct (`selectedMonthIndex` → `selectedMonth` → bill display`). Promoted `selectedMonth` derivation to explicit `useMemo` with `[simulation, selectedMonthIndex]` dependencies for robustness. Fresh deployment should resolve any stale-build issues from UAT session.
+- **Month Tab Selection (UAT #2):** Investigated rendering path — code logic is correct (`selectedMonthIndex` → `selectedMonth` → bill display`). Promoted `selectedMonth`derivation to explicit`useMemo`with`[simulation, selectedMonthIndex]` dependencies for robustness. Fresh deployment should resolve any stale-build issues from UAT session.
 - **Expand/Collapse Toggle (UAT #5):** Replaced native `<details open>` (which had CSS/framework conflicts) with a controlled React state toggle using `monthTableOpen` state, `ChevronDown`/`ChevronRight` icons, and conditional rendering. Defaults to collapsed to reduce page density.
 - **System Assumptions Card (UAT #4):** Added read-only "System Assumptions" card in Advanced view showing: Performance Ratio (80%), panel degradation rate, panel lifetime (from Solar API), primary roof azimuth/pitch (from Solar API `roofSegmentStats`), assumed losses (~20%), DC/AC ratio (1.2). Extended `buildingInsights.ts` `RoofSegment` type to parse `pitchDegrees`.
 - **Seasonal Consumption Profile (UAT #3):** Defined 12 Malaysian seasonal monthly multipliers (hot dry months higher, monsoon months lower, normalized to avg 1.0). Added Flat/Seasonal toggle below the consumption input with range preview. Updated `runAnnualSimulation` to accept `number | number[]`. Added `consumptionProfile` to `AnalysisConfig` and save payload. Updated PDF report assumptions to show profile choice and degradation rate.

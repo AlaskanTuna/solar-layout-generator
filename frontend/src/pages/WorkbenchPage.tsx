@@ -4,31 +4,33 @@ import { GuidedTour, type TourStep } from '@/components/GuidedTour'
 
 const WORKBENCH_TOUR_STEPS: TourStep[] = [
   {
-    title: 'Welcome to the Roof Layout Workbench',
+    title: 'Your Roof Layout',
     description:
-      'This is your rooftop with solar panels placed by satellite analysis. You can adjust the layout before moving to financial analysis.'
+      'Welcome! This page shows solar panels placed on your rooftop by satellite analysis. The blue rectangles are solar panels — you can customise this layout before calculating your savings.'
   },
   {
     target: '[data-tour="panel-model"]',
     title: 'Choose Your Panel Model',
-    description: 'Select from different solar panel models. Changing the model updates panel dimensions and energy yield.'
+    description:
+      'Pick a solar panel brand and model. Different panels have different sizes, efficiency, and prices. The default (Jinko Tiger Neo) is a popular choice in Malaysia.'
   },
   {
     target: '[data-tour="panel-count"]',
-    title: 'Adjust Panel Count',
+    title: 'How Many Panels?',
     description:
-      'Use the slider to add or remove panels. Higher-yield panels are kept first when you reduce the count.'
+      'Slide left to remove panels, right to add more. The system keeps the highest-performing panels first. More panels = more savings, but also higher installation cost.'
   },
   {
     target: '[data-tour="canvas"]',
-    title: 'Your Roof Canvas',
+    title: 'Arrange Your Panels',
     description:
-      'Click any panel to select it. Drag to reposition. Use the rotation slider in the sidebar to adjust angle. Press Delete to remove a panel.'
+      'Click any blue panel to select it. Then you can drag it to a new position, use the rotation slider in the sidebar to angle it, or press the Delete key to remove it.'
   },
   {
     target: '[data-tour="save-continue"]',
     title: 'Save & Continue',
-    description: 'When you\'re happy with the layout, click here to save and move to the financial analysis page.'
+    description:
+      'Happy with the layout? Click "Save & Continue" to save your arrangement and move to the savings analysis page. You can always come back to adjust later.'
   }
 ]
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -743,10 +745,7 @@ export function WorkbenchPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <CardTitle className="text-xl">{project.name}</CardTitle>
-                  <CardDescription>
-                    Adjust the suggested layout before moving to financial analysis. Use the slider to add or remove
-                    panels. Click a panel on the canvas to select it, then rotate or delete it.
-                  </CardDescription>
+                  <CardDescription>Adjust the suggested layout before moving to financial analysis.</CardDescription>
                 </div>
                 {/* Badge removed — not needed for user-facing UI */}
               </div>
@@ -945,6 +944,9 @@ export function WorkbenchPage() {
                 <Button variant="outline" asChild>
                   <Link to="/dashboard">Back to Dashboard</Link>
                 </Button>
+                <Button variant="outline" asChild>
+                  <Link to={`/project/${projectId}/map`}>Back to Map</Link>
+                </Button>
                 <Button data-tour="save-continue" onClick={handleSave} disabled={isSaving || pendingPanelId !== null}>
                   {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
                 </Button>
@@ -958,10 +960,10 @@ export function WorkbenchPage() {
             <CardHeader className="border-b border-stone-200 bg-stone-50/70">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle>Roof Layout Workbench</CardTitle>
-                  <CardDescription>
-                    Drag panels, rotate the selected panel, and prune the array before analysis.
-                  </CardDescription>
+                  <CardTitle>
+                    Roof Layout Workbench
+                    <InfoTooltip text="Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it." />
+                  </CardTitle>
                 </div>
                 {(pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
                   <Badge className="bg-amber-600 text-white hover:bg-amber-600">

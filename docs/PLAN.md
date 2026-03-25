@@ -1,4 +1,12 @@
-﻿# PLAN - AGENT ONLY
+﻿# PLAN (AGENT ONLY)
+
+> Refer to `docs/TRD.md` for architecture, data models, API contracts, and code-level details.
+> Refer to `docs/PRD.md` for product requirements and acceptance criteria.
+> Refer to `docs/ROADMAP.md` for the phase timeline overview.
+
+---
+
+<!-- Record latest from here onwards. -->
 
 ## Phase 0: Project Scaffolding
 
@@ -51,6 +59,8 @@
 
 - [x] Update PLAN.md
 - [x] Update PROGRESS.md
+
+---
 
 ## Phase 1: Backend â€” Auth, API Endpoints, Solar API Pipeline
 
@@ -167,6 +177,8 @@
 - [x] `rotatePoint` â€” 0Â°, 90Â°, 180Â°
 - [x] All 18 tests passing
 
+---
+
 ## Phase 1.1: Backend Hardening (Post-QA Audit)
 
 ### 1. Decision Gate: Location Cache Policy (M1 + M2)
@@ -240,6 +252,8 @@
 - [x] Run `tests/smoke/smoke-authz.sh` with updated assertions
 - [x] Update `docs/TEST.md` with hardening test results
 - [x] Request QA re-review on hardening diff only
+
+---
 
 ## Phase 2: Frontend - Auth UI, Dashboard, MapPage, WorkbenchPage
 
@@ -366,6 +380,8 @@
 - [x] Navigate to `/project/:id/analysis` on success; disable button while saving
 - [x] "Back to Dashboard" link
 
+---
+
 ## Phase 2.1: Frontend QA Fixes
 
 ### 1. Refinement: MapPage Search + New Project Recovery
@@ -400,6 +416,8 @@
 - [x] Add utility tests for `canvasTransforms.ts`
 - [x] Add hook tests for `usePanelState.ts`
 
+---
+
 ## Phase 2.2: Manual QA Follow-up
 
 ### 1. Refinement: MapPage Polling + Places Modernization
@@ -413,6 +431,8 @@
 - [x] Update `MapPage` to load the newer `PlaceAutocompleteElement` via `google.maps.importLibrary('places')` when available, with legacy autocomplete retained only as a compatibility fallback
 - [x] Fail the processing state cleanly when polling errors occur instead of leaving the UI stuck on "Analyzing your rooftop..."
 - [x] Guard ready-state project creation so repeated polling responses cannot create duplicate projects before navigation completes
+
+---
 
 ## Phase 2.3: Manual QA Follow-up - Workbench + Observability
 
@@ -429,6 +449,8 @@
 - [x] Add backend request/route/pipeline logging for auth, project CRUD, location resolve/status/data, recompute, and pipeline file uploads
 - [x] Harden `GET /api/locations/:id/data` so a `ready` location cannot return a partial 200 response without `buildingInsightsJson` or `rgbImageUrl`
 
+---
+
 ## Phase 2.4: Workbench Rendering Alignment
 
 ### 1. Refinement: Prototype-Accurate Panel Rendering
@@ -443,6 +465,8 @@
 - [x] Add/update focused transform tests for the new frontend projected-CRS path and the backend GeoTIFF Y-resolution normalization
 - [x] Verify with a live numeric sanity check that the latest location's panel centers now cluster within the actual rooftop image bounds instead of spanning the whole image
 
+---
+
 ## Phase 2.5: Location Cache Smoke Test
 
 ### 1. Testing: End-to-End Cache Reuse Verification
@@ -456,6 +480,8 @@
 - [x] Assert the second resolve reuses the same `locationId`, returns `ready` immediately, and does not increase the number of `Location` rows within the configured coordinate tolerance window
 - [x] Support both cold-cache validation (fresh coordinate required) and warm-cache validation (`CACHE_ALLOW_WARM=1`) so the script is usable during manual troubleshooting without always burning a fresh Solar API call
 - [x] Syntax-check the script and document usage/verification notes for the manual live run
+
+---
 
 ## Phase 3: Frontend - Billing Engine, Page 3, PDF Export
 
@@ -593,6 +619,8 @@
 - [x] On revisit (status `analysis_saved`): load saved config into inputs, re-derive results reactively
 - [x] "Back to Workbench" link for layout adjustments
 
+---
+
 ## Phase 3.1: QA Audit Fixes
 
 ### 1. Hardening: Project Save Response Consistency
@@ -658,6 +686,8 @@
 - [x] Constrain the input to a reasonable range without banning negative rebate values
 - [x] Add helper text clarifying that negative AFA represents a rebate
 
+---
+
 ## Phase 3.2: Database Reconciliation
 
 ### 1. Hardening: TariffConfig Migration Ledger + Seed Workflow
@@ -671,6 +701,8 @@
 - [x] Update Prisma seed execution to run with Node directly instead of `tsx`, avoiding the copied-`node_modules` esbuild platform mismatch
 - [x] Verify `npm run db:seed` succeeds against Supabase
 - [x] Verify `prisma migrate status` reports the Supabase schema is up to date
+
+---
 
 ## Phase 4: Integration Testing, Landing Page, Deployment
 
@@ -764,6 +796,8 @@
 - [x] Identify and contact potential UAT participants (Malaysian homeowners, solar-interested individuals, classmates/faculty as backup)
 - [x] Prepare brief UAT introduction explaining the app and what participants will test
 
+---
+
 ## Phase 4.1: Knowledge Vault Corrections
 
 ### 1. Fix: Billing Engine Accuracy Corrections
@@ -793,6 +827,8 @@
 - [x] Pass selected model's `costPerWp` to AnalysisPage to compute accurate system cost
 - [x] Store selected panel model ID in project's editedLayout or analysisConfig
 - [x] Run `npx tsc --noEmit` and `npx vitest` to verify
+
+---
 
 ## Phase 4.2: Panel Model Dimension Integration
 
@@ -838,6 +874,8 @@
 
 - [x] Run `npx prisma db seed` against production database (upsert updated the existing RP4-2025 row)
 - [x] Verify the tariff config returns the updated AFA default (-2.15 sen/kWh confirmed via Prisma query)
+
+---
 
 ## Phase 4.3: AnalysisPage UAT 3 Fixes
 
@@ -893,6 +931,8 @@
 - [x] When Seasonal is selected, multiply base consumption by monthly factors before passing to the simulation
 - [x] Persist the profile choice in `analysisConfig`
 
+---
+
 ## Phase 4.4: Tooltip & Guidance Pass (Ease-of-Use)
 
 ### 1. Feature: Page Onboarding Banners
@@ -930,6 +970,8 @@
 - [x] Add tooltips to 4 NEM credit terms in "With Solar" section: Billable kWh, Credit Used, Credit Balance, Credit Forfeited
 - [x] Add tooltips to 4 System Assumptions values: Performance Ratio, Roof Azimuth/Pitch, Assumed Losses, DC/AC Ratio
 - [x] Add tooltip to WorkbenchPage Annual Yield label
+
+---
 
 ## Phase 5: Post-MVP Enhancements and Polish
 
@@ -982,7 +1024,37 @@
 - [x] Remove old localStorage-based onboarding banners from MapPage, WorkbenchPage, and AnalysisPage
 - [x] Auto-show tour on first visit (use localStorage to track whether tour has been completed per page)
 
-### 5. Enhancement: Dashboard Improvements
+### 5. Refinement: Guided Tour & Visual Polish
+
+**Purpose/Issue:** Tour backdrop is too heavy (frosted blur obscures context), modal positioning requires scrolling, tour steps are too few for laypeople, and multiple visual/UX improvements identified during manual testing.
+
+**Implementation:**
+
+- [x] Remove frosted blur from tour backdrop; use a lighter semi-transparent overlay
+- [x] Improve tour modal positioning to scroll targets into view with offset padding
+- [x] Add more detailed tour steps to all three pages (MapPage, WorkbenchPage, AnalysisPage)
+- [x] Make TNB bill image clickable — enlarge as centered popup overlay on click
+- [x] Simplify System Cost tooltip: dynamic formula (e.g. "4 × 440 Wp × RM 2.20 = RM 3,872"), rename label to "System Cost (RM)"
+- [x] Change Monthly Bill Comparison bar palette to orange (solar theme)
+- [x] Rework Net Benefit Projection: scrap period selector, show Year 1–10 bars, fix Y-axis negative tick overflow
+- [x] Bold and enlarge "System Assumptions" sidebar label, add descriptive tooltip
+- [x] Link PR and Losses dynamically (PR + Losses = 100%); place Assumed Losses beside/below PR in the text card
+- [x] Month-by-Month table: swap NEM Bill and Savings columns, rename to "Total Bill" (bold green) and "NEM Savings"
+- [x] Add divider between Simple and Advanced configurable variables in sidebar
+
+### 6. Refinement: Navigation and Layout
+
+**Purpose/Issue:** Navigation between pages needs more flexibility. Sidebar descriptions can be more compact. Loading screens should appear on all page transitions.
+
+**Implementation:**
+
+- [x] WorkbenchPage: add "Back to Map" button below "Back to Dashboard"
+- [x] WorkbenchPage: move sidebar CardDescription into a tooltip beside the canvas card title "Roof Layout Workbench"
+- [x] AnalysisPage: add "Back to Dashboard" button above "Back to Workbench"
+- [x] AnalysisPage: move sidebar CardDescription to after the panel specs `<details>` element with a subtle divider
+- [x] Ensure LoadingOverlay persists between all three MVP page transitions
+
+### 7. Enhancement: Dashboard Improvements
 
 **Purpose/Issue:** Dashboard currently shows basic project cards. Improve UX before UAT participants see it.
 
@@ -1032,38 +1104,16 @@
 - [x] Add skeleton state to AnalysisPage while data loads
 - [x] Add skeleton/placeholder to WorkbenchPage canvas area during image load
 
-## Phase 6: UAT + Final Fixes
+---
 
-### 1. Preparation: UAT Materials
+## Phase X: Final Documentation
 
-**Purpose/Issue:** Structured UAT requires prepared materials so participants can test independently on the live deployment.
+### 1. ...
 
-**Implementation:**
-
-- [ ] Write UAT test scenarios document: task list covering the full workflow (sign up, create project, search location, adjust panels, view analysis, export PDF)
-- [ ] Create feedback form (Google Forms or similar): usability rating, accuracy perception, comprehensibility of results, open-ended comments
-- [ ] Write brief UAT participant guide: app URL, account creation instructions, what to test, how to submit feedback
-
-### 2. Testing: UAT Round 1
-
-**Purpose/Issue:** First round of user testing with minimum 3 participants on the live Heroku deployment.
+**Purpose/Issue:** ...
 
 **Implementation:**
 
-- [ ] Distribute deployed app URL and UAT guide to confirmed participants
-- [ ] Participants complete the full workflow independently
-- [ ] Collect Round 1 feedback (usability, accuracy, comprehensibility)
-- [ ] Triage feedback: categorise as critical bug, usability fix, or future enhancement
-- [ ] Fix and deploy critical bugs
+- [ ] ...
 
-### 3. Testing: UAT Round 2 + Final Fixes
-
-**Purpose/Issue:** Confirm Round 1 issues are resolved and collect final feedback.
-
-**Implementation:**
-
-- [ ] Conduct Round 2 with same or additional participants
-- [ ] Collect Round 2 feedback to confirm issues are resolved
-- [ ] Compile UAT findings summary: response rates, satisfaction scores, key issues, resolution status
-- [ ] Apply final fixes for any remaining critical issues
-- [ ] Freeze codebase for submission
+---

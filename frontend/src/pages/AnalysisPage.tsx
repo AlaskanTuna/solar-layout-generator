@@ -44,6 +44,7 @@ import { InfoTooltip } from '@/components/InfoTooltip'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
+import { ImagePopup } from '@/components/ImagePopup'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
 import { getPanelModel } from '@shared/types'
 
@@ -100,32 +101,39 @@ const NEM_TOOLTIPS: Record<string, string> = {
 
 const ANALYSIS_TOUR_STEPS: TourStep[] = [
   {
-    title: 'Welcome to your Solar Analysis',
+    title: 'Your Solar Savings Analysis',
     description:
-      'This page estimates how much you could save on your electricity bill with solar panels. Let\'s walk through the key sections.'
+      'This page calculates how much you could save on your TNB electricity bill with solar panels. All numbers update live as you change the inputs on the left.'
   },
   {
     target: '[data-tour="consumption-input"]',
-    title: 'Your Electricity Usage',
+    title: 'Enter Your Electricity Usage',
     description:
-      'Enter your average monthly kWh from your TNB bill. This is the most important input — it determines your baseline bill and potential savings.'
+      'This is the most important input. Find your average monthly kWh on your TNB bill (look for "Purata Penggunaan") and enter it here. Tap the info icon to see an example bill.'
   },
   {
     target: '[data-tour="view-toggle"]',
-    title: 'Simple vs Advanced View',
+    title: 'Simple vs Advanced',
     description:
-      'Simple view shows your key savings at a glance. Switch to Advanced for full tariff breakdowns, bill components, and system assumptions.'
+      'Start with Simple view for a quick summary. Switch to Advanced when you want detailed tariff breakdowns, bill components, and system assumptions you can customise.'
   },
   {
     target: '[data-tour="hero-cards"]',
-    title: 'Your Savings Summary',
+    title: 'Key Numbers at a Glance',
     description:
-      'These cards show your average monthly savings, annual savings, payback period, and carbon offset. Hover the info icons for explanations.'
+      'These four cards tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself, and how much CO2 you\'re offsetting.'
+  },
+  {
+    target: '[data-tour="monthly-chart"]',
+    title: 'Monthly Bill Comparison',
+    description:
+      'This chart compares what you\'d pay without solar (orange) to what you\'d pay with solar (green) for each month. The difference is your savings.'
   },
   {
     target: '[data-tour="export-pdf"]',
-    title: 'Export Your Report',
-    description: 'When you\'re satisfied with the analysis, export a PDF report to share with installers or family.'
+    title: 'Export & Save',
+    description:
+      'When you\'re happy with the results, click "Save Analysis" to store your settings, or "Export PDF" to download a report you can share with solar installers or your family.'
   }
 ]
 
@@ -261,7 +269,6 @@ export function AnalysisPage() {
   const [isExporting, setIsExporting] = useState(false)
   const [formState, setFormState] = useState<AnalysisFormState | null>(null)
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('simple')
-  const [benefitPeriod, setBenefitPeriod] = useState<1 | 5 | 10>(10)
   const [monthTableOpen, setMonthTableOpen] = useState(false)
 
   const projectQuery = useQuery({
@@ -494,9 +501,6 @@ export function AnalysisPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <CardTitle className="text-xl">{projectQuery.data.name}</CardTitle>
-                  <CardDescription>
-                    Adjust assumptions and review the NEM billing outcome before saving.
-                  </CardDescription>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
@@ -531,6 +535,11 @@ export function AnalysisPage() {
               )}
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="border-t border-stone-200 pt-3">
+                <p className="text-xs text-muted-foreground">
+                  Adjust assumptions and review the NEM billing outcome before saving.
+                </p>
+              </div>
               {panelsMissingMonthlyEnergy.length > 0 && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                   {panelsMissingMonthlyEnergy.length} panel(s) are missing monthly recompute data. They are treated as 0
@@ -552,7 +561,8 @@ export function AnalysisPage() {
                     <InfoTooltip>
                       <div className="space-y-1.5">
                         <p>Your average monthly electricity usage in kWh. Look for "Purata Penggunaan" on your TNB bill:</p>
-                        <img src={tnbBillImg} alt="TNB bill showing average kWh usage" className="w-full rounded" />
+                        <ImagePopup src={tnbBillImg} alt="TNB bill showing average kWh usage" className="w-full rounded" />
+                        <p className="text-[10px] text-stone-400">Click image to enlarge</p>
                       </div>
                     </InfoTooltip>
                   </Label>
@@ -632,8 +642,14 @@ export function AnalysisPage() {
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                 <div className="space-y-1">
                   <Label>
-                    System Cost
-                    <InfoTooltip text="Total estimated installation cost. When a panel model is selected, this is calculated as panels × panel capacity × cost per watt. Otherwise falls back to RM 4,500/kWp. Adjust based on actual installer quotes." />
+                    System Cost (RM)
+                    <InfoTooltip
+                      text={
+                        selectedPanelModel && selectedPanelModel.costPerWp > 0
+                          ? `Estimated cost based on your layout: ${activePanels.length} panels × ${selectedPanelModel.capacityWp} Wp × RM ${selectedPanelModel.costPerWp.toFixed(2)}/Wp = RM ${Math.round(activePanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp).toLocaleString()}. Adjust based on actual installer quotes.`
+                          : 'Total estimated installation cost. Adjust based on actual installer quotes.'
+                      }
+                    />
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     Used for payback and 10-year net benefit calculations.
@@ -691,6 +707,8 @@ export function AnalysisPage() {
                     />
                   </div>
 
+                  <div className="my-2 border-t border-stone-200" />
+
                   <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
                     <div className="space-y-1">
                       <Label>
@@ -706,7 +724,10 @@ export function AnalysisPage() {
                   </div>
 
                   <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
-                    <Label className="text-xs font-medium text-stone-500">System Assumptions</Label>
+                    <Label className="text-sm font-semibold text-stone-700">
+                      System Assumptions
+                      <InfoTooltip text="These values affect how the system's real-world output is estimated. Most homeowners can leave these at their defaults." />
+                    </Label>
                     <div className="grid grid-cols-3 gap-2">
                       <div>
                         <Label className="text-[11px] text-muted-foreground">PR (%)</Label>
@@ -719,7 +740,9 @@ export function AnalysisPage() {
                           onChange={(e) => {
                             const v = Number(e.target.value)
                             if (v >= 50 && v <= 100)
-                              setFormState((c) => (c ? { ...c, performanceRatio: v / 100 } : c))
+                              setFormState((c) =>
+                                c ? { ...c, performanceRatio: v / 100, assumedLosses: 1 - v / 100 } : c
+                              )
                           }}
                         />
                       </div>
@@ -727,15 +750,9 @@ export function AnalysisPage() {
                         <Label className="text-[11px] text-muted-foreground">Losses (%)</Label>
                         <Input
                           type="number"
-                          min={0}
-                          max={50}
-                          step={1}
+                          disabled
                           value={Math.round(formState.assumedLosses * 100)}
-                          onChange={(e) => {
-                            const v = Number(e.target.value)
-                            if (v >= 0 && v <= 50)
-                              setFormState((c) => (c ? { ...c, assumedLosses: v / 100 } : c))
-                          }}
+                          className="bg-stone-50 text-stone-500"
                         />
                       </div>
                       <div>
@@ -759,6 +776,9 @@ export function AnalysisPage() {
               )}
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <Button variant="outline" asChild>
+                  <Link to="/dashboard">Back to Dashboard</Link>
+                </Button>
                 <Button variant="outline" asChild>
                   <Link to={`/project/${projectId}/workbench`}>Back to Workbench</Link>
                 </Button>
@@ -851,7 +871,7 @@ export function AnalysisPage() {
           </div>
 
           <div className="space-y-6">
-            <Card className="border-stone-200 bg-white/90 shadow-sm">
+            <Card data-tour="monthly-chart" className="border-stone-200 bg-white/90 shadow-sm">
               <CardHeader>
                 <CardTitle>Monthly Bill Comparison</CardTitle>
                 <CardDescription>
@@ -866,8 +886,8 @@ export function AnalysisPage() {
                     <YAxis tickFormatter={(value) => `RM${value}`} />
                     <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
                     <Legend />
-                    <Bar dataKey="baselineBill" name="Without Solar" fill="#1f2937" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="nemBill" name="With Solar" fill="#0f766e" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="baselineBill" name="Without Solar" fill="#ea580c" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="nemBill" name="With Solar" fill="#16a34a" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -906,56 +926,36 @@ export function AnalysisPage() {
               const round2 = (v: number) => Math.round(v * 100) / 100
               const year1Savings = simulation.totalSavingsRm
               const dr = formState.degradationRate
-              const netBenefit1yr = round2(computeDegradedSavings(year1Savings, dr, 1) - formState.systemCostRm)
-              const netBenefit5yr = round2(computeDegradedSavings(year1Savings, dr, 5) - formState.systemCostRm)
-              const netBenefit10yr = round2(computeDegradedSavings(year1Savings, dr, 10) - formState.systemCostRm)
-              const netBenefitData = [
-                benefitPeriod === 1 && { period: '1 Year', value: netBenefit1yr },
-                benefitPeriod === 5 && { period: '5 Years', value: netBenefit5yr },
-                benefitPeriod === 10 && { period: '10 Years', value: netBenefit10yr }
-              ].filter(Boolean) as { period: string; value: number }[]
-              const selectedBenefit =
-                benefitPeriod === 1 ? netBenefit1yr : benefitPeriod === 5 ? netBenefit5yr : netBenefit10yr
+              const netBenefitData = Array.from({ length: 10 }, (_, i) => ({
+                year: `Yr ${i + 1}`,
+                value: round2(computeDegradedSavings(year1Savings, dr, i + 1) - formState.systemCostRm)
+              }))
+              const tenYearBenefit = netBenefitData[9].value
 
               return (
                 <Card className="border-stone-200 bg-white/90 shadow-sm">
                   <CardHeader>
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <CardTitle>Net Benefit Projection</CardTitle>
-                        <CardDescription>
-                          How much you gain (or lose) after subtracting the cost of installing your solar system.
-                        </CardDescription>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Label className="text-sm text-muted-foreground">Period</Label>
-                        <select
-                          className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
-                          value={benefitPeriod}
-                          onChange={(e) => setBenefitPeriod(Number(e.target.value) as 1 | 5 | 10)}
-                        >
-                          <option value={1}>1-Year</option>
-                          <option value={5}>5-Year</option>
-                          <option value={10}>10-Year</option>
-                        </select>
-                      </div>
-                    </div>
+                    <CardTitle>Net Benefit Projection</CardTitle>
+                    <CardDescription>
+                      How much you gain (or lose) after subtracting the cost of installing your solar system, year by
+                      year.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="rounded-lg bg-stone-50 p-4 text-center">
-                      <p className="text-sm text-muted-foreground">{benefitPeriod}-Year Net Benefit</p>
+                      <p className="text-sm text-muted-foreground">10-Year Net Benefit</p>
                       <p
-                        className={`text-3xl font-semibold ${selectedBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}
+                        className={`text-3xl font-semibold ${tenYearBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}
                       >
-                        {formatCurrency(selectedBenefit)}
+                        {formatCurrency(tenYearBenefit)}
                       </p>
                     </div>
                     <div className="h-[260px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={netBenefitData}>
+                        <BarChart data={netBenefitData} margin={{ left: 10 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="period" />
-                          <YAxis tickFormatter={(value) => `RM${value}`} />
+                          <XAxis dataKey="year" tick={{ fontSize: 11 }} />
+                          <YAxis tickFormatter={(value) => `RM${value >= 0 ? '' : ''}${value.toLocaleString()}`} width={70} />
                           <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
                           <Bar dataKey="value" name="Net Benefit" radius={[4, 4, 0, 0]}>
                             {netBenefitData.map((entry, index) => (
@@ -978,8 +978,9 @@ export function AnalysisPage() {
                   Standard industry assumptions used in this analysis. These are not site-measured values.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <CardContent className="space-y-4">
+                {/* PR + Losses side by side */}
+                <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-lg bg-stone-50 p-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
                       Performance Ratio
@@ -988,6 +989,17 @@ export function AnalysisPage() {
                     <p className="mt-1 text-lg font-semibold">{Math.round(formState.performanceRatio * 100)}%</p>
                     <p className="text-xs text-stone-400">Typical for Malaysian residential systems</p>
                   </div>
+                  <div className="rounded-lg bg-stone-50 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                      Assumed Losses
+                      <InfoTooltip text="Energy lost to dust, wiring, inverter conversion, and heat. This is automatically calculated as 100% minus the Performance Ratio." />
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">{Math.round(formState.assumedLosses * 100)}%</p>
+                    <p className="text-xs text-stone-400">Soiling, cable, inverter, temperature</p>
+                  </div>
+                </div>
+                {/* Remaining assumptions */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="rounded-lg bg-stone-50 p-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Panel Degradation</p>
                     <p className="mt-1 text-lg font-semibold">{(formState.degradationRate * 100).toFixed(1)}%/yr</p>
@@ -1019,14 +1031,6 @@ export function AnalysisPage() {
                       <p className="text-xs text-stone-400">Primary roof segment (from Solar API)</p>
                     </div>
                   )}
-                  <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                      Assumed Losses
-                      <InfoTooltip text="Energy lost to dust, wiring, inverter conversion, and heat — typically around 20% for residential systems." />
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">{Math.round(formState.assumedLosses * 100)}%</p>
-                    <p className="text-xs text-stone-400">Soiling, cable, inverter, temperature</p>
-                  </div>
                   <div className="rounded-lg bg-stone-50 p-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
                       DC/AC Ratio
@@ -1218,8 +1222,8 @@ export function AnalysisPage() {
                           <th className="px-3 py-2 font-medium">Credit Used</th>
                           <th className="px-3 py-2 font-medium">Credit Balance</th>
                           <th className="px-3 py-2 font-medium">Baseline Bill</th>
-                          <th className="px-3 py-2 font-medium">NEM Bill</th>
-                          <th className="px-3 py-2 font-medium">Total Savings</th>
+                          <th className="px-3 py-2 font-medium">NEM Savings</th>
+                          <th className="px-3 py-2 font-medium">Total Bill</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1234,9 +1238,11 @@ export function AnalysisPage() {
                             <td className="px-3 py-2">{formatNumber(month.creditUsed, 'kWh')}</td>
                             <td className="px-3 py-2">{formatNumber(month.creditBalance, 'kWh')}</td>
                             <td className="px-3 py-2">{formatCurrency(month.baselineBill.total)}</td>
-                            <td className="px-3 py-2">{formatCurrency(month.nemBill.total)}</td>
-                            <td className="px-3 py-2 font-semibold text-emerald-700">
+                            <td className="px-3 py-2 text-emerald-700">
                               {formatCurrency(month.savingsRm)}
+                            </td>
+                            <td className="px-3 py-2 font-semibold text-emerald-700">
+                              {formatCurrency(month.nemBill.total)}
                             </td>
                           </tr>
                         ))}
@@ -1349,8 +1355,8 @@ export function AnalysisPage() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Bar dataKey="baselineBill" fill="#1f2937" />
-                    <Bar dataKey="nemBill" fill="#0f766e" />
+                    <Bar dataKey="baselineBill" fill="#ea580c" />
+                    <Bar dataKey="nemBill" fill="#16a34a" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

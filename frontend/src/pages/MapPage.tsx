@@ -8,18 +8,26 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
 import { AlertTriangle, ArrowLeft, Loader2, MapPin } from 'lucide-react'
+import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
 
 const MAP_TOUR_STEPS: TourStep[] = [
   {
-    title: 'Find Your Building',
+    title: 'Welcome to the Solar Layout Generator',
     description:
-      'Type your home address in the search bar above. We\'ll locate your building on the map and fetch satellite data to estimate its solar potential.'
+      'This tool helps you estimate how much you could save on your electricity bill by installing solar panels. Let\'s start by finding your home.'
   },
   {
     target: '[data-tour="search-box"]',
     title: 'Search for Your Address',
-    description: 'Enter your full address or postcode. The map will zoom to your location and highlight your building.'
+    description:
+      'Type your full home address or postcode here. The map will zoom to your building and show its outline.'
+  },
+  {
+    target: '[data-tour="search-box"]',
+    title: 'Confirm Your Building',
+    description:
+      'After selecting an address, you\'ll see your building highlighted. Click "Analyse This Location" to fetch satellite solar data — this usually takes 15–30 seconds.'
   }
 ]
 import { Link } from 'react-router-dom'
@@ -314,9 +322,7 @@ export function MapPage() {
       <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />
 
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-300 border-t-neutral-900" />
-        </div>
+        <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />
       )}
 
       {/* Confirm panel */}
