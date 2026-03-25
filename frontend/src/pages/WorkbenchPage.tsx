@@ -21,10 +21,16 @@ const WORKBENCH_TOUR_STEPS: TourStep[] = [
       'Slide left to remove panels, right to add more. The system keeps the highest-performing panels first. More panels = more savings, but also higher installation cost.'
   },
   {
-    target: '[data-tour="canvas"]',
+    target: '[data-tour="canvas-title"]',
     title: 'Arrange Your Panels',
     description:
       'Click any blue panel to select it. Then you can drag it to a new position, use the rotation slider in the sidebar to angle it, or press the Delete key to remove it.'
+  },
+  {
+    target: '[data-tour="canvas-controls"]',
+    title: 'Canvas Controls',
+    description:
+      'Use these buttons to zoom in/out, reset the view, and switch between satellite (RGB), solar irradiance, and elevation overlays.'
   },
   {
     target: '[data-tour="save-continue"]',
@@ -940,12 +946,12 @@ export function WorkbenchPage() {
                 </Button>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <Button variant="outline" asChild>
+              <div className="grid gap-3 xl:grid-cols-1">
+                <Button variant="outline" size="sm" asChild>
                   <Link to="/dashboard">Back to Dashboard</Link>
                 </Button>
-                <Button variant="outline" asChild>
-                  <Link to={`/project/${projectId}/map`}>Back to Map</Link>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={`/project/${projectId}/map?view=readonly`}>Back to Map</Link>
                 </Button>
                 <Button data-tour="save-continue" onClick={handleSave} disabled={isSaving || pendingPanelId !== null}>
                   {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
@@ -960,7 +966,7 @@ export function WorkbenchPage() {
             <CardHeader className="border-b border-stone-200 bg-stone-50/70">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle>
+                  <CardTitle data-tour="canvas-title">
                     Roof Layout Workbench
                     <InfoTooltip text="Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it." />
                   </CardTitle>
@@ -1013,7 +1019,7 @@ export function WorkbenchPage() {
                     </Stage>
 
                     {/* Zoom controls */}
-                    <div className="absolute right-4 top-4 flex flex-col gap-1">
+                    <div data-tour="canvas-controls" className="absolute right-4 top-4 flex flex-col gap-1">
                       <button
                         onClick={handleZoomIn}
                         className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"

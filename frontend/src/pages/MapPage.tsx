@@ -86,11 +86,14 @@ export function MapPage() {
   })
 
   // If existing project already has a ready location, navigate to workbench
+  // Unless ?view=readonly is set (Back to Map from workbench)
+  const searchParams = new URLSearchParams(window.location.search)
+  const isReadonly = searchParams.get('view') === 'readonly'
   useEffect(() => {
-    if (existingProject?.location?.status === 'ready') {
+    if (!isReadonly && existingProject?.location?.status === 'ready') {
       navigate(`/project/${existingProject.id}/workbench`, { replace: true })
     }
-  }, [existingProject, navigate])
+  }, [existingProject, navigate, isReadonly])
 
   // Poll location status while processing
   const { data: statusData, error: statusError } = useQuery({
@@ -185,7 +188,8 @@ export function MapPage() {
 
     const input = document.createElement('input')
     input.type = 'text'
-    input.placeholder = 'Search for your address...'
+    input.placeholder = isReadonly ? 'Location locked — go back to workbench to edit' : 'Search for your address...'
+    input.disabled = isReadonly
     input.className =
       'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-base text-stone-950 outline-none placeholder:text-stone-500'
     host.appendChild(input)

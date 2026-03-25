@@ -843,7 +843,9 @@ export function AnalysisPage() {
               <CardContent className="space-y-1 p-5">
                 <p className="text-sm text-muted-foreground">
                   Simple Payback
-                  <InfoTooltip text="How many years until your savings cover the cost of installing the system." />
+                  <InfoTooltip
+                    text={`How many years until your savings cover the cost of installing the system.\n\nNet benefit projections:\n1-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 1) - formState.systemCostRm)}\n5-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 5) - formState.systemCostRm)}\n10-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 10) - formState.systemCostRm)}`}
+                  />
                 </p>
                 <p className="text-2xl font-semibold">{formatNumber(analysisResults.paybackYears, 'years')}</p>
                 <span
