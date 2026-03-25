@@ -34,7 +34,7 @@ Styled as a soft info-toned banner (stone-50/stone-100 background, stone-700 tex
 | WorkbenchPage | "Drag, rotate, or remove the solar panels on your roof, then click Save & Continue." |
 | AnalysisPage | "See how much you could save on your electricity bill with solar — adjust your usage below." |
 
-**Step indicators:** Each page also gets a muted "Step N of 3" label near the page header:
+**Step indicators:** Each page gets a muted "Step N of 3" label rendered as part of the onboarding banner (left-aligned, before the banner text). If the banner is dismissed, the step indicator is also hidden — it served its purpose on first visit.
 - MapPage: "Step 1 of 3"
 - WorkbenchPage: "Step 2 of 3"
 - AnalysisPage: "Step 3 of 3"
@@ -52,7 +52,7 @@ Modify existing `CardDescription` text or add small muted `<p>` elements within 
 | Monthly Bill Comparison chart description | Change to: "Your estimated monthly bill without solar (baseline) versus with solar (NEM) for each month." |
 | Cumulative Savings chart description | Change to: "Total savings accumulated month by month over the year." |
 | Net Benefit Projection description | Change to: "How much you gain (or lose) after subtracting the cost of installing your solar system." |
-| Financial Disclaimers card | Show on the interactive AnalysisPage (currently only in PDF export). Already renders in Advanced view — ensure it's also visible in Simple view. |
+| WorkbenchPage sidebar controls | Add brief guidance text below the sidebar card description: "Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it." |
 
 ### Layer 3: InfoTooltips (~25 new)
 
@@ -74,6 +74,8 @@ Uses the existing `InfoTooltip` component (lucide-react info icon + shadcn Toolt
 | System Size (kWp) | "Kilowatt-peak — the maximum power your solar system can produce under ideal sunlight conditions." |
 
 #### AnalysisPage — Bill Components (8)
+
+Defined as a `BILL_COMPONENT_TOOLTIPS` lookup constant. Applied to matching labels in **both** the "Without Solar" and "With Solar" columns (same tooltip text, referenced by component key to avoid duplication).
 
 | Component | Tooltip |
 |-----------|---------|
@@ -114,16 +116,16 @@ Uses the existing `InfoTooltip` component (lucide-react info icon + shadcn Toolt
 
 - **No new components needed.** Reuse existing `InfoTooltip`. Onboarding banners are plain JSX (`div` + `button` + `localStorage`).
 - **No new dependencies.**
-- **Existing tooltips unchanged.** The 6 existing AnalysisPage tooltips and 5 WorkbenchPage tooltips remain as-is.
+- **Existing tooltips unchanged.** The 6 existing AnalysisPage tooltips and 7 existing WorkbenchPage tooltips remain as-is.
 - **Bill component tooltips rendered once as a lookup object** to avoid 8×2 (Without + With Solar) duplicated tooltip text. Define a `BILL_COMPONENT_TOOLTIPS` constant and reference by key.
-- **Disclaimers card** moves from Advanced-only to always-visible (both Simple and Advanced views).
+- **TooltipProvider optimization:** Consider hoisting the `TooltipProvider` to the app root or page level instead of nesting one per `InfoTooltip` instance, since there will be ~30+ tooltips on the AnalysisPage.
 
 ### Files Changed
 
 | File | Changes |
 |------|---------|
 | `frontend/src/pages/AnalysisPage.tsx` | Onboarding banner, step indicator, ~21 new InfoTooltips, section guidance text, disclaimers visibility |
-| `frontend/src/pages/WorkbenchPage.tsx` | Onboarding banner, step indicator, 1 new tooltip |
+| `frontend/src/pages/WorkbenchPage.tsx` | Onboarding banner, step indicator, 1 new tooltip, sidebar guidance text |
 | `frontend/src/pages/MapPage.tsx` | Onboarding banner, step indicator |
 | `frontend/src/lib/analysis.ts` | `BILL_COMPONENT_TOOLTIPS` constant (optional, could live in AnalysisPage) |
 
