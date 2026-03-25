@@ -1,5 +1,14 @@
 ﻿# PROGRESS - AGENT ONLY
 
+## [25/03/26] - Phase 4.3: AnalysisPage UAT 3 Fixes
+
+- **Degradation Bug Fix (UAT #1):** Extracted `computeDegradedSavings()` helper in `analysis.ts`. Net Benefit Projection card (Advanced view) now applies `year1Savings × (1 - degradationRate)^(yr-1)` compounding for 1yr/5yr/10yr periods instead of simple multiplication. Refactored `buildAnalysisResults()` to use the same helper for consistency.
+- **Month Tab Selection (UAT #2):** Investigated rendering path — code logic is correct (`selectedMonthIndex` → `selectedMonth` → bill display`). Promoted `selectedMonth` derivation to explicit `useMemo` with `[simulation, selectedMonthIndex]` dependencies for robustness. Fresh deployment should resolve any stale-build issues from UAT session.
+- **Expand/Collapse Toggle (UAT #5):** Replaced native `<details open>` (which had CSS/framework conflicts) with a controlled React state toggle using `monthTableOpen` state, `ChevronDown`/`ChevronRight` icons, and conditional rendering. Defaults to collapsed to reduce page density.
+- **System Assumptions Card (UAT #4):** Added read-only "System Assumptions" card in Advanced view showing: Performance Ratio (80%), panel degradation rate, panel lifetime (from Solar API), primary roof azimuth/pitch (from Solar API `roofSegmentStats`), assumed losses (~20%), DC/AC ratio (1.2). Extended `buildingInsights.ts` `RoofSegment` type to parse `pitchDegrees`.
+- **Seasonal Consumption Profile (UAT #3):** Defined 12 Malaysian seasonal monthly multipliers (hot dry months higher, monsoon months lower, normalized to avg 1.0). Added Flat/Seasonal toggle below the consumption input with range preview. Updated `runAnnualSimulation` to accept `number | number[]`. Added `consumptionProfile` to `AnalysisConfig` and save payload. Updated PDF report assumptions to show profile choice and degradation rate.
+- **Verification:** Frontend TSC clean. 94 frontend tests pass, 48 backend tests pass.
+
 ## [24/03/26] - Phase 4.3b: Model Capacity Passthrough, Panel Styling, and Overlay Views
 
 - **Capacity-Aware Recompute:** Added optional `capacityWp` to `FluxRecomputeRequest`. Both single and batch recompute endpoints now use the selected panel model's capacity (e.g., 440Wp for Jinko) instead of always using the Google API default (400Wp). Switching from Google Default to Jinko now produces ~10% higher kWh values as expected.

@@ -839,6 +839,60 @@
 - [x] Run `npx prisma db seed` against production database (upsert updated the existing RP4-2025 row)
 - [x] Verify the tariff config returns the updated AFA default (-2.15 sen/kWh confirmed via Prisma query)
 
+## Phase 4.3: AnalysisPage UAT 3 Fixes
+
+### 1. Fix: Degradation Not Applied to Net Benefit Projections (UAT #1)
+
+**Purpose/Issue:** The Net Benefit Projection card (Advanced view) calculates 1yr/5yr/10yr projections using simple `totalSavingsRm * N` without applying the degradation rate. The degradation input field exists and is correctly wired to payback/ROI in `analysis.ts`, but the inline projection display silently ignores it — overstating long-term returns.
+
+**Implementation:**
+
+- [x] Replace `simulation.totalSavingsRm * N - systemCostRm` with degradation-compounded sums: `Σ year1Savings × (1 - degradationRate)^(yr-1)` for yr = 1..N
+- [x] Extract a reusable `computeDegradedSavings(year1Savings, degradationRate, years)` helper in `analysis.ts`
+- [x] Use the helper in both the Net Benefit Projection card and the existing `buildAnalysisResults()` to avoid drift
+
+### 2. Fix: Month Tab Selection Does Not Update Bill Breakdown (UAT #2)
+
+**Purpose/Issue:** The Bill Component Breakdown's month tabs (Jan–Dec) do not update the displayed values when clicked. The `selectedMonthIndex` state and `selectedMonth` derivation look correct in code, but the UAT tester (solar engineer) confirmed all months show January's values.
+
+**Implementation:**
+
+- [x] Investigate the `selectedMonthIndex` → `selectedMonth` → bill display rendering path for stale state or rendering issues
+- [x] Ensure `selectedMonth` reactively updates when month tabs are clicked (add `useMemo` if needed)
+- [x] Verify the `simulation.months` array contains distinct per-month values (not duplicated references)
+
+### 3. Fix: Expand/Collapse Toggle for Month-by-Month Table (UAT #5)
+
+**Purpose/Issue:** The `<details open>` element for the Month-by-Month Breakdown does not visually collapse when toggled. Likely a CSS/framework conflict with the native HTML5 `<details>` element.
+
+**Implementation:**
+
+- [x] Replace `<details open>` with a controlled React state toggle using a clickable summary + conditional rendering
+- [x] Default to collapsed state to reduce page density (per UAT #2 feedback about cognitive overload)
+- [x] Use ChevronDown/ChevronUp icon to indicate toggle state
+
+### 4. Feature: System Assumptions Card (UAT #4)
+
+**Purpose/Issue:** No performance ratio (PR), panel tilt/azimuth, or loss factors are shown. A solar professional expects to see these system-level assumptions. The Solar API already provides roof segment pitch/azimuth data that can be surfaced without new inputs.
+
+**Implementation:**
+
+- [x] Extend `buildingInsights.ts` `RoofSegment` type to include `pitchDegrees` and parse it from the Solar API response
+- [x] Add a read-only "System Assumptions" card in the Advanced view showing: assumed PR (80%), primary roof pitch and azimuth from Solar API, panel lifetime, assumed loss factors (soiling, cable, inverter), degradation rate
+- [x] Include a note that these are standard industry assumptions, not site-measured values
+
+### 5. Feature: Seasonal Consumption Profile (UAT #3)
+
+**Purpose/Issue:** Consumption input assumes a flat value across all 12 months. Malaysian households have seasonal variation (school holidays, hot dry spells, Ramadan). Even a simple seasonal multiplier improves fidelity.
+
+**Implementation:**
+
+- [x] Define Malaysian seasonal monthly multipliers as a constant (e.g., hot months higher, monsoon months lower, normalized to average 1.0)
+- [x] Add a "Consumption Profile" toggle in the form: Flat (current) / Seasonal
+- [x] Update `runAnnualSimulation` to accept `number | number[]` for consumption, normalizing to a 12-element array internally
+- [x] When Seasonal is selected, multiply base consumption by monthly factors before passing to the simulation
+- [x] Persist the profile choice in `analysisConfig`
+
 ## Phase 5: Post-MVP Enhancements and Polish
 
 ### 1. Enhancement: Dashboard Improvements

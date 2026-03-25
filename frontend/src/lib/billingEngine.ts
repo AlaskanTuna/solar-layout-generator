@@ -227,22 +227,28 @@ export function computeNemMonth(
 /**
  * Run a 12-month NEM billing simulation.
  *
- * @param monthlyConsumption - constant consumption applied to all 12 months (kWh)
+ * @param monthlyConsumption - constant or per-month consumption (kWh). A single number is applied to all 12 months;
+ *                             an array of 12 values supplies per-month consumption.
  * @param monthlyGeneration  - array of 12 monthly generation values (kWh), index 0 = January
  * @param config             - tariff parameters from TariffConfig
  * @returns Annual simulation with per-month breakdown and totals
  */
 export function runAnnualSimulation(
-  monthlyConsumption: number,
+  monthlyConsumption: number | number[],
   monthlyGeneration: number[],
   config: BillingConfig
 ): AnnualSimulationResult {
+  const consumptionArr = Array.isArray(monthlyConsumption)
+    ? monthlyConsumption
+    : Array.from({ length: 12 }, () => monthlyConsumption)
+
   const months: NemMonthResult[] = []
   let creditBalance = 0
 
   for (let i = 0; i < 12; i++) {
+    const consumption = consumptionArr[i] ?? 0
     const generation = monthlyGeneration[i] ?? 0
-    const result = computeNemMonth(monthlyConsumption, generation, creditBalance, config, i + 1)
+    const result = computeNemMonth(consumption, generation, creditBalance, config, i + 1)
     creditBalance = result.creditBalance
     months.push(result)
   }

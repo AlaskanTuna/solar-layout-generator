@@ -10,6 +10,7 @@ export type AnalysisConfig = {
   afaRateSenPerKwh: number
   systemKwp: number
   degradationRate: number // e.g. 0.005 = 0.5%/year
+  consumptionProfile: ConsumptionProfile
 }
 
 export type AnalysisResultsRecord = {
@@ -33,6 +34,34 @@ export type AnalysisResultsRecord = {
 
 export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+export type ConsumptionProfile = 'flat' | 'seasonal'
+
+/**
+ * Malaysian seasonal monthly multipliers for residential electricity consumption.
+ * Based on typical patterns: higher AC usage during hot dry months (Mar–Jun),
+ * moderate during transition (Jul–Oct), lower during northeast monsoon (Nov–Feb).
+ * Normalised so the 12-month average equals 1.0 (annual total unchanged).
+ */
+export const SEASONAL_MULTIPLIERS: readonly number[] = [
+  0.93, // Jan — monsoon, cooler
+  0.95, // Feb — monsoon tail
+  1.08, // Mar — hot dry season starts
+  1.10, // Apr — peak hot season
+  1.10, // May — peak hot season
+  1.08, // Jun — hot, school holidays
+  1.02, // Jul — transition
+  1.00, // Aug — transition
+  0.98, // Sep — transition
+  0.95, // Oct — monsoon onset
+  0.90, // Nov — northeast monsoon
+  0.91 // Dec — monsoon, school holidays
+] as const
+
+/** Apply seasonal multipliers to a base consumption value, returning 12 monthly values. */
+export function applySeasonalProfile(baseKwh: number): number[] {
+  return SEASONAL_MULTIPLIERS.map((m) => round2(baseKwh * m))
+}
+
 export const ANALYSIS_DISCLAIMERS = [
   'Estimates are based on published TNB tariff rates under Regulatory Period 4 (effective 1 July 2025) and NEM Rakyat 3.0 rules. Actual bills may vary due to billing cycle length, meter reading dates, and tariff adjustments.',
   'The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes.',
@@ -43,6 +72,15 @@ export const ANALYSIS_DISCLAIMERS = [
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100
+}
+
+/** Sum year1Savings degraded by (1 - rate)^(yr-1) for yr = 1..years */
+export function computeDegradedSavings(year1Savings: number, degradationRate: number, years: number): number {
+  let total = 0
+  for (let yr = 1; yr <= years; yr++) {
+    total += year1Savings * Math.pow(1 - degradationRate, yr - 1)
+  }
+  return round2(total)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -69,6 +107,10 @@ export function aggregateMonthlyGeneration(activePanels: PanelEdit[]): number[] 
   return totals.map((value) => round2(value))
 }
 
+function getConsumptionProfile(value: unknown): ConsumptionProfile | null {
+  return value === 'flat' || value === 'seasonal' ? value : null
+}
+
 export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> | null {
   if (!isRecord(raw)) {
     return null
@@ -80,6 +122,7 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   const afaRateSenPerKwh = getNumber(raw.afaRateSenPerKwh)
   const systemKwp = getNumber(raw.systemKwp)
   const degradationRate = getNumber(raw.degradationRate)
+  const consumptionProfile = getConsumptionProfile(raw.consumptionProfile)
 
   return {
     ...(monthlyConsumptionKwh !== null ? { monthlyConsumptionKwh } : {}),
@@ -87,7 +130,8 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
     ...(systemCostRm !== null ? { systemCostRm } : {}),
     ...(afaRateSenPerKwh !== null ? { afaRateSenPerKwh } : {}),
     ...(systemKwp !== null ? { systemKwp } : {}),
-    ...(degradationRate !== null ? { degradationRate } : {})
+    ...(degradationRate !== null ? { degradationRate } : {}),
+    ...(consumptionProfile ? { consumptionProfile } : {})
   }
 }
 
@@ -123,11 +167,7 @@ export function buildAnalysisResults({
   }
 
   // Degradation-aware 10-year totals
-  let tenYearSavings = 0
-  for (let yr = 1; yr <= 10; yr++) {
-    tenYearSavings += year1Savings * Math.pow(1 - degradationRate, yr - 1)
-  }
-  tenYearSavings = round2(tenYearSavings)
+  const tenYearSavings = computeDegradedSavings(year1Savings, degradationRate, 10)
 
   const tenYearNetBenefitRm = round2(tenYearSavings - systemCostRm)
   const tenYearRoiPercent =

@@ -18,7 +18,7 @@ describe('buildingInsights', () => {
         panelWidthMeters: 1.134,
         panelHeightMeters: 2.278,
         panelCapacityWatts: 450,
-        roofSegmentStats: [{ azimuthDegrees: 180 }],
+        roofSegmentStats: [{ azimuthDegrees: 180, pitchDegrees: 15 }],
         solarPanels: [
           {
             id: 'panel_0',

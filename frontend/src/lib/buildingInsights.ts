@@ -7,6 +7,7 @@ export type BoundingBox = {
 
 export type RoofSegment = {
   azimuthDegrees: number
+  pitchDegrees: number
 }
 
 export type SolarPanel = {
@@ -98,7 +99,8 @@ export function parseBuildingInsights(raw: unknown): ParsedBuildingInsights | nu
         .map((segment) => {
           if (!isRecord(segment)) return null
           const azimuthDegrees = getNumber(segment.azimuthDegrees)
-          return azimuthDegrees === null ? null : { azimuthDegrees }
+          const pitchDegrees = getNumber(segment.pitchDegrees) ?? 0
+          return azimuthDegrees === null ? null : { azimuthDegrees, pitchDegrees }
         })
         .filter((segment): segment is RoofSegment => segment !== null)
     : []

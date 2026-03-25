@@ -28,16 +28,21 @@ import {
   ANALYSIS_DISCLAIMERS,
   MONTH_LABELS,
   aggregateMonthlyGeneration,
+  applySeasonalProfile,
   buildAnalysisResults,
   buildThresholdWarnings,
+  computeDegradedSavings,
   parseSavedAnalysisConfig,
+  SEASONAL_MULTIPLIERS,
   type AnalysisConfig,
   type AnalysisResultsRecord,
-  type ConnectionPhase
+  type ConnectionPhase,
+  type ConsumptionProfile
 } from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
 import { InfoTooltip } from '@/components/InfoTooltip'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { getPanelModel } from '@shared/types'
 
 const currencyFormatter = new Intl.NumberFormat('en-MY', {
@@ -156,6 +161,7 @@ export function AnalysisPage() {
   const [formState, setFormState] = useState<AnalysisFormState | null>(null)
   const [viewMode, setViewMode] = useState<'simple' | 'advanced'>('simple')
   const [benefitPeriod, setBenefitPeriod] = useState<1 | 5 | 10>(10)
+  const [monthTableOpen, setMonthTableOpen] = useState(false)
 
   const projectQuery = useQuery({
     queryKey: ['project', projectId],
@@ -232,7 +238,8 @@ export function AnalysisPage() {
       connectionPhase: savedConfig?.connectionPhase ?? 'single',
       systemCostRm: savedConfig?.systemCostRm ?? defaultSystemCostRm,
       afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault,
-      degradationRate: savedConfig?.degradationRate ?? 0.005
+      degradationRate: savedConfig?.degradationRate ?? 0.005,
+      consumptionProfile: savedConfig?.consumptionProfile ?? 'flat'
     })
     initializedProjectIdRef.current = projectId
   }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights, selectedPanelModel])
@@ -248,10 +255,17 @@ export function AnalysisPage() {
     }
   }, [tariffQuery.data, formState])
 
+  const monthlyConsumption = useMemo(() => {
+    if (!formState) return formState
+    return formState.consumptionProfile === 'seasonal'
+      ? applySeasonalProfile(formState.monthlyConsumptionKwh)
+      : formState.monthlyConsumptionKwh
+  }, [formState])
+
   const simulation = useMemo(() => {
-    if (!formState || !billingConfig) return null
-    return runAnnualSimulation(formState.monthlyConsumptionKwh, monthlyGeneration, billingConfig)
-  }, [billingConfig, formState, monthlyGeneration])
+    if (!formState || !billingConfig || monthlyConsumption == null) return null
+    return runAnnualSimulation(monthlyConsumption, monthlyGeneration, billingConfig)
+  }, [billingConfig, formState, monthlyConsumption, monthlyGeneration])
 
   const analysisResults = useMemo(() => {
     if (!simulation || !formState) return null
@@ -266,7 +280,10 @@ export function AnalysisPage() {
   }, [activePanels.length, carbonOffsetFactorKgPerMwh, formState, simulation])
 
   const chartData = useMemo(() => (simulation ? buildChartData(simulation) : []), [simulation])
-  const selectedMonth = simulation?.months[selectedMonthIndex] ?? null
+  const selectedMonth = useMemo(
+    () => simulation?.months[selectedMonthIndex] ?? null,
+    [simulation, selectedMonthIndex]
+  )
   const thresholdWarnings = useMemo(() => {
     if (!selectedMonth || !tariffQuery.data) return []
     return buildThresholdWarnings(selectedMonth, tariffQuery.data.thresholds)
@@ -475,6 +492,36 @@ export function AnalysisPage() {
                     )
                   }}
                 />
+                <div className="mt-2 flex items-center gap-2">
+                  <Label className="text-xs text-muted-foreground">Profile:</Label>
+                  <div className="inline-flex rounded-md border border-stone-200 bg-stone-50 p-0.5 text-xs">
+                    <button
+                      type="button"
+                      className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'flat' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                      onClick={() =>
+                        setFormState((c) => (c ? { ...c, consumptionProfile: 'flat' as ConsumptionProfile } : c))
+                      }
+                    >
+                      Flat
+                    </button>
+                    <button
+                      type="button"
+                      className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'seasonal' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                      onClick={() =>
+                        setFormState((c) => (c ? { ...c, consumptionProfile: 'seasonal' as ConsumptionProfile } : c))
+                      }
+                    >
+                      Seasonal
+                    </button>
+                  </div>
+                  <InfoTooltip text="Flat uses the same kWh every month. Seasonal applies typical Malaysian monthly variation (higher in hot months, lower during monsoon)." />
+                </div>
+                {formState.consumptionProfile === 'seasonal' && (
+                  <p className="text-xs text-muted-foreground">
+                    Monthly range: {Math.round(formState.monthlyConsumptionKwh * Math.min(...SEASONAL_MULTIPLIERS))}–
+                    {Math.round(formState.monthlyConsumptionKwh * Math.max(...SEASONAL_MULTIPLIERS))} kWh
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
@@ -727,9 +774,11 @@ export function AnalysisPage() {
           {viewMode === 'advanced' &&
             (() => {
               const round2 = (v: number) => Math.round(v * 100) / 100
-              const netBenefit1yr = round2(simulation.totalSavingsRm * 1 - formState.systemCostRm)
-              const netBenefit5yr = round2(simulation.totalSavingsRm * 5 - formState.systemCostRm)
-              const netBenefit10yr = round2(simulation.totalSavingsRm * 10 - formState.systemCostRm)
+              const year1Savings = simulation.totalSavingsRm
+              const dr = formState.degradationRate
+              const netBenefit1yr = round2(computeDegradedSavings(year1Savings, dr, 1) - formState.systemCostRm)
+              const netBenefit5yr = round2(computeDegradedSavings(year1Savings, dr, 5) - formState.systemCostRm)
+              const netBenefit10yr = round2(computeDegradedSavings(year1Savings, dr, 10) - formState.systemCostRm)
               const netBenefitData = [
                 { period: '1 Year', value: netBenefit1yr },
                 { period: '5 Years', value: netBenefit5yr },
@@ -788,6 +837,62 @@ export function AnalysisPage() {
                 </Card>
               )
             })()}
+
+          {viewMode === 'advanced' && buildingInsights && (
+            <Card className="border-stone-200 bg-white/90 shadow-sm">
+              <CardHeader>
+                <CardTitle>System Assumptions</CardTitle>
+                <CardDescription>
+                  Standard industry assumptions used in this analysis. These are not site-measured values.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="rounded-lg bg-stone-50 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Performance Ratio</p>
+                    <p className="mt-1 text-lg font-semibold">80%</p>
+                    <p className="text-xs text-stone-400">Typical for Malaysian residential systems</p>
+                  </div>
+                  <div className="rounded-lg bg-stone-50 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Panel Degradation</p>
+                    <p className="mt-1 text-lg font-semibold">{(formState.degradationRate * 100).toFixed(1)}%/yr</p>
+                    <p className="text-xs text-stone-400">Annual output decline (N-type ~0.5%)</p>
+                  </div>
+                  {buildingInsights.solarPotential.panelLifetimeYears && (
+                    <div className="rounded-lg bg-stone-50 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Panel Lifetime</p>
+                      <p className="mt-1 text-lg font-semibold">
+                        {buildingInsights.solarPotential.panelLifetimeYears} years
+                      </p>
+                      <p className="text-xs text-stone-400">From Google Solar API estimate</p>
+                    </div>
+                  )}
+                  {buildingInsights.solarPotential.roofSegmentStats.length > 0 && (
+                    <div className="rounded-lg bg-stone-50 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                        Roof Azimuth / Pitch
+                      </p>
+                      <p className="mt-1 text-lg font-semibold">
+                        {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}° /{' '}
+                        {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].pitchDegrees)}°
+                      </p>
+                      <p className="text-xs text-stone-400">Primary roof segment (from Solar API)</p>
+                    </div>
+                  )}
+                  <div className="rounded-lg bg-stone-50 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Assumed Losses</p>
+                    <p className="mt-1 text-lg font-semibold">~20%</p>
+                    <p className="text-xs text-stone-400">Soiling, cable, inverter, temperature</p>
+                  </div>
+                  <div className="rounded-lg bg-stone-50 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">DC/AC Ratio</p>
+                    <p className="mt-1 text-lg font-semibold">1.2</p>
+                    <p className="text-xs text-stone-400">Standard residential inverter sizing</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {viewMode === 'advanced' && (
             <Card className="border-stone-200 bg-white/90 shadow-sm">
@@ -933,11 +1038,16 @@ export function AnalysisPage() {
                 <CardTitle>Month-by-Month Breakdown</CardTitle>
                 <CardDescription>Detailed billing inputs, credits, and savings for every month.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <details open className="space-y-4">
-                  <summary className="cursor-pointer text-sm font-medium text-stone-700">
-                    Expand or collapse the full billing table
-                  </summary>
+              <CardContent className="space-y-4">
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-sm font-medium text-stone-700 hover:text-stone-900"
+                  onClick={() => setMonthTableOpen((prev) => !prev)}
+                >
+                  {monthTableOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {monthTableOpen ? 'Collapse' : 'Expand'} the full billing table
+                </button>
+                {monthTableOpen && (
                   <div className="overflow-x-auto">
                     <table className="min-w-full border-collapse text-sm">
                       <thead>
@@ -974,7 +1084,7 @@ export function AnalysisPage() {
                       </tbody>
                     </table>
                   </div>
-                </details>
+                )}
               </CardContent>
             </Card>
           )}
@@ -1045,10 +1155,14 @@ export function AnalysisPage() {
                       {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m)
                     </p>
                   )}
-                  <p>Monthly consumption: {formatNumber(formState.monthlyConsumptionKwh, 'kWh')}</p>
+                  <p>
+                    Monthly consumption: {formatNumber(formState.monthlyConsumptionKwh, 'kWh')} (
+                    {formState.consumptionProfile === 'seasonal' ? 'seasonal profile' : 'flat'})
+                  </p>
                   <p>Connection phase: {formState.connectionPhase === 'single' ? 'Single phase' : 'Three phase'}</p>
                   <p>System cost: {formatCurrency(formState.systemCostRm)}</p>
                   <p>AFA rate: {formatNumber(formState.afaRateSenPerKwh, 'sen/kWh')}</p>
+                  <p>Degradation rate: {(formState.degradationRate * 100).toFixed(1)}%/year</p>
                   <p>
                     Location:{' '}
                     {projectQuery.data.location
