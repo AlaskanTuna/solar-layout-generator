@@ -226,10 +226,17 @@ export function WorkbenchPage() {
   const irradianceStyle = useMemo(() => {
     const azimuth = MONTHLY_AZIMUTH[irradianceMonth] ?? 180
     const intensity = MONTHLY_IRRADIANCE[irradianceMonth] ?? 0.9
-    const cssAngle = (180 - azimuth + 360) % 360
-    const alpha = intensity * 0.15
+    // Position the glow source on the edge of the container based on azimuth
+    // Azimuth 0°=N(top), 90°=E(right), 180°=S(bottom), 270°=W(left)
+    const rad = (azimuth * Math.PI) / 180
+    const gx = 50 + Math.sin(rad) * 50 // sin maps azimuth to X: 0°→50%, 90°→100%, 180°→50%, 270°→0%
+    const gy = 50 - Math.cos(rad) * 50 // -cos maps azimuth to Y: 0°→0%, 90°→50%, 180°→100%
+    const alpha = intensity * 0.25
     return {
-      boxShadow: `inset 0 0 100px 60px rgba(255, 184, 0, ${alpha.toFixed(3)})`
+      boxShadow: [
+        `inset ${(gx - 50) * 1.5}px ${(gy - 50) * 1.5}px 80px 30px rgba(255, 184, 0, ${(alpha * 0.7).toFixed(3)})`,
+        `inset ${(gx - 50) * 0.8}px ${(gy - 50) * 0.8}px 40px 15px rgba(255, 200, 50, ${(alpha * 0.4).toFixed(3)})`
+      ].join(', ')
     }
   }, [irradianceMonth])
 
@@ -412,9 +419,9 @@ export function WorkbenchPage() {
           handleDeleteSelected()
         }
       }
-      if (e.key === ' ' && !e.repeat) {
+      if (e.key === ' ') {
         e.preventDefault()
-        setSpaceHeld(true)
+        if (!e.repeat) setSpaceHeld(true)
       }
     }
     function handleKeyUp(e: KeyboardEvent) {
@@ -422,7 +429,7 @@ export function WorkbenchPage() {
         setSpaceHeld(false)
       }
     }
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown, { passive: false })
     window.addEventListener('keyup', handleKeyUp)
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
@@ -1007,17 +1014,17 @@ export function WorkbenchPage() {
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
       <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-between px-4">
         <Link
-          to="/dashboard"
-          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Dashboard
-        </Link>
-        <Link
           to={`/project/${projectId}/map?view=readonly`}
           className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
         >
+          <ArrowLeft className="h-3.5 w-3.5" />
           Map
+        </Link>
+        <Link
+          to={`/project/${projectId}/analysis`}
+          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
+        >
+          Analysis
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -1219,14 +1226,19 @@ export function WorkbenchPage() {
                 </Button>
               </div>
 
-              <Button
-                data-tour="save-continue"
-                className="w-full"
-                onClick={handleSave}
-                disabled={isSaving || pendingPanelId !== null}
-              >
-                {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
-              </Button>
+              <div className="grid gap-2">
+                <Button variant="outline" size="sm" asChild className="w-full">
+                  <Link to="/dashboard">Back to Dashboard</Link>
+                </Button>
+                <Button
+                  data-tour="save-continue"
+                  className="w-full"
+                  onClick={handleSave}
+                  disabled={isSaving || pendingPanelId !== null}
+                >
+                  {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </aside>
