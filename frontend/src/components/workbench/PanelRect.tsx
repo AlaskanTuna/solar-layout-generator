@@ -10,10 +10,13 @@ type PanelRectProps = {
   rotation: number
   fill: string
   selected: boolean
+  multiSelected?: boolean
   stageWidth: number
   stageHeight: number
   disabled?: boolean
-  onSelect: (panelId: string) => void
+  snapEnabled?: boolean
+  onSnapDragMove?: (panelId: string, position: { x: number; y: number }) => { x: number; y: number }
+  onSelect: (panelId: string, shiftKey: boolean) => void
   onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
 }
 
@@ -32,9 +35,12 @@ export function PanelRect({
   rotation,
   fill,
   selected,
+  multiSelected = false,
   stageWidth,
   stageHeight,
   disabled = false,
+  snapEnabled = false,
+  onSnapDragMove,
   onSelect,
   onDragEnd
 }: PanelRectProps) {
@@ -42,7 +48,7 @@ export function PanelRect({
 
   const opacity = disabled ? 0.5 : hovered && !selected ? 0.96 : 0.92
 
-  const stroke = selected ? '#ffffff' : hovered ? 'rgba(255, 255, 255, 0.6)' : '#292524'
+  const stroke = multiSelected ? '#22d3ee' : selected ? '#ffffff' : hovered ? 'rgba(255, 255, 255, 0.6)' : '#292524'
 
   const strokeWidth = selected ? 1.5 : hovered ? 1 : 1
 
@@ -66,10 +72,16 @@ export function PanelRect({
       shadowBlur={shadowBlur}
       shadowOpacity={shadowOpacity}
       draggable={!disabled}
-      dragBoundFunc={(position) => ({
-        x: Math.min(stageWidth - width / 2, Math.max(width / 2, position.x)),
-        y: Math.min(stageHeight - height / 2, Math.max(height / 2, position.y))
-      })}
+      dragBoundFunc={(position) => {
+        const clamped = {
+          x: Math.min(stageWidth - width / 2, Math.max(width / 2, position.x)),
+          y: Math.min(stageHeight - height / 2, Math.max(height / 2, position.y))
+        }
+        if (snapEnabled && onSnapDragMove) {
+          return onSnapDragMove(id, clamped)
+        }
+        return clamped
+      }}
       onMouseEnter={(event) => {
         setHovered(true)
         const container = event.target.getStage()?.container()
@@ -80,9 +92,9 @@ export function PanelRect({
         const container = event.target.getStage()?.container()
         if (container) container.style.cursor = 'default'
       }}
-      onClick={() => onSelect(id)}
-      onTap={() => onSelect(id)}
-      onDragStart={() => onSelect(id)}
+      onClick={(e) => onSelect(id, e.evt.shiftKey)}
+      onTap={() => onSelect(id, false)}
+      onDragStart={() => onSelect(id, false)}
       onDragEnd={(event) => {
         const node = event.target
         onDragEnd(id, { x: node.x(), y: node.y() }, () => {

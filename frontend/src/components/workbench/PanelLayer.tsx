@@ -13,13 +13,15 @@ type PanelLayerProps = {
   panels: RenderPanel[]
   panelWidth: number
   panelHeight: number
-  selectedPanelId: string | null
+  selectedPanelIds: Set<string>
   stageWidth: number
   stageHeight: number
   disabledPanelId?: string | null
   energyMin: number
   energyMax: number
-  onSelect: (panelId: string) => void
+  snapEnabled?: boolean
+  onSnapDragMove?: (panelId: string, position: { x: number; y: number }) => { x: number; y: number }
+  onSelect: (panelId: string, shiftKey: boolean) => void
   onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
 }
 
@@ -52,12 +54,14 @@ export function PanelLayer({
   panels,
   panelWidth,
   panelHeight,
-  selectedPanelId,
+  selectedPanelIds,
   stageWidth,
   stageHeight,
   disabledPanelId,
   energyMin,
   energyMax,
+  snapEnabled = false,
+  onSnapDragMove,
   onSelect,
   onDragEnd
 }: PanelLayerProps) {
@@ -73,10 +77,13 @@ export function PanelLayer({
           height={panelHeight}
           rotation={panel.rotation}
           fill={getPanelColor(panelAnnualEnergy(panel), energyMin, energyMax)}
-          selected={selectedPanelId === panel.id}
+          selected={selectedPanelIds.has(panel.id)}
+          multiSelected={selectedPanelIds.size > 1 && selectedPanelIds.has(panel.id)}
           stageWidth={stageWidth}
           stageHeight={stageHeight}
           disabled={disabledPanelId === panel.id}
+          snapEnabled={snapEnabled}
+          onSnapDragMove={onSnapDragMove}
           onSelect={onSelect}
           onDragEnd={onDragEnd}
         />

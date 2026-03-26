@@ -82,20 +82,20 @@ function buildPdfFileName(projectName: string) {
 }
 
 const BILL_TOOLTIPS: Record<string, string> = {
-  energy: 'The base electricity charge, calculated from your kWh usage at TNB\'s tiered rates.',
+  energy: "The base electricity charge, calculated from your kWh usage at TNB's tiered rates.",
   capacity: 'A fixed charge based on your connection capacity, applied to usage above 600 kWh.',
   network: 'Covers the cost of maintaining the electricity grid that delivers power to your home.',
   retail: 'An additional surcharge applied to usage above 600 kWh.',
   afa: 'Automatic Fuel Adjustment — a government-set surcharge (or rebate) that reflects fuel cost changes.',
   eeiRebate: 'Energy Efficiency Incentive — a rebate that rewards lower electricity consumption.',
-  reFund: 'Renewable Energy Fund — a 1.6% levy that funds Malaysia\'s renewable energy development.',
+  reFund: "Renewable Energy Fund — a 1.6% levy that funds Malaysia's renewable energy development.",
   sst: 'Sales and Service Tax (8%) — applies only when monthly usage exceeds 600 kWh.'
 }
 
 const NEM_TOOLTIPS: Record<string, string> = {
   billableKwh: 'Your consumption minus solar generation — this is what TNB actually charges you for.',
-  creditUsed: 'Excess solar credits from previous months applied to reduce this month\'s bill.',
-  creditBalance: 'Unused solar credits carried forward to offset future months\' bills.',
+  creditUsed: "Excess solar credits from previous months applied to reduce this month's bill.",
+  creditBalance: "Unused solar credits carried forward to offset future months' bills.",
   creditForfeited: 'Credits that expired at year-end (December) — NEM credits cannot be carried into the next year.'
 }
 
@@ -121,13 +121,13 @@ const ANALYSIS_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="hero-cards"]',
     title: 'Key Numbers at a Glance',
     description:
-      'These four cards tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself, and how much CO2 you\'re offsetting.'
+      "These four cards tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself, and how much CO2 you're offsetting."
   },
   {
     target: '[data-tour="monthly-chart"]',
     title: 'Monthly Bill Comparison',
     description:
-      'This chart compares what you\'d pay without solar (orange) to what you\'d pay with solar (green) for each month. The difference is your savings.'
+      "This chart compares what you'd pay without solar (orange) to what you'd pay with solar (green) for each month. The difference is your savings."
   },
   {
     target: '[data-tour="export-pdf"]',
@@ -139,7 +139,7 @@ const ANALYSIS_TOUR_STEPS: TourStep[] = [
 
 function azimuthToCompass(deg: number): string {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-  return directions[Math.round(((deg % 360) + 360) % 360 / 45) % 8]
+  return directions[Math.round((((deg % 360) + 360) % 360) / 45) % 8]
 }
 
 /** Controlled text input for degradation rate that preserves intermediate states like "0." */
@@ -336,7 +336,9 @@ export function AnalysisPage() {
     // Compute system cost from selected panel model if available, otherwise fall back to tariff default
     let defaultSystemCostRm: number
     if (selectedPanelModel && selectedPanelModel.costPerWp > 0) {
-      defaultSystemCostRm = Math.round(localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp)
+      defaultSystemCostRm = Math.round(
+        localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp
+      )
     } else {
       defaultSystemCostRm = Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp)
     }
@@ -391,10 +393,7 @@ export function AnalysisPage() {
   }, [activePanels.length, carbonOffsetFactorKgPerMwh, formState, simulation])
 
   const chartData = useMemo(() => (simulation ? buildChartData(simulation) : []), [simulation])
-  const selectedMonth = useMemo(
-    () => simulation?.months[selectedMonthIndex] ?? null,
-    [simulation, selectedMonthIndex]
-  )
+  const selectedMonth = useMemo(() => simulation?.months[selectedMonthIndex] ?? null, [simulation, selectedMonthIndex])
   const thresholdWarnings = useMemo(() => {
     if (!selectedMonth || !tariffQuery.data) return []
     return buildThresholdWarnings(selectedMonth, tariffQuery.data.thresholds)
@@ -527,9 +526,7 @@ export function AnalysisPage() {
                     </p>
                     <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
                     <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
-                    {selectedPanelModel.costPerWp > 0 && (
-                      <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>
-                    )}
+                    {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
                   </div>
                 </details>
               )}
@@ -554,14 +551,23 @@ export function AnalysisPage() {
                 </div>
               )}
 
-              <div data-tour="consumption-input" className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+              <div
+                data-tour="consumption-input"
+                className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4"
+              >
                 <div className="space-y-1">
                   <Label>
                     Monthly Electricity Consumption (kWh)
                     <InfoTooltip>
                       <div className="space-y-1.5">
-                        <p>Your average monthly electricity usage in kWh. Look for "Purata Penggunaan" on your TNB bill:</p>
-                        <ImagePopup src={tnbBillImg} alt="TNB bill showing average kWh usage" className="w-full rounded" />
+                        <p>
+                          Your average monthly electricity usage in kWh. Look for "Purata Penggunaan" on your TNB bill:
+                        </p>
+                        <ImagePopup
+                          src={tnbBillImg}
+                          alt="TNB bill showing average kWh usage"
+                          className="w-full rounded"
+                        />
                         <p className="text-[10px] text-stone-400">Click image to enlarge</p>
                       </div>
                     </InfoTooltip>
@@ -765,8 +771,7 @@ export function AnalysisPage() {
                           value={formState.dcAcRatio}
                           onChange={(e) => {
                             const v = Number(e.target.value)
-                            if (v >= 1.0 && v <= 2.0)
-                              setFormState((c) => (c ? { ...c, dcAcRatio: v } : c))
+                            if (v >= 1.0 && v <= 2.0) setFormState((c) => (c ? { ...c, dcAcRatio: v } : c))
                           }}
                         />
                       </div>
@@ -794,7 +799,10 @@ export function AnalysisPage() {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-6">
-          <div data-tour="view-toggle" className="inline-flex rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm">
+          <div
+            data-tour="view-toggle"
+            className="inline-flex rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm"
+          >
             <button
               type="button"
               className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
@@ -957,7 +965,10 @@ export function AnalysisPage() {
                         <BarChart data={netBenefitData} margin={{ left: 10 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
                           <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-                          <YAxis tickFormatter={(value) => `RM${value >= 0 ? '' : ''}${value.toLocaleString()}`} width={70} />
+                          <YAxis
+                            tickFormatter={(value) => `RM${value >= 0 ? '' : ''}${value.toLocaleString()}`}
+                            width={70}
+                          />
                           <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
                           <Bar dataKey="value" name="Net Benefit" radius={[4, 4, 0, 0]}>
                             {netBenefitData.map((entry, index) => (
@@ -1085,35 +1096,51 @@ export function AnalysisPage() {
                     <p className="text-xs text-stone-400">What you'd pay at full consumption</p>
                     <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-stone-500">Energy <InfoTooltip text={BILL_TOOLTIPS.energy} /></p>
+                        <p className="text-stone-500">
+                          Energy <InfoTooltip text={BILL_TOOLTIPS.energy} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.energy)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} /></p>
+                        <p className="text-stone-500">
+                          Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.capacity)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">Network <InfoTooltip text={BILL_TOOLTIPS.network} /></p>
+                        <p className="text-stone-500">
+                          Network <InfoTooltip text={BILL_TOOLTIPS.network} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.network)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">Retail <InfoTooltip text={BILL_TOOLTIPS.retail} /></p>
+                        <p className="text-stone-500">
+                          Retail <InfoTooltip text={BILL_TOOLTIPS.retail} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.retail)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">AFA <InfoTooltip text={BILL_TOOLTIPS.afa} /></p>
+                        <p className="text-stone-500">
+                          AFA <InfoTooltip text={BILL_TOOLTIPS.afa} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.afa)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} /></p>
+                        <p className="text-stone-500">
+                          EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} />
+                        </p>
                         <p className="font-semibold">-{formatCurrency(selectedMonth.baselineBill.eeiRebate)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} /></p>
+                        <p className="text-stone-500">
+                          RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.reFund)}</p>
                       </div>
                       <div>
-                        <p className="text-stone-500">SST <InfoTooltip text={BILL_TOOLTIPS.sst} /></p>
+                        <p className="text-stone-500">
+                          SST <InfoTooltip text={BILL_TOOLTIPS.sst} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.sst)}</p>
                       </div>
                     </div>
@@ -1131,58 +1158,84 @@ export function AnalysisPage() {
                     <p className="text-xs text-emerald-800/50">Your bill after solar offsets your usage under NEM</p>
                     <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-emerald-900/70">Billable kWh <InfoTooltip text={NEM_TOOLTIPS.billableKwh} /></p>
+                        <p className="text-emerald-900/70">
+                          Billable kWh <InfoTooltip text={NEM_TOOLTIPS.billableKwh} />
+                        </p>
                         <p className="font-semibold">{formatNumber(selectedMonth.billableKwh, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Credit Used <InfoTooltip text={NEM_TOOLTIPS.creditUsed} /></p>
+                        <p className="text-emerald-900/70">
+                          Credit Used <InfoTooltip text={NEM_TOOLTIPS.creditUsed} />
+                        </p>
                         <p className="font-semibold">{formatNumber(selectedMonth.creditUsed, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Credit Balance <InfoTooltip text={NEM_TOOLTIPS.creditBalance} /></p>
+                        <p className="text-emerald-900/70">
+                          Credit Balance <InfoTooltip text={NEM_TOOLTIPS.creditBalance} />
+                        </p>
                         <p className="font-semibold">{formatNumber(selectedMonth.creditBalance, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Credit Forfeited <InfoTooltip text={NEM_TOOLTIPS.creditForfeited} /></p>
+                        <p className="text-emerald-900/70">
+                          Credit Forfeited <InfoTooltip text={NEM_TOOLTIPS.creditForfeited} />
+                        </p>
                         <p className="font-semibold">{formatNumber(selectedMonth.creditForfeited, 'kWh')}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Energy <InfoTooltip text={BILL_TOOLTIPS.energy} /></p>
+                        <p className="text-emerald-900/70">
+                          Energy <InfoTooltip text={BILL_TOOLTIPS.energy} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.energy)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Retail <InfoTooltip text={BILL_TOOLTIPS.retail} /></p>
+                        <p className="text-emerald-900/70">
+                          Retail <InfoTooltip text={BILL_TOOLTIPS.retail} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.retail)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} /></p>
+                        <p className="text-emerald-900/70">
+                          Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.capacity)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">AFA <InfoTooltip text={BILL_TOOLTIPS.afa} /></p>
+                        <p className="text-emerald-900/70">
+                          AFA <InfoTooltip text={BILL_TOOLTIPS.afa} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.afa)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">Network <InfoTooltip text={BILL_TOOLTIPS.network} /></p>
+                        <p className="text-emerald-900/70">
+                          Network <InfoTooltip text={BILL_TOOLTIPS.network} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.network)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} /></p>
+                        <p className="text-emerald-900/70">
+                          EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} />
+                        </p>
                         <p className="font-semibold">-{formatCurrency(selectedMonth.nemBill.eeiRebate)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} /></p>
+                        <p className="text-emerald-900/70">
+                          RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.reFund)}</p>
                       </div>
                       <div>
-                        <p className="text-emerald-900/70">SST <InfoTooltip text={BILL_TOOLTIPS.sst} /></p>
+                        <p className="text-emerald-900/70">
+                          SST <InfoTooltip text={BILL_TOOLTIPS.sst} />
+                        </p>
                         <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.sst)}</p>
                       </div>
                     </div>
                     <div className="mt-4 border-t border-emerald-200 pt-3">
                       <p className="text-sm text-emerald-900/70">
                         Total
-                        <InfoTooltip text={`${formatCurrency(selectedMonth.baselineBill.total)} (without solar) − ${formatCurrency(selectedMonth.savingsRm)} (savings) = ${formatCurrency(selectedMonth.nemBill.total)}`} />
+                        <InfoTooltip
+                          text={`${formatCurrency(selectedMonth.baselineBill.total)} (without solar) − ${formatCurrency(selectedMonth.savingsRm)} (savings) = ${formatCurrency(selectedMonth.nemBill.total)}`}
+                        />
                       </p>
                       <p className="text-xl font-semibold text-emerald-950">
                         {formatCurrency(selectedMonth.nemBill.total)}
@@ -1240,9 +1293,7 @@ export function AnalysisPage() {
                             <td className="px-3 py-2">{formatNumber(month.creditUsed, 'kWh')}</td>
                             <td className="px-3 py-2">{formatNumber(month.creditBalance, 'kWh')}</td>
                             <td className="px-3 py-2">{formatCurrency(month.baselineBill.total)}</td>
-                            <td className="px-3 py-2 text-emerald-700">
-                              {formatCurrency(month.savingsRm)}
-                            </td>
+                            <td className="px-3 py-2 text-emerald-700">{formatCurrency(month.savingsRm)}</td>
                             <td className="px-3 py-2 font-semibold text-emerald-700">
                               {formatCurrency(month.nemBill.total)}
                             </td>

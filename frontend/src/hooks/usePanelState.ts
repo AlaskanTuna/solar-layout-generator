@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PanelEdit } from '@shared/types'
 import { recomputeFluxBatch } from '@/api/locations'
 import {
@@ -9,6 +9,12 @@ import {
   type RoofSegment,
   type SolarPanel
 } from '@/lib/buildingInsights'
+import { useUndoRedo } from './useUndoRedo'
+
+type UndoRedoSnapshot = {
+  panels: WorkbenchPanelState[]
+  visibleCount: number
+}
 
 export type WorkbenchPanelState = {
   id: string
@@ -64,6 +70,21 @@ export function usePanelState({
   const initializedProjectIdRef = useRef<string | null>(null)
   const batchRecomputedProjectIdRef = useRef<string | null>(null)
   const stableOrderRef = useRef<string[]>([])
+
+  const panelsRef = useRef<WorkbenchPanelState[]>(panels)
+  const visibleCountRef = useRef(visibleCount)
+  useEffect(() => {
+    panelsRef.current = panels
+  }, [panels])
+  useEffect(() => {
+    visibleCountRef.current = visibleCount
+  }, [visibleCount])
+
+  const undoRedo = useUndoRedo<UndoRedoSnapshot>({ maxHistory: 30 })
+
+  const pushSnapshot = useCallback(() => {
+    undoRedo.push({ panels: panelsRef.current, visibleCount: visibleCountRef.current })
+  }, [undoRedo])
 
   const parsedEdits = useMemo(() => parsePanelEdits(editedLayout), [editedLayout])
 
@@ -205,14 +226,17 @@ export function usePanelState({
   }
 
   function movePanel(panelId: string, center: { lat: number; lng: number }) {
+    pushSnapshot()
     updatePanelState(panelId, (panel) => ({ ...panel, center }))
   }
 
   function rotatePanel(panelId: string, rotation: number) {
+    pushSnapshot()
     updatePanelState(panelId, (panel) => ({ ...panel, rotation: normalizeRotation(rotation) }))
   }
 
   function deletePanel(panelId: string) {
+    pushSnapshot()
     updatePanelState(panelId, (panel) => ({ ...panel, deleted: true }))
     setVisibleCountState((current) => Math.max(minVisibleCount, current - 1))
   }
@@ -226,8 +250,25 @@ export function usePanelState({
   }
 
   function setVisibleCount(count: number) {
+    pushSnapshot()
     setVisibleCountState(Math.max(minVisibleCount, Math.min(effectiveMaxVisibleCount, count)))
   }
+
+  const undo = useCallback(() => {
+    const snapshot = undoRedo.undo()
+    if (snapshot) {
+      setPanels(snapshot.panels)
+      setVisibleCountState(snapshot.visibleCount)
+    }
+  }, [undoRedo])
+
+  const redo = useCallback(() => {
+    const snapshot = undoRedo.redo()
+    if (snapshot) {
+      setPanels(snapshot.panels)
+      setVisibleCountState(snapshot.visibleCount)
+    }
+  }, [undoRedo])
 
   function serializeLayout(): PanelEdit[] {
     return panels.map((panel) => {
@@ -270,6 +311,10 @@ export function usePanelState({
     deletePanel,
     updatePanelEnergy,
     setVisibleCount,
-    serializeLayout
+    serializeLayout,
+    undo,
+    redo,
+    canUndo: undoRedo.canUndo,
+    canRedo: undoRedo.canRedo
   }
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { resolveLocation, getLocationStatus } from '@/api/locations'
@@ -15,7 +15,7 @@ const MAP_TOUR_STEPS: TourStep[] = [
   {
     title: 'Welcome to the Solar Layout Generator',
     description:
-      'This tool helps you estimate how much you could save on your electricity bill by installing solar panels. Let\'s start by finding your home.'
+      "This tool helps you estimate how much you could save on your electricity bill by installing solar panels. Let's start by finding your home."
   },
   {
     target: '[data-tour="search-box"]',
@@ -30,7 +30,6 @@ const MAP_TOUR_STEPS: TourStep[] = [
       'After selecting an address, you\'ll see your building highlighted. Click "Analyse This Location" to fetch satellite solar data — this usually takes 15–30 seconds.'
   }
 ]
-import { Link } from 'react-router-dom'
 
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
 
@@ -221,7 +220,7 @@ export function MapPage() {
       center: MALAYSIA_CENTER,
       zoom: 16,
       mapId: 'solar-layout-map',
-      disableDefaultUI: false,
+      disableDefaultUI: true,
       zoomControl: true,
       mapTypeControl: true,
       mapTypeId: 'satellite'
@@ -311,7 +310,33 @@ export function MapPage() {
     <div className="relative h-screen w-full">
       <div ref={mapRef} className="h-full w-full" />
 
-      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
+      {/* Navigation buttons — top-left */}
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Dashboard
+        </Link>
+        {isReadonly && projectId && projectId !== 'new' && (
+          <Link
+            to={`/project/${projectId}/workbench`}
+            className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Workbench
+          </Link>
+        )}
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex flex-col items-center px-4">
+        {/* Step label */}
+        {isNewProject && !isReadonly && (
+          <p className="mb-2 rounded-lg bg-white/90 px-3 py-1 text-xs font-medium text-stone-500 shadow-sm backdrop-blur">
+            Step 1 of 3 — Find Your Home
+          </p>
+        )}
         <div
           ref={searchHostRef}
           data-tour="search-box"
@@ -321,13 +346,23 @@ export function MapPage() {
         >
           <div className="h-12" />
         </div>
+        {/* Readonly CTA */}
+        {isReadonly && (
+          <p className="mt-2 rounded-lg bg-white/90 px-3 py-1.5 text-xs text-stone-500 shadow-sm backdrop-blur">
+            Want to analyse a different location?{' '}
+            <Link
+              to="/dashboard"
+              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+            >
+              Go to Dashboard
+            </Link>
+          </p>
+        )}
       </div>
 
       <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />
 
-      {!isLoaded && (
-        <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />
-      )}
+      {!isLoaded && <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />}
 
       {/* Confirm panel */}
       {phase === 'confirm' && selectedPlace && (

@@ -49,14 +49,14 @@ export const SEASONAL_MULTIPLIERS: readonly number[] = [
   0.93, // Jan — monsoon, cooler
   0.95, // Feb — monsoon tail
   1.08, // Mar — hot dry season starts
-  1.10, // Apr — peak hot season
-  1.10, // May — peak hot season
+  1.1, // Apr — peak hot season
+  1.1, // May — peak hot season
   1.08, // Jun — hot, school holidays
   1.02, // Jul — transition
-  1.00, // Aug — transition
+  1.0, // Aug — transition
   0.98, // Sep — transition
   0.95, // Oct — monsoon onset
-  0.90, // Nov — northeast monsoon
+  0.9, // Nov — northeast monsoon
   0.91 // Dec — monsoon, school holidays
 ] as const
 
@@ -169,7 +169,12 @@ export function buildAnalysisResults({
     for (let yr = 1; yr <= 50; yr++) {
       cumulative += year1Savings * Math.pow(1 - degradationRate, yr - 1)
       if (cumulative >= systemCostRm) {
-        paybackYears = round2(yr - 1 + (systemCostRm - (cumulative - year1Savings * Math.pow(1 - degradationRate, yr - 1))) / (year1Savings * Math.pow(1 - degradationRate, yr - 1)))
+        paybackYears = round2(
+          yr -
+            1 +
+            (systemCostRm - (cumulative - year1Savings * Math.pow(1 - degradationRate, yr - 1))) /
+              (year1Savings * Math.pow(1 - degradationRate, yr - 1))
+        )
         break
       }
     }
@@ -179,8 +184,7 @@ export function buildAnalysisResults({
   const tenYearSavings = computeDegradedSavings(year1Savings, degradationRate, 10)
 
   const tenYearNetBenefitRm = round2(tenYearSavings - systemCostRm)
-  const tenYearRoiPercent =
-    systemCostRm > 0 ? round2(((tenYearSavings - systemCostRm) / systemCostRm) * 100) : null
+  const tenYearRoiPercent = systemCostRm > 0 ? round2(((tenYearSavings - systemCostRm) / systemCostRm) * 100) : null
   const carbonOffsetKg = round2((simulation.totalGenerationKwh / 1000) * carbonOffsetFactorKgPerMwh)
 
   return {

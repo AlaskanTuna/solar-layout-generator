@@ -396,11 +396,7 @@ locationsRouter.post(
 
     const rotationRad = (rotation * Math.PI) / 180
     const corners = getRotatedCorners(px, py, widthPx, heightPx, rotationRad)
-    const monthlyEnergyDcKwh = await computeMonthlyEnergy(
-      image,
-      corners,
-      capacityWp ?? panelSpecs.panelCapacityWatts
-    )
+    const monthlyEnergyDcKwh = await computeMonthlyEnergy(image, corners, capacityWp ?? panelSpecs.panelCapacityWatts)
 
     const response: FluxRecomputeResponse = { panelId, monthlyEnergyDcKwh }
     console.info(`[FluxRecompute] success panel=${panelId} months=${monthlyEnergyDcKwh.length}`)

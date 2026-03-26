@@ -107,11 +107,7 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
                 Done
               </Button>
             ) : (
-              <Button
-                size="sm"
-                className="h-7 gap-1 px-2 text-xs"
-                onClick={() => setCurrentStep((s) => s + 1)}
-              >
+              <Button size="sm" className="h-7 gap-1 px-2 text-xs" onClick={() => setCurrentStep((s) => s + 1)}>
                 Next <ChevronRight className="h-3 w-3" />
               </Button>
             )}
@@ -141,7 +137,7 @@ export function GuidedTour({ storageKey, steps }: { storageKey: string; steps: T
       {/* Floating ? button */}
       <button
         type="button"
-        className="fixed bottom-5 right-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 shadow-lg transition-colors hover:bg-stone-50 hover:text-stone-700"
+        className="fixed bottom-5 left-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 shadow-lg transition-colors hover:bg-stone-50 hover:text-stone-700"
         onClick={openTour}
         title="Show guided tour"
       >

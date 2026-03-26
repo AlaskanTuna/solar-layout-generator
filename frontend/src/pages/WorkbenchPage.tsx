@@ -41,7 +41,7 @@ const WORKBENCH_TOUR_STEPS: TourStep[] = [
 ]
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { Image as KonvaImage, Layer, Stage } from 'react-konva'
+import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
 import { saveLayout } from '@/api/projects'
@@ -67,6 +67,7 @@ import {
   type CanvasGeo
 } from '@/lib/canvasTransforms'
 import { InfoTooltip } from '@/components/InfoTooltip'
+import { computeSnap, type SnapGuide } from '@/lib/snapAlignment'
 import { cn } from '@/lib/utils'
 import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
 
@@ -193,7 +194,12 @@ export function WorkbenchPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const rotationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null)
+  const [selectedPanelIds, setSelectedPanelIds] = useState<Set<string>>(new Set())
+  const [snapEnabled, setSnapEnabled] = useState(true)
+  const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
+  const [marqueeMode, setMarqueeMode] = useState(false)
+  const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
+  const marqueeStartRef = useRef<{ x: number; y: number } | null>(null)
   const [pendingPanelId, setPendingPanelId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
@@ -264,7 +270,11 @@ export function WorkbenchPage() {
     deletePanel,
     updatePanelEnergy,
     setVisibleCount,
-    serializeLayout
+    serializeLayout,
+    undo,
+    redo,
+    canUndo,
+    canRedo
   } = usePanelState({
     projectId,
     locationId: project?.locationId,
@@ -279,6 +289,7 @@ export function WorkbenchPage() {
     onBatchRecomputeStatusChange: setInitialBatchStatus
   })
 
+  const selectedPanelId = selectedPanelIds.size === 1 ? [...selectedPanelIds][0]! : null
   const selectedPanel = selectedPanelId ? (getPanel(selectedPanelId) ?? null) : null
 
   const renderPanels = useMemo(() => {
@@ -290,16 +301,52 @@ export function WorkbenchPage() {
     }))
   }, [visiblePanels, geo])
 
+  const handleSnapDragMove = useCallback(
+    (panelId: string, position: { x: number; y: number }) => {
+      if (!snapEnabled || !panelDimensions) {
+        setSnapGuides([])
+        return position
+      }
+
+      const panel = getPanel(panelId)
+      if (!panel) return position
+
+      const otherPanels = renderPanels
+        .filter(({ panel: p }) => p.id !== panelId)
+        .map(({ panel: p, x, y }) => ({ id: p.id, x, y, rotation: p.rotation }))
+
+      const result = computeSnap(
+        { x: position.x, y: position.y, rotation: panel.rotation, id: panelId },
+        otherPanels,
+        panelDimensions.width,
+        panelDimensions.height,
+        stageSize.width,
+        stageSize.height
+      )
+
+      setSnapGuides(result.guides)
+      return { x: result.x, y: result.y }
+    },
+    [snapEnabled, panelDimensions, getPanel, renderPanels, stageSize]
+  )
+
   useEffect(() => {
     if (visiblePanels.length === 0) {
-      setSelectedPanelId(null)
+      setSelectedPanelIds(new Set())
       return
     }
-
-    if (!selectedPanelId || !visiblePanels.some((panel) => panel.id === selectedPanelId)) {
-      setSelectedPanelId(visiblePanels[0]?.id ?? null)
-    }
-  }, [selectedPanelId, visiblePanels])
+    // Clean out any selected IDs that are no longer visible
+    setSelectedPanelIds((prev) => {
+      const visibleIds = new Set(visiblePanels.map((p) => p.id))
+      const next = new Set([...prev].filter((id) => visibleIds.has(id)))
+      if (next.size === 0 && visiblePanels.length > 0) {
+        next.add(visiblePanels[0]!.id)
+      }
+      // Only update if changed to avoid infinite renders
+      if (next.size === prev.size && [...next].every((id) => prev.has(id))) return prev
+      return next
+    })
+  }, [visiblePanels])
 
   useEffect(() => {
     return () => {
@@ -308,6 +355,27 @@ export function WorkbenchPage() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'Z' || e.key === 'y')) {
+        e.preventDefault()
+        redo()
+      }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedPanelIds.size > 0) {
+          e.preventDefault()
+          handleDeleteSelected()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [undo, redo, selectedPanelIds])
 
   useEffect(() => {
     if (!import.meta.env.DEV) return
@@ -359,7 +427,12 @@ export function WorkbenchPage() {
     return getRectAabb(points)
   }
 
-  function getPlacementError(panelId: string, center: { lat: number; lng: number }, rotation: number) {
+  function getPlacementError(
+    panelId: string,
+    center: { lat: number; lng: number },
+    rotation: number,
+    excludeIds?: Set<string>
+  ) {
     if (!geo || !panelDimensions) return 'bounds' as const
 
     const proposedAabb = getPlacementAabb(panelId, center, rotation, geo)
@@ -386,6 +459,7 @@ export function WorkbenchPage() {
 
     for (const otherPanel of visiblePanels) {
       if (otherPanel.id === panelId) continue
+      if (excludeIds?.has(otherPanel.id)) continue
       const otherAabb = getPlacementAabb(otherPanel.id, otherPanel.center, otherPanel.rotation, geo)
       if (otherAabb && aabbsOverlap(proposedAabb, otherAabb)) {
         return 'overlap' as const
@@ -428,26 +502,114 @@ export function WorkbenchPage() {
     }
   }
 
+  function handlePanelSelect(panelId: string, shiftKey: boolean) {
+    setSelectedPanelIds((prev) => {
+      if (shiftKey) {
+        const next = new Set(prev)
+        if (next.has(panelId)) {
+          next.delete(panelId)
+        } else {
+          next.add(panelId)
+        }
+        return next
+      }
+      return new Set([panelId])
+    })
+  }
+
   async function handlePanelDragEnd(panelId: string, position: { x: number; y: number }, resetPosition: () => void) {
+    setSnapGuides([])
     if (!geo) return
 
     const panel = getPanel(panelId)
     if (!panel) return
 
-    const nextCenter = pixelToLatLng(position.x, position.y, geo)
-    const placementError = getPlacementError(panelId, nextCenter, panel.rotation)
-    if (placementError) {
-      resetPosition()
-      setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
+    // Single panel drag or not part of multi-selection
+    if (!selectedPanelIds.has(panelId) || selectedPanelIds.size <= 1) {
+      const nextCenter = pixelToLatLng(position.x, position.y, geo)
+      const placementError = getPlacementError(panelId, nextCenter, panel.rotation)
+      if (placementError) {
+        resetPosition()
+        setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
+        return
+      }
+
+      const previousCenter = panel.center
+      movePanel(panelId, nextCenter)
+      await recomputePanel(panelId, nextCenter, panel.rotation, () => {
+        movePanel(panelId, previousCenter)
+        resetPosition()
+      })
       return
     }
 
-    const previousCenter = panel.center
-    movePanel(panelId, nextCenter)
-    await recomputePanel(panelId, nextCenter, panel.rotation, () => {
-      movePanel(panelId, previousCenter)
+    // Group drag
+    const origPixel = latLngToPixel(panel.center.lat, panel.center.lng, geo)
+    const deltaX = position.x - origPixel.x
+    const deltaY = position.y - origPixel.y
+
+    const selectedPanels = [...selectedPanelIds]
+      .map((id) => getPanel(id))
+      .filter((p): p is NonNullable<typeof p> => p != null)
+
+    // Validate all new positions
+    const moves: { id: string; prevCenter: { lat: number; lng: number }; nextCenter: { lat: number; lng: number } }[] =
+      []
+
+    for (const sp of selectedPanels) {
+      const spPixel = latLngToPixel(sp.center.lat, sp.center.lng, geo)
+      const newPixel = { x: spPixel.x + deltaX, y: spPixel.y + deltaY }
+      const nextCenter = pixelToLatLng(newPixel.x, newPixel.y, geo)
+
+      const placementError = getPlacementError(sp.id, nextCenter, sp.rotation, selectedPanelIds)
+      if (placementError) {
+        resetPosition()
+        setMessage({ tone: 'error', text: `Group move failed: ${getPlacementErrorMessage(placementError)}` })
+        return
+      }
+      moves.push({ id: sp.id, prevCenter: sp.center, nextCenter })
+    }
+
+    // Apply all moves
+    for (const mv of moves) {
+      movePanel(mv.id, mv.nextCenter)
+    }
+
+    // Batch recompute
+    if (!project) return
+    setPendingPanelId(panelId)
+    setMessage({ tone: 'info', text: `Recomputing yield for ${moves.length} panels...` })
+
+    try {
+      const batchResponse = await recomputeFluxBatch(project.locationId, {
+        panels: moves.map((mv) => {
+          const p = getPanel(mv.id)!
+          return {
+            panelId: mv.id,
+            center: mv.nextCenter,
+            rotation: p.rotation,
+            widthM: selectedPanelModel.widthM,
+            heightM: selectedPanelModel.heightM,
+            capacityWp: selectedPanelModel.capacityWp
+          }
+        })
+      })
+      for (const result of batchResponse.results) {
+        if (result.monthlyEnergyDcKwh.length === 12) {
+          updatePanelEnergy(result.panelId, result.monthlyEnergyDcKwh)
+        }
+      }
+      setMessage(null)
+    } catch {
+      // Rollback all
+      for (const mv of moves) {
+        movePanel(mv.id, mv.prevCenter)
+      }
       resetPosition()
-    })
+      setMessage({ tone: 'error', text: 'Failed to recompute group move. Positions reverted.' })
+    } finally {
+      setPendingPanelId(null)
+    }
   }
 
   function scheduleRotationRecompute(
@@ -466,9 +628,52 @@ export function WorkbenchPage() {
   }
 
   function handleRotationInput(value: number) {
+    const nextRotation = ((value % 360) + 360) % 360
+
+    if (selectedPanelIds.size > 1) {
+      // Group rotate: apply same absolute rotation to all selected
+      for (const id of selectedPanelIds) {
+        const p = getPanel(id)
+        if (!p) continue
+        const placementError = getPlacementError(p.id, p.center, nextRotation)
+        if (placementError) {
+          setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
+          return
+        }
+      }
+      for (const id of selectedPanelIds) {
+        rotatePanel(id, nextRotation)
+      }
+      // Schedule batch recompute for all selected
+      if (rotationTimeoutRef.current) clearTimeout(rotationTimeoutRef.current)
+      rotationTimeoutRef.current = setTimeout(() => {
+        if (!project) return
+        const panels = [...selectedPanelIds]
+          .map((id) => getPanel(id))
+          .filter((p): p is NonNullable<typeof p> => p != null)
+        void recomputeFluxBatch(project.locationId, {
+          panels: panels.map((p) => ({
+            panelId: p.id,
+            center: p.center,
+            rotation: nextRotation,
+            widthM: selectedPanelModel.widthM,
+            heightM: selectedPanelModel.heightM,
+            capacityWp: selectedPanelModel.capacityWp
+          }))
+        })
+          .then((resp) => {
+            for (const r of resp.results) {
+              if (r.monthlyEnergyDcKwh.length === 12) updatePanelEnergy(r.panelId, r.monthlyEnergyDcKwh)
+            }
+          })
+          .catch(() => {})
+      }, 1000)
+      return
+    }
+
+    // Single panel rotation
     if (!selectedPanel) return
 
-    const nextRotation = ((value % 360) + 360) % 360
     const placementError = getPlacementError(selectedPanel.id, selectedPanel.center, nextRotation)
     if (placementError) {
       setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
@@ -481,13 +686,16 @@ export function WorkbenchPage() {
   }
 
   function handleDeleteSelected() {
-    if (!selectedPanelId) return
+    if (selectedPanelIds.size === 0) return
 
     if (rotationTimeoutRef.current) {
       clearTimeout(rotationTimeoutRef.current)
     }
 
-    deletePanel(selectedPanelId)
+    for (const id of selectedPanelIds) {
+      deletePanel(id)
+    }
+    setSelectedPanelIds(new Set())
     setMessage(null)
   }
 
@@ -869,52 +1077,63 @@ export function WorkbenchPage() {
                 <div className="flex items-center justify-between">
                   <Label>
                     Selected Panel
-                    <InfoTooltip text="Click any panel on the canvas to select it. You can then rotate or delete it." />
+                    <InfoTooltip text="Click any panel on the canvas to select it. Hold Shift to select multiple. You can then rotate or delete them." />
                   </Label>
-                  <span className="text-sm font-medium">{selectedPanel?.id ?? 'None'}</span>
+                  <span className="text-sm font-medium">
+                    {selectedPanelIds.size > 1 ? `${selectedPanelIds.size} panels` : (selectedPanel?.id ?? 'None')}
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs text-stone-500">Annual Yield</p>
-                    <p className="text-sm font-semibold">
-                      {selectedAnnualEnergy !== null ? `${formatNumber(selectedAnnualEnergy)} kWh` : '—'}
+                {selectedPanelIds.size > 1 ? (
+                  <div className="text-sm text-stone-600">
+                    <p className="font-medium">{selectedPanelIds.size} panels selected</p>
+                    <p className="mt-1 text-xs text-stone-500">
+                      Use the rotation slider to rotate all selected panels. Press Delete to remove them.
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-stone-500">Rotation</p>
-                    <p className="text-sm font-semibold">
-                      {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
-                    </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-stone-500">Annual Yield</p>
+                      <p className="text-sm font-semibold">
+                        {selectedAnnualEnergy !== null ? `${formatNumber(selectedAnnualEnergy)} kWh` : '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-stone-500">Rotation</p>
+                      <p className="text-sm font-semibold">
+                        {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-stone-500">
+                        Avg Monthly Yield
+                        <InfoTooltip
+                          text={
+                            selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
+                              ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                                  .map(
+                                    (month, i) =>
+                                      `${month}: ${formatNumber(selectedPanel.monthlyEnergyDcKwh[i] ?? 0)} kWh`
+                                  )
+                                  .join('\n')
+                              : 'Monthly data not yet computed'
+                          }
+                        />
+                      </p>
+                      <p className="text-sm font-semibold">
+                        {selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
+                          ? `${formatNumber(selectedAnnualEnergy! / 12)} kWh`
+                          : '—'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-stone-500">
-                      Avg Monthly Yield
-                      <InfoTooltip
-                        text={
-                          selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
-                            ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                                .map(
-                                  (month, i) =>
-                                    `${month}: ${formatNumber(selectedPanel.monthlyEnergyDcKwh[i] ?? 0)} kWh`
-                                )
-                                .join('\n')
-                            : 'Monthly data not yet computed'
-                        }
-                      />
-                    </p>
-                    <p className="text-sm font-semibold">
-                      {selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
-                        ? `${formatNumber(selectedAnnualEnergy! / 12)} kWh`
-                        : '—'}
-                    </p>
-                  </div>
-                </div>
+                )}
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label>
-                      Rotate Panel
+                      Rotate {selectedPanelIds.size > 1 ? 'Panels' : 'Panel'}
                       <InfoTooltip text="Drag to set rotation angle (0–359°). The panel's energy yield is recomputed after each change." />
                     </Label>
                     <span className="text-sm font-medium">
@@ -926,7 +1145,9 @@ export function WorkbenchPage() {
                     min={0}
                     max={359}
                     step={5}
-                    disabled={!selectedPanel || pendingPanelId === selectedPanel.id}
+                    disabled={
+                      selectedPanelIds.size === 0 || (selectedPanel != null && pendingPanelId === selectedPanel.id)
+                    }
                     onValueChange={(value) => {
                       const nextValue = value[0]
                       if (typeof nextValue === 'number') {
@@ -939,10 +1160,12 @@ export function WorkbenchPage() {
                 <Button
                   variant="destructive"
                   className="w-full"
-                  disabled={!selectedPanel || pendingPanelId === selectedPanel.id}
+                  disabled={
+                    selectedPanelIds.size === 0 || (selectedPanel != null && pendingPanelId === selectedPanel.id)
+                  }
                   onClick={handleDeleteSelected}
                 >
-                  Delete Selected Panel
+                  {selectedPanelIds.size > 1 ? `Delete ${selectedPanelIds.size} Panels` : 'Delete Selected Panel'}
                 </Button>
               </div>
 
@@ -996,30 +1219,239 @@ export function WorkbenchPage() {
                       scaleY={stageScale}
                       x={stagePosition.x}
                       y={stagePosition.y}
-                      draggable={stageScale > 1}
+                      draggable={stageScale > 1 && !marqueeMode}
                       onWheel={handleWheel}
                       className="overflow-hidden rounded-xl shadow-lg"
+                      onClick={(e) => {
+                        if (e.target === e.target.getStage()) {
+                          setSelectedPanelIds(new Set())
+                        }
+                      }}
+                      onMouseDown={(e) => {
+                        if (!marqueeMode) return
+                        if (e.target !== e.target.getStage()) return
+                        const stage = e.target.getStage()
+                        const pos = stage?.getPointerPosition()
+                        if (!pos) return
+                        const stagePos = {
+                          x: (pos.x - stagePosition.x) / stageScale,
+                          y: (pos.y - stagePosition.y) / stageScale
+                        }
+                        marqueeStartRef.current = stagePos
+                        setMarqueeRect({ x: stagePos.x, y: stagePos.y, width: 0, height: 0 })
+                      }}
+                      onMouseMove={(e) => {
+                        if (!marqueeStartRef.current || !marqueeRect) return
+                        const stage = e.target.getStage()
+                        const pos = stage?.getPointerPosition()
+                        if (!pos) return
+                        const stagePos = {
+                          x: (pos.x - stagePosition.x) / stageScale,
+                          y: (pos.y - stagePosition.y) / stageScale
+                        }
+                        const start = marqueeStartRef.current
+                        setMarqueeRect({
+                          x: Math.min(start.x, stagePos.x),
+                          y: Math.min(start.y, stagePos.y),
+                          width: Math.abs(stagePos.x - start.x),
+                          height: Math.abs(stagePos.y - start.y)
+                        })
+                      }}
+                      onMouseUp={() => {
+                        if (!marqueeRect || !marqueeStartRef.current) return
+                        const selected = new Set<string>()
+                        for (const { panel, x, y } of renderPanels) {
+                          if (
+                            x >= marqueeRect.x &&
+                            x <= marqueeRect.x + marqueeRect.width &&
+                            y >= marqueeRect.y &&
+                            y <= marqueeRect.y + marqueeRect.height
+                          ) {
+                            selected.add(panel.id)
+                          }
+                        }
+                        if (selected.size > 0) {
+                          setSelectedPanelIds(selected)
+                        }
+                        setMarqueeRect(null)
+                        marqueeStartRef.current = null
+                      }}
                     >
                       <Layer listening={false}>
-                        <KonvaImage image={displayImage ?? undefined} width={stageSize.width} height={stageSize.height} />
+                        <KonvaImage
+                          image={displayImage ?? undefined}
+                          width={stageSize.width}
+                          height={stageSize.height}
+                        />
                       </Layer>
                       <PanelLayer
                         panels={renderPanels}
                         panelWidth={panelDimensions.width}
                         panelHeight={panelDimensions.height}
-                        selectedPanelId={selectedPanelId}
+                        selectedPanelIds={selectedPanelIds}
                         stageWidth={stageSize.width}
                         stageHeight={stageSize.height}
                         disabledPanelId={pendingPanelId}
                         energyMin={allPanelsEnergyRange.min}
                         energyMax={allPanelsEnergyRange.max}
-                        onSelect={setSelectedPanelId}
+                        snapEnabled={snapEnabled}
+                        onSnapDragMove={handleSnapDragMove}
+                        onSelect={handlePanelSelect}
                         onDragEnd={handlePanelDragEnd}
                       />
+                      {snapGuides.length > 0 && (
+                        <Layer listening={false}>
+                          {snapGuides.map((guide, i) => (
+                            <KonvaLine
+                              key={i}
+                              points={
+                                guide.orientation === 'vertical'
+                                  ? [guide.position, guide.start, guide.position, guide.end]
+                                  : [guide.start, guide.position, guide.end, guide.position]
+                              }
+                              stroke="#22d3ee"
+                              strokeWidth={1}
+                              dash={[4, 4]}
+                              listening={false}
+                            />
+                          ))}
+                        </Layer>
+                      )}
+                      {marqueeRect && (
+                        <Layer>
+                          <KonvaRect
+                            x={marqueeRect.x}
+                            y={marqueeRect.y}
+                            width={marqueeRect.width}
+                            height={marqueeRect.height}
+                            stroke="#22d3ee"
+                            strokeWidth={1}
+                            dash={[6, 4]}
+                            fill="rgba(34, 211, 238, 0.1)"
+                            listening={false}
+                          />
+                        </Layer>
+                      )}
                     </Stage>
 
                     {/* Zoom controls */}
                     <div data-tour="canvas-controls" className="absolute right-4 top-4 flex flex-col gap-1">
+                      <button
+                        onClick={undo}
+                        disabled={!canUndo}
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 7v6h6" />
+                          <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+                        </svg>
+                        <span className="pointer-events-none absolute -left-14 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          Undo
+                        </span>
+                      </button>
+                      <button
+                        onClick={redo}
+                        disabled={!canRedo}
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 7v6h-6" />
+                          <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
+                        </svg>
+                        <span className="pointer-events-none absolute -left-14 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          Redo
+                        </span>
+                      </button>
+                      <div className="border-t border-stone-200 pt-1 mt-1" />
+                      <button
+                        onClick={() => setMarqueeMode((v) => !v)}
+                        className={cn(
+                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white',
+                          marqueeMode && 'ring-1 ring-cyan-400 bg-cyan-50'
+                        )}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M5 3h2" />
+                          <path d="M9 3h2" />
+                          <path d="M13 3h2" />
+                          <path d="M17 3h2" />
+                          <path d="M21 5v2" />
+                          <path d="M21 9v2" />
+                          <path d="M21 13v2" />
+                          <path d="M21 17v2" />
+                          <path d="M19 21h-2" />
+                          <path d="M15 21h-2" />
+                          <path d="M11 21h-2" />
+                          <path d="M7 21h-2" />
+                          <path d="M3 19v-2" />
+                          <path d="M3 15v-2" />
+                          <path d="M3 11v-2" />
+                          <path d="M3 7v-2" />
+                        </svg>
+                        <span className="pointer-events-none absolute -left-18 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          {marqueeMode ? 'Marquee: ON' : 'Marquee'}
+                        </span>
+                      </button>
+                      {selectedPanelIds.size > 1 && (
+                        <span className="text-center text-[10px] text-cyan-600 font-medium">
+                          {selectedPanelIds.size} selected
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setSnapEnabled((v) => !v)}
+                        className={cn(
+                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white',
+                          snapEnabled && 'ring-1 ring-cyan-400 bg-cyan-50'
+                        )}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M6 15V9a6 6 0 0 1 12 0v6" />
+                          <path d="M6 9h4" />
+                          <path d="M14 9h4" />
+                          <path d="M6 15h4" />
+                          <path d="M14 15h4" />
+                        </svg>
+                        <span className="pointer-events-none absolute -left-14 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          {snapEnabled ? 'Snap: ON' : 'Snap'}
+                        </span>
+                      </button>
+                      <div className="border-t border-stone-200 pt-1 mt-1" />
                       <button
                         onClick={handleZoomIn}
                         className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
@@ -1048,9 +1480,7 @@ export function WorkbenchPage() {
                         </span>
                       </button>
                       {stageScale !== 1 && (
-                        <span className="mt-1 text-center text-xs text-stone-500">
-                          {Math.round(stageScale * 100)}%
-                        </span>
+                        <span className="mt-1 text-center text-xs text-stone-500">{Math.round(stageScale * 100)}%</span>
                       )}
                       <div className="mt-2 border-t border-stone-200 pt-2">
                         <button
@@ -1060,7 +1490,16 @@ export function WorkbenchPage() {
                             overlayExpanded && 'ring-1 ring-stone-400'
                           )}
                         >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                             <circle cx="12" cy="12" r="3" />
                           </svg>
@@ -1089,7 +1528,9 @@ export function WorkbenchPage() {
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
                                 overlayMode === 'annual-flux' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
                               )}
-                              style={{ background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)' }}
+                              style={{
+                                background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
+                              }}
                               title="Annual Flux"
                             >
                               <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -1102,7 +1543,9 @@ export function WorkbenchPage() {
                                 'group relative h-8 w-8 rounded-md shadow-md transition-all',
                                 overlayMode === 'dsm' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
                               )}
-                              style={{ background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)' }}
+                              style={{
+                                background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
+                              }}
                               title="DSM"
                             >
                               <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
