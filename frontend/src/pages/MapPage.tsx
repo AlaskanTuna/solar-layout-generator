@@ -7,7 +7,7 @@ import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
-import { AlertTriangle, ArrowLeft, Loader2, MapPin } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
 
@@ -187,14 +187,16 @@ export function MapPage() {
 
     const input = document.createElement('input')
     input.type = 'text'
-    input.placeholder = isReadonly ? 'Location locked — go back to workbench to edit' : 'Search for your address...'
+    input.placeholder = isReadonly
+      ? 'Please create new project in dashboard for new location.'
+      : 'Search for your address...'
     input.disabled = isReadonly
     input.className =
       'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-base text-stone-950 outline-none placeholder:text-stone-500'
     host.appendChild(input)
 
     const autocomplete = new google.maps.places.Autocomplete(input, {
-      componentRestrictions: { country: 'my' },
+      componentRestrictions: { country: 'my' }, // Restricts map results to Malaysia only
       fields: ['geometry', 'formatted_address']
     })
     autocompleteInstance.current = autocomplete
@@ -310,11 +312,11 @@ export function MapPage() {
     <div className="relative h-screen w-full">
       <div ref={mapRef} className="h-full w-full" />
 
-      {/* Navigation buttons — top-left */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+      {/* Navigation buttons — top center */}
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center gap-2 px-4">
         <Link
           to="/dashboard"
-          className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
+          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Dashboard
@@ -322,21 +324,15 @@ export function MapPage() {
         {isReadonly && projectId && projectId !== 'new' && (
           <Link
             to={`/project/${projectId}/workbench`}
-            className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
+            className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
             Workbench
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         )}
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex flex-col items-center px-4">
-        {/* Step label */}
-        {isNewProject && !isReadonly && (
-          <p className="mb-2 rounded-lg bg-white/90 px-3 py-1 text-xs font-medium text-stone-500 shadow-sm backdrop-blur">
-            Step 1 of 3 — Find Your Home
-          </p>
-        )}
+      <div className="pointer-events-none absolute inset-x-0 top-16 z-10 flex flex-col items-center px-4">
         <div
           ref={searchHostRef}
           data-tour="search-box"

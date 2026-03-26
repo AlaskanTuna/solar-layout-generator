@@ -24,13 +24,13 @@ const WORKBENCH_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="canvas-title"]',
     title: 'Arrange Your Panels',
     description:
-      'Click any blue panel to select it. Then you can drag it to a new position, use the rotation slider in the sidebar to angle it, or press the Delete key to remove it.'
+      'Click a panel to select it, or hold Shift and click to select multiple. Drag to reposition, use the sidebar slider to rotate, or press Delete to remove. You can also undo/redo any change with Ctrl+Z / Ctrl+Shift+Z.'
   },
   {
     target: '[data-tour="canvas-controls"]',
     title: 'Canvas Controls',
     description:
-      'Use these buttons to zoom in/out, reset the view, and switch between satellite (RGB), solar irradiance, and elevation overlays.'
+      'Undo/redo your edits, use the marquee tool to drag-select groups of panels, toggle snap alignment for precise placement, zoom in/out, and switch overlay views. Hold Spacebar to pan the canvas without losing your selection.'
   },
   {
     target: '[data-tour="save-continue"]',
@@ -200,6 +200,7 @@ export function WorkbenchPage() {
   const [marqueeMode, setMarqueeMode] = useState(false)
   const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null)
+  const [spaceHeld, setSpaceHeld] = useState(false)
   const [pendingPanelId, setPendingPanelId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
@@ -372,9 +373,22 @@ export function WorkbenchPage() {
           handleDeleteSelected()
         }
       }
+      if (e.key === ' ' && !e.repeat) {
+        e.preventDefault()
+        setSpaceHeld(true)
+      }
+    }
+    function handleKeyUp(e: KeyboardEvent) {
+      if (e.key === ' ') {
+        setSpaceHeld(false)
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
   }, [undo, redo, selectedPanelIds])
 
   useEffect(() => {
@@ -1219,23 +1233,27 @@ export function WorkbenchPage() {
                       scaleY={stageScale}
                       x={stagePosition.x}
                       y={stagePosition.y}
-                      draggable={stageScale > 1 && !marqueeMode}
+                      draggable={(stageScale > 1 && !marqueeMode) || spaceHeld}
+                      style={{ cursor: spaceHeld ? 'grab' : undefined }}
                       onWheel={handleWheel}
                       className="overflow-hidden rounded-xl shadow-lg"
                       onClick={(e) => {
+                        if (spaceHeld) return
                         if (e.target === e.target.getStage()) {
                           setSelectedPanelIds(new Set())
                         }
                       }}
                       onMouseDown={(e) => {
-                        if (!marqueeMode) return
+                        if (!marqueeMode || spaceHeld) return
                         if (e.target !== e.target.getStage()) return
                         const stage = e.target.getStage()
-                        const pos = stage?.getPointerPosition()
+                        if (!stage) return
+                        const pos = stage.getPointerPosition()
                         if (!pos) return
+                        const sx = stage.scaleX()
                         const stagePos = {
-                          x: (pos.x - stagePosition.x) / stageScale,
-                          y: (pos.y - stagePosition.y) / stageScale
+                          x: (pos.x - stage.x()) / sx,
+                          y: (pos.y - stage.y()) / sx
                         }
                         marqueeStartRef.current = stagePos
                         setMarqueeRect({ x: stagePos.x, y: stagePos.y, width: 0, height: 0 })
@@ -1243,11 +1261,13 @@ export function WorkbenchPage() {
                       onMouseMove={(e) => {
                         if (!marqueeStartRef.current || !marqueeRect) return
                         const stage = e.target.getStage()
-                        const pos = stage?.getPointerPosition()
+                        if (!stage) return
+                        const pos = stage.getPointerPosition()
                         if (!pos) return
+                        const sx = stage.scaleX()
                         const stagePos = {
-                          x: (pos.x - stagePosition.x) / stageScale,
-                          y: (pos.y - stagePosition.y) / stageScale
+                          x: (pos.x - stage.x()) / sx,
+                          y: (pos.y - stage.y()) / sx
                         }
                         const start = marqueeStartRef.current
                         setMarqueeRect({
@@ -1354,7 +1374,7 @@ export function WorkbenchPage() {
                           <path d="M3 7v6h6" />
                           <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
                         </svg>
-                        <span className="pointer-events-none absolute -left-14 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                           Undo
                         </span>
                       </button>
@@ -1376,7 +1396,7 @@ export function WorkbenchPage() {
                           <path d="M21 7v6h-6" />
                           <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
                         </svg>
-                        <span className="pointer-events-none absolute -left-14 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                           Redo
                         </span>
                       </button>
@@ -1415,15 +1435,10 @@ export function WorkbenchPage() {
                           <path d="M3 11v-2" />
                           <path d="M3 7v-2" />
                         </svg>
-                        <span className="pointer-events-none absolute -left-18 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                           {marqueeMode ? 'Marquee: ON' : 'Marquee'}
                         </span>
                       </button>
-                      {selectedPanelIds.size > 1 && (
-                        <span className="text-center text-[10px] text-cyan-600 font-medium">
-                          {selectedPanelIds.size} selected
-                        </span>
-                      )}
                       <button
                         onClick={() => setSnapEnabled((v) => !v)}
                         className={cn(
@@ -1447,7 +1462,7 @@ export function WorkbenchPage() {
                           <path d="M6 15h4" />
                           <path d="M14 15h4" />
                         </svg>
-                        <span className="pointer-events-none absolute -left-14 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                           {snapEnabled ? 'Snap: ON' : 'Snap'}
                         </span>
                       </button>
@@ -1457,7 +1472,7 @@ export function WorkbenchPage() {
                         className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
                       >
                         +
-                        <span className="pointer-events-none absolute -left-16 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                           Zoom in
                         </span>
                       </button>
@@ -1466,7 +1481,7 @@ export function WorkbenchPage() {
                         className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
                       >
                         −
-                        <span className="pointer-events-none absolute -left-18 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                           Zoom out
                         </span>
                       </button>
@@ -1475,7 +1490,7 @@ export function WorkbenchPage() {
                         className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-xs font-medium shadow-md hover:bg-white"
                       >
                         1:1
-                        <span className="pointer-events-none absolute -left-20 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                           Reset zoom
                         </span>
                       </button>
@@ -1503,7 +1518,7 @@ export function WorkbenchPage() {
                             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                             <circle cx="12" cy="12" r="3" />
                           </svg>
-                          <span className="pointer-events-none absolute -left-18 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
                             {overlayExpanded ? 'Hide overlays' : 'Overlays'}
                           </span>
                         </button>
@@ -1518,7 +1533,7 @@ export function WorkbenchPage() {
                               style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
                               title="RGB"
                             >
-                              <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
                                 RGB
                               </span>
                             </button>
@@ -1533,7 +1548,7 @@ export function WorkbenchPage() {
                               }}
                               title="Annual Flux"
                             >
-                              <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
                                 Flux
                               </span>
                             </button>
@@ -1548,7 +1563,7 @@ export function WorkbenchPage() {
                               }}
                               title="DSM"
                             >
-                              <span className="pointer-events-none absolute -left-12 top-1/2 -translate-y-1/2 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
                                 DSM
                               </span>
                             </button>

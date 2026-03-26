@@ -94,7 +94,9 @@ export function PanelRect({
       }}
       onClick={(e) => onSelect(id, e.evt.shiftKey)}
       onTap={() => onSelect(id, false)}
-      onDragStart={() => onSelect(id, false)}
+      onDragStart={() => {
+        if (!selected) onSelect(id, false)
+      }}
       onDragEnd={(event) => {
         const node = event.target
         onDragEnd(id, { x: node.x(), y: node.y() }, () => {
