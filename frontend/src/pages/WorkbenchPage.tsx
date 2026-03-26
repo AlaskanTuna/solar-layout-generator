@@ -226,17 +226,14 @@ export function WorkbenchPage() {
   const irradianceStyle = useMemo(() => {
     const azimuth = MONTHLY_AZIMUTH[irradianceMonth] ?? 180
     const intensity = MONTHLY_IRRADIANCE[irradianceMonth] ?? 0.9
-    // Position the glow source on the edge of the container based on azimuth
-    // Azimuth 0°=N(top), 90°=E(right), 180°=S(bottom), 270°=W(left)
+    // Position glow on the container edge: azimuth 0°=N(top), 90°=E(right), 180°=S(bottom)
     const rad = (azimuth * Math.PI) / 180
-    const gx = 50 + Math.sin(rad) * 50 // sin maps azimuth to X: 0°→50%, 90°→100%, 180°→50%, 270°→0%
-    const gy = 50 - Math.cos(rad) * 50 // -cos maps azimuth to Y: 0°→0%, 90°→50%, 180°→100%
-    const alpha = intensity * 0.25
+    const gx = 50 + Math.sin(rad) * 50
+    const gy = 50 - Math.cos(rad) * 50
+    const alpha = intensity * 0.35
+    // Replace the static background-image with a directional amber glow from the sun's position
     return {
-      boxShadow: [
-        `inset ${(gx - 50) * 1.5}px ${(gy - 50) * 1.5}px 80px 30px rgba(255, 184, 0, ${(alpha * 0.7).toFixed(3)})`,
-        `inset ${(gx - 50) * 0.8}px ${(gy - 50) * 0.8}px 40px 15px rgba(255, 200, 50, ${(alpha * 0.4).toFixed(3)})`
-      ].join(', ')
+      backgroundImage: `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(255,184,0,${alpha.toFixed(2)}) 0%, rgba(255,200,50,${(alpha * 0.3).toFixed(3)}) 25%, transparent 55%), linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%)`
     }
   }, [irradianceMonth])
 
@@ -1012,7 +1009,7 @@ export function WorkbenchPage() {
   return (
     <div className="h-screen overflow-hidden bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
-      <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-between px-4">
+      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-30 flex -translate-y-1/2 justify-between px-4">
         <Link
           to={`/project/${projectId}/map?view=readonly`}
           className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
@@ -1267,7 +1264,7 @@ export function WorkbenchPage() {
             <CardContent className="p-4">
               <div
                 ref={containerRef}
-                className="relative flex min-h-[50vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-[radial-gradient(circle_at_top_left,#fefce8,transparent_30%),linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-2"
+                className="relative flex min-h-[50vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 p-2"
                 style={irradianceStyle}
               >
                 {stageReady && panelDimensions ? (
@@ -1769,13 +1766,24 @@ export function WorkbenchPage() {
                   }}
                   className="flex-1"
                 />
-                <span className="w-28 text-right text-[11px] text-stone-400">
-                  ☀️ {MONTH_LABELS[irradianceMonth]} sunlight
+                <span className="w-32 text-right text-[11px] text-stone-400">
+                  ☀️ {MONTHLY_AZIMUTH[irradianceMonth]}°{' '}
+                  {(() => {
+                    const a = MONTHLY_AZIMUTH[irradianceMonth] ?? 180
+                    if (a >= 337.5 || a < 22.5) return 'N'
+                    if (a < 67.5) return 'NE'
+                    if (a < 112.5) return 'E'
+                    if (a < 157.5) return 'SE'
+                    if (a < 202.5) return 'S'
+                    if (a < 247.5) return 'SW'
+                    if (a < 292.5) return 'W'
+                    return 'NW'
+                  })()}
                 </span>
               </div>
 
-              {/* Panel model selector */}
-              <div data-tour="panel-model" className="mt-2 flex justify-center">
+              {/* Panel model selector — rendered as fixed element below */}
+              <div data-tour="panel-model" className="fixed inset-x-0 bottom-0 z-40 flex justify-center">
                 <PanelModelDrawer
                   selectedModelId={selectedPanelModelId}
                   onSelect={handleModelChange}

@@ -495,8 +495,8 @@ export function AnalysisPage() {
   return (
     <div className="relative min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
       <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
-      {/* Floating nav — fixed bottom corners */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-between px-4">
+      {/* Floating nav — vertically centered, left/right edges */}
+      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-30 flex -translate-y-1/2 justify-between px-4">
         <Link
           to={`/project/${projectId}/workbench`}
           className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-2 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"

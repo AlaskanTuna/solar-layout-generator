@@ -312,8 +312,8 @@ export function MapPage() {
     <div className="relative h-screen w-full">
       <div ref={mapRef} className="h-full w-full" />
 
-      {/* Navigation buttons — bottom-left / bottom-right */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-6 z-20 flex justify-between px-4">
+      {/* Navigation buttons — vertically centered, left/right edges */}
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-20 flex -translate-y-1/2 justify-between px-4">
         <Link
           to="/dashboard"
           className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-all active:scale-95 hover:bg-stone-50"
