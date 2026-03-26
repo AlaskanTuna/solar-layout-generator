@@ -216,8 +216,8 @@ locationsRouter.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const overlayType = req.params.type as string
-    if (overlayType !== 'annual-flux' && overlayType !== 'dsm') {
-      res.status(400).json({ error: 'Invalid overlay type. Must be "annual-flux" or "dsm".' })
+    if (overlayType !== 'annual-flux' && overlayType !== 'dsm' && overlayType !== 'mask') {
+      res.status(400).json({ error: 'Invalid overlay type. Must be "annual-flux", "dsm", or "mask".' })
       return
     }
 
@@ -227,7 +227,12 @@ locationsRouter.get(
       return
     }
 
-    const tifPath = overlayType === 'annual-flux' ? location.annualFluxPath : location.dsmPath
+    const tifPath =
+      overlayType === 'annual-flux'
+        ? location.annualFluxPath
+        : overlayType === 'dsm'
+          ? location.dsmPath
+          : location.maskPath
     if (!tifPath) {
       res.status(404).json({ error: `${overlayType} layer not available for this location` })
       return
@@ -301,6 +306,11 @@ locationsRouter.get(
       { pos: 1.0, r: 220, g: 0, b: 0 }
     ]
 
+    const maskStops = [
+      { pos: 0.0, r: 0, g: 0, b: 0 },
+      { pos: 1.0, r: 34, g: 197, b: 94 }
+    ]
+
     const pixels = Buffer.alloc(width * height * 4)
     for (let i = 0; i < data.length; i++) {
       const offset = i * 4
@@ -312,12 +322,12 @@ locationsRouter.get(
         continue
       }
       const ratio = Math.max(0, Math.min(1, (data[i] - min) / (max - min)))
-      const stops = overlayType === 'annual-flux' ? fluxStops : dsmStops
+      const stops = overlayType === 'annual-flux' ? fluxStops : overlayType === 'dsm' ? dsmStops : maskStops
       const [r, g, b] = lerpColor(ratio, stops)
       pixels[offset] = r
       pixels[offset + 1] = g
       pixels[offset + 2] = b
-      pixels[offset + 3] = 230
+      pixels[offset + 3] = overlayType === 'mask' ? 150 : 230
     }
 
     // Resize to match RGB image dimensions

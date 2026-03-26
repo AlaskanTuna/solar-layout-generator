@@ -58,6 +58,6 @@ export function recomputeFluxBatch(locationId: string, req: FluxRecomputeBatchRe
   })
 }
 
-export function getOverlayUrl(locationId: string, type: 'annual-flux' | 'dsm') {
+export function getOverlayUrl(locationId: string, type: 'annual-flux' | 'dsm' | 'mask') {
   return apiFetch<{ url: string }>(`/locations/${locationId}/overlay/${type}`)
 }

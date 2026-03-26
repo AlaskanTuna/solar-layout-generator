@@ -67,6 +67,7 @@ import {
   type CanvasGeo
 } from '@/lib/canvasTransforms'
 import { InfoTooltip } from '@/components/InfoTooltip'
+import { computeSegmentHulls } from '@/lib/segmentVisualization'
 import { computeSnap, type SnapGuide } from '@/lib/snapAlignment'
 import { cn } from '@/lib/utils'
 import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
@@ -211,9 +212,10 @@ export function WorkbenchPage() {
   const [isModelRecomputing, setIsModelRecomputing] = useState(false)
   const [stageScale, setStageScale] = useState(1)
   const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 })
-  const [overlayMode, setOverlayMode] = useState<'rgb' | 'annual-flux' | 'dsm'>('rgb')
+  const [overlayMode, setOverlayMode] = useState<'rgb' | 'annual-flux' | 'dsm' | 'mask'>('rgb')
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null)
   const [overlayExpanded, setOverlayExpanded] = useState(false)
+  const [showSegments, setShowSegments] = useState(false)
   const zoomSnapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isOverlayLoading, setIsOverlayLoading] = useState(false)
 
@@ -301,6 +303,22 @@ export function WorkbenchPage() {
       ...latLngToPixel(panel.center.lat, panel.center.lng, geo)
     }))
   }, [visiblePanels, geo])
+
+  const segmentHulls = useMemo(() => {
+    if (!showSegments || !buildingInsights || !geo) return []
+
+    const solarPanels = buildingInsights.solarPotential.solarPanels
+    const roofSegments = buildingInsights.solarPotential.roofSegmentStats
+    const activePanelIds = new Set(visiblePanels.map((p) => p.id))
+
+    // Build pixel position map from renderPanels
+    const pixelMap = new Map<string, { x: number; y: number }>()
+    for (const { panel, x, y } of renderPanels) {
+      pixelMap.set(panel.id, { x, y })
+    }
+
+    return computeSegmentHulls(solarPanels, roofSegments, pixelMap, activePanelIds)
+  }, [showSegments, buildingInsights, geo, visiblePanels, renderPanels])
 
   const handleSnapDragMove = useCallback(
     (panelId: string, position: { x: number; y: number }) => {
@@ -1304,6 +1322,21 @@ export function WorkbenchPage() {
                           height={stageSize.height}
                         />
                       </Layer>
+                      {showSegments && segmentHulls.length > 0 && (
+                        <Layer listening={false}>
+                          {segmentHulls.map((hull) => (
+                            <KonvaLine
+                              key={`seg-${hull.segmentIndex}`}
+                              points={hull.hullPoints.flatMap((p) => [p.x, p.y])}
+                              closed
+                              fill={hull.color}
+                              stroke={hull.color.replace('0.35)', '0.7)')}
+                              strokeWidth={1.5}
+                              listening={false}
+                            />
+                          ))}
+                        </Layer>
+                      )}
                       <PanelLayer
                         panels={renderPanels}
                         panelWidth={panelDimensions.width}
@@ -1354,8 +1387,12 @@ export function WorkbenchPage() {
                       )}
                     </Stage>
 
-                    {/* Zoom controls */}
+                    {/* Canvas controls */}
                     <div data-tour="canvas-controls" className="absolute right-4 top-4 flex flex-col gap-1">
+                      {/* Tools group */}
+                      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">
+                        Tools
+                      </span>
                       <button
                         onClick={undo}
                         disabled={!canUndo}
@@ -1400,7 +1437,6 @@ export function WorkbenchPage() {
                           Redo
                         </span>
                       </button>
-                      <div className="border-t border-stone-200 pt-1 mt-1" />
                       <button
                         onClick={() => setMarqueeMode((v) => !v)}
                         className={cn(
@@ -1466,7 +1502,11 @@ export function WorkbenchPage() {
                           {snapEnabled ? 'Snap: ON' : 'Snap'}
                         </span>
                       </button>
-                      <div className="border-t border-stone-200 pt-1 mt-1" />
+                      <div className="my-1 border-t border-stone-200" />
+                      {/* View group */}
+                      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">
+                        View
+                      </span>
                       <button
                         onClick={handleZoomIn}
                         className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
@@ -1497,79 +1537,112 @@ export function WorkbenchPage() {
                       {stageScale !== 1 && (
                         <span className="mt-1 text-center text-xs text-stone-500">{Math.round(stageScale * 100)}%</span>
                       )}
-                      <div className="mt-2 border-t border-stone-200 pt-2">
-                        <button
-                          onClick={() => setOverlayExpanded((v) => !v)}
-                          className={cn(
-                            'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white',
-                            overlayExpanded && 'ring-1 ring-stone-400'
-                          )}
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                            {overlayExpanded ? 'Hide overlays' : 'Overlays'}
-                          </span>
-                        </button>
-                        {overlayExpanded && (
-                          <div className="mt-1 flex flex-col gap-1">
-                            <button
-                              onClick={() => setOverlayMode('rgb')}
-                              className={cn(
-                                'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'rgb' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                              )}
-                              style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
-                              title="RGB"
-                            >
-                              <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                                RGB
-                              </span>
-                            </button>
-                            <button
-                              onClick={() => setOverlayMode('annual-flux')}
-                              className={cn(
-                                'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'annual-flux' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                              )}
-                              style={{
-                                background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
-                              }}
-                              title="Annual Flux"
-                            >
-                              <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                                Flux
-                              </span>
-                            </button>
-                            <button
-                              onClick={() => setOverlayMode('dsm')}
-                              className={cn(
-                                'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                                overlayMode === 'dsm' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                              )}
-                              style={{
-                                background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
-                              }}
-                              title="DSM"
-                            >
-                              <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                                DSM
-                              </span>
-                            </button>
-                          </div>
+                      <div className="my-1 border-t border-stone-200" />
+                      {/* Layers group */}
+                      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">
+                        Layers
+                      </span>
+                      <button
+                        onClick={() => setOverlayExpanded((v) => !v)}
+                        className={cn(
+                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white',
+                          overlayExpanded && 'ring-1 ring-stone-400'
                         )}
-                      </div>
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          {overlayExpanded ? 'Hide overlays' : 'Overlays'}
+                        </span>
+                      </button>
+                      {overlayExpanded && (
+                        <div className="mt-1 flex flex-col gap-1">
+                          <button
+                            onClick={() => setOverlayMode('rgb')}
+                            className={cn(
+                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                              overlayMode === 'rgb' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            )}
+                            style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
+                            title="RGB"
+                          >
+                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              RGB
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => setOverlayMode('annual-flux')}
+                            className={cn(
+                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                              overlayMode === 'annual-flux' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            )}
+                            style={{
+                              background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
+                            }}
+                            title="Annual Flux"
+                          >
+                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              Flux
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => setOverlayMode('dsm')}
+                            className={cn(
+                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                              overlayMode === 'dsm' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            )}
+                            style={{
+                              background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
+                            }}
+                            title="DSM"
+                          >
+                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              DSM
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => setOverlayMode('mask')}
+                            className={cn(
+                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                              overlayMode === 'mask' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            )}
+                            style={{
+                              background: 'linear-gradient(135deg, #064e3b, #059669, #34d399, #d1fae5)'
+                            }}
+                            title="Mask"
+                          >
+                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              Mask
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => setShowSegments((v) => !v)}
+                            className={cn(
+                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
+                              showSegments ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            )}
+                            style={{
+                              background: 'linear-gradient(135deg, #f59e0b, #06b6d4, #8b5cf6, #ef4444)'
+                            }}
+                            title="Segments"
+                          >
+                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              Segments
+                            </span>
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Loading overlays */}
@@ -1590,31 +1663,59 @@ export function WorkbenchPage() {
                       </div>
                     )}
 
-                    {/* Vertical legend for overlay views */}
-                    {overlayMode !== 'rgb' && !isOverlayLoading && (
-                      <div className="absolute bottom-4 left-4 z-10">
-                        <div className="rounded-lg bg-black/60 px-2.5 py-2 backdrop-blur-sm">
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-[9px] font-medium text-white/90">
-                              {overlayMode === 'annual-flux' ? 'Sunny' : 'High'}
-                            </span>
-                            <div
-                              className="w-3 rounded-sm"
-                              style={{
-                                height: '120px',
-                                background:
-                                  overlayMode === 'annual-flux'
-                                    ? 'linear-gradient(to bottom, #ffffff, #fadc32, #dc1e1e, #800080, #000000)'
-                                    : 'linear-gradient(to bottom, #dc0000, #f0f000, #00c800, #00b4dc, #0000b4)'
-                              }}
-                            />
-                            <span className="text-[9px] font-medium text-white/90">
-                              {overlayMode === 'annual-flux' ? 'Shady' : 'Low'}
-                            </span>
-                          </div>
+                    {/* Bottom-left legends */}
+                    <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-2">
+                      {showSegments && segmentHulls.length > 0 && (
+                        <div className="rounded-lg bg-black/70 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                          <p className="mb-1 font-medium">Roof Segments</p>
+                          {segmentHulls.map((hull) => (
+                            <p key={hull.segmentIndex} className="flex items-center gap-1.5">
+                              <span
+                                className="inline-block h-2.5 w-2.5 rounded-full"
+                                style={{ background: hull.color.replace('0.35)', '1)') }}
+                              />
+                              Seg {hull.segmentIndex + 1}: {hull.azimuth.toFixed(0)}° / {hull.pitch.toFixed(0)}° (
+                              {hull.panelCount} panels)
+                            </p>
+                          ))}
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {overlayMode !== 'rgb' && !isOverlayLoading && (
+                        <div className="rounded-lg bg-black/60 px-2.5 py-2 backdrop-blur-sm">
+                          {overlayMode === 'mask' ? (
+                            <div className="flex flex-col items-center gap-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-3 w-3 rounded-sm bg-green-500/60" />
+                                <span className="text-[9px] font-medium text-white/90">Roof</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-3 w-3 rounded-sm bg-black/40 ring-1 ring-white/20" />
+                                <span className="text-[9px] font-medium text-white/90">Off-roof</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1">
+                              <span className="text-[9px] font-medium text-white/90">
+                                {overlayMode === 'annual-flux' ? 'Sunny' : 'High'}
+                              </span>
+                              <div
+                                className="w-3 rounded-sm"
+                                style={{
+                                  height: '120px',
+                                  background:
+                                    overlayMode === 'annual-flux'
+                                      ? 'linear-gradient(to bottom, #ffffff, #fadc32, #dc1e1e, #800080, #000000)'
+                                      : 'linear-gradient(to bottom, #dc0000, #f0f000, #00c800, #00b4dc, #0000b4)'
+                                }}
+                              />
+                              <span className="text-[9px] font-medium text-white/90">
+                                {overlayMode === 'annual-flux' ? 'Shady' : 'Low'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
