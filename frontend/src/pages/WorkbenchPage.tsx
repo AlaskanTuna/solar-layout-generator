@@ -151,8 +151,8 @@ function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTM
     const element = containerRef.current
 
     const update = () => {
-      const maxWidth = Math.max(element.clientWidth - 16, 1)
-      const maxHeight = Math.max(window.innerHeight - 160, 400)
+      const maxWidth = Math.max(element.clientWidth - 64, 1)
+      const maxHeight = Math.max(element.clientHeight - 64, 200)
       const scale = Math.min(maxWidth / image.width, maxHeight / image.height)
 
       setSize({
@@ -1787,8 +1787,8 @@ export function WorkbenchPage() {
           </Card>
         </section>
       </div>
-      {/* Panel model drawer — fixed at bottom, aligned under sidebar */}
-      <div data-tour="panel-model" className="fixed bottom-0 left-0 z-40 flex w-[22rem] justify-center pb-1 pl-4">
+      {/* Panel model drawer — fixed at bottom, centered under sidebar */}
+      <div data-tour="panel-model" className="fixed bottom-0 left-4 z-40 flex w-[22rem] justify-center">
         <PanelModelDrawer
           selectedModelId={selectedPanelModelId}
           onSelect={handleModelChange}
