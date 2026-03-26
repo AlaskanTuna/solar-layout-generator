@@ -44,7 +44,7 @@ function getRoiCondition(paybackYears: number | null) {
 export function HeroMetrics({ analysisResults, paybackTooltip }: HeroMetricsProps) {
   return (
     <div data-tour="hero-cards" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <Card className="border-stone-200 bg-white/90 shadow-sm">
+      <Card className="border-border bg-card/90 shadow-sm">
         <CardContent className="space-y-1 p-5">
           <p className="text-sm text-muted-foreground">
             Average Monthly Savings
@@ -54,7 +54,7 @@ export function HeroMetrics({ analysisResults, paybackTooltip }: HeroMetricsProp
           <p className="text-sm text-muted-foreground">{formatNumber(analysisResults.averageMonthlySavingsPct, '%')}</p>
         </CardContent>
       </Card>
-      <Card className="border-stone-200 bg-white/90 shadow-sm">
+      <Card className="border-border bg-card/90 shadow-sm">
         <CardContent className="space-y-1 p-5">
           <p className="text-sm text-muted-foreground">
             Annual Savings
@@ -66,7 +66,7 @@ export function HeroMetrics({ analysisResults, paybackTooltip }: HeroMetricsProp
           </p>
         </CardContent>
       </Card>
-      <Card className="border-stone-200 bg-white/90 shadow-sm">
+      <Card className="border-border bg-card/90 shadow-sm">
         <CardContent className="space-y-1 p-5">
           <p className="text-sm text-muted-foreground">
             Simple Payback
@@ -81,7 +81,7 @@ export function HeroMetrics({ analysisResults, paybackTooltip }: HeroMetricsProp
           <p className="text-xs text-muted-foreground">{getRoiCondition(analysisResults.paybackYears).description}</p>
         </CardContent>
       </Card>
-      <Card className="border-stone-200 bg-white/90 shadow-sm">
+      <Card className="border-border bg-card/90 shadow-sm">
         <CardContent className="space-y-1 p-5">
           <p className="text-sm text-muted-foreground">
             CO2 Offset

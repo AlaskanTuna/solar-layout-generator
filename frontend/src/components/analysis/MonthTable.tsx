@@ -12,7 +12,7 @@ type MonthTableProps = {
 
 export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
   return (
-    <Card className="border-stone-200 bg-white/90 shadow-sm">
+    <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader>
         <CardTitle>Month-by-Month Breakdown</CardTitle>
         <CardDescription>Detailed billing inputs, credits, and savings for every month.</CardDescription>
@@ -20,7 +20,7 @@ export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
       <CardContent className="space-y-4">
         <button
           type="button"
-          className="flex items-center gap-1.5 text-sm font-medium text-stone-700 hover:text-stone-900"
+          className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-foreground"
           onClick={onToggle}
         >
           {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -30,7 +30,7 @@ export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-stone-200 text-left text-stone-500">
+                <tr className="border-b border-border text-left text-muted-foreground">
                   <th className="px-3 py-2 font-medium">Month</th>
                   <th className="px-3 py-2 font-medium">Consumption</th>
                   <th className="px-3 py-2 font-medium">Generation</th>
@@ -44,7 +44,7 @@ export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
               </thead>
               <tbody>
                 {simulation.months.map((month, index) => (
-                  <tr key={MONTH_LABELS[index]} className="border-b border-stone-100">
+                  <tr key={MONTH_LABELS[index]} className="border-b border-border">
                     <td className="px-3 py-2 font-medium">{MONTH_LABELS[index]}</td>
                     <td className="px-3 py-2">{formatNumber(month.consumptionKwh, 'kWh')}</td>
                     <td className="px-3 py-2">{formatNumber(month.generationKwh, 'kWh')}</td>

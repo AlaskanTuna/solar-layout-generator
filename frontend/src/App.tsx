@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { MapPage } from './pages/MapPage'
 import { WorkbenchPage } from './pages/WorkbenchPage'
 import { AnalysisPage } from './pages/AnalysisPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
         <Route path="/project/:projectId/workbench" element={<WorkbenchPage />} />
         <Route path="/project/:projectId/analysis" element={<AnalysisPage />} />
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

@@ -4,11 +4,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { listProjects, deleteProject } from '@/api/projects'
 import type { ProjectResponse } from '@/api/projects'
+import { AppNav } from '@/components/AppNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { writeNewProjectDraft } from '@/lib/projectDraftStorage'
 import {
   Dialog,
@@ -19,20 +20,16 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Plus, LogOut, Trash2, Clock, Home } from 'lucide-react'
+import { Plus, Trash2, Clock, Sun, FolderOpen, ArrowRight, Map, Wrench, BarChart3 } from 'lucide-react'
 import { toast } from 'sonner'
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Draft',
-  layout_saved: 'Layout Saved',
-  analysis_saved: 'Analysis Complete'
-}
-
-const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
-  draft: 'outline',
-  layout_saved: 'secondary',
-  analysis_saved: 'default'
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'outline'; icon: React.ReactNode }
+> = {
+  draft: { label: 'Draft', variant: 'outline', icon: <Map className="h-3 w-3" /> },
+  layout_saved: { label: 'Layout Saved', variant: 'secondary', icon: <Wrench className="h-3 w-3" /> },
+  analysis_saved: { label: 'Analysis Complete', variant: 'default', icon: <BarChart3 className="h-3 w-3" /> }
 }
 
 function projectRoute(project: ProjectResponse): string {
@@ -62,7 +59,7 @@ function formatRelativeDate(dateString: string): string {
 }
 
 export function DashboardPage() {
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -100,18 +97,26 @@ export function DashboardPage() {
     }
   }
 
+  const totalProjects = projects?.length ?? 0
+  const completedProjects = projects?.filter((p) => p.status === 'analysis_saved').length ?? 0
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">My Projects</h1>
-          <p className="text-sm text-muted-foreground">{user?.email}</p>
-        </div>
-        <div className="flex gap-2">
+    <div className="min-h-screen bg-background">
+      <AppNav />
+
+      <main className="mx-auto max-w-5xl px-6 pt-24 pb-16">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="animate-fade-in">
+            <h1 className="font-heading text-3xl font-bold tracking-tight">
+              Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}
+            </h1>
+            <p className="mt-1 text-muted-foreground">Manage your solar assessment projects</p>
+          </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
                 New Project
               </Button>
             </DialogTrigger>
@@ -131,6 +136,7 @@ export function DashboardPage() {
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
                     required
+                    autoFocus
                   />
                 </div>
                 <DialogFooter className="mt-6">
@@ -141,84 +147,104 @@ export function DashboardPage() {
               </form>
             </DialogContent>
           </Dialog>
-          <Button variant="outline" onClick={() => navigate('/')}>
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Button>
-          <Button variant="outline" onClick={() => signOut()}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
         </div>
-      </div>
 
-      <div className="mt-8">
-        {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {[0, 1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardHeader className="flex-row items-start justify-between space-y-0 pb-2">
-                  <Skeleton className="h-5 w-32" />
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-4 w-40" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : !projects?.length ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No projects yet. Create your first solar assessment project.</p>
-              <Button className="mt-4" onClick={() => setDialogOpen(true)}>
-                Create Your First Project
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {projects.map((project) => (
-              <Card
-                key={project.id}
-                className="group cursor-pointer transition-shadow hover:shadow-md"
-                onClick={() => navigate(projectRoute(project))}
-              >
-                <CardHeader className="flex-row items-start justify-between space-y-0 pb-2">
-                  <CardTitle className="text-base">{project.name}</CardTitle>
-                  <div className="flex items-center gap-1.5">
-                    <Badge variant={STATUS_VARIANTS[project.status] ?? 'secondary'}>
-                      {STATUS_LABELS[project.status] ?? project.status}
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setDeleteTarget(project)
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>Updated {formatRelativeDate(project.updatedAt)}</span>
-                    <span className="mx-1">·</span>
-                    <span>
-                      Created{' '}
-                      {new Date(project.createdAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Quick Stats */}
+        {!isLoading && totalProjects > 0 && (
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 animate-fade-in">
+            <div className="glass-card p-4">
+              <p className="text-sm text-muted-foreground">Total Projects</p>
+              <p className="mt-1 font-heading text-2xl font-bold">{totalProjects}</p>
+            </div>
+            <div className="glass-card p-4">
+              <p className="text-sm text-muted-foreground">Analyses Complete</p>
+              <p className="mt-1 font-heading text-2xl font-bold text-primary">{completedProjects}</p>
+            </div>
+            <div className="glass-card hidden p-4 sm:block">
+              <p className="text-sm text-muted-foreground">In Progress</p>
+              <p className="mt-1 font-heading text-2xl font-bold">{totalProjects - completedProjects}</p>
+            </div>
           </div>
         )}
-      </div>
+
+        {/* Project List */}
+        <div className="mt-8">
+          {isLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="glass-card space-y-3 p-5">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                  </div>
+                  <Skeleton className="h-4 w-48" />
+                </div>
+              ))}
+            </div>
+          ) : !projects?.length ? (
+            /* Empty State */
+            <div className="glass-card flex flex-col items-center py-16 text-center animate-fade-in-up">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                <Sun className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="mt-6 font-heading text-xl font-semibold">No projects yet</h2>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                Create your first solar assessment project to discover your rooftop solar potential.
+              </p>
+              <Button className="mt-6 gap-2" onClick={() => setDialogOpen(true)}>
+                <Plus className="h-4 w-4" />
+                Create Your First Project
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 animate-fade-in">
+              {projects.map((project) => {
+                const config = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.draft
+                return (
+                  <div
+                    key={project.id}
+                    className="glass-card group cursor-pointer p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                    onClick={() => navigate(projectRoute(project))}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <FolderOpen className="h-4 w-4" />
+                        </div>
+                        <h3 className="font-heading font-semibold">{project.name}</h3>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant={config.variant} className="gap-1">
+                          {config.icon}
+                          {config.label}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setDeleteTarget(project)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>Updated {formatRelativeDate(project.updatedAt)}</span>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </main>
 
       {/* Delete confirmation dialog */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>

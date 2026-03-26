@@ -417,7 +417,7 @@ export function AnalysisPage() {
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-4 pb-6 xl:flex-row">
         {/* ───── Sidebar ───── */}
         <aside className="xl:w-[24rem] xl:min-w-[24rem]">
-          <Card className="border-stone-200 bg-white/92 shadow-sm">
+          <Card className="border-border bg-card/92 shadow-sm">
             <CardHeader className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -425,24 +425,24 @@ export function AnalysisPage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="rounded-lg bg-stone-100 p-3">
-                  <p className="text-stone-500">
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-muted-foreground">
                     System Size
                     <InfoTooltip text="Kilowatt-peak (kWp) — the maximum power your solar system can produce under ideal sunlight conditions." />
                   </p>
                   <p className="mt-1 text-lg font-semibold">{formatNumber(systemKwp, 'kWp')}</p>
                 </div>
-                <div className="rounded-lg bg-stone-100 p-3">
-                  <p className="text-stone-500">Active Panels</p>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-muted-foreground">Active Panels</p>
                   <p className="mt-1 text-lg font-semibold">{activePanels.length}</p>
                 </div>
               </div>
               {selectedPanelModel && (
-                <details className="rounded-lg border border-stone-200 bg-stone-50/80 text-sm">
-                  <summary className="cursor-pointer px-3 py-2 font-medium text-stone-700 select-none">
+                <details className="rounded-lg border border-border bg-muted/50 text-sm">
+                  <summary className="cursor-pointer px-3 py-2 font-medium text-foreground select-none">
                     {selectedPanelModel.name} — {selectedPanelModel.capacityWp}Wp
                   </summary>
-                  <div className="space-y-1 border-t border-stone-200 px-3 py-2 text-stone-600">
+                  <div className="space-y-1 border-t border-border px-3 py-2 text-muted-foreground">
                     <p>
                       Dimensions: {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
                     </p>
@@ -454,7 +454,7 @@ export function AnalysisPage() {
               )}
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="border-t border-stone-200 pt-3">
+              <div className="border-t border-border pt-3">
                 <p className="text-xs text-muted-foreground">
                   Adjust assumptions and review the NEM billing outcome before saving.
                 </p>
@@ -473,10 +473,7 @@ export function AnalysisPage() {
                 </div>
               )}
 
-              <div
-                data-tour="consumption-input"
-                className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4"
-              >
+              <div data-tour="consumption-input" className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
                     Monthly Electricity Consumption (kWh)
@@ -490,7 +487,7 @@ export function AnalysisPage() {
                           alt="TNB bill showing average kWh usage"
                           className="w-full rounded"
                         />
-                        <p className="text-[10px] text-stone-400">Click image to enlarge</p>
+                        <p className="text-[10px] text-muted-foreground">Click image to enlarge</p>
                       </div>
                     </InfoTooltip>
                   </Label>
@@ -513,10 +510,10 @@ export function AnalysisPage() {
                 />
                 <div className="mt-2 flex items-center gap-2">
                   <Label className="text-xs text-muted-foreground">Profile:</Label>
-                  <div className="inline-flex rounded-md border border-stone-200 bg-stone-50 p-0.5 text-xs">
+                  <div className="inline-flex rounded-md border border-border bg-muted p-0.5 text-xs">
                     <button
                       type="button"
-                      className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'flat' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                      className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'flat' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                       onClick={() =>
                         setFormState((c) => (c ? { ...c, consumptionProfile: 'flat' as ConsumptionProfile } : c))
                       }
@@ -525,7 +522,7 @@ export function AnalysisPage() {
                     </button>
                     <button
                       type="button"
-                      className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'seasonal' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+                      className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'seasonal' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                       onClick={() =>
                         setFormState((c) => (c ? { ...c, consumptionProfile: 'seasonal' as ConsumptionProfile } : c))
                       }
@@ -543,7 +540,7 @@ export function AnalysisPage() {
                 )}
               </div>
 
-              <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+              <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
                     Connection Phase
@@ -567,7 +564,7 @@ export function AnalysisPage() {
                 </select>
               </div>
 
-              <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+              <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
                     System Cost (RM)
@@ -600,7 +597,7 @@ export function AnalysisPage() {
 
               {viewMode === 'advanced' && (
                 <>
-                  <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+                  <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                     <div className="space-y-1">
                       <Label>
                         AFA Rate
@@ -635,9 +632,9 @@ export function AnalysisPage() {
                     />
                   </div>
 
-                  <div className="my-2 border-t border-stone-200" />
+                  <div className="my-2 border-t border-border" />
 
-                  <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
+                  <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                     <div className="space-y-1">
                       <Label>
                         Panel Degradation
@@ -651,8 +648,8 @@ export function AnalysisPage() {
                     />
                   </div>
 
-                  <div className="space-y-2 rounded-xl border border-stone-200 bg-white/90 p-4">
-                    <Label className="text-sm font-semibold text-stone-700">
+                  <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
+                    <Label className="text-sm font-semibold text-foreground">
                       System Assumptions
                       <InfoTooltip text="These values affect how the system's real-world output is estimated. Most homeowners can leave these at their defaults." />
                     </Label>
@@ -680,7 +677,7 @@ export function AnalysisPage() {
                           type="number"
                           disabled
                           value={Math.round(formState.assumedLosses * 100)}
-                          className="bg-stone-50 text-stone-500"
+                          className="bg-muted text-muted-foreground"
                         />
                       </div>
                       <div>
@@ -716,20 +713,17 @@ export function AnalysisPage() {
 
         {/* ───── Main content ───── */}
         <section className="min-w-0 flex-1 space-y-6">
-          <div
-            data-tour="view-toggle"
-            className="inline-flex rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm"
-          >
+          <div data-tour="view-toggle" className="inline-flex rounded-lg border border-border bg-card/90 p-1 shadow-sm">
             <button
               type="button"
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-stone-900 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setViewMode('simple')}
             >
               Simple
             </button>
             <button
               type="button"
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'advanced' ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'advanced' ? 'bg-stone-900 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setViewMode('advanced')}
             >
               Advanced
@@ -745,7 +739,7 @@ export function AnalysisPage() {
             <BillComparisonChart chartData={chartData} />
 
             {viewMode === 'advanced' && (
-              <Card className="border-stone-200 bg-white/90 shadow-sm">
+              <Card className="border-border bg-card/90 shadow-sm">
                 <CardHeader>
                   <CardTitle>Cumulative Savings</CardTitle>
                   <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
@@ -781,7 +775,7 @@ export function AnalysisPage() {
           )}
 
           {viewMode === 'advanced' && buildingInsights && (
-            <Card className="border-stone-200 bg-white/90 shadow-sm">
+            <Card className="border-border bg-card/90 shadow-sm">
               <CardHeader>
                 <CardTitle>System Assumptions</CardTitle>
                 <CardDescription>
@@ -791,45 +785,47 @@ export function AnalysisPage() {
               <CardContent className="space-y-4">
                 {/* PR + Losses side by side */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                  <div className="rounded-lg bg-muted p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Performance Ratio
                       <InfoTooltip text="The percentage of theoretical solar output your system actually delivers, accounting for real-world inefficiencies." />
                     </p>
                     <p className="mt-1 text-lg font-semibold">{Math.round(formState.performanceRatio * 100)}%</p>
-                    <p className="text-xs text-stone-400">Typical for Malaysian residential systems</p>
+                    <p className="text-xs text-muted-foreground">Typical for Malaysian residential systems</p>
                   </div>
-                  <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                  <div className="rounded-lg bg-muted p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Assumed Losses
                       <InfoTooltip text="Energy lost to dust, wiring, inverter conversion, and heat. This is automatically calculated as 100% minus the Performance Ratio." />
                     </p>
                     <p className="mt-1 text-lg font-semibold">{Math.round(formState.assumedLosses * 100)}%</p>
-                    <p className="text-xs text-stone-400">Soiling, cable, inverter, temperature</p>
+                    <p className="text-xs text-muted-foreground">Soiling, cable, inverter, temperature</p>
                   </div>
                 </div>
                 {/* Remaining assumptions */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Panel Degradation</p>
+                  <div className="rounded-lg bg-muted p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Panel Degradation
+                    </p>
                     <p className="mt-1 text-lg font-semibold">{(formState.degradationRate * 100).toFixed(1)}%/yr</p>
-                    <p className="text-xs text-stone-400">Annual output decline (N-type ~0.5%)</p>
+                    <p className="text-xs text-muted-foreground">Annual output decline (N-type ~0.5%)</p>
                   </div>
                   {buildingInsights.solarPotential.panelLifetimeYears && (
-                    <div className="rounded-lg bg-stone-50 p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                    <div className="rounded-lg bg-muted p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         Panel Lifetime
                         <InfoTooltip text="How long the panels are expected to generate electricity. Payback must happen within this period for the investment to be worthwhile." />
                       </p>
                       <p className="mt-1 text-lg font-semibold">
                         {buildingInsights.solarPotential.panelLifetimeYears} years
                       </p>
-                      <p className="text-xs text-stone-400">From Google Solar API estimate</p>
+                      <p className="text-xs text-muted-foreground">From Google Solar API estimate</p>
                     </div>
                   )}
                   {buildingInsights.solarPotential.roofSegmentStats.length > 0 && (
-                    <div className="rounded-lg bg-stone-50 p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                    <div className="rounded-lg bg-muted p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         Roof Azimuth / Pitch
                         <InfoTooltip text="Azimuth is the compass direction your roof faces: 0° = North, 90° = East, 180° = South, 270° = West. In Malaysia, south-facing roofs get the most sunlight. Pitch is how steep your roof is — 0° is flat, 45° is a steep slope." />
                       </p>
@@ -838,16 +834,16 @@ export function AnalysisPage() {
                         {azimuthToCompass(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}) /{' '}
                         {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].pitchDegrees)}°
                       </p>
-                      <p className="text-xs text-stone-400">Primary roof segment (from Solar API)</p>
+                      <p className="text-xs text-muted-foreground">Primary roof segment (from Solar API)</p>
                     </div>
                   )}
-                  <div className="rounded-lg bg-stone-50 p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                  <div className="rounded-lg bg-muted p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       DC/AC Ratio
                       <InfoTooltip text="The ratio of panel capacity to inverter capacity. A ratio of 1.2 means slightly more panel power than the inverter can handle at peak, which maximises output across the day." />
                     </p>
                     <p className="mt-1 text-lg font-semibold">{formState.dcAcRatio}</p>
-                    <p className="text-xs text-stone-400">Standard residential inverter sizing</p>
+                    <p className="text-xs text-muted-foreground">Standard residential inverter sizing</p>
                   </div>
                 </div>
               </CardContent>
@@ -871,7 +867,7 @@ export function AnalysisPage() {
             />
           )}
 
-          <Card className="border-stone-200 bg-white/90 shadow-sm">
+          <Card className="border-border bg-card/90 shadow-sm">
             <CardHeader>
               <CardTitle>Financial Disclaimers</CardTitle>
               <CardDescription>All bill and savings figures should be treated as estimates.</CardDescription>

@@ -26,7 +26,7 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }:
   const tenYearBenefit = netBenefitData[9].value
 
   return (
-    <Card className="border-stone-200 bg-white/90 shadow-sm">
+    <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader>
         <CardTitle>Net Benefit Projection</CardTitle>
         <CardDescription>
@@ -34,7 +34,7 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }:
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-lg bg-stone-50 p-4 text-center">
+        <div className="rounded-lg bg-muted p-4 text-center">
           <p className="text-sm text-muted-foreground">10-Year Net Benefit</p>
           <p className={`text-3xl font-semibold ${tenYearBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
             {formatCurrency(tenYearBenefit)}

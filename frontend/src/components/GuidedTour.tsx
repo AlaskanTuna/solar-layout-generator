@@ -75,20 +75,20 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
       <div className="fixed inset-0 z-[60] bg-black/10" onClick={onClose} />
 
       {/* Modal */}
-      <div className="z-[61] w-80 rounded-xl border border-stone-200 bg-white p-4 shadow-xl" style={style}>
+      <div className="glass-card z-[61] w-80 p-4 shadow-xl" style={style}>
         <div className="mb-3 flex items-start justify-between">
-          <h3 className="text-sm font-semibold text-stone-900">{step.title}</h3>
+          <h3 className="text-sm font-semibold text-foreground">{step.title}</h3>
           <button
             type="button"
-            className="rounded-md p-0.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+            className="rounded-md p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mb-4 text-xs leading-relaxed text-stone-600">{step.description}</p>
+        <p className="mb-4 text-xs leading-relaxed text-muted-foreground">{step.description}</p>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-stone-400">
+          <span className="text-xs text-muted-foreground">
             {currentStep + 1} of {steps.length}
           </span>
           <div className="flex gap-1.5">
@@ -137,7 +137,7 @@ export function GuidedTour({ storageKey, steps }: { storageKey: string; steps: T
       {/* Floating ? button */}
       <button
         type="button"
-        className="fixed bottom-5 left-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 shadow-lg transition-colors hover:bg-stone-50 hover:text-stone-700"
+        className="glass fixed bottom-5 left-5 z-50 flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground shadow-lg transition-colors hover:bg-accent hover:text-foreground"
         onClick={openTour}
         title="Show guided tour"
       >

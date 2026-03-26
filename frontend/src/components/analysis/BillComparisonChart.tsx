@@ -9,7 +9,7 @@ type BillComparisonChartProps = {
 
 export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
   return (
-    <Card data-tour="monthly-chart" className="border-stone-200 bg-white/90 shadow-sm">
+    <Card data-tour="monthly-chart" className="border-border bg-card/90 shadow-sm">
       <CardHeader>
         <CardTitle>Monthly Bill Comparison</CardTitle>
         <CardDescription>

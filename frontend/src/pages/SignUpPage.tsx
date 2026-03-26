@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Sun, Loader2, Mail } from 'lucide-react'
 
 export function SignUpPage() {
   const { session, loading, signUp } = useAuth()
@@ -32,73 +33,130 @@ export function SignUpPage() {
     }
   }
 
-  if (success) {
-    return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>
-              We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link to="/sign-in">
-              <Button variant="outline" className="w-full">
-                Back to Sign In
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign Up</CardTitle>
-          <CardDescription>Create an account to get started</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+    <div className="flex min-h-screen">
+      {/* Left panel — branding */}
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-primary via-solar-600 to-solar-800 p-10 lg:flex">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -right-32 -top-32 h-[400px] w-[400px] rounded-full bg-solar-400/20 blur-[80px]" />
+        </div>
+
+        <div className="relative">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
+              <Sun className="h-4.5 w-4.5 text-white" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={6}
-                required
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? 'Creating account...' : 'Sign Up'}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/sign-in" className="text-primary underline underline-offset-4">
-              Sign In
-            </Link>
+            <span className="font-heading text-lg font-semibold text-white">SolarSim</span>
+          </Link>
+        </div>
+
+        <div className="relative">
+          <h2 className="font-heading text-3xl font-bold leading-tight text-white">
+            Start your solar assessment today
+          </h2>
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
+            Join homeowners across Malaysia who are making data-driven decisions about rooftop solar.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+
+        <p className="relative text-xs text-white/40">2026 SolarSim</p>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex flex-1 flex-col">
+        <div className="flex items-center justify-between p-6">
+          <Link to="/" className="flex items-center gap-2 lg:hidden">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+              <Sun className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="font-heading text-base font-semibold">SolarSim</span>
+          </Link>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
+        </div>
+
+        <div className="flex flex-1 items-center justify-center px-6 pb-12">
+          <div className="w-full max-w-sm animate-fade-in">
+            {success ? (
+              <div className="text-center">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                  <Mail className="h-8 w-8 text-primary" />
+                </div>
+                <h1 className="font-heading text-2xl font-bold tracking-tight">Check your email</h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  We&apos;ve sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click the
+                  link to activate your account.
+                </p>
+                <Link to="/sign-in" className="mt-6 block">
+                  <Button variant="outline" className="w-full">
+                    Back to Sign In
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="mb-8">
+                  <h1 className="font-heading text-2xl font-bold tracking-tight">Create an account</h1>
+                  <p className="mt-1 text-sm text-muted-foreground">Get started with your free solar assessment</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="At least 6 characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      minLength={6}
+                      required
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                      {error}
+                    </div>
+                  )}
+
+                  <Button type="submit" className="w-full" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      'Sign Up'
+                    )}
+                  </Button>
+                </form>
+
+                <p className="mt-6 text-center text-sm text-muted-foreground">
+                  Already have an account?{' '}
+                  <Link to="/sign-in" className="font-medium text-primary transition-colors hover:text-primary/80">
+                    Sign In
+                  </Link>
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

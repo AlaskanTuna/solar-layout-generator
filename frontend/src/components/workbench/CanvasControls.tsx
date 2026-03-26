@@ -45,7 +45,7 @@ export function CanvasControls({
   return (
     <div data-tour="canvas-controls" className="absolute right-4 top-4 flex flex-col gap-1">
       {/* Tools group */}
-      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">Tools</span>
+      <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">Tools</span>
       <ToolButton onClick={onUndo} disabled={!canUndo} tooltip="Undo">
         <svg
           width="16"
@@ -124,10 +124,10 @@ export function CanvasControls({
         </svg>
       </ToolButton>
 
-      <div className="my-1 border-t border-stone-200" />
+      <div className="my-1 border-t border-border" />
 
       {/* View group */}
-      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">View</span>
+      <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">View</span>
       <ToolButton onClick={onZoomIn} tooltip="Zoom in">
         <span className="text-sm font-bold">+</span>
       </ToolButton>
@@ -138,13 +138,13 @@ export function CanvasControls({
         <span className="text-xs font-medium">1:1</span>
       </ToolButton>
       {stageScale !== 1 && (
-        <span className="mt-1 text-center text-xs text-stone-500">{Math.round(stageScale * 100)}%</span>
+        <span className="mt-1 text-center text-xs text-muted-foreground">{Math.round(stageScale * 100)}%</span>
       )}
 
-      <div className="my-1 border-t border-stone-200" />
+      <div className="my-1 border-t border-border" />
 
       {/* Layers group */}
-      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">Layers</span>
+      <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">Layers</span>
       <ToolButton
         onClick={onToggleOverlayExpanded}
         className={overlayExpanded ? 'ring-1 ring-stone-400' : ''}
@@ -225,13 +225,13 @@ function ToolButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed',
+        'group relative flex h-8 w-8 items-center justify-center rounded-md bg-card/90 text-sm shadow-md transition-all hover:bg-card active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed',
         active && 'ring-1 ring-cyan-400 bg-cyan-50',
         className
       )}
     >
       {children}
-      <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
+      <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-foreground px-1.5 py-0.5 text-[10px] font-normal text-background opacity-0 transition-opacity group-hover:opacity-100">
         {tooltip}
       </span>
     </button>
@@ -254,12 +254,12 @@ function SwatchButton({
       onClick={onClick}
       className={cn(
         'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-        active ? 'outline outline-1 outline-stone-900' : ''
+        active ? 'outline outline-1 outline-foreground' : ''
       )}
       style={{ background }}
       title={label}
     >
-      <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+      <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-foreground px-1.5 py-0.5 text-[10px] text-background opacity-0 transition-opacity group-hover:opacity-100">
         {label}
       </span>
     </button>

@@ -996,11 +996,8 @@ export function WorkbenchPage() {
         />
 
         <section className="flex min-w-0 flex-1 flex-col">
-          <Card
-            data-tour="canvas"
-            className="flex flex-1 flex-col overflow-hidden border-stone-200 bg-white/90 shadow-sm"
-          >
-            <CardHeader className="border-b border-stone-200 bg-stone-50/70">
+          <Card data-tour="canvas" className="flex flex-1 flex-col overflow-hidden border-border bg-card/90 shadow-sm">
+            <CardHeader className="border-b border-border bg-muted/50">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle data-tour="canvas-title">
@@ -1022,7 +1019,7 @@ export function WorkbenchPage() {
             <CardContent className="flex flex-1 flex-col overflow-hidden p-4">
               <div
                 ref={containerRef}
-                className="relative flex flex-1 items-center justify-center rounded-2xl border border-dashed border-stone-300 p-8"
+                className="relative flex flex-1 items-center justify-center rounded-2xl border border-dashed border-border p-8"
                 style={irradianceStyle}
               >
                 {stageReady && panelDimensions ? (
@@ -1193,17 +1190,17 @@ export function WorkbenchPage() {
 
                     {/* Loading overlays */}
                     {isOverlayLoading && (
-                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-                        <div className="flex items-center gap-3 rounded-lg bg-white/90 px-5 py-3 text-sm font-medium shadow-lg">
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-background/60 backdrop-blur-[1px]">
+                        <div className="glass flex items-center gap-3 rounded-lg px-5 py-3 text-sm font-medium">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
                           Loading overlay...
                         </div>
                       </div>
                     )}
                     {isModelRecomputing && (
-                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-                        <div className="flex items-center gap-3 rounded-lg bg-white/90 px-5 py-3 text-sm font-medium shadow-lg">
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-background/60 backdrop-blur-[1px]">
+                        <div className="glass flex items-center gap-3 rounded-lg px-5 py-3 text-sm font-medium">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
                           Recalculating energy for new panel dimensions...
                         </div>
                       </div>
@@ -1262,7 +1259,7 @@ export function WorkbenchPage() {
                   </>
                 ) : (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-900" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
                     Preparing the canvas...
                   </div>
                 )}
@@ -1281,7 +1278,7 @@ export function WorkbenchPage() {
                   }}
                   className="flex-1"
                 />
-                <span className="w-32 text-right text-[11px] text-stone-400">
+                <span className="w-32 text-right text-[11px] text-muted-foreground">
                   ☀️ {MONTHLY_AZIMUTH[irradianceMonth]}°{' '}
                   {(() => {
                     const a = MONTHLY_AZIMUTH[irradianceMonth] ?? 180

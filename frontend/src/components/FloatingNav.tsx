@@ -12,7 +12,7 @@ export function FloatingNav({ left, right }: FloatingNavProps) {
       {left ? (
         <Link
           to={left.to}
-          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-2 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
+          className="glass pointer-events-auto flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground transition-all active:scale-95 hover:bg-accent"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {left.label}
@@ -23,7 +23,7 @@ export function FloatingNav({ left, right }: FloatingNavProps) {
       {right ? (
         <Link
           to={right.to}
-          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-2 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
+          className="glass pointer-events-auto flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground transition-all active:scale-95 hover:bg-accent"
         >
           {right.label}
           <ArrowRight className="h-3.5 w-3.5" />

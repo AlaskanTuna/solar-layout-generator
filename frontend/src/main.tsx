@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { Toaster } from './components/ui/sonner'
 import { AuthProvider } from './hooks/useAuth'
+import { ThemeProvider } from './hooks/useTheme'
 import { App } from './App'
 import './index.css'
 
@@ -15,10 +16,12 @@ createRoot(document.getElementById('root')!).render(
     <AppErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <AuthProvider>
-            <App />
-            <Toaster position="top-right" richColors />
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <App />
+              <Toaster position="top-right" richColors />
+            </AuthProvider>
+          </ThemeProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </AppErrorBoundary>

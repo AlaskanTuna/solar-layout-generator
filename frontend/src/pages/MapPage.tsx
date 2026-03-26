@@ -5,7 +5,6 @@ import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { resolveLocation, getLocationStatus } from '@/api/locations'
 import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
 import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
@@ -192,7 +191,7 @@ export function MapPage() {
       : 'Search for your address...'
     input.disabled = isReadonly
     input.className =
-      'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-base text-stone-950 outline-none placeholder:text-stone-500'
+      'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground'
     host.appendChild(input)
 
     const autocomplete = new google.maps.places.Autocomplete(input, {
@@ -286,24 +285,22 @@ export function MapPage() {
   if (mapsError) {
     return (
       <div className="flex h-screen items-center justify-center px-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="space-y-4 py-8 text-center">
-            <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
-            <p className="font-medium">Failed to load Google Maps</p>
-            <p className="text-sm text-muted-foreground">{mapsError}</p>
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" onClick={() => window.location.reload()}>
-                Reload Page
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/dashboard">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="glass-card w-full max-w-md space-y-4 p-8 text-center">
+          <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
+          <p className="font-medium">Failed to load Google Maps</p>
+          <p className="text-sm text-muted-foreground">{mapsError}</p>
+          <div className="flex justify-center gap-2">
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Reload Page
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     )
   }
@@ -316,7 +313,7 @@ export function MapPage() {
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-20 flex -translate-y-1/2 justify-between px-4">
         <Link
           to="/dashboard"
-          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-all active:scale-95 hover:bg-stone-50"
+          className="glass pointer-events-auto flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground transition-all active:scale-95 hover:bg-accent"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Dashboard
@@ -324,7 +321,7 @@ export function MapPage() {
         {isReadonly && projectId && projectId !== 'new' ? (
           <Link
             to={`/project/${projectId}/workbench`}
-            className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-all active:scale-95 hover:bg-stone-50"
+            className="glass pointer-events-auto flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground transition-all active:scale-95 hover:bg-accent"
           >
             Workbench
             <ArrowRight className="h-3.5 w-3.5" />
@@ -338,7 +335,7 @@ export function MapPage() {
         <div
           ref={searchHostRef}
           data-tour="search-box"
-          className={`pointer-events-auto w-full max-w-md rounded-xl border border-white/70 bg-white/95 shadow-lg backdrop-blur ${
+          className={`glass pointer-events-auto w-full max-w-md rounded-xl ${
             !isLoaded || phase === 'processing' ? 'pointer-events-none opacity-70' : ''
           }`}
         >
@@ -352,64 +349,58 @@ export function MapPage() {
 
       {/* Confirm panel */}
       {phase === 'confirm' && selectedPlace && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-          <Card className="w-96 shadow-lg">
-            <CardContent className="py-4">
-              <p className="text-sm font-medium">Is this your building?</p>
-              <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
-              <div className="mt-3 flex gap-2">
-                <Button onClick={handleConfirm} className="flex-1">
-                  Confirm Location
-                </Button>
-                <Button variant="outline" onClick={handleRetry} className="flex-1">
-                  Search Again
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
+          <div className="glass-card w-96 p-5">
+            <p className="text-sm font-medium">Is this your building?</p>
+            <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
+            <div className="mt-3 flex gap-2">
+              <Button onClick={handleConfirm} className="flex-1">
+                Confirm Location
+              </Button>
+              <Button variant="outline" onClick={handleRetry} className="flex-1">
+                Search Again
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Processing overlay */}
       {phase === 'processing' && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-          <Card className="w-96 shadow-lg">
-            <CardContent className="flex items-center gap-3 py-4">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              <div>
-                <p className="text-sm font-medium">Analyzing your rooftop...</p>
-                <p className="text-sm text-muted-foreground">
-                  Fetching satellite data and solar potential. This usually takes 15–30 seconds.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
+          <div className="glass-card flex w-96 items-center gap-3 p-5">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <div>
+              <p className="text-sm font-medium">Analyzing your rooftop...</p>
+              <p className="text-sm text-muted-foreground">
+                Fetching satellite data and solar potential. This usually takes 15–30 seconds.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Error state */}
       {phase === 'failed' && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-          <Card className="w-96 shadow-lg">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                <p className="text-sm text-destructive">{errorMessage}</p>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <Button variant="outline" onClick={handleRetry} className="flex-1">
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Try Another Location
-                </Button>
-                <Button variant="outline" asChild className="flex-1">
-                  <Link to="/dashboard">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
+          <div className="glass-card w-96 p-5">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <p className="text-sm text-destructive">{errorMessage}</p>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <Button variant="outline" onClick={handleRetry} className="flex-1">
+                <MapPin className="mr-2 h-4 w-4" />
+                Try Another Location
+              </Button>
+              <Button variant="outline" asChild className="flex-1">
+                <Link to="/dashboard">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

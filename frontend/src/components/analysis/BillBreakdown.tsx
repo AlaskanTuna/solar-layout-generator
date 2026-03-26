@@ -21,7 +21,7 @@ export function BillBreakdown({
   thresholdWarnings
 }: BillBreakdownProps) {
   return (
-    <Card className="border-stone-200 bg-white/90 shadow-sm">
+    <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -54,61 +54,61 @@ export function BillBreakdown({
       </CardHeader>
       <CardContent className="grid gap-6 lg:grid-cols-2">
         {/* "Without Solar" column */}
-        <div className="rounded-xl border border-stone-200 bg-stone-50/70 p-4">
-          <h3 className="text-sm font-semibold text-stone-900">Without Solar</h3>
-          <p className="text-xs text-stone-400">What you'd pay at full consumption</p>
+        <div className="rounded-xl border border-border bg-muted/70 p-4">
+          <h3 className="text-sm font-semibold text-foreground">Without Solar</h3>
+          <p className="text-xs text-muted-foreground">What you'd pay at full consumption</p>
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 Energy <InfoTooltip text={BILL_TOOLTIPS.energy} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.energy)}</p>
             </div>
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.capacity)}</p>
             </div>
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 Network <InfoTooltip text={BILL_TOOLTIPS.network} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.network)}</p>
             </div>
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 Retail <InfoTooltip text={BILL_TOOLTIPS.retail} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.retail)}</p>
             </div>
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 AFA <InfoTooltip text={BILL_TOOLTIPS.afa} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.afa)}</p>
             </div>
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} />
               </p>
               <p className="font-semibold">-{formatCurrency(selectedMonth.baselineBill.eeiRebate)}</p>
             </div>
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.reFund)}</p>
             </div>
             <div>
-              <p className="text-stone-500">
+              <p className="text-muted-foreground">
                 SST <InfoTooltip text={BILL_TOOLTIPS.sst} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.baselineBill.sst)}</p>
             </div>
           </div>
-          <div className="mt-4 border-t border-stone-200 pt-3">
-            <p className="text-sm text-stone-500">
+          <div className="mt-4 border-t border-border pt-3">
+            <p className="text-sm text-muted-foreground">
               Total
               <InfoTooltip text="Energy + Capacity + Network + Retail + AFA − EEI Rebate + RE Fund + SST" />
             </p>

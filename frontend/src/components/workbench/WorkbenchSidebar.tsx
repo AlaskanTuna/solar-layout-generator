@@ -83,7 +83,7 @@ export function WorkbenchSidebar({
 }: WorkbenchSidebarProps) {
   return (
     <aside className="xl:w-[22rem] xl:min-w-[22rem]">
-      <Card className="border-stone-200 bg-white/90 shadow-sm">
+      <Card className="border-border bg-card/90 shadow-sm">
         <CardHeader className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -92,15 +92,15 @@ export function WorkbenchSidebar({
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="rounded-lg bg-stone-100 p-3">
-              <p className="text-stone-500">
+            <div className="rounded-lg bg-muted p-3">
+              <p className="text-muted-foreground">
                 Annual Yield
                 <InfoTooltip text="Total estimated electricity your panels will generate in a year." />
               </p>
               <p className="mt-1 text-lg font-semibold">{formatNumber(totalAnnualYield)} kWh</p>
             </div>
-            <div className="rounded-lg bg-stone-100 p-3">
-              <p className="text-stone-500">
+            <div className="rounded-lg bg-muted p-3">
+              <p className="text-muted-foreground">
                 CO₂ Offset
                 <InfoTooltip
                   text={`Estimated using a factor of ${carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor for this region.`}
@@ -109,7 +109,7 @@ export function WorkbenchSidebar({
               <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
             </div>
           </div>
-          <div className="border-t border-stone-200" />
+          <div className="border-t border-border" />
           <div data-tour="panel-model">
             <PanelModelDrawer
               selectedModelId={selectedPanelModelId}
@@ -117,11 +117,11 @@ export function WorkbenchSidebar({
               disabled={isModelRecomputing || isSaving}
             />
           </div>
-          <details className="rounded-lg border border-stone-200 bg-stone-50/80 text-sm">
-            <summary className="cursor-pointer px-3 py-2 font-medium text-stone-700 select-none">
+          <details className="rounded-lg border border-border bg-muted/50 text-sm">
+            <summary className="cursor-pointer px-3 py-2 font-medium text-foreground select-none">
               Panel Specifications
             </summary>
-            <div className="space-y-1 border-t border-stone-200 px-3 py-2 text-stone-600">
+            <div className="space-y-1 border-t border-border px-3 py-2 text-muted-foreground">
               <p>
                 Dimensions: {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
               </p>
@@ -188,9 +188,9 @@ export function WorkbenchSidebar({
             </p>
           </div>
 
-          <div className="border-t border-stone-200" />
+          <div className="border-t border-border" />
 
-          <div className="space-y-3 rounded-xl border border-stone-200 bg-stone-50/80 p-4">
+          <div className="space-y-3 rounded-xl border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <Label>
                 Selected Panel
@@ -202,28 +202,28 @@ export function WorkbenchSidebar({
             </div>
 
             {selectedPanelIds.size > 1 ? (
-              <div className="text-sm text-stone-600">
+              <div className="text-sm text-muted-foreground">
                 <p className="font-medium">{selectedPanelIds.size} panels selected</p>
-                <p className="mt-1 text-xs text-stone-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Use the rotation slider to rotate all selected panels. Press Delete to remove them.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-stone-500">Annual Yield</p>
+                  <p className="text-xs text-muted-foreground">Annual Yield</p>
                   <p className="text-sm font-semibold">
                     {selectedAnnualEnergy !== null ? `${formatNumber(selectedAnnualEnergy)} kWh` : '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500">Rotation</p>
+                  <p className="text-xs text-muted-foreground">Rotation</p>
                   <p className="text-sm font-semibold">
                     {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-xs text-muted-foreground">
                     Avg Monthly Yield
                     <InfoTooltip
                       text={

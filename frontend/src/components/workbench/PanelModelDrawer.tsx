@@ -35,14 +35,14 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
       <Drawer.Trigger asChild disabled={disabled}>
         <button
           className={cn(
-            'w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-left text-sm shadow-sm transition-all hover:bg-stone-50 active:scale-[0.98]',
+            'w-full rounded-lg border border-border bg-card px-3 py-2.5 text-left text-sm shadow-sm transition-all hover:bg-accent active:scale-[0.98]',
             disabled && 'cursor-not-allowed opacity-60'
           )}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-stone-900">{selectedModel.name}</p>
-              <p className="text-xs text-stone-500">Choose a Solar Panel</p>
+              <p className="font-medium text-foreground">{selectedModel.name}</p>
+              <p className="text-xs text-muted-foreground">Choose a Solar Panel</p>
             </div>
             <svg
               width="16"
@@ -51,7 +51,7 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="text-stone-400"
+              className="text-muted-foreground"
             >
               <path d="m6 9 6 6 6-6" />
             </svg>
@@ -60,12 +60,12 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
       </Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40" />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-2xl bg-white">
-          <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-stone-300" />
-          <Drawer.Title className="px-6 pt-4 pb-2 text-lg font-semibold text-stone-900">
+        <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-2xl bg-card">
+          <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted" />
+          <Drawer.Title className="px-6 pt-4 pb-2 text-lg font-semibold text-foreground">
             Choose a Solar Panel
           </Drawer.Title>
-          <Drawer.Description className="px-6 pb-4 text-sm text-stone-500">
+          <Drawer.Description className="px-6 pb-4 text-sm text-muted-foreground">
             The model selection changes the size and energy output of all panels on your roof.
           </Drawer.Description>
           <div className="flex gap-4 overflow-x-auto px-6 pb-8 pt-2">
@@ -89,8 +89,8 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
     <button
       onClick={onSelect}
       className={cn(
-        'group flex min-w-[180px] flex-col rounded-xl border-2 bg-white p-3 text-left shadow-sm transition-all hover:shadow-md',
-        isSelected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-stone-200 hover:border-stone-300'
+        'group flex min-w-[180px] flex-col rounded-xl border-2 bg-card p-3 text-left shadow-sm transition-all hover:shadow-md',
+        isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-border/80'
       )}
     >
       {/* 3D Preview */}
@@ -107,9 +107,9 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
       </div>
 
       {/* Model info */}
-      <p className="text-sm font-semibold text-stone-900">{model.name}</p>
-      <p className="text-xs text-stone-500">{model.manufacturer}</p>
-      <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-stone-600">
+      <p className="text-sm font-semibold text-foreground">{model.name}</p>
+      <p className="text-xs text-muted-foreground">{model.manufacturer}</p>
+      <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>{model.capacityWp} Wp</span>
         <span>{(model.efficiency * 100).toFixed(1)}% eff.</span>
         <span>
@@ -118,7 +118,7 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
         {model.costPerWp > 0 && <span>RM {model.costPerWp.toFixed(2)}/Wp</span>}
       </div>
       {isSelected && (
-        <div className="mt-2 flex items-center gap-1 text-xs font-medium text-blue-600">
+        <div className="mt-2 flex items-center gap-1 text-xs font-medium text-primary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M20 6 9 17l-5-5" />
           </svg>

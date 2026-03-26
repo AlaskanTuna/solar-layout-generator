@@ -25,7 +25,7 @@ export function ImagePopup({ src, alt, className }: { src: string; alt: string; 
             <div className="relative max-h-[80vh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
-                className="absolute -right-3 -top-3 rounded-full bg-white p-1.5 shadow-md hover:bg-stone-100"
+                className="absolute -right-3 -top-3 rounded-full bg-card p-1.5 shadow-md hover:bg-muted"
                 onClick={() => setOpen(false)}
               >
                 <X className="h-4 w-4" />
