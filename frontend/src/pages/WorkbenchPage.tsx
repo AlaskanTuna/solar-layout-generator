@@ -232,10 +232,10 @@ export function WorkbenchPage() {
     const rad = (azimuth * Math.PI) / 180
     const gx = 50 + Math.sin(rad) * 50
     const gy = 50 - Math.cos(rad) * 50
-    const alpha = intensity * 0.35
+    const alpha = intensity * 0.18
     // Replace the static background-image with a directional amber glow from the sun's position
     return {
-      backgroundImage: `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(255,184,0,${alpha.toFixed(2)}) 0%, rgba(255,200,50,${(alpha * 0.3).toFixed(3)}) 25%, transparent 55%), linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%)`
+      backgroundImage: `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(255,184,0,${alpha.toFixed(2)}) 0%, rgba(255,200,50,${(alpha * 0.2).toFixed(3)}) 50%, transparent 55%), linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%)`
     }
   }, [irradianceMonth])
 
@@ -1608,15 +1608,15 @@ export function WorkbenchPage() {
                       </button>
                       <div
                         className={cn(
-                          'mt-1 flex flex-col gap-1 overflow-hidden transition-all duration-200',
-                          overlayExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          'mt-1 flex flex-col gap-1 transition-all duration-200',
+                          overlayExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
                         )}
                       >
                         <button
                           onClick={() => setOverlayMode('rgb')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'rgb' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            overlayMode === 'rgb' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
                           )}
                           style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
                           title="RGB"
@@ -1629,7 +1629,7 @@ export function WorkbenchPage() {
                           onClick={() => setOverlayMode('annual-flux')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'annual-flux' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            overlayMode === 'annual-flux' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
@@ -1644,7 +1644,7 @@ export function WorkbenchPage() {
                           onClick={() => setOverlayMode('dsm')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'dsm' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            overlayMode === 'dsm' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
@@ -1659,7 +1659,7 @@ export function WorkbenchPage() {
                           onClick={() => setOverlayMode('mask')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'mask' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            overlayMode === 'mask' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #064e3b, #059669, #34d399, #d1fae5)'
@@ -1674,7 +1674,7 @@ export function WorkbenchPage() {
                           onClick={() => setShowSegments((v) => !v)}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            showSegments ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                            showSegments ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #f59e0b, #06b6d4, #8b5cf6, #ef4444)'

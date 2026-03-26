@@ -42,10 +42,7 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-stone-900">{selectedModel.name}</p>
-              <p className="text-xs text-stone-500">
-                {selectedModel.manufacturer} · {selectedModel.capacityWp}Wp ·{' '}
-                {(selectedModel.efficiency * 100).toFixed(1)}%
-              </p>
+              <p className="text-xs text-stone-500">Choose a Solar Panel</p>
             </div>
             <svg
               width="16"
@@ -69,7 +66,7 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
             Choose a Solar Panel
           </Drawer.Title>
           <Drawer.Description className="px-6 pb-4 text-sm text-stone-500">
-            Select a panel model. This changes the size and energy output of all panels on your roof.
+            The model selection changes the size and energy output of all panels on your roof.
           </Drawer.Description>
           <div className="flex gap-4 overflow-x-auto px-6 pb-8 pt-2">
             {PANEL_MODELS.map((model) => (
