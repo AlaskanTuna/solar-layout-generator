@@ -45,7 +45,9 @@ import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
 import { saveLayout } from '@/api/projects'
+import { IrradianceGlow, MONTHLY_IRRADIANCE, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
+import { PanelModelDrawer } from '@/components/workbench/PanelModelDrawer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -218,6 +220,7 @@ export function WorkbenchPage() {
   const [showSegments, setShowSegments] = useState(false)
   const zoomSnapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isOverlayLoading, setIsOverlayLoading] = useState(false)
+  const [irradianceMonth, setIrradianceMonth] = useState(new Date().getMonth())
 
   const {
     project,
@@ -1062,18 +1065,11 @@ export function WorkbenchPage() {
                   Panel Model
                   <InfoTooltip text="Select the solar panel model. Changing the model updates panel dimensions on the canvas and recalculates energy yield for all panels." />
                 </Label>
-                <select
-                  value={selectedPanelModelId}
-                  onChange={(e) => handleModelChange(e.target.value)}
+                <PanelModelDrawer
+                  selectedModelId={selectedPanelModelId}
+                  onSelect={handleModelChange}
                   disabled={isModelRecomputing || isSaving}
-                  className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-stone-500 focus:outline-none focus:ring-1 focus:ring-stone-500"
-                >
-                  {PANEL_MODELS.map((model) => (
-                    <option key={model.id} value={model.id}>
-                      {model.name} — {model.capacityWp}Wp
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div data-tour="panel-count" className="space-y-3">
@@ -1663,6 +1659,9 @@ export function WorkbenchPage() {
                       </div>
                     )}
 
+                    {/* Irradiance ambient glow */}
+                    <IrradianceGlow month={irradianceMonth} />
+
                     {/* Bottom-left legends */}
                     <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-2">
                       {showSegments && segmentHulls.length > 0 && (
@@ -1723,6 +1722,24 @@ export function WorkbenchPage() {
                     Preparing the canvas...
                   </div>
                 )}
+              </div>
+
+              {/* Irradiance month slider */}
+              <div className="mt-3 flex items-center gap-3">
+                <span className="w-8 text-xs font-medium text-stone-500">{MONTH_LABELS[irradianceMonth]}</span>
+                <Slider
+                  value={[irradianceMonth]}
+                  min={0}
+                  max={11}
+                  step={1}
+                  onValueChange={(v) => {
+                    if (typeof v[0] === 'number') setIrradianceMonth(v[0])
+                  }}
+                  className="flex-1"
+                />
+                <span className="w-20 text-right text-xs text-stone-400">
+                  {Math.round((MONTHLY_IRRADIANCE[irradianceMonth] ?? 1) * 100)}% solar
+                </span>
               </div>
             </CardContent>
           </Card>
