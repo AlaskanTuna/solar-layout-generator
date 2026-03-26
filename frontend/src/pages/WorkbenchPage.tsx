@@ -1,6 +1,43 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
+import type { KonvaEventObject } from 'konva/lib/Node'
+import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
+import { saveLayout } from '@/api/projects'
+import { MONTHLY_AZIMUTH, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
+import { PanelLayer } from '@/components/workbench/PanelLayer'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Slider } from '@/components/ui/slider'
+import { usePanelState, type BatchRecomputeStatus } from '@/hooks/usePanelState'
+import { useWorkbenchData } from '@/hooks/useWorkbenchData'
+import { useWorkbenchKeyboard } from '@/hooks/useWorkbenchKeyboard'
+import { useIrradiance } from '@/hooks/useIrradiance'
+import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
+import {
+  aabbsOverlap,
+  createCanvasGeo,
+  getRectAabb,
+  getRotatedRectPoints,
+  isAabbInsideStage,
+  isPolygonInsideRasterMask,
+  latLngToPixel,
+  panelMetersToPixels,
+  pixelToLatLng,
+  type CanvasGeo
+} from '@/lib/canvasTransforms'
+import { COLORS } from '@/lib/constants'
+import { FloatingNav } from '@/components/FloatingNav'
+import { InfoTooltip } from '@/components/InfoTooltip'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
+import { CanvasControls } from '@/components/workbench/CanvasControls'
+import { WorkbenchSidebar } from '@/components/workbench/WorkbenchSidebar'
+import { computeSegmentHulls } from '@/lib/segmentVisualization'
+import { computeSnap, type SnapGuide } from '@/lib/snapAlignment'
+import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
 
 const WORKBENCH_TOUR_STEPS: TourStep[] = [
   {
@@ -39,41 +76,6 @@ const WORKBENCH_TOUR_STEPS: TourStep[] = [
       'Happy with the layout? Click "Save & Continue" to save your arrangement and move to the savings analysis page. You can always come back to adjust later.'
   }
 ]
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
-import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
-import type { KonvaEventObject } from 'konva/lib/Node'
-import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
-import { saveLayout } from '@/api/projects'
-import { MONTHLY_AZIMUTH, MONTHLY_IRRADIANCE, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
-import { PanelLayer } from '@/components/workbench/PanelLayer'
-import { PanelModelDrawer } from '@/components/workbench/PanelModelDrawer'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
-import { usePanelState, type BatchRecomputeStatus } from '@/hooks/usePanelState'
-import { useWorkbenchData } from '@/hooks/useWorkbenchData'
-import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
-import {
-  aabbsOverlap,
-  createCanvasGeo,
-  getRectAabb,
-  getRotatedRectPoints,
-  isAabbInsideStage,
-  isPolygonInsideRasterMask,
-  latLngToPixel,
-  panelMetersToPixels,
-  pixelToLatLng,
-  type CanvasGeo
-} from '@/lib/canvasTransforms'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { InfoTooltip } from '@/components/InfoTooltip'
-import { computeSegmentHulls } from '@/lib/segmentVisualization'
-import { computeSnap, type SnapGuide } from '@/lib/snapAlignment'
-import { cn } from '@/lib/utils'
-import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
 
 type UiMessage = {
   tone: 'error' | 'info'
@@ -152,8 +154,6 @@ function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTM
 
     const update = () => {
       const maxWidth = Math.max(element.clientWidth - 64, 1)
-      // Use viewport height minus a generous offset for card header, padding, slider, toolbar
-      // This ensures the canvas never overflows the visible card area on any screen size
       const maxHeight = Math.max(window.innerHeight - 280, 200)
       const scale = Math.min(maxWidth / image.width, maxHeight / image.height)
 
@@ -223,21 +223,8 @@ export function WorkbenchPage() {
   const [showSegments, setShowSegments] = useState(false)
   const zoomSnapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isOverlayLoading, setIsOverlayLoading] = useState(false)
-  const [irradianceMonth, setIrradianceMonth] = useState(new Date().getMonth())
 
-  const irradianceStyle = useMemo(() => {
-    const azimuth = MONTHLY_AZIMUTH[irradianceMonth] ?? 180
-    const intensity = MONTHLY_IRRADIANCE[irradianceMonth] ?? 0.9
-    // Position glow on the container edge: azimuth 0°=N(top), 90°=E(right), 180°=S(bottom)
-    const rad = (azimuth * Math.PI) / 180
-    const gx = 50 + Math.sin(rad) * 50
-    const gy = 50 - Math.cos(rad) * 50
-    const alpha = intensity * 0.18
-    // Replace the static background-image with a directional amber glow from the sun's position
-    return {
-      backgroundImage: `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(255,184,0,${alpha.toFixed(2)}) 0%, rgba(255,200,50,${(alpha * 0.2).toFixed(3)}) 50%, transparent 55%), linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%)`
-    }
-  }, [irradianceMonth])
+  const { irradianceMonth, setIrradianceMonth, irradianceStyle } = useIrradiance()
 
   const {
     project,
@@ -331,7 +318,6 @@ export function WorkbenchPage() {
     const roofSegments = buildingInsights.solarPotential.roofSegmentStats
     const activePanelIds = new Set(visiblePanels.map((p) => p.id))
 
-    // Build pixel position map (with rotation) from renderPanels
     const pixelMap = new Map<string, { x: number; y: number; rotation: number }>()
     for (const { panel, x, y } of renderPanels) {
       pixelMap.set(panel.id, { x, y, rotation: panel.rotation })
@@ -381,14 +367,12 @@ export function WorkbenchPage() {
       setSelectedPanelIds(new Set())
       return
     }
-    // Clean out any selected IDs that are no longer visible
     setSelectedPanelIds((prev) => {
       const visibleIds = new Set(visiblePanels.map((p) => p.id))
       const next = new Set([...prev].filter((id) => visibleIds.has(id)))
       if (next.size === 0 && visiblePanels.length > 0) {
         next.add(visiblePanels[0]!.id)
       }
-      // Only update if changed to avoid infinite renders
       if (next.size === prev.size && [...next].every((id) => prev.has(id))) return prev
       return next
     })
@@ -402,39 +386,28 @@ export function WorkbenchPage() {
     }
   }, [])
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault()
-        undo()
-      }
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'Z' || e.key === 'y')) {
-        e.preventDefault()
-        redo()
-      }
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (selectedPanelIds.size > 0) {
-          e.preventDefault()
-          handleDeleteSelected()
-        }
-      }
-      if (e.key === ' ') {
-        e.preventDefault()
-        if (!e.repeat) setSpaceHeld(true)
-      }
+  function handleDeleteSelected() {
+    if (selectedPanelIds.size === 0) return
+
+    if (rotationTimeoutRef.current) {
+      clearTimeout(rotationTimeoutRef.current)
     }
-    function handleKeyUp(e: KeyboardEvent) {
-      if (e.key === ' ') {
-        setSpaceHeld(false)
-      }
+
+    for (const id of selectedPanelIds) {
+      deletePanel(id)
     }
-    window.addEventListener('keydown', handleKeyDown, { passive: false })
-    window.addEventListener('keyup', handleKeyUp)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('keyup', handleKeyUp)
-    }
-  }, [undo, redo, selectedPanelIds])
+    setSelectedPanelIds(new Set())
+    setMessage(null)
+  }
+
+  useWorkbenchKeyboard({
+    undo,
+    redo,
+    selectedPanelIds,
+    onDeleteSelected: handleDeleteSelected,
+    onSpaceDown: () => setSpaceHeld(true),
+    onSpaceUp: () => setSpaceHeld(false)
+  })
 
   useEffect(() => {
     if (!import.meta.env.DEV) return
@@ -583,7 +556,6 @@ export function WorkbenchPage() {
     const panel = getPanel(panelId)
     if (!panel) return
 
-    // Single panel drag or not part of multi-selection
     if (!selectedPanelIds.has(panelId) || selectedPanelIds.size <= 1) {
       const nextCenter = pixelToLatLng(position.x, position.y, geo)
       const placementError = getPlacementError(panelId, nextCenter, panel.rotation)
@@ -611,7 +583,6 @@ export function WorkbenchPage() {
       .map((id) => getPanel(id))
       .filter((p): p is NonNullable<typeof p> => p != null)
 
-    // Validate all new positions
     const moves: { id: string; prevCenter: { lat: number; lng: number }; nextCenter: { lat: number; lng: number } }[] =
       []
 
@@ -629,12 +600,10 @@ export function WorkbenchPage() {
       moves.push({ id: sp.id, prevCenter: sp.center, nextCenter })
     }
 
-    // Apply all moves
     for (const mv of moves) {
       movePanel(mv.id, mv.nextCenter)
     }
 
-    // Batch recompute
     if (!project) return
     setPendingPanelId(panelId)
     setMessage({ tone: 'info', text: `Recomputing yield for ${moves.length} panels...` })
@@ -660,7 +629,6 @@ export function WorkbenchPage() {
       }
       setMessage(null)
     } catch {
-      // Rollback all
       for (const mv of moves) {
         movePanel(mv.id, mv.prevCenter)
       }
@@ -690,7 +658,6 @@ export function WorkbenchPage() {
     const nextRotation = ((value % 360) + 360) % 360
 
     if (selectedPanelIds.size > 1) {
-      // Group rotate: apply same absolute rotation to all selected
       for (const id of selectedPanelIds) {
         const p = getPanel(id)
         if (!p) continue
@@ -703,7 +670,6 @@ export function WorkbenchPage() {
       for (const id of selectedPanelIds) {
         rotatePanel(id, nextRotation)
       }
-      // Schedule batch recompute for all selected
       if (rotationTimeoutRef.current) clearTimeout(rotationTimeoutRef.current)
       rotationTimeoutRef.current = setTimeout(() => {
         if (!project) return
@@ -730,7 +696,6 @@ export function WorkbenchPage() {
       return
     }
 
-    // Single panel rotation
     if (!selectedPanel) return
 
     const placementError = getPlacementError(selectedPanel.id, selectedPanel.center, nextRotation)
@@ -742,20 +707,6 @@ export function WorkbenchPage() {
     const previousRotation = selectedPanel.rotation
     rotatePanel(selectedPanel.id, nextRotation)
     scheduleRotationRecompute(selectedPanel.id, selectedPanel.center, nextRotation, previousRotation)
-  }
-
-  function handleDeleteSelected() {
-    if (selectedPanelIds.size === 0) return
-
-    if (rotationTimeoutRef.current) {
-      clearTimeout(rotationTimeoutRef.current)
-    }
-
-    for (const id of selectedPanelIds) {
-      deletePanel(id)
-    }
-    setSelectedPanelIds(new Set())
-    setMessage(null)
   }
 
   useEffect(() => {
@@ -792,7 +743,6 @@ export function WorkbenchPage() {
     if (stageScale >= 1) return
 
     zoomSnapTimerRef.current = setTimeout(() => {
-      // 1s debounce before snapping back to 1:1
       const duration = 300
       const startScale = stageScale
       const startPos = { ...stagePosition }
@@ -801,7 +751,7 @@ export function WorkbenchPage() {
       function animate(now: number) {
         const elapsed = now - startTime
         const t = Math.min(1, elapsed / duration)
-        const ease = t * (2 - t) // ease-out
+        const ease = t * (2 - t)
         const nextScale = startScale + (1 - startScale) * ease
         const nextX = startPos.x * (1 - ease)
         const nextY = startPos.y * (1 - ease)
@@ -1011,246 +961,39 @@ export function WorkbenchPage() {
   return (
     <div className="h-screen overflow-hidden bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
-      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-30 flex -translate-y-1/2 justify-between px-4">
-        <Link
-          to={`/project/${projectId}/map?view=readonly`}
-          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Map
-        </Link>
-        <Link
-          to={`/project/${projectId}/analysis`}
-          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
-        >
-          Analysis
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
+      <FloatingNav
+        left={{ label: 'Map', to: `/project/${projectId}/map?view=readonly` }}
+        right={{ label: 'Analysis', to: `/project/${projectId}/analysis` }}
+      />
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-4 overflow-y-auto px-4 py-4 xl:flex-row">
-        <aside className="xl:w-[22rem] xl:min-w-[22rem]">
-          <Card className="border-stone-200 bg-white/90 shadow-sm">
-            <CardHeader className="space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <CardTitle className="text-xl">{project.name}</CardTitle>
-                  <CardDescription>Adjust the suggested layout before moving to financial analysis.</CardDescription>
-                </div>
-                {/* Badge removed — not needed for user-facing UI */}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="rounded-lg bg-stone-100 p-3">
-                  <p className="text-stone-500">
-                    Annual Yield
-                    <InfoTooltip text="Total estimated electricity your panels will generate in a year." />
-                  </p>
-                  <p className="mt-1 text-lg font-semibold">{formatNumber(totalAnnualYield)} kWh</p>
-                </div>
-                <div className="rounded-lg bg-stone-100 p-3">
-                  <p className="text-stone-500">
-                    CO₂ Offset
-                    <InfoTooltip
-                      text={`Estimated using a factor of ${buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor for this region.`}
-                    />
-                  </p>
-                  <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
-                </div>
-              </div>
-              <div className="border-t border-stone-200" />
-              <div data-tour="panel-model">
-                <PanelModelDrawer
-                  selectedModelId={selectedPanelModelId}
-                  onSelect={handleModelChange}
-                  disabled={isModelRecomputing || isSaving}
-                />
-              </div>
-              <details className="rounded-lg border border-stone-200 bg-stone-50/80 text-sm">
-                <summary className="cursor-pointer px-3 py-2 font-medium text-stone-700 select-none">
-                  Panel Specifications
-                </summary>
-                <div className="space-y-1 border-t border-stone-200 px-3 py-2 text-stone-600">
-                  <p>
-                    Dimensions: {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
-                  </p>
-                  <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
-                  <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
-                  {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
-                  <p>Max panels (API): {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
-                  {buildingInsights.solarPotential.panelLifetimeYears != null && (
-                    <p>Lifespan: {buildingInsights.solarPotential.panelLifetimeYears} years</p>
-                  )}
-                </div>
-              </details>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {initialBatchStatus === 'loading' && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
-                  Computing monthly energy data for all panels...
-                </div>
-              )}
-
-              {initialBatchStatus === 'error' && (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                  Could not compute monthly energy breakdown. Annual estimates will be used instead.
-                </div>
-              )}
-
-              {message && (
-                <div
-                  className={cn(
-                    'rounded-lg border px-3 py-2 text-sm',
-                    message.tone === 'error'
-                      ? 'border-red-200 bg-red-50 text-red-700'
-                      : 'border-amber-200 bg-amber-50 text-amber-700'
-                  )}
-                >
-                  {message.text}
-                </div>
-              )}
-
-              <div data-tour="panel-count" className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>
-                    Panel Quantity
-                    <InfoTooltip text="Adjust how many panels to include. Higher-yield panels are kept first when you reduce the count." />
-                  </Label>
-                  <span className="text-sm text-muted-foreground">
-                    {visiblePanels.length} / {maxVisibleCount}
-                  </span>
-                </div>
-                <Slider
-                  value={[visibleCount]}
-                  min={minVisibleCount}
-                  max={Math.max(minVisibleCount, maxVisibleCount)}
-                  step={1}
-                  onValueChange={(value) => {
-                    const nextValue = value[0]
-                    if (typeof nextValue === 'number') {
-                      setVisibleCount(nextValue)
-                    }
-                  }}
-                  disabled={maxVisibleCount <= minVisibleCount}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Higher-yield panels are kept visible first. Lowering the slider removes lower-ranked panels from the
-                  saved layout.
-                </p>
-              </div>
-
-              <div className="border-t border-stone-200" />
-
-              <div className="space-y-3 rounded-xl border border-stone-200 bg-stone-50/80 p-4">
-                <div className="flex items-center justify-between">
-                  <Label>
-                    Selected Panel
-                    <InfoTooltip text="Click any panel on the canvas to select it. Hold Shift to select multiple. You can then rotate or delete them." />
-                  </Label>
-                  <span className="text-sm font-medium">
-                    {selectedPanelIds.size > 1 ? `${selectedPanelIds.size} panels` : (selectedPanel?.id ?? 'None')}
-                  </span>
-                </div>
-
-                {selectedPanelIds.size > 1 ? (
-                  <div className="text-sm text-stone-600">
-                    <p className="font-medium">{selectedPanelIds.size} panels selected</p>
-                    <p className="mt-1 text-xs text-stone-500">
-                      Use the rotation slider to rotate all selected panels. Press Delete to remove them.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-xs text-stone-500">Annual Yield</p>
-                      <p className="text-sm font-semibold">
-                        {selectedAnnualEnergy !== null ? `${formatNumber(selectedAnnualEnergy)} kWh` : '—'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-stone-500">Rotation</p>
-                      <p className="text-sm font-semibold">
-                        {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-stone-500">
-                        Avg Monthly Yield
-                        <InfoTooltip
-                          text={
-                            selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
-                              ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                                  .map(
-                                    (month, i) =>
-                                      `${month}: ${formatNumber(selectedPanel.monthlyEnergyDcKwh[i] ?? 0)} kWh`
-                                  )
-                                  .join('\n')
-                              : 'Monthly data not yet computed'
-                          }
-                        />
-                      </p>
-                      <p className="text-sm font-semibold">
-                        {selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
-                          ? `${formatNumber(selectedAnnualEnergy! / 12)} kWh`
-                          : '—'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>
-                      Rotate {selectedPanelIds.size > 1 ? 'Panels' : 'Panel'}
-                      <InfoTooltip text="Drag to set rotation angle (0–359°). The panel's energy yield is recomputed after each change." />
-                    </Label>
-                    <span className="text-sm font-medium">
-                      {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
-                    </span>
-                  </div>
-                  <Slider
-                    value={[selectedPanel?.rotation ?? 0]}
-                    min={0}
-                    max={359}
-                    step={5}
-                    disabled={
-                      selectedPanelIds.size === 0 || (selectedPanel != null && pendingPanelId === selectedPanel.id)
-                    }
-                    onValueChange={(value) => {
-                      const nextValue = value[0]
-                      if (typeof nextValue === 'number') {
-                        handleRotationInput(nextValue)
-                      }
-                    }}
-                  />
-                </div>
-
-                <Button
-                  variant="destructive"
-                  className="w-full"
-                  disabled={
-                    selectedPanelIds.size === 0 || (selectedPanel != null && pendingPanelId === selectedPanel.id)
-                  }
-                  onClick={handleDeleteSelected}
-                >
-                  {selectedPanelIds.size > 1 ? `Delete ${selectedPanelIds.size} Panels` : 'Delete Selected Panel'}
-                </Button>
-              </div>
-
-              <div className="grid gap-2">
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link to="/dashboard">Back to Dashboard</Link>
-                </Button>
-                <Button
-                  data-tour="save-continue"
-                  className="w-full"
-                  onClick={handleSave}
-                  disabled={isSaving || pendingPanelId !== null}
-                >
-                  {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </aside>
+        <WorkbenchSidebar
+          projectName={project.name}
+          totalAnnualYield={totalAnnualYield}
+          totalCarbonOffsetKg={totalCarbonOffsetKg}
+          carbonOffsetFactorKgPerMwh={buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh}
+          maxArrayPanelsCount={buildingInsights.solarPotential.maxArrayPanelsCount}
+          panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears ?? undefined}
+          selectedPanelModelId={selectedPanelModelId}
+          selectedPanelModel={selectedPanelModel}
+          onModelChange={handleModelChange}
+          isModelRecomputing={isModelRecomputing}
+          isSaving={isSaving}
+          isBatchRecomputing={isBatchRecomputing}
+          initialBatchStatus={initialBatchStatus}
+          message={message}
+          visiblePanelCount={visiblePanels.length}
+          visibleCount={visibleCount}
+          minVisibleCount={minVisibleCount}
+          maxVisibleCount={maxVisibleCount}
+          onVisibleCountChange={setVisibleCount}
+          selectedPanelIds={selectedPanelIds}
+          selectedPanel={selectedPanel}
+          selectedAnnualEnergy={selectedAnnualEnergy}
+          pendingPanelId={pendingPanelId}
+          onRotationInput={handleRotationInput}
+          onDeleteSelected={handleDeleteSelected}
+          onSave={handleSave}
+        />
 
         <section className="flex min-w-0 flex-1 flex-col">
           <Card
@@ -1402,7 +1145,7 @@ export function WorkbenchPage() {
                                   ? [guide.position, guide.start, guide.position, guide.end]
                                   : [guide.start, guide.position, guide.end, guide.position]
                               }
-                              stroke="#22d3ee"
+                              stroke={COLORS.selectionCyan}
                               strokeWidth={1}
                               dash={[4, 4]}
                               listening={false}
@@ -1417,7 +1160,7 @@ export function WorkbenchPage() {
                             y={marqueeRect.y}
                             width={marqueeRect.width}
                             height={marqueeRect.height}
-                            stroke="#22d3ee"
+                            stroke={COLORS.selectionCyan}
                             strokeWidth={1}
                             dash={[6, 4]}
                             fill="rgba(34, 211, 238, 0.1)"
@@ -1427,266 +1170,26 @@ export function WorkbenchPage() {
                       )}
                     </Stage>
 
-                    {/* Canvas controls */}
-                    <div data-tour="canvas-controls" className="absolute right-4 top-4 flex flex-col gap-1">
-                      {/* Tools group */}
-                      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">
-                        Tools
-                      </span>
-                      <button
-                        onClick={undo}
-                        disabled={!canUndo}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M3 7v6h6" />
-                          <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
-                        </svg>
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          Undo
-                        </span>
-                      </button>
-                      <button
-                        onClick={redo}
-                        disabled={!canRedo}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 7v6h-6" />
-                          <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
-                        </svg>
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          Redo
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => setMarqueeMode((v) => !v)}
-                        className={cn(
-                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90',
-                          marqueeMode && 'ring-1 ring-cyan-400 bg-cyan-50'
-                        )}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M5 3h2" />
-                          <path d="M9 3h2" />
-                          <path d="M13 3h2" />
-                          <path d="M17 3h2" />
-                          <path d="M21 5v2" />
-                          <path d="M21 9v2" />
-                          <path d="M21 13v2" />
-                          <path d="M21 17v2" />
-                          <path d="M19 21h-2" />
-                          <path d="M15 21h-2" />
-                          <path d="M11 21h-2" />
-                          <path d="M7 21h-2" />
-                          <path d="M3 19v-2" />
-                          <path d="M3 15v-2" />
-                          <path d="M3 11v-2" />
-                          <path d="M3 7v-2" />
-                        </svg>
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          {marqueeMode ? 'Marquee: ON' : 'Marquee'}
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => setSnapEnabled((v) => !v)}
-                        className={cn(
-                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90',
-                          snapEnabled && 'ring-1 ring-cyan-400 bg-cyan-50'
-                        )}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M6 15V9a6 6 0 0 1 12 0v6" />
-                          <path d="M6 9h4" />
-                          <path d="M14 9h4" />
-                          <path d="M6 15h4" />
-                          <path d="M14 15h4" />
-                        </svg>
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          {snapEnabled ? 'Snap: ON' : 'Snap'}
-                        </span>
-                      </button>
-                      <div className="my-1 border-t border-stone-200" />
-                      {/* View group */}
-                      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">
-                        View
-                      </span>
-                      <button
-                        onClick={handleZoomIn}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md transition-transform hover:bg-white active:scale-90"
-                      >
-                        +
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          Zoom in
-                        </span>
-                      </button>
-                      <button
-                        onClick={handleZoomOut}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md transition-transform hover:bg-white active:scale-90"
-                      >
-                        −
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          Zoom out
-                        </span>
-                      </button>
-                      <button
-                        onClick={handleZoomReset}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-xs font-medium shadow-md transition-transform hover:bg-white active:scale-90"
-                      >
-                        1:1
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          Reset zoom
-                        </span>
-                      </button>
-                      {stageScale !== 1 && (
-                        <span className="mt-1 text-center text-xs text-stone-500">{Math.round(stageScale * 100)}%</span>
-                      )}
-                      <div className="my-1 border-t border-stone-200" />
-                      {/* Layers group */}
-                      <span className="text-[8px] font-medium uppercase tracking-wider text-stone-400 text-center">
-                        Layers
-                      </span>
-                      <button
-                        onClick={() => setOverlayExpanded((v) => !v)}
-                        className={cn(
-                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90',
-                          overlayExpanded && 'ring-1 ring-stone-400'
-                        )}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                        <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
-                          {overlayExpanded ? 'Hide overlays' : 'Overlays'}
-                        </span>
-                      </button>
-                      <div
-                        className={cn(
-                          'mt-1 flex flex-col gap-1 transition-all duration-200',
-                          overlayExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-                        )}
-                      >
-                        <button
-                          onClick={() => setOverlayMode('rgb')}
-                          className={cn(
-                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'rgb' ? 'outline outline-1 outline-stone-900' : ''
-                          )}
-                          style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
-                          title="RGB"
-                        >
-                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                            RGB
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setOverlayMode('annual-flux')}
-                          className={cn(
-                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'annual-flux' ? 'outline outline-1 outline-stone-900' : ''
-                          )}
-                          style={{
-                            background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
-                          }}
-                          title="Annual Flux"
-                        >
-                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                            Flux
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setOverlayMode('dsm')}
-                          className={cn(
-                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'dsm' ? 'outline outline-1 outline-stone-900' : ''
-                          )}
-                          style={{
-                            background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
-                          }}
-                          title="DSM"
-                        >
-                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                            DSM
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setOverlayMode('mask')}
-                          className={cn(
-                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'mask' ? 'outline outline-1 outline-stone-900' : ''
-                          )}
-                          style={{
-                            background: 'linear-gradient(135deg, #064e3b, #059669, #34d399, #d1fae5)'
-                          }}
-                          title="Mask"
-                        >
-                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                            Mask
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setShowSegments((v) => !v)}
-                          className={cn(
-                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            showSegments ? 'outline outline-1 outline-stone-900' : ''
-                          )}
-                          style={{
-                            background: 'linear-gradient(135deg, #f59e0b, #06b6d4, #8b5cf6, #ef4444)'
-                          }}
-                          title="Segments"
-                        >
-                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                            Segments
-                          </span>
-                        </button>
-                      </div>
-                    </div>
+                    <CanvasControls
+                      canUndo={canUndo}
+                      canRedo={canRedo}
+                      onUndo={undo}
+                      onRedo={redo}
+                      marqueeMode={marqueeMode}
+                      onToggleMarquee={() => setMarqueeMode((v) => !v)}
+                      snapEnabled={snapEnabled}
+                      onToggleSnap={() => setSnapEnabled((v) => !v)}
+                      stageScale={stageScale}
+                      onZoomIn={handleZoomIn}
+                      onZoomOut={handleZoomOut}
+                      onZoomReset={handleZoomReset}
+                      overlayExpanded={overlayExpanded}
+                      onToggleOverlayExpanded={() => setOverlayExpanded((v) => !v)}
+                      overlayMode={overlayMode}
+                      onOverlayModeChange={setOverlayMode}
+                      showSegments={showSegments}
+                      onToggleSegments={() => setShowSegments((v) => !v)}
+                    />
 
                     {/* Loading overlays */}
                     {isOverlayLoading && (
@@ -1745,10 +1248,7 @@ export function WorkbenchPage() {
                                 className="w-3 rounded-sm"
                                 style={{
                                   height: '120px',
-                                  background:
-                                    overlayMode === 'annual-flux'
-                                      ? 'linear-gradient(to bottom, #ffffff, #fadc32, #dc1e1e, #800080, #000000)'
-                                      : 'linear-gradient(to bottom, #dc0000, #f0f000, #00c800, #00b4dc, #0000b4)'
+                                  background: overlayMode === 'annual-flux' ? COLORS.legendFlux : COLORS.legendDsm
                                 }}
                               />
                               <span className="text-[9px] font-medium text-white/90">
