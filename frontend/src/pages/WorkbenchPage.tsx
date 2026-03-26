@@ -1241,7 +1241,7 @@ export function WorkbenchPage() {
         </aside>
 
         <section className="min-w-0 flex-1">
-          <Card data-tour="canvas" className="overflow-hidden border-stone-200 bg-white/90 shadow-sm">
+          <Card data-tour="canvas" className="border-stone-200 bg-white/90 shadow-sm">
             <CardHeader className="border-b border-stone-200 bg-stone-50/70">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -1264,7 +1264,7 @@ export function WorkbenchPage() {
             <CardContent className="p-4">
               <div
                 ref={containerRef}
-                className="relative flex min-h-[50vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 p-2"
+                className="relative flex min-h-[45vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 p-6"
                 style={irradianceStyle}
               >
                 {stageReady && panelDimensions ? (
@@ -1779,20 +1779,21 @@ export function WorkbenchPage() {
                     if (a < 292.5) return 'W'
                     return 'NW'
                   })()}
+                  <InfoTooltip text="Approximate sun direction for this month in Malaysia. The amber glow on the canvas shows where sunlight hits your roof." />
                 </span>
               </div>
 
-              {/* Panel model selector — rendered as fixed element below */}
-              <div data-tour="panel-model" className="fixed inset-x-0 bottom-0 z-40 flex justify-center">
-                <PanelModelDrawer
-                  selectedModelId={selectedPanelModelId}
-                  onSelect={handleModelChange}
-                  disabled={isModelRecomputing || isSaving}
-                />
-              </div>
             </CardContent>
           </Card>
         </section>
+      </div>
+      {/* Panel model drawer — fixed at bottom-center of screen */}
+      <div data-tour="panel-model" className="fixed inset-x-0 bottom-0 z-40 flex justify-center pb-1">
+        <PanelModelDrawer
+          selectedModelId={selectedPanelModelId}
+          onSelect={handleModelChange}
+          disabled={isModelRecomputing || isSaving}
+        />
       </div>
     </div>
   )

@@ -512,7 +512,7 @@ export function AnalysisPage() {
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pb-6 xl:flex-row">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-4 pb-6 xl:flex-row">
         <aside className="xl:w-[24rem] xl:min-w-[24rem]">
           <Card className="border-stone-200 bg-white/92 shadow-sm">
             <CardHeader className="space-y-3">
