@@ -35,24 +35,30 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
       <Drawer.Trigger asChild disabled={disabled}>
         <button
           className={cn(
-            'flex items-center gap-2 rounded-t-xl border border-b-0 border-stone-300 bg-white px-5 py-2 text-sm shadow-md transition-all hover:bg-stone-50 active:scale-95',
+            'w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-left text-sm shadow-sm transition-all hover:bg-stone-50 active:scale-[0.98]',
             disabled && 'cursor-not-allowed opacity-60'
           )}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="text-stone-400"
-          >
-            <path d="m18 15-6-6-6 6" />
-          </svg>
-          <span className="text-xs font-semibold text-stone-700">Panels</span>
-          <span className="text-[10px] text-stone-400">·</span>
-          <span className="text-[10px] text-stone-500">{selectedModel.name}</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-stone-900">{selectedModel.name}</p>
+              <p className="text-xs text-stone-500">
+                {selectedModel.manufacturer} · {selectedModel.capacityWp}Wp ·{' '}
+                {(selectedModel.efficiency * 100).toFixed(1)}%
+              </p>
+            </div>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-stone-400"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
         </button>
       </Drawer.Trigger>
       <Drawer.Portal>

@@ -152,7 +152,9 @@ function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTM
 
     const update = () => {
       const maxWidth = Math.max(element.clientWidth - 64, 1)
-      const maxHeight = Math.max(element.clientHeight - 64, 200)
+      // Use viewport height minus a generous offset for card header, padding, slider, toolbar
+      // This ensures the canvas never overflows the visible card area on any screen size
+      const maxHeight = Math.max(window.innerHeight - 280, 200)
       const scale = Math.min(maxWidth / image.width, maxHeight / image.height)
 
       setSize({
@@ -1054,6 +1056,14 @@ export function WorkbenchPage() {
                   <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
                 </div>
               </div>
+              <div className="border-t border-stone-200" />
+              <div data-tour="panel-model">
+                <PanelModelDrawer
+                  selectedModelId={selectedPanelModelId}
+                  onSelect={handleModelChange}
+                  disabled={isModelRecomputing || isSaving}
+                />
+              </div>
               <details className="rounded-lg border border-stone-200 bg-stone-50/80 text-sm">
                 <summary className="cursor-pointer px-3 py-2 font-medium text-stone-700 select-none">
                   Panel Specifications
@@ -1126,6 +1136,8 @@ export function WorkbenchPage() {
                   saved layout.
                 </p>
               </div>
+
+              <div className="border-t border-stone-200" />
 
               <div className="space-y-3 rounded-xl border border-stone-200 bg-stone-50/80 p-4">
                 <div className="flex items-center justify-between">
@@ -1241,7 +1253,10 @@ export function WorkbenchPage() {
         </aside>
 
         <section className="flex min-w-0 flex-1 flex-col">
-          <Card data-tour="canvas" className="flex flex-1 flex-col overflow-hidden border-stone-200 bg-white/90 shadow-sm">
+          <Card
+            data-tour="canvas"
+            className="flex flex-1 flex-col overflow-hidden border-stone-200 bg-white/90 shadow-sm"
+          >
             <CardHeader className="border-b border-stone-200 bg-stone-50/70">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -1782,18 +1797,9 @@ export function WorkbenchPage() {
                   <InfoTooltip text="Approximate sun direction for this month in Malaysia. The amber glow on the canvas shows where sunlight hits your roof." />
                 </span>
               </div>
-
             </CardContent>
           </Card>
         </section>
-      </div>
-      {/* Panel model drawer — fixed at bottom, centered under sidebar */}
-      <div data-tour="panel-model" className="fixed bottom-0 left-4 z-40 flex w-[22rem] justify-center">
-        <PanelModelDrawer
-          selectedModelId={selectedPanelModelId}
-          onSelect={handleModelChange}
-          disabled={isModelRecomputing || isSaving}
-        />
       </div>
     </div>
   )
