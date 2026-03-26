@@ -1240,8 +1240,8 @@ export function WorkbenchPage() {
           </Card>
         </aside>
 
-        <section className="min-w-0 flex-1">
-          <Card data-tour="canvas" className="border-stone-200 bg-white/90 shadow-sm">
+        <section className="flex min-w-0 flex-1 flex-col">
+          <Card data-tour="canvas" className="flex flex-1 flex-col overflow-hidden border-stone-200 bg-white/90 shadow-sm">
             <CardHeader className="border-b border-stone-200 bg-stone-50/70">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -1261,10 +1261,10 @@ export function WorkbenchPage() {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="p-4">
+            <CardContent className="flex flex-1 flex-col overflow-hidden p-4">
               <div
                 ref={containerRef}
-                className="relative flex min-h-[45vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 p-6"
+                className="relative flex flex-1 items-center justify-center rounded-2xl border border-dashed border-stone-300 p-8"
                 style={irradianceStyle}
               >
                 {stageReady && panelDimensions ? (
@@ -1787,8 +1787,8 @@ export function WorkbenchPage() {
           </Card>
         </section>
       </div>
-      {/* Panel model drawer — fixed at bottom-center of screen */}
-      <div data-tour="panel-model" className="fixed inset-x-0 bottom-0 z-40 flex justify-center pb-1">
+      {/* Panel model drawer — fixed at bottom, aligned under sidebar */}
+      <div data-tour="panel-model" className="fixed bottom-0 left-0 z-40 flex w-[22rem] justify-center pb-1 pl-4">
         <PanelModelDrawer
           selectedModelId={selectedPanelModelId}
           onSelect={handleModelChange}
