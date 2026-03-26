@@ -45,12 +45,17 @@ const AdvancedPdfReport = forwardRef<HTMLDivElement, AdvancedPdfReportProps>(
         <div ref={ref} className="w-[794px] bg-white px-10 py-10 text-stone-900">
           <div className="space-y-8">
             <div className="flex items-start justify-between border-b border-stone-200 pb-6">
-              <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-stone-500">Solar Layout Generator</p>
-                <h1 className="mt-2 text-3xl font-semibold">{projectName}</h1>
-                <p className="mt-2 text-sm text-stone-500">
-                  Generated on {new Date().toLocaleDateString('en-MY')} for rooftop solar financial analysis.
-                </p>
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ea580c]">
+                  <span className="text-xl font-bold text-white">S</span>
+                </div>
+                <div>
+                  <p className="text-sm uppercase tracking-[0.3em] text-stone-500">SolarSim</p>
+                  <h1 className="mt-1 text-3xl font-semibold">{projectName}</h1>
+                  <p className="mt-2 text-sm text-stone-500">
+                    Generated on {new Date().toLocaleDateString('en-MY')} for rooftop solar financial analysis.
+                  </p>
+                </div>
               </div>
               <div className="rounded-2xl border border-stone-200 px-4 py-3 text-right">
                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Project Status</p>

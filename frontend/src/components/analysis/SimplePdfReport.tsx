@@ -21,10 +21,17 @@ const SimplePdfReport = forwardRef<HTMLDivElement, SimplePdfReportProps>(
           className="w-[210mm] bg-white p-8 text-stone-900"
           style={{ fontFamily: 'system-ui, sans-serif' }}
         >
-          <h1 className="text-2xl font-bold">Solar Savings Report</h1>
-          <p className="mt-1 text-sm text-stone-500">
-            {projectName} &middot; Generated {new Date().toLocaleDateString('en-MY')}
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#ea580c]">
+              <span className="text-lg font-bold text-white">S</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Solar Savings Report</h1>
+              <p className="text-sm text-stone-500">
+                {projectName} &middot; Generated {new Date().toLocaleDateString('en-MY')}
+              </p>
+            </div>
+          </div>
 
           <div className="mt-6 grid grid-cols-3 gap-4">
             <div className="rounded-lg bg-green-50 p-4 text-center">
