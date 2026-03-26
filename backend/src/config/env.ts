@@ -9,7 +9,10 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') })
 const envSchema = z.object({
   PORT: z.coerce.number().optional(),
   BACKEND_PORT: z.coerce.number().default(3001),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.enum(['development', 'production', 'test']).default('development')
+  ),
   SUPABASE_DATABASE_URL: z.string().min(1),
   GOOGLE_SOLAR_API_KEY: z.string().min(1),
   GOOGLE_MAPS_API_KEY: z.string().min(1),

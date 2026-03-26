@@ -21,7 +21,7 @@ export const MONTHLY_IRRADIANCE = [
 
 // Sun azimuth approximation for Malaysia by month (degrees from North, clockwise)
 // At 3°N, the sun is slightly south most of the year, crossing north briefly around equinoxes
-const MONTHLY_AZIMUTH = [
+export const MONTHLY_AZIMUTH = [
   180, // Jan — south
   170, // Feb — slightly south
   160, // Mar — transitioning

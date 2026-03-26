@@ -6,6 +6,15 @@ import { cn } from '@/lib/utils'
 
 const PanelPreview3D = lazy(() => import('./PanelPreview3D'))
 
+const MODEL_CELL_COLORS: Record<string, string> = {
+  'google-default': '#1a2744',
+  'jinko-tiger-neo': '#0d1f3c',
+  'longi-himo6': '#162d50',
+  'ja-deepblue4': '#0a1a38',
+  'canadian-hihero': '#1e2d4a',
+  'trina-vertex-s': '#142642'
+}
+
 type PanelModelDrawerProps = {
   selectedModelId: string
   onSelect: (modelId: string) => void
@@ -26,30 +35,23 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
       <Drawer.Trigger asChild disabled={disabled}>
         <button
           className={cn(
-            'w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-left text-sm shadow-sm transition-colors hover:bg-stone-50',
+            'flex items-center gap-2 rounded-full border border-stone-300 bg-white/95 px-4 py-2 text-sm shadow-lg backdrop-blur transition-all hover:shadow-xl active:scale-95',
             disabled && 'cursor-not-allowed opacity-60'
           )}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-stone-900">{selectedModel.name}</p>
-              <p className="text-xs text-stone-500">
-                {selectedModel.manufacturer} · {selectedModel.capacityWp}Wp ·{' '}
-                {(selectedModel.efficiency * 100).toFixed(1)}%
-              </p>
-            </div>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-stone-400"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </div>
+          <span className="text-xs font-medium text-stone-900">{selectedModel.name}</span>
+          <span className="text-[10px] text-stone-500">{selectedModel.capacityWp}Wp</span>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-stone-400"
+          >
+            <path d="m18 15-6-6-6 6" />
+          </svg>
         </button>
       </Drawer.Trigger>
       <Drawer.Portal>
@@ -96,7 +98,7 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
             </div>
           }
         >
-          <PanelPreview3D widthM={model.widthM} heightM={model.heightM} />
+          <PanelPreview3D widthM={model.widthM} heightM={model.heightM} cellColor={MODEL_CELL_COLORS[model.id]} />
         </Suspense>
       </div>
 

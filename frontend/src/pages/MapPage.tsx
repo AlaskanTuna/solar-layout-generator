@@ -312,27 +312,29 @@ export function MapPage() {
     <div className="relative h-screen w-full">
       <div ref={mapRef} className="h-full w-full" />
 
-      {/* Navigation buttons — top center */}
-      <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center gap-2 px-4">
+      {/* Navigation buttons — left/right edges */}
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-between px-4">
         <Link
           to="/dashboard"
-          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
+          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-all active:scale-95 hover:bg-stone-50"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Dashboard
         </Link>
-        {isReadonly && projectId && projectId !== 'new' && (
+        {isReadonly && projectId && projectId !== 'new' ? (
           <Link
             to={`/project/${projectId}/workbench`}
-            className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-colors hover:bg-stone-50"
+            className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-md transition-all active:scale-95 hover:bg-stone-50"
           >
             Workbench
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
+        ) : (
+          <span />
         )}
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-16 z-10 flex flex-col items-center px-4">
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex flex-col items-center px-4">
         <div
           ref={searchHostRef}
           data-tour="search-box"
@@ -342,18 +344,6 @@ export function MapPage() {
         >
           <div className="h-12" />
         </div>
-        {/* Readonly CTA */}
-        {isReadonly && (
-          <p className="mt-2 rounded-lg bg-white/90 px-3 py-1.5 text-xs text-stone-500 shadow-sm backdrop-blur">
-            Want to analyse a different location?{' '}
-            <Link
-              to="/dashboard"
-              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-            >
-              Go to Dashboard
-            </Link>
-          </p>
-        )}
       </div>
 
       <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />

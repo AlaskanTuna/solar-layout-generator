@@ -24,7 +24,7 @@ const WORKBENCH_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="canvas-title"]',
     title: 'Arrange Your Panels',
     description:
-      'Click a panel to select it, or hold Shift and click to select multiple. Drag to reposition, use the sidebar slider to rotate, or press Delete to remove. You can also undo/redo any change with Ctrl+Z / Ctrl+Shift+Z.'
+      'Click a panel to select it. Drag to reposition, use the sidebar slider to rotate, or press Delete to remove.'
   },
   {
     target: '[data-tour="canvas-controls"]',
@@ -45,7 +45,7 @@ import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
 import { saveLayout } from '@/api/projects'
-import { IrradianceGlow, MONTHLY_IRRADIANCE, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
+import { MONTHLY_AZIMUTH, MONTHLY_IRRADIANCE, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
 import { PanelModelDrawer } from '@/components/workbench/PanelModelDrawer'
 import { Badge } from '@/components/ui/badge'
@@ -68,6 +68,7 @@ import {
   pixelToLatLng,
   type CanvasGeo
 } from '@/lib/canvasTransforms'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { computeSegmentHulls } from '@/lib/segmentVisualization'
 import { computeSnap, type SnapGuide } from '@/lib/snapAlignment'
@@ -222,6 +223,16 @@ export function WorkbenchPage() {
   const [isOverlayLoading, setIsOverlayLoading] = useState(false)
   const [irradianceMonth, setIrradianceMonth] = useState(new Date().getMonth())
 
+  const irradianceStyle = useMemo(() => {
+    const azimuth = MONTHLY_AZIMUTH[irradianceMonth] ?? 180
+    const intensity = MONTHLY_IRRADIANCE[irradianceMonth] ?? 0.9
+    const cssAngle = (180 - azimuth + 360) % 360
+    const alpha = intensity * 0.15
+    return {
+      boxShadow: `inset 0 0 100px 60px rgba(255, 184, 0, ${alpha.toFixed(3)})`
+    }
+  }, [irradianceMonth])
+
   const {
     project,
     buildingInsights,
@@ -308,20 +319,27 @@ export function WorkbenchPage() {
   }, [visiblePanels, geo])
 
   const segmentHulls = useMemo(() => {
-    if (!showSegments || !buildingInsights || !geo) return []
+    if (!showSegments || !buildingInsights || !geo || !panelDimensions) return []
 
     const solarPanels = buildingInsights.solarPotential.solarPanels
     const roofSegments = buildingInsights.solarPotential.roofSegmentStats
     const activePanelIds = new Set(visiblePanels.map((p) => p.id))
 
-    // Build pixel position map from renderPanels
-    const pixelMap = new Map<string, { x: number; y: number }>()
+    // Build pixel position map (with rotation) from renderPanels
+    const pixelMap = new Map<string, { x: number; y: number; rotation: number }>()
     for (const { panel, x, y } of renderPanels) {
-      pixelMap.set(panel.id, { x, y })
+      pixelMap.set(panel.id, { x, y, rotation: panel.rotation })
     }
 
-    return computeSegmentHulls(solarPanels, roofSegments, pixelMap, activePanelIds)
-  }, [showSegments, buildingInsights, geo, visiblePanels, renderPanels])
+    return computeSegmentHulls(
+      solarPanels,
+      roofSegments,
+      pixelMap,
+      activePanelIds,
+      panelDimensions.width,
+      panelDimensions.height
+    )
+  }, [showSegments, buildingInsights, geo, panelDimensions, visiblePanels, renderPanels])
 
   const handleSnapDragMove = useCallback(
     (panelId: string, position: { x: number; y: number }) => {
@@ -985,9 +1003,25 @@ export function WorkbenchPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
+    <div className="h-screen overflow-hidden bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
+      <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-between px-4">
+        <Link
+          to="/dashboard"
+          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Dashboard
+        </Link>
+        <Link
+          to={`/project/${projectId}/map?view=readonly`}
+          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
+        >
+          Map
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+      <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-4 overflow-y-auto px-4 py-4 xl:flex-row">
         <aside className="xl:w-[22rem] xl:min-w-[22rem]">
           <Card className="border-stone-200 bg-white/90 shadow-sm">
             <CardHeader className="space-y-3">
@@ -1059,18 +1093,6 @@ export function WorkbenchPage() {
                   {message.text}
                 </div>
               )}
-
-              <div data-tour="panel-model" className="space-y-3">
-                <Label>
-                  Panel Model
-                  <InfoTooltip text="Select the solar panel model. Changing the model updates panel dimensions on the canvas and recalculates energy yield for all panels." />
-                </Label>
-                <PanelModelDrawer
-                  selectedModelId={selectedPanelModelId}
-                  onSelect={handleModelChange}
-                  disabled={isModelRecomputing || isSaving}
-                />
-              </div>
 
               <div data-tour="panel-count" className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1197,17 +1219,14 @@ export function WorkbenchPage() {
                 </Button>
               </div>
 
-              <div className="grid gap-3 xl:grid-cols-1">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/dashboard">Back to Dashboard</Link>
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={`/project/${projectId}/map?view=readonly`}>Back to Map</Link>
-                </Button>
-                <Button data-tour="save-continue" onClick={handleSave} disabled={isSaving || pendingPanelId !== null}>
-                  {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
-                </Button>
-              </div>
+              <Button
+                data-tour="save-continue"
+                className="w-full"
+                onClick={handleSave}
+                disabled={isSaving || pendingPanelId !== null}
+              >
+                {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
+              </Button>
             </CardContent>
           </Card>
         </aside>
@@ -1236,7 +1255,8 @@ export function WorkbenchPage() {
             <CardContent className="p-4">
               <div
                 ref={containerRef}
-                className="relative flex min-h-[60vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-[radial-gradient(circle_at_top_left,#fefce8,transparent_30%),linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-2"
+                className="relative flex min-h-[50vh] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-[radial-gradient(circle_at_top_left,#fefce8,transparent_30%),linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-2"
+                style={irradianceStyle}
               >
                 {stageReady && panelDimensions ? (
                   <>
@@ -1392,7 +1412,7 @@ export function WorkbenchPage() {
                       <button
                         onClick={undo}
                         disabled={!canUndo}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <svg
                           width="16"
@@ -1414,7 +1434,7 @@ export function WorkbenchPage() {
                       <button
                         onClick={redo}
                         disabled={!canRedo}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <svg
                           width="16"
@@ -1436,7 +1456,7 @@ export function WorkbenchPage() {
                       <button
                         onClick={() => setMarqueeMode((v) => !v)}
                         className={cn(
-                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white',
+                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90',
                           marqueeMode && 'ring-1 ring-cyan-400 bg-cyan-50'
                         )}
                       >
@@ -1474,7 +1494,7 @@ export function WorkbenchPage() {
                       <button
                         onClick={() => setSnapEnabled((v) => !v)}
                         className={cn(
-                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-colors hover:bg-white',
+                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90',
                           snapEnabled && 'ring-1 ring-cyan-400 bg-cyan-50'
                         )}
                       >
@@ -1505,7 +1525,7 @@ export function WorkbenchPage() {
                       </span>
                       <button
                         onClick={handleZoomIn}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md transition-transform hover:bg-white active:scale-90"
                       >
                         +
                         <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -1514,7 +1534,7 @@ export function WorkbenchPage() {
                       </button>
                       <button
                         onClick={handleZoomOut}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md hover:bg-white"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm font-bold shadow-md transition-transform hover:bg-white active:scale-90"
                       >
                         −
                         <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -1523,7 +1543,7 @@ export function WorkbenchPage() {
                       </button>
                       <button
                         onClick={handleZoomReset}
-                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-xs font-medium shadow-md hover:bg-white"
+                        className="group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-xs font-medium shadow-md transition-transform hover:bg-white active:scale-90"
                       >
                         1:1
                         <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] font-normal text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -1541,7 +1561,7 @@ export function WorkbenchPage() {
                       <button
                         onClick={() => setOverlayExpanded((v) => !v)}
                         className={cn(
-                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white',
+                          'group relative flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-sm shadow-md transition-all hover:bg-white active:scale-90',
                           overlayExpanded && 'ring-1 ring-stone-400'
                         )}
                       >
@@ -1562,83 +1582,86 @@ export function WorkbenchPage() {
                           {overlayExpanded ? 'Hide overlays' : 'Overlays'}
                         </span>
                       </button>
-                      {overlayExpanded && (
-                        <div className="mt-1 flex flex-col gap-1">
-                          <button
-                            onClick={() => setOverlayMode('rgb')}
-                            className={cn(
-                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                              overlayMode === 'rgb' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                            )}
-                            style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
-                            title="RGB"
-                          >
-                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                              RGB
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => setOverlayMode('annual-flux')}
-                            className={cn(
-                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                              overlayMode === 'annual-flux' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                            )}
-                            style={{
-                              background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
-                            }}
-                            title="Annual Flux"
-                          >
-                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                              Flux
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => setOverlayMode('dsm')}
-                            className={cn(
-                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                              overlayMode === 'dsm' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                            )}
-                            style={{
-                              background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
-                            }}
-                            title="DSM"
-                          >
-                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                              DSM
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => setOverlayMode('mask')}
-                            className={cn(
-                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                              overlayMode === 'mask' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                            )}
-                            style={{
-                              background: 'linear-gradient(135deg, #064e3b, #059669, #34d399, #d1fae5)'
-                            }}
-                            title="Mask"
-                          >
-                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                              Mask
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => setShowSegments((v) => !v)}
-                            className={cn(
-                              'group relative h-8 w-8 rounded-md shadow-md transition-all',
-                              showSegments ? 'ring-1 ring-stone-900 ring-offset-1' : ''
-                            )}
-                            style={{
-                              background: 'linear-gradient(135deg, #f59e0b, #06b6d4, #8b5cf6, #ef4444)'
-                            }}
-                            title="Segments"
-                          >
-                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                              Segments
-                            </span>
-                          </button>
-                        </div>
-                      )}
+                      <div
+                        className={cn(
+                          'mt-1 flex flex-col gap-1 overflow-hidden transition-all duration-200',
+                          overlayExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                        )}
+                      >
+                        <button
+                          onClick={() => setOverlayMode('rgb')}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
+                            overlayMode === 'rgb' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                          )}
+                          style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
+                          title="RGB"
+                        >
+                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            RGB
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setOverlayMode('annual-flux')}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
+                            overlayMode === 'annual-flux' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                          )}
+                          style={{
+                            background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
+                          }}
+                          title="Annual Flux"
+                        >
+                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            Flux
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setOverlayMode('dsm')}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
+                            overlayMode === 'dsm' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                          )}
+                          style={{
+                            background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
+                          }}
+                          title="DSM"
+                        >
+                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            DSM
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setOverlayMode('mask')}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
+                            overlayMode === 'mask' ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                          )}
+                          style={{
+                            background: 'linear-gradient(135deg, #064e3b, #059669, #34d399, #d1fae5)'
+                          }}
+                          title="Mask"
+                        >
+                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            Mask
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setShowSegments((v) => !v)}
+                          className={cn(
+                            'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
+                            showSegments ? 'ring-1 ring-stone-900 ring-offset-1' : ''
+                          )}
+                          style={{
+                            background: 'linear-gradient(135deg, #f59e0b, #06b6d4, #8b5cf6, #ef4444)'
+                          }}
+                          title="Segments"
+                        >
+                          <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            Segments
+                          </span>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Loading overlays */}
@@ -1658,9 +1681,6 @@ export function WorkbenchPage() {
                         </div>
                       </div>
                     )}
-
-                    {/* Irradiance ambient glow */}
-                    <IrradianceGlow month={irradianceMonth} />
 
                     {/* Bottom-left legends */}
                     <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-2">
@@ -1682,7 +1702,7 @@ export function WorkbenchPage() {
                       {overlayMode !== 'rgb' && !isOverlayLoading && (
                         <div className="rounded-lg bg-black/60 px-2.5 py-2 backdrop-blur-sm">
                           {overlayMode === 'mask' ? (
-                            <div className="flex flex-col items-center gap-1.5">
+                            <div className="flex flex-col items-start gap-1.5">
                               <div className="flex items-center gap-1.5">
                                 <div className="h-3 w-3 rounded-sm bg-green-500/60" />
                                 <span className="text-[9px] font-medium text-white/90">Roof</span>
@@ -1726,7 +1746,7 @@ export function WorkbenchPage() {
 
               {/* Irradiance month slider */}
               <div className="mt-3 flex items-center gap-3">
-                <span className="w-8 text-xs font-medium text-stone-500">{MONTH_LABELS[irradianceMonth]}</span>
+                <span className="w-8 text-xs font-medium text-amber-600">{MONTH_LABELS[irradianceMonth]}</span>
                 <Slider
                   value={[irradianceMonth]}
                   min={0}
@@ -1737,9 +1757,18 @@ export function WorkbenchPage() {
                   }}
                   className="flex-1"
                 />
-                <span className="w-20 text-right text-xs text-stone-400">
-                  {Math.round((MONTHLY_IRRADIANCE[irradianceMonth] ?? 1) * 100)}% solar
+                <span className="w-28 text-right text-[11px] text-stone-400">
+                  ☀️ {MONTH_LABELS[irradianceMonth]} sunlight
                 </span>
+              </div>
+
+              {/* Panel model selector */}
+              <div data-tour="panel-model" className="mt-2 flex justify-center">
+                <PanelModelDrawer
+                  selectedModelId={selectedPanelModelId}
+                  onSelect={handleModelChange}
+                  disabled={isModelRecomputing || isSaving}
+                />
               </div>
             </CardContent>
           </Card>

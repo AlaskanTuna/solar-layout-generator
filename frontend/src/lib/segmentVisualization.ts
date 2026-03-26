@@ -74,18 +74,29 @@ export function convexHull(points: { x: number; y: number }[]): { x: number; y: 
   return hull
 }
 
+/** Padding around panel corners for the segment hull outline. */
+const HULL_PADDING = 4
+
 /**
- * Group panels by segment, compute convex hulls of their pixel positions.
+ * Group panels by segment, expand each panel center into its four
+ * corners (using panelWidth/panelHeight + padding), then compute
+ * convex hulls so that even segments with 1-2 panels produce a
+ * visible filled polygon.
  */
 export function computeSegmentHulls(
   solarPanels: SolarPanel[],
   roofSegments: RoofSegment[],
-  panelPixelPositions: Map<string, { x: number; y: number }>,
-  visiblePanelIds: Set<string>
+  panelPixelPositions: Map<string, { x: number; y: number; rotation: number }>,
+  visiblePanelIds: Set<string>,
+  panelWidth: number,
+  panelHeight: number
 ): SegmentHull[] {
-  // Group visible panels by segmentIndex
+  // Group visible panels by segmentIndex, expanding centers into corners
   const groups = new Map<number, { x: number; y: number }[]>()
   const panelCounts = new Map<number, number>()
+
+  const halfW = panelWidth / 2 + HULL_PADDING
+  const halfH = panelHeight / 2 + HULL_PADDING
 
   for (const panel of solarPanels) {
     if (!visiblePanelIds.has(panel.id)) continue
@@ -96,7 +107,27 @@ export function computeSegmentHulls(
       groups.set(panel.segmentIndex, [])
       panelCounts.set(panel.segmentIndex, 0)
     }
-    groups.get(panel.segmentIndex)!.push(pos)
+
+    const rot = (pos.rotation * Math.PI) / 180
+    const cosR = Math.cos(rot)
+    const sinR = Math.sin(rot)
+
+    // Expand center into 4 rotated corners
+    const corners = [
+      { lx: -halfW, ly: -halfH },
+      { lx: halfW, ly: -halfH },
+      { lx: halfW, ly: halfH },
+      { lx: -halfW, ly: halfH }
+    ]
+
+    const pts = groups.get(panel.segmentIndex)!
+    for (const { lx, ly } of corners) {
+      pts.push({
+        x: pos.x + cosR * lx - sinR * ly,
+        y: pos.y + sinR * lx + cosR * ly
+      })
+    }
+
     panelCounts.set(panel.segmentIndex, (panelCounts.get(panel.segmentIndex) ?? 0) + 1)
   }
 

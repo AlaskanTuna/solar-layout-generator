@@ -1,5 +1,3 @@
-import { getRotatedRectPoints, getRectAabb } from './canvasTransforms'
-
 export type SnapGuide = {
   orientation: 'horizontal' | 'vertical'
   position: number
@@ -20,14 +18,14 @@ type PanelInfo = {
   rotation: number
 }
 
-const SNAP_THRESHOLD = 8
+const SNAP_THRESHOLD = 10
 const ROTATION_TOLERANCE = 5
 
 /**
  * Given a panel being dragged, compute snapped position and guide lines
- * by comparing its AABB edges against all other visible panels with
- * similar rotation. Returns the adjusted (x, y) and any guide lines
- * to render on the canvas.
+ * by projecting center-to-center distances onto the panel's local axes
+ * (U along width, V along height) and snapping to edge-to-edge or
+ * center-aligned targets. This properly handles rotated panels.
  */
 export function computeSnap(
   dragged: { x: number; y: number; rotation: number; id: string },
@@ -37,64 +35,67 @@ export function computeSnap(
   stageWidth: number,
   stageHeight: number
 ): SnapResult {
+  // Clamp to stage bounds
   let x = Math.min(stageWidth - panelWidth / 2, Math.max(panelWidth / 2, dragged.x))
   let y = Math.min(stageHeight - panelHeight / 2, Math.max(panelHeight / 2, dragged.y))
   const guides: SnapGuide[] = []
 
-  const draggedAabb = getRectAabb(getRotatedRectPoints(x, y, panelWidth, panelHeight, dragged.rotation))
+  const rot = (dragged.rotation * Math.PI) / 180
+  const cosR = Math.cos(rot)
+  const sinR = Math.sin(rot)
 
-  let bestSnapX: { dx: number; guidePos: number } | null = null
-  let bestSnapXDist = SNAP_THRESHOLD + 1
-  let bestSnapY: { dy: number; guidePos: number } | null = null
-  let bestSnapYDist = SNAP_THRESHOLD + 1
+  // Track best snap along panel's local U (width) and V (height) axes
+  let bestU: { correction: number; otherX: number; otherY: number } | null = null
+  let bestUDist = SNAP_THRESHOLD + 1
+  let bestV: { correction: number; otherX: number; otherY: number } | null = null
+  let bestVDist = SNAP_THRESHOLD + 1
 
   for (const other of others) {
     if (other.id === dragged.id) continue
-
     const rotDiff = Math.abs(((dragged.rotation - other.rotation + 180) % 360) - 180)
     if (rotDiff > ROTATION_TOLERANCE) continue
 
-    const otherAabb = getRectAabb(getRotatedRectPoints(other.x, other.y, panelWidth, panelHeight, other.rotation))
+    // Delta from dragged center to other center, in global coords
+    const dx = other.x - x
+    const dy = other.y - y
 
-    const xPairs: [number, number][] = [
-      [draggedAabb.minX, otherAabb.minX],
-      [draggedAabb.minX, otherAabb.maxX],
-      [draggedAabb.maxX, otherAabb.minX],
-      [draggedAabb.maxX, otherAabb.maxX]
-    ]
+    // Project onto panel's local axes
+    // U = along width (cosR, sinR), V = along height (-sinR, cosR)
+    const u = dx * cosR + dy * sinR
+    const v = -dx * sinR + dy * cosR
 
-    for (const [dEdge, oEdge] of xPairs) {
-      const dist = Math.abs(dEdge - oEdge)
-      if (dist < bestSnapXDist) {
-        bestSnapXDist = dist
-        bestSnapX = { dx: oEdge - dEdge, guidePos: oEdge }
+    // Snap targets along U (width axis): edge-to-edge = +/-panelWidth, aligned = 0
+    for (const target of [panelWidth, -panelWidth, 0]) {
+      const dist = Math.abs(u - target)
+      if (dist < bestUDist) {
+        bestUDist = dist
+        bestU = { correction: target - u, otherX: other.x, otherY: other.y }
       }
     }
 
-    const yPairs: [number, number][] = [
-      [draggedAabb.minY, otherAabb.minY],
-      [draggedAabb.minY, otherAabb.maxY],
-      [draggedAabb.maxY, otherAabb.minY],
-      [draggedAabb.maxY, otherAabb.maxY]
-    ]
-
-    for (const [dEdge, oEdge] of yPairs) {
-      const dist = Math.abs(dEdge - oEdge)
-      if (dist < bestSnapYDist) {
-        bestSnapYDist = dist
-        bestSnapY = { dy: oEdge - dEdge, guidePos: oEdge }
+    // Snap targets along V (height axis): edge-to-edge = +/-panelHeight, aligned = 0
+    for (const target of [panelHeight, -panelHeight, 0]) {
+      const dist = Math.abs(v - target)
+      if (dist < bestVDist) {
+        bestVDist = dist
+        bestV = { correction: target - v, otherX: other.x, otherY: other.y }
       }
     }
   }
 
-  if (bestSnapX && bestSnapXDist <= SNAP_THRESHOLD) {
-    x += bestSnapX.dx
-    guides.push({ orientation: 'vertical', position: bestSnapX.guidePos, start: 0, end: stageHeight })
+  // Apply corrections (convert local axis corrections to global X/Y deltas)
+  if (bestU && bestUDist <= SNAP_THRESHOLD) {
+    x += bestU.correction * cosR
+    y += bestU.correction * sinR
+    // Draw vertical guide through the aligned axis
+    guides.push({ orientation: 'vertical', position: bestU.otherX, start: 0, end: stageHeight })
   }
 
-  if (bestSnapY && bestSnapYDist <= SNAP_THRESHOLD) {
-    y += bestSnapY.dy
-    guides.push({ orientation: 'horizontal', position: bestSnapY.guidePos, start: 0, end: stageWidth })
+  if (bestV && bestVDist <= SNAP_THRESHOLD) {
+    x += bestV.correction * -sinR
+    y += bestV.correction * cosR
+    // Draw horizontal guide through the aligned axis
+    guides.push({ orientation: 'horizontal', position: bestV.otherY, start: 0, end: stageWidth })
   }
 
   return { x, y, guides }

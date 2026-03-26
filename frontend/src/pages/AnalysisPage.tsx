@@ -41,7 +41,7 @@ import {
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react'
 import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { ImagePopup } from '@/components/ImagePopup'
@@ -491,9 +491,26 @@ export function AnalysisPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
+    <div className="relative min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
       <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
+      {/* Floating nav */}
+      <div className="pointer-events-none sticky top-0 z-30 flex justify-between px-4 py-3">
+        <Link
+          to={`/project/${projectId}/workbench`}
+          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Workbench
+        </Link>
+        <Link
+          to="/dashboard"
+          className="pointer-events-auto flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-md backdrop-blur transition-all active:scale-95 hover:bg-stone-50"
+        >
+          Dashboard
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pb-6 xl:flex-row">
         <aside className="xl:w-[24rem] xl:min-w-[24rem]">
           <Card className="border-stone-200 bg-white/92 shadow-sm">
             <CardHeader className="space-y-3">
@@ -780,13 +797,7 @@ export function AnalysisPage() {
                 </>
               )}
 
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <Button variant="outline" asChild>
-                  <Link to="/dashboard">Back to Dashboard</Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link to={`/project/${projectId}/workbench`}>Back to Workbench</Link>
-                </Button>
+              <div className="grid gap-3">
                 <Button data-tour="export-pdf" variant="outline" onClick={handleExportPdf} disabled={isExporting}>
                   {isExporting ? 'Exporting PDF...' : 'Export PDF'}
                 </Button>
