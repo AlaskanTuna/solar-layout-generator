@@ -1616,7 +1616,7 @@ export function WorkbenchPage() {
                           onClick={() => setOverlayMode('rgb')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'rgb' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
+                            overlayMode === 'rgb' ? 'outline outline-1 outline-stone-900' : ''
                           )}
                           style={{ background: 'linear-gradient(135deg, #a7f3d0, #93c5fd, #c4b5fd, #fda4af)' }}
                           title="RGB"
@@ -1629,7 +1629,7 @@ export function WorkbenchPage() {
                           onClick={() => setOverlayMode('annual-flux')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'annual-flux' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
+                            overlayMode === 'annual-flux' ? 'outline outline-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #1e1b4b, #7e22ce, #f472b6, #fde68a, #fefce8)'
@@ -1644,7 +1644,7 @@ export function WorkbenchPage() {
                           onClick={() => setOverlayMode('dsm')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'dsm' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
+                            overlayMode === 'dsm' ? 'outline outline-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #bfdbfe, #a5f3fc, #bbf7d0, #fef08a, #fecaca)'
@@ -1659,7 +1659,7 @@ export function WorkbenchPage() {
                           onClick={() => setOverlayMode('mask')}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            overlayMode === 'mask' ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
+                            overlayMode === 'mask' ? 'outline outline-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #064e3b, #059669, #34d399, #d1fae5)'
@@ -1674,7 +1674,7 @@ export function WorkbenchPage() {
                           onClick={() => setShowSegments((v) => !v)}
                           className={cn(
                             'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-                            showSegments ? 'outline outline-2 outline-offset-1 outline-stone-900' : ''
+                            showSegments ? 'outline outline-1 outline-stone-900' : ''
                           )}
                           style={{
                             background: 'linear-gradient(135deg, #f59e0b, #06b6d4, #8b5cf6, #ef4444)'

@@ -903,14 +903,59 @@ export function AnalysisPage() {
               </CardHeader>
               <CardContent className="h-[340px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `RM${value}`} />
-                    <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
-                    <Legend />
-                    <Bar dataKey="baselineBill" name="Without Solar" fill="#ea580c" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="nemBill" name="With Solar" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorBaseline" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ea580c" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#ea580c" stopOpacity={0.05} />
+                      </linearGradient>
+                      <linearGradient id="colorNem" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#16a34a" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#16a34a" stopOpacity={0.05} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="month"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fill: '#78716c', fontSize: 12 }}
+                      dy={10}
+                    />
+                    <YAxis
+                      tickFormatter={(value) => `RM${value}`}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fill: '#78716c', fontSize: 12 }}
+                      dx={-10}
+                    />
+                    <Tooltip
+                      formatter={(value) => formatTooltipCurrency(value)}
+                      cursor={{ fill: '#f5f5f4' }}
+                      contentStyle={{
+                        borderRadius: '8px',
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                      }}
+                      labelStyle={{ color: '#1c1917', fontWeight: 600, paddingBottom: '4px' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                    <Bar
+                      dataKey="baselineBill"
+                      name="Without Solar"
+                      fill="url(#colorBaseline)"
+                      stroke="#ea580c"
+                      strokeWidth={2}
+                      radius={[2, 2, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="nemBill"
+                      name="With Solar"
+                      fill="url(#colorNem)"
+                      stroke="#16a34a"
+                      strokeWidth={2}
+                      radius={[2, 2, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -975,17 +1020,50 @@ export function AnalysisPage() {
                     </div>
                     <div className="h-[260px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={netBenefitData} margin={{ left: 10 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="year" tick={{ fontSize: 11 }} />
+                        <BarChart data={netBenefitData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorPositive" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#16a34a" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="#16a34a" stopOpacity={0.05} />
+                            </linearGradient>
+                            <linearGradient id="colorNegative" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#ea580c" stopOpacity={0.05} />
+                              <stop offset="95%" stopColor="#ea580c" stopOpacity={0.4} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#e5e7eb" />
+                          <XAxis
+                            dataKey="year"
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fill: '#78716c', fontSize: 11 }}
+                            dy={10}
+                          />
                           <YAxis
                             tickFormatter={(value) => `RM${value >= 0 ? '' : ''}${value.toLocaleString()}`}
                             width={70}
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fill: '#78716c', fontSize: 11 }}
+                            dx={-10}
                           />
-                          <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
-                          <Bar dataKey="value" name="Net Benefit" radius={[4, 4, 0, 0]}>
+                          <Tooltip
+                            formatter={(value) => formatTooltipCurrency(value)}
+                            cursor={{ fill: '#f5f5f4' }}
+                            contentStyle={{
+                              borderRadius: '8px',
+                              border: '1px solid #e5e7eb',
+                              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                            }}
+                            labelStyle={{ color: '#1c1917', fontWeight: 600, paddingBottom: '4px' }}
+                          />
+                          <Bar dataKey="value" name="Net Benefit" radius={[2, 2, 0, 0]} strokeWidth={2}>
                             {netBenefitData.map((entry, index) => (
-                              <Cell key={index} fill={entry.value >= 0 ? '#15803d' : '#dc2626'} />
+                              <Cell
+                                key={index}
+                                fill={entry.value >= 0 ? 'url(#colorPositive)' : 'url(#colorNegative)'}
+                                stroke={entry.value >= 0 ? '#16a34a' : '#ea580c'}
+                              />
                             ))}
                           </Bar>
                         </BarChart>
@@ -1355,24 +1433,20 @@ export function AnalysisPage() {
             </div>
             <div className="rounded-lg bg-amber-50 p-4 text-center">
               <p className="text-sm text-stone-600">Payback Period</p>
-              <p className="text-xl font-bold text-amber-700">
-                {formatNumber(analysisResults.paybackYears, 'years')}
-              </p>
+              <p className="text-xl font-bold text-amber-700">{formatNumber(analysisResults.paybackYears, 'years')}</p>
             </div>
             <div className="rounded-lg bg-blue-50 p-4 text-center">
               <p className="text-sm text-stone-600">CO&#8322; Offset</p>
-              <p className="text-xl font-bold text-blue-700">
-                {formatNumber(analysisResults.carbonOffsetKg, 'kg/yr')}
-              </p>
+              <p className="text-xl font-bold text-blue-700">{formatNumber(analysisResults.carbonOffsetKg, 'kg/yr')}</p>
             </div>
           </div>
 
           <div className="mt-6 rounded-lg border border-stone-200 p-4">
             <p className="text-sm leading-relaxed">
-              By installing <strong>{activePanels.length} solar panels</strong> (
-              {formatNumber(systemKwp, 'kWp')} system), you could save approximately{' '}
-              <strong>{formatCurrency(analysisResults.averageMonthlySavingsRm)}</strong> per month on your
-              electricity bill. The system would pay for itself in approximately{' '}
+              By installing <strong>{activePanels.length} solar panels</strong> ({formatNumber(systemKwp, 'kWp')}{' '}
+              system), you could save approximately{' '}
+              <strong>{formatCurrency(analysisResults.averageMonthlySavingsRm)}</strong> per month on your electricity
+              bill. The system would pay for itself in approximately{' '}
               <strong>{formatNumber(analysisResults.paybackYears, 'years')}</strong>, after which all savings go
               directly to you. Over 10 years, you could save a total of{' '}
               <strong>{formatCurrency(analysisResults.tenYearNetBenefitRm + formState.systemCostRm)}</strong>.
@@ -1405,9 +1479,7 @@ export function AnalysisPage() {
               <tfoot>
                 <tr className="border-t-2 border-stone-300 font-semibold">
                   <td className="py-2">Annual Total</td>
-                  <td className="py-2 text-right">
-                    {formatCurrency(analysisResults.annualTotals.totalBaselineRm)}
-                  </td>
+                  <td className="py-2 text-right">{formatCurrency(analysisResults.annualTotals.totalBaselineRm)}</td>
                   <td className="py-2 text-right">{formatCurrency(analysisResults.annualTotals.totalNemRm)}</td>
                   <td className="py-2 text-right text-green-700">
                     {formatCurrency(analysisResults.annualTotals.totalSavingsRm)}
