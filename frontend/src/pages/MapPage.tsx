@@ -5,8 +5,9 @@ import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { resolveLocation, getLocationStatus } from '@/api/locations'
 import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
+import { AppLayout } from '@/components/AppLayout'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
-import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Loader2, MapPin } from 'lucide-react'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
 
@@ -306,103 +307,83 @@ export function MapPage() {
   }
 
   return (
-    <div className="relative h-screen w-full">
-      <div ref={mapRef} className="h-full w-full" />
+    <AppLayout mode="full" noFooter>
+      <div className="relative h-full w-full">
+        <div ref={mapRef} className="h-full w-full" />
 
-      {/* Navigation buttons — vertically centered, left/right edges */}
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-20 flex -translate-y-1/2 justify-between px-4">
-        <Link
-          to="/dashboard"
-          className="glass pointer-events-auto flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground transition-all active:scale-95 hover:bg-accent"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Dashboard
-        </Link>
-        {isReadonly && projectId && projectId !== 'new' ? (
-          <Link
-            to={`/project/${projectId}/workbench`}
-            className="glass pointer-events-auto flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground transition-all active:scale-95 hover:bg-accent"
+        <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex flex-col items-center px-4">
+          <div
+            ref={searchHostRef}
+            data-tour="search-box"
+            className={`glass pointer-events-auto w-full max-w-md rounded-xl ${
+              !isLoaded || phase === 'processing' ? 'pointer-events-none opacity-70' : ''
+            }`}
           >
-            Workbench
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        ) : (
-          <span />
+            <div className="h-12" />
+          </div>
+        </div>
+
+        <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />
+
+        {!isLoaded && <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />}
+
+        {/* Confirm panel */}
+        {phase === 'confirm' && selectedPlace && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
+            <div className="glass-card w-96 p-5">
+              <p className="text-sm font-medium">Is this your building?</p>
+              <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
+              <div className="mt-3 flex gap-2">
+                <Button onClick={handleConfirm} className="flex-1">
+                  Confirm Location
+                </Button>
+                <Button variant="outline" onClick={handleRetry} className="flex-1">
+                  Search Again
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Processing overlay */}
+        {phase === 'processing' && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
+            <div className="glass-card flex w-96 items-center gap-3 p-5">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <div>
+                <p className="text-sm font-medium">Analyzing your rooftop...</p>
+                <p className="text-sm text-muted-foreground">
+                  Fetching satellite data and solar potential. This usually takes 15–30 seconds.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {phase === 'failed' && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
+            <div className="glass-card w-96 p-5">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                <p className="text-sm text-destructive">{errorMessage}</p>
+              </div>
+              <div className="mt-3 flex gap-2">
+                <Button variant="outline" onClick={handleRetry} className="flex-1">
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Try Another Location
+                </Button>
+                <Button variant="outline" asChild className="flex-1">
+                  <Link to="/dashboard">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-
-      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex flex-col items-center px-4">
-        <div
-          ref={searchHostRef}
-          data-tour="search-box"
-          className={`glass pointer-events-auto w-full max-w-md rounded-xl ${
-            !isLoaded || phase === 'processing' ? 'pointer-events-none opacity-70' : ''
-          }`}
-        >
-          <div className="h-12" />
-        </div>
-      </div>
-
-      <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />
-
-      {!isLoaded && <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />}
-
-      {/* Confirm panel */}
-      {phase === 'confirm' && selectedPlace && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
-          <div className="glass-card w-96 p-5">
-            <p className="text-sm font-medium">Is this your building?</p>
-            <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
-            <div className="mt-3 flex gap-2">
-              <Button onClick={handleConfirm} className="flex-1">
-                Confirm Location
-              </Button>
-              <Button variant="outline" onClick={handleRetry} className="flex-1">
-                Search Again
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Processing overlay */}
-      {phase === 'processing' && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
-          <div className="glass-card flex w-96 items-center gap-3 p-5">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <div>
-              <p className="text-sm font-medium">Analyzing your rooftop...</p>
-              <p className="text-sm text-muted-foreground">
-                Fetching satellite data and solar potential. This usually takes 15–30 seconds.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Error state */}
-      {phase === 'failed' && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
-          <div className="glass-card w-96 p-5">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-              <p className="text-sm text-destructive">{errorMessage}</p>
-            </div>
-            <div className="mt-3 flex gap-2">
-              <Button variant="outline" onClick={handleRetry} className="flex-1">
-                <MapPin className="mr-2 h-4 w-4" />
-                Try Another Location
-              </Button>
-              <Button variant="outline" asChild className="flex-1">
-                <Link to="/dashboard">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </AppLayout>
   )
 }

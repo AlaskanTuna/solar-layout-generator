@@ -29,7 +29,7 @@ import {
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { FloatingNav } from '@/components/FloatingNav'
+import { AppLayout } from '@/components/AppLayout'
 import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { ImagePopup } from '@/components/ImagePopup'
@@ -408,13 +408,9 @@ export function AnalysisPage() {
   const paybackTooltip = `How many years until your savings cover the cost of installing the system.\n\nNet benefit projections:\n1-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 1) - formState.systemCostRm)}\n5-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 5) - formState.systemCostRm)}\n10-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 10) - formState.systemCostRm)}`
 
   return (
-    <div className="relative min-h-screen bg-[linear-gradient(180deg,#f7f7f4_0%,#f3efe7_45%,#f7faf7_100%)]">
+    <AppLayout noFooter>
       <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
-      <FloatingNav
-        left={{ label: 'Workbench', to: `/project/${projectId}/workbench` }}
-        right={{ label: 'Dashboard', to: '/dashboard' }}
-      />
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-4 pb-6 xl:flex-row">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
         {/* ───── Sidebar ───── */}
         <aside className="xl:w-[24rem] xl:min-w-[24rem]">
           <Card className="border-border bg-card/92 shadow-sm">
@@ -903,6 +899,6 @@ export function AnalysisPage() {
         formState={formState}
         location={projectQuery.data.location}
       />
-    </div>
+    </AppLayout>
   )
 }

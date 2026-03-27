@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { listProjects, deleteProject } from '@/api/projects'
 import type { ProjectResponse } from '@/api/projects'
-import { AppNav } from '@/components/AppNav'
+import { AppLayout } from '@/components/AppLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,7 +20,20 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { Plus, Trash2, Clock, Sun, FolderOpen, ArrowRight, Map, Wrench, BarChart3 } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  Clock,
+  Sun,
+  FolderOpen,
+  ArrowRight,
+  Map,
+  Wrench,
+  BarChart3,
+  Sparkles,
+  TrendingUp,
+  Lightbulb
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 const STATUS_CONFIG: Record<
@@ -101,74 +114,110 @@ export function DashboardPage() {
   const completedProjects = projects?.filter((p) => p.status === 'analysis_saved').length ?? 0
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppNav />
-
-      <main className="mx-auto max-w-5xl px-6 pt-24 pb-16">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="animate-fade-in">
-            <h1 className="font-heading text-3xl font-bold tracking-tight">
-              Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}
-            </h1>
-            <p className="mt-1 text-muted-foreground">Manage your solar assessment projects</p>
+    <AppLayout>
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        {/* ─── Hero Banner ─── */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-8 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative flex items-start justify-between">
+            <div className="animate-fade-in">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <span className="text-sm font-medium text-primary">Dashboard</span>
+              </div>
+              <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight">
+                Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}
+              </h1>
+              <p className="mt-1 max-w-md text-muted-foreground">
+                Manage your solar assessment projects and track your savings potential.
+              </p>
+            </div>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2 shadow-md">
+                  <Plus className="h-4 w-4" />
+                  New Project
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <form onSubmit={handleCreateProject}>
+                  <DialogHeader>
+                    <DialogTitle>Create New Project</DialogTitle>
+                    <DialogDescription>
+                      Give your solar assessment project a name, then search for your building.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="mt-4 space-y-2">
+                    <Label htmlFor="project-name">Project Name</Label>
+                    <Input
+                      id="project-name"
+                      placeholder="e.g. My Home Solar"
+                      value={projectName}
+                      onChange={(e) => setProjectName(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <DialogFooter className="mt-6">
+                    <Button type="submit" disabled={!projectName.trim()}>
+                      Continue
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                New Project
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <form onSubmit={handleCreateProject}>
-                <DialogHeader>
-                  <DialogTitle>Create New Project</DialogTitle>
-                  <DialogDescription>
-                    Give your solar assessment project a name, then search for your building.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="mt-4 space-y-2">
-                  <Label htmlFor="project-name">Project Name</Label>
-                  <Input
-                    id="project-name"
-                    placeholder="e.g. My Home Solar"
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                </div>
-                <DialogFooter className="mt-6">
-                  <Button type="submit" disabled={!projectName.trim()}>
-                    Continue
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
 
-        {/* Quick Stats */}
+        {/* ─── Quick Stats ─── */}
         {!isLoading && totalProjects > 0 && (
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 animate-fade-in">
-            <div className="glass-card p-4">
-              <p className="text-sm text-muted-foreground">Total Projects</p>
-              <p className="mt-1 font-heading text-2xl font-bold">{totalProjects}</p>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 animate-fade-in">
+            <div className="glass-card flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <FolderOpen className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Projects</p>
+                <p className="font-heading text-2xl font-bold">{totalProjects}</p>
+              </div>
             </div>
-            <div className="glass-card p-4">
-              <p className="text-sm text-muted-foreground">Analyses Complete</p>
-              <p className="mt-1 font-heading text-2xl font-bold text-primary">{completedProjects}</p>
+            <div className="glass-card flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-500/10 dark:bg-green-500/20">
+                <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Analyses Complete</p>
+                <p className="font-heading text-2xl font-bold text-green-600 dark:text-green-400">
+                  {completedProjects}
+                </p>
+              </div>
             </div>
-            <div className="glass-card hidden p-4 sm:block">
-              <p className="text-sm text-muted-foreground">In Progress</p>
-              <p className="mt-1 font-heading text-2xl font-bold">{totalProjects - completedProjects}</p>
+            <div className="glass-card hidden items-center gap-3 p-4 sm:flex">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-500/20">
+                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">In Progress</p>
+                <p className="font-heading text-2xl font-bold text-amber-600 dark:text-amber-400">
+                  {totalProjects - completedProjects}
+                </p>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Project List */}
-        <div className="mt-8">
+        {/* ─── Section Header ─── */}
+        <div className="mt-8 flex items-center justify-between">
+          <h2 className="font-heading text-lg font-semibold">Your Projects</h2>
+          {totalProjects > 0 && (
+            <span className="text-sm text-muted-foreground">
+              {totalProjects} project{totalProjects !== 1 && 's'}
+            </span>
+          )}
+        </div>
+
+        {/* ─── Project List ─── */}
+        <div className="mt-4">
           {isLoading ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {[0, 1, 2, 3].map((i) => (
@@ -182,7 +231,7 @@ export function DashboardPage() {
               ))}
             </div>
           ) : !projects?.length ? (
-            /* Empty State */
+            /* ─── Empty State ─── */
             <div className="glass-card flex flex-col items-center py-16 text-center animate-fade-in-up">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
                 <Sun className="h-8 w-8 text-primary" />
@@ -207,11 +256,17 @@ export function DashboardPage() {
                     onClick={() => navigate(projectRoute(project))}
                   >
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                           <FolderOpen className="h-4 w-4" />
                         </div>
-                        <h3 className="font-heading font-semibold">{project.name}</h3>
+                        <div>
+                          <h3 className="font-heading font-semibold">{project.name}</h3>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>Updated {formatRelativeDate(project.updatedAt)}</span>
+                          </div>
+                        </div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Badge variant={config.variant} className="gap-1">
@@ -231,12 +286,11 @@ export function DashboardPage() {
                         </Button>
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>Updated {formatRelativeDate(project.updatedAt)}</span>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    <div className="mt-3 flex items-center justify-end">
+                      <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                        Open project
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                      </span>
                     </div>
                   </div>
                 )
@@ -244,7 +298,24 @@ export function DashboardPage() {
             </div>
           )}
         </div>
-      </main>
+
+        {/* ─── Quick Tips ─── */}
+        {!isLoading && totalProjects > 0 && totalProjects < 3 && (
+          <div className="mt-8 glass-card flex items-start gap-4 p-5 animate-fade-in">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-500/20">
+              <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <h3 className="font-heading text-sm font-semibold">Getting started tips</h3>
+              <ul className="mt-1.5 space-y-1 text-sm text-muted-foreground">
+                <li>Search for your address on the Map page to fetch satellite solar data.</li>
+                <li>Adjust your panel layout on the Workbench to match your roof.</li>
+                <li>View your projected savings and export a PDF report on the Analysis page.</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Delete confirmation dialog */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
@@ -265,6 +336,6 @@ export function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </AppLayout>
   )
 }

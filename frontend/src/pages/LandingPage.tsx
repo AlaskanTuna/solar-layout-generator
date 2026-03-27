@@ -1,4 +1,4 @@
-import { Link, Navigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ export function LandingPage() {
   const { session, loading } = useAuth()
 
   if (loading) return null
-  if (session) return <Navigate to="/dashboard" replace />
+  const isSignedIn = !!session
 
   return (
     <div className="flex min-h-screen flex-col bg-background font-body">
@@ -40,14 +40,22 @@ export function LandingPage() {
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Link to="/sign-in">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/sign-up">
-              <Button size="sm">Get Started</Button>
-            </Link>
+            {isSignedIn ? (
+              <Link to="/dashboard">
+                <Button size="sm">Go to Dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/sign-in">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/sign-up">
+                  <Button size="sm">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -79,9 +87,9 @@ export function LandingPage() {
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <Link to="/sign-up">
+            <Link to={isSignedIn ? '/dashboard' : '/sign-up'}>
               <Button size="lg" className="gap-2 px-8 text-base">
-                Get Started Free
+                {isSignedIn ? 'Go to Dashboard' : 'Get Started Free'}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

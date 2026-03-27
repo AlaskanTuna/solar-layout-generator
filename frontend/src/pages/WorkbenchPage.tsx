@@ -29,7 +29,7 @@ import {
   type CanvasGeo
 } from '@/lib/canvasTransforms'
 import { COLORS } from '@/lib/constants'
-import { FloatingNav } from '@/components/FloatingNav'
+import { AppLayout } from '@/components/AppLayout'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
@@ -959,12 +959,8 @@ export function WorkbenchPage() {
     : null
 
   return (
-    <div className="h-screen overflow-hidden bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)]">
+    <AppLayout mode="full" noFooter>
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
-      <FloatingNav
-        left={{ label: 'Map', to: `/project/${projectId}/map?view=readonly` }}
-        right={{ label: 'Analysis', to: `/project/${projectId}/analysis` }}
-      />
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-4 overflow-y-auto px-4 py-4 xl:flex-row">
         <WorkbenchSidebar
           projectName={project.name}
@@ -1298,6 +1294,6 @@ export function WorkbenchPage() {
           </Card>
         </section>
       </div>
-    </div>
+    </AppLayout>
   )
 }
