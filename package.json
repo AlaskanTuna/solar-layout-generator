@@ -1,25 +1,31 @@
 {
   "name": "solar-layout-generator",
   "private": true,
-  "workspaces": [
-    "shared",
-    "backend",
-    "frontend"
-  ],
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": "24.x"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.ts"
+  },
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "npm run dev --workspace=backend",
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "db:migrate": "npm exec --workspace=backend -- prisma migrate dev",
-    "db:seed": "npm exec --workspace=backend -- prisma db seed",
+    "dev": "concurrently \"pnpm --filter backend dev\" \"pnpm --filter frontend dev\"",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "db:migrate": "pnpm exec prisma migrate dev --schema prisma/schema.prisma",
+    "db:seed": "pnpm exec prisma db seed --schema prisma/schema.prisma",
     "format": "prettier --write .",
-    "test": "npm run test --workspace=frontend && npm exec --workspace=backend -- vitest run",
-    "build": "npm run build --workspace=shared && node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma && npm run build --workspace=backend && npm run build --workspace=frontend",
-    "start": "npm run start --workspace=backend",
-    "heroku-postbuild": "npm run build"
+    "test": "pnpm --filter frontend test && pnpm --filter backend test",
+    "build": "pnpm --filter @shared/types build && pnpm exec prisma generate --schema prisma/schema.prisma && pnpm --filter backend build && pnpm --filter frontend build",
+    "start": "pnpm --filter backend start",
+    "heroku-postbuild": "pnpm build"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.6.0"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "prisma": "^6.6.0"
   }
 }

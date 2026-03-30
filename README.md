@@ -20,7 +20,7 @@ A web-based tool for Malaysian homeowners to assess rooftop solar potential usin
 Frontend (React + Vite + Konva.js)  ↔  REST API  ↔  Backend (Express.js + Prisma)  ↔  Supabase (PostgreSQL + Auth + Storage)  ↔  Google Solar API + Google Maps API
 ```
 
-Monorepo with npm workspaces:
+Monorepo with pnpm workspaces:
 
 | Workspace   | Purpose                                                   |
 | ----------- | --------------------------------------------------------- |
@@ -44,7 +44,8 @@ Monorepo with npm workspaces:
 
 ## Prerequisites
 
-- **Node.js** 20+ and npm
+- **Node.js** 24.x
+- **pnpm** 10.x via Corepack (`corepack enable`)
 - **Supabase project** with PostgreSQL, Auth enabled, and a Storage bucket named `geotiffs`
 - **Google Cloud project** with these APIs enabled:
   - Solar API
@@ -60,7 +61,8 @@ Monorepo with npm workspaces:
 ```bash
 git clone https://github.com/<your-username>/solar-layout-generator.git
 cd solar-layout-generator
-npm install
+corepack enable
+pnpm install
 ```
 
 ### 2. Configure environment variables
@@ -86,21 +88,21 @@ Fill in all values in `.env`:
 ### 3. Set up the database
 
 ```bash
-npm run db:migrate    # Run Prisma migrations
-npm run db:seed       # Seed Malaysian tariff configuration
+pnpm db:migrate    # Run Prisma migrations
+pnpm db:seed       # Seed Malaysian tariff configuration
 ```
 
 ### 4. Start the dev servers
 
 ```bash
-npm run dev           # Starts both frontend (port 5173) and backend (port 3001) concurrently
+pnpm dev           # Starts both frontend (port 5173) and backend (port 3001) concurrently
 ```
 
 Or run them separately:
 
 ```bash
-npm run dev:backend   # Backend only (port 3001)
-npm run dev:frontend  # Frontend only (port 5173)
+pnpm dev:backend   # Backend only (port 3001)
+pnpm dev:frontend  # Frontend only (port 5173)
 ```
 
 The frontend proxies `/api` requests to the backend in development.
@@ -111,15 +113,15 @@ The frontend proxies `/api` requests to the backend in development.
 
 | Command                | Description                           |
 | ---------------------- | ------------------------------------- |
-| `npm run dev`          | Start frontend + backend concurrently |
-| `npm run dev:backend`  | Start backend only                    |
-| `npm run dev:frontend` | Start frontend only                   |
-| `npm run build`        | Build all workspaces for production   |
-| `npm test`             | Run frontend + backend unit tests     |
-| `npm run format`       | Run Prettier across the repo          |
-| `npm run db:migrate`   | Run Prisma migrations                 |
-| `npm run db:seed`      | Seed tariff config data               |
-| `npx vitest`           | Run unit tests                        |
+| `pnpm dev`          | Start frontend + backend concurrently |
+| `pnpm dev:backend`  | Start backend only                    |
+| `pnpm dev:frontend` | Start frontend only                   |
+| `pnpm build`        | Build all workspaces for production   |
+| `pnpm test`         | Run frontend + backend unit tests     |
+| `pnpm format`       | Run Prettier across the repo          |
+| `pnpm db:migrate`   | Run Prisma migrations                 |
+| `pnpm db:seed`      | Seed tariff config data               |
+| `pnpm exec vitest`  | Run unit tests                        |
 
 ---
 
@@ -163,9 +165,11 @@ The repo now includes [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.ym
 
 It behaves like this:
 
-- Pull requests run install, build, and unit tests only
+- Pull requests run pnpm install, build, and unit tests only
 - Pushes to `main` run the same CI checks, then deploy the passing commit to Heroku automatically
 - Deployment still uses your existing Heroku Git app endpoint, so Heroku continues to build the app with the current `Procfile` and `heroku-postbuild`
+- Heroku now detects `pnpm-lock.yaml`, installs the exact pnpm version from `packageManager`, and builds the app with pnpm
+- The old `package-lock.json` should stay out of the repo so Heroku and contributors do not accidentally fall back to npm
 
 Before the workflow can deploy, add these GitHub repository secrets:
 
@@ -199,7 +203,7 @@ git push heroku main                # deploy to Heroku
 
 With the workflow configured, you should not need `git push heroku main` for normal releases. Keep it only as an emergency/manual fallback.
 
-The `heroku-postbuild` script still builds all workspaces on Heroku. The Express server serves the frontend static files in production.
+The `heroku-postbuild` script still builds all workspaces on Heroku. The `Procfile` now starts the app with `pnpm start`, and the Express server serves the frontend static files in production.
 
 > **Note:** This project uses Express 5 with `path-to-regexp` v8+, which requires named catch-all parameters (e.g. `'{*path}'` instead of `'*'`).
 
@@ -209,13 +213,13 @@ The `heroku-postbuild` script still builds all workspaces on Heroku. The Express
 
 ```bash
 # Run all unit tests
-npm test
+pnpm test
 
 # Run backend tests only
-npm exec --workspace=backend -- vitest run
+pnpm --filter backend test
 
 # Run frontend tests only
-npm run test --workspace=frontend
+pnpm --filter frontend test
 
 # Smoke tests (requires running backend + valid env)
 bash tests/smoke/smoke-authz.sh

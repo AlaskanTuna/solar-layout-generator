@@ -1,0 +1,11 @@
+packages:
+  - 'shared'
+  - 'backend'
+  - 'frontend'
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  core-js: true
+  esbuild: true
+  prisma: true
+  sharp: true

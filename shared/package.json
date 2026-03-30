@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "node ../node_modules/typescript/bin/tsc -b"
+    "build": "tsc -b"
   },
   "main": "index.ts",
   "types": "index.ts",
   "exports": {
     ".": "./index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }

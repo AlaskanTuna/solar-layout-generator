@@ -1,1 +1,1 @@
-web: npm run start --workspace=backend
+web: pnpm start
