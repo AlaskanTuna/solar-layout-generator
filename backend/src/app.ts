@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { type Express } from 'express'
 import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -11,7 +11,7 @@ import { requestLogger } from './middleware/requestLogger.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export const app = express()
+export const app: Express = express()
 
 app.use(cors())
 app.use(express.json())

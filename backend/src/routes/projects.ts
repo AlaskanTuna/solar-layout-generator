@@ -1,11 +1,11 @@
-import { Router } from 'express'
+import { Router, type Router as ExpressRouter } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { createProjectSchema, saveLayoutSchema, saveAnalysisSchema } from '../validators/projects.js'
 import * as projectService from '../services/projectService.js'
 
-export const projectsRouter = Router()
+export const projectsRouter: ExpressRouter = Router()
 
 // POST /api/projects
 projectsRouter.post(

@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, type Router as ExpressRouter } from 'express'
 import * as GeoTIFF from 'geotiff'
 import sharp from 'sharp'
 import { requireAuth } from '../middleware/auth.js'
@@ -19,7 +19,7 @@ import type {
   FluxRecomputeBatchResponse
 } from '@shared/types'
 
-export const locationsRouter = Router()
+export const locationsRouter: ExpressRouter = Router()
 
 type LocationImageGeoTransformResponse = {
   originX: number

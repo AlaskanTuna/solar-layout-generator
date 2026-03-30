@@ -1,9 +1,9 @@
-import { Router } from 'express'
+import { Router, type Router as ExpressRouter } from 'express'
 import { prisma } from '../config/prisma.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import type { TariffConfigResponse } from '@shared/types'
 
-export const tariffRouter = Router()
+export const tariffRouter: ExpressRouter = Router()
 
 // GET /api/tariff/config — public, no auth required
 tariffRouter.get(
