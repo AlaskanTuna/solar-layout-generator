@@ -3,6 +3,10 @@ import type { PanelModel } from './index'
 // IMPORTANT: widthM = short side, heightM = long side
 // This matches the Google Solar API convention (panelWidthMeters < panelHeightMeters)
 // and the solar industry convention (module width = narrow side).
+//
+// costPerWp is the PANEL MODULE cost only (not turnkey installed cost).
+// The AnalysisPage applies DEFAULT_INSTALLATION_MULTIPLIER (2.0×) to estimate
+// turnkey cost including inverter, mounting, wiring, labour, and permitting.
 export const PANEL_MODELS: PanelModel[] = [
   {
     id: 'google-default',

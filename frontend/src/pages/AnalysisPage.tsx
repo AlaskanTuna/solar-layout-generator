@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   ANALYSIS_DISCLAIMERS,
+  DEFAULT_INSTALLATION_MULTIPLIER,
   MONTH_LABELS,
   aggregateMonthlyGeneration,
   applySeasonalProfile,
@@ -38,6 +39,7 @@ import { getPanelModel } from '@shared/types'
 import { formatCurrency, formatNumber, formatTooltipCurrency } from '@/components/analysis/formatters'
 import { HeroMetrics } from '@/components/analysis/HeroMetrics'
 import { BillComparisonChart } from '@/components/analysis/BillComparisonChart'
+import { FinancialRoadmap } from '@/components/analysis/FinancialRoadmap'
 import { NetBenefitChart } from '@/components/analysis/NetBenefitChart'
 import { BillBreakdown } from '@/components/analysis/BillBreakdown'
 import { MonthTable } from '@/components/analysis/MonthTable'
@@ -247,11 +249,16 @@ export function AnalysisPage() {
     const localPanelCapacity = selectedPanelModel?.capacityWp ?? buildingInsights.solarPotential.panelCapacityWatts ?? 0
     const localSystemKwp = Math.round(((localPanels.length * localPanelCapacity) / 1000) * 100) / 100
 
-    // Compute system cost from selected panel model if available, otherwise fall back to tariff default
+    // Compute system cost from selected panel model if available, otherwise fall back to tariff default.
+    // costPerWp is panel module cost only; multiply by installation multiplier to get turnkey cost
+    // (covers inverter, mounting, wiring, labour, permitting).
     let defaultSystemCostRm: number
     if (selectedPanelModel && selectedPanelModel.costPerWp > 0) {
       defaultSystemCostRm = Math.round(
-        localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp
+        localPanels.length *
+          selectedPanelModel.capacityWp *
+          selectedPanelModel.costPerWp *
+          DEFAULT_INSTALLATION_MULTIPLIER
       )
     } else {
       defaultSystemCostRm = Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp)
@@ -567,8 +574,8 @@ export function AnalysisPage() {
                     <InfoTooltip
                       text={
                         selectedPanelModel && selectedPanelModel.costPerWp > 0
-                          ? `Estimated cost based on your layout: ${activePanels.length} panels × ${selectedPanelModel.capacityWp} Wp × RM ${selectedPanelModel.costPerWp.toFixed(2)}/Wp = RM ${Math.round(activePanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp).toLocaleString()}. Adjust based on actual installer quotes.`
-                          : 'Total estimated installation cost. Adjust based on actual installer quotes.'
+                          ? `Estimated turnkey cost: ${activePanels.length} panels × ${selectedPanelModel.capacityWp} Wp × RM ${selectedPanelModel.costPerWp.toFixed(2)}/Wp × ${DEFAULT_INSTALLATION_MULTIPLIER.toFixed(1)} (installation multiplier) = RM ${Math.round(activePanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp * DEFAULT_INSTALLATION_MULTIPLIER).toLocaleString()}. The ${DEFAULT_INSTALLATION_MULTIPLIER.toFixed(1)}× multiplier accounts for inverter, mounting hardware, wiring, labour, and permitting — typical for Malaysian residential installations. Adjust to match your actual installer quote.`
+                          : 'Total estimated installation cost based on average Malaysian turnkey pricing. Adjust to match your actual installer quote.'
                       }
                     />
                   </Label>
@@ -767,6 +774,16 @@ export function AnalysisPage() {
               year1Savings={simulation.totalSavingsRm}
               degradationRate={formState.degradationRate}
               systemCostRm={formState.systemCostRm}
+            />
+          )}
+
+          {viewMode === 'advanced' && (
+            <FinancialRoadmap
+              systemCostRm={formState.systemCostRm}
+              paybackYears={analysisResults.paybackYears}
+              year1Savings={simulation.totalSavingsRm}
+              degradationRate={formState.degradationRate}
+              systemKwp={systemKwp}
             />
           )}
 

@@ -124,7 +124,7 @@ export interface PanelModel {
   heightM: number
   capacityWp: number
   efficiency: number
-  costPerWp: number // RM per Wp
+  costPerWp: number // RM per Wp (panel module cost only; installation multiplier applied at analysis time)
 }
 
 export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelModels'
