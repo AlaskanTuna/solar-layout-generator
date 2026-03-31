@@ -264,10 +264,20 @@ export function AnalysisPage() {
       defaultSystemCostRm = Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp)
     }
 
+    // If the saved cost matches the old panel-only formula (without installation multiplier),
+    // the user never manually edited it — recalculate with the corrected multiplier.
+    let resolvedSystemCostRm = savedConfig?.systemCostRm ?? defaultSystemCostRm
+    if (savedConfig?.systemCostRm != null && selectedPanelModel && selectedPanelModel.costPerWp > 0) {
+      const oldPanelOnlyCost = Math.round(localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp)
+      if (savedConfig.systemCostRm === oldPanelOnlyCost) {
+        resolvedSystemCostRm = defaultSystemCostRm
+      }
+    }
+
     setFormState({
       monthlyConsumptionKwh: savedConfig?.monthlyConsumptionKwh ?? 600,
       connectionPhase: savedConfig?.connectionPhase ?? 'single',
-      systemCostRm: savedConfig?.systemCostRm ?? defaultSystemCostRm,
+      systemCostRm: resolvedSystemCostRm,
       afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault,
       degradationRate: savedConfig?.degradationRate ?? 0.005,
       consumptionProfile: savedConfig?.consumptionProfile ?? 'flat',
