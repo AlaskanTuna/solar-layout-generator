@@ -204,24 +204,21 @@ export function DashboardPage() {
           onClick={() => setSidebarExpanded(false)}
         />
 
-        {/* ═══════ Nav Sidebar (overlay — above topbar z-50) ═══════ */}
+        {/* ═══════ Nav Sidebar — fixed, above topbar (z-[60] > z-50) ═══════ */}
         <aside
-          className={`fixed left-0 top-0 z-[60] flex h-screen flex-col border-r border-border bg-sidebar shadow-xl transition-[width] duration-300 ease-in-out ${sidebarExpanded ? 'w-60' : 'w-16'}`}
+          className="sidebar-shell fixed left-0 top-0 z-[60] flex h-screen flex-col overflow-x-hidden overflow-y-auto border-r border-border bg-sidebar"
+          data-expanded={sidebarExpanded || undefined}
           onMouseEnter={() => setSidebarExpanded(true)}
           onMouseLeave={() => setSidebarExpanded(false)}
         >
-          {/* Logo — mirrors AppNav logo */}
-          <div className="flex h-14 shrink-0 items-center gap-3 px-3">
+          {/* Logo — mirrors AppNav */}
+          <div className="flex h-14 shrink-0 items-center gap-3 px-[18px]">
             <Link to="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
                 <Sun className="h-3.5 w-3.5 text-white" />
               </div>
             </Link>
-            <span
-              className={`font-heading text-sm font-semibold tracking-tight whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}
-            >
-              SolarSim
-            </span>
+            <span className="sidebar-label font-heading text-sm font-semibold tracking-tight">SolarSim</span>
           </div>
 
           {/* Nav items */}
@@ -239,18 +236,14 @@ export function DashboardPage() {
                   }`}
                 >
                   <div className={`shrink-0 ${isActive ? 'text-primary' : ''}`}>{item.icon}</div>
-                  <span
-                    className={`truncate whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}
-                  >
-                    {item.label}
-                  </span>
+                  <span className="sidebar-label truncate">{item.label}</span>
                 </button>
               )
             })}
           </nav>
 
-          {/* Sidebar collapse indicator — always centered in the 64px column */}
-          <div className="w-16 py-3">
+          {/* Collapse indicator */}
+          <div className="w-16 shrink-0 py-3">
             <div className="flex items-center justify-center text-muted-foreground">
               <ChevronLeft
                 className="h-4 w-4 transition-transform duration-300 ease-in-out"

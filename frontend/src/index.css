@@ -337,7 +337,37 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* ─────────────────────────────────────────────────
+/* --- DASHBOARD SIDEBAR (collapse / expand) ---
+   Collapsed 64px by default, expands to 240px on
+   hover as overlay. CSS transition, no JS width. */
+.sidebar-shell {
+  width: 64px;
+  transition: width 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: width;
+}
+
+.sidebar-shell[data-expanded] {
+  width: 240px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.16);
+}
+
+.sidebar-shell .sidebar-label {
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 150ms ease;
+}
+
+.sidebar-shell[data-expanded] .sidebar-label {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar-shell::-webkit-scrollbar {
+  width: 0;
+}
+
+/*─────────────────────────────────────────────────
    ACCESSIBILITY — Reduced motion
    ───────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

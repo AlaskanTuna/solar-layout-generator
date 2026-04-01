@@ -86,7 +86,12 @@ export function NotificationPopover({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="glass-nav absolute right-0 z-50 mt-2 w-80 max-h-[400px] overflow-y-auto rounded-xl border border-border shadow-xl"
+              className="absolute right-0 z-50 mt-2 w-80 max-h-[400px] overflow-y-auto rounded-xl border border-border shadow-xl"
+              style={{
+                background: 'color-mix(in srgb, var(--card) 92%, transparent)',
+                backdropFilter: 'blur(24px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(180%)'
+              }}
             >
               <div className="flex items-center justify-between border-b border-border p-4">
                 <h3 className="text-sm font-semibold">Notifications</h3>
