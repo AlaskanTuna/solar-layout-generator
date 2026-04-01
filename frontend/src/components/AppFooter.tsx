@@ -4,11 +4,12 @@ import { Sun, Leaf } from 'lucide-react'
 export function AppFooter() {
   return (
     <footer className="border-t border-border bg-muted/30 px-6 py-8">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 sm:flex-row sm:justify-between">
+      <div className="mx-auto flex max-w-7xl items-center justify-end gap-3">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Leaf className="h-3 w-3 text-green-600 dark:text-green-400" />
           UN SDG 7: Affordable and Clean Energy
         </div>
+        <div className="h-3 w-px bg-border" />
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">

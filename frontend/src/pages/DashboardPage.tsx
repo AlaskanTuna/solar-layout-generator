@@ -200,30 +200,28 @@ export function DashboardPage() {
       <div className="relative flex min-h-[calc(100vh-3.5rem)]">
         {/* ═══════ Backdrop blur overlay ═══════ */}
         <div
-          className="fixed inset-0 top-14 z-30 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
-          style={{ opacity: sidebarExpanded ? 1 : 0, pointerEvents: sidebarExpanded ? 'auto' : 'none' }}
+          className={`fixed inset-0 z-[55] bg-black/20 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${sidebarExpanded ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
           onClick={() => setSidebarExpanded(false)}
         />
 
-        {/* ═══════ Nav Sidebar (overlay layer) ═══════ */}
+        {/* ═══════ Nav Sidebar (overlay — above topbar z-50) ═══════ */}
         <aside
-          className="fixed left-0 top-14 z-40 flex h-[calc(100vh-3.5rem)] flex-col border-r border-border bg-sidebar shadow-xl transition-all duration-300 ease-in-out"
-          style={{ width: sidebarExpanded ? 240 : 64 }}
+          className={`fixed left-0 top-0 z-[60] flex h-screen flex-col border-r border-border bg-sidebar shadow-xl transition-[width] duration-300 ease-in-out ${sidebarExpanded ? 'w-60' : 'w-16'}`}
           onMouseEnter={() => setSidebarExpanded(true)}
           onMouseLeave={() => setSidebarExpanded(false)}
         >
-          {/* User avatar */}
-          <div className="flex items-center gap-3 border-b border-sidebar-border px-3 py-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-heading text-sm font-bold text-primary">
-              {user?.email?.charAt(0).toUpperCase() ?? 'U'}
-            </div>
-            <div
-              className="min-w-0 overflow-hidden transition-opacity duration-200"
-              style={{ opacity: sidebarExpanded ? 1 : 0, width: sidebarExpanded ? 'auto' : 0 }}
+          {/* Logo — mirrors AppNav logo */}
+          <div className="flex h-14 shrink-0 items-center gap-3 px-3">
+            <Link to="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+                <Sun className="h-3.5 w-3.5 text-white" />
+              </div>
+            </Link>
+            <span
+              className={`font-heading text-sm font-semibold tracking-tight whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}
             >
-              <p className="truncate text-sm font-semibold text-sidebar-foreground">{user?.email?.split('@')[0]}</p>
-              <p className="truncate text-xs text-muted-foreground">Free plan</p>
-            </div>
+              SolarSim
+            </span>
           </div>
 
           {/* Nav items */}
@@ -242,8 +240,7 @@ export function DashboardPage() {
                 >
                   <div className={`shrink-0 ${isActive ? 'text-primary' : ''}`}>{item.icon}</div>
                   <span
-                    className="truncate whitespace-nowrap transition-opacity duration-200"
-                    style={{ opacity: sidebarExpanded ? 1 : 0, width: sidebarExpanded ? 'auto' : 0 }}
+                    className={`truncate whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}
                   >
                     {item.label}
                   </span>
@@ -253,10 +250,10 @@ export function DashboardPage() {
           </nav>
 
           {/* Sidebar collapse indicator — always centered in the 64px column */}
-          <div className="border-t border-sidebar-border py-3" style={{ width: 64 }}>
+          <div className="w-16 py-3">
             <div className="flex items-center justify-center text-muted-foreground">
               <ChevronLeft
-                className="h-4 w-4 transition-transform duration-300"
+                className="h-4 w-4 transition-transform duration-300 ease-in-out"
                 style={{ transform: sidebarExpanded ? 'rotate(0deg)' : 'rotate(180deg)' }}
               />
             </div>
