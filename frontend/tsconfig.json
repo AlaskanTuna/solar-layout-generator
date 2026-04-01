@@ -5,11 +5,10 @@
     "jsx": "react-jsx",
     "noEmit": true,
     "rootDir": "src",
-    "baseUrl": ".",
-    "ignoreDeprecations": "5.0",
+    "typeRoots": ["./node_modules/@types", "./node_modules"],
     "types": ["vite/client", "google.maps"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
