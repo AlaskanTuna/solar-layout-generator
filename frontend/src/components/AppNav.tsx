@@ -10,15 +10,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Sun, User, LogOut, LayoutDashboard, ChevronRight, Home } from 'lucide-react'
+import { User, LogOut, LayoutDashboard, ChevronRight, Home } from 'lucide-react'
 
-type Crumb = { label: string; to?: string }
+type Crumb = { label: string; to?: string; icon?: React.ReactNode }
 
 function useBreadcrumbs(): Crumb[] {
   const { pathname } = useLocation()
   const { projectId } = useParams()
 
-  const crumbs: Crumb[] = [{ label: 'Dashboard', to: '/dashboard' }]
+  const crumbs: Crumb[] = [
+    { label: 'Home', to: '/', icon: <Home className="h-3.5 w-3.5" /> },
+    { label: 'Dashboard', to: '/dashboard' }
+  ]
 
   if (!projectId) return crumbs
 
@@ -58,28 +61,27 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
 
   return (
     <nav className="glass-nav fixed inset-x-0 top-0 z-50">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        {/* Left — Logo + Breadcrumbs */}
-        <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-              <Sun className="h-3.5 w-3.5 text-white" />
-            </div>
-            {!minimal && <span className="font-heading text-sm font-semibold tracking-tight">SolarSim</span>}
-          </Link>
-
+      <div className="flex h-14 items-center justify-between px-6" style={{ marginLeft: 64 }}>
+        {/* Left — Breadcrumbs (Home > Dashboard > ...) */}
+        <div className="flex items-center">
           {!minimal && (
-            <div className="hidden items-center gap-1 text-sm sm:flex">
-              <ChevronRight className="h-3 w-3 text-muted-foreground/50" />
+            <div className="flex items-center gap-1 text-sm">
               {crumbs.map((crumb, i) => (
                 <span key={i} className="flex items-center gap-1">
                   {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/50" />}
                   {crumb.to ? (
-                    <Link to={crumb.to} className="text-muted-foreground transition-colors hover:text-foreground">
+                    <Link
+                      to={crumb.to}
+                      className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {crumb.icon}
                       {crumb.label}
                     </Link>
                   ) : (
-                    <span className="font-medium text-foreground">{crumb.label}</span>
+                    <span className="flex items-center gap-1.5 font-medium text-foreground">
+                      {crumb.icon}
+                      {crumb.label}
+                    </span>
                   )}
                 </span>
               ))}
