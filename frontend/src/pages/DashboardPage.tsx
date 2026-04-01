@@ -197,10 +197,17 @@ export function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="flex min-h-[calc(100vh-3.5rem)]">
-        {/* ═══════ Nav Sidebar ═══════ */}
+      <div className="relative flex min-h-[calc(100vh-3.5rem)]">
+        {/* ═══════ Backdrop blur overlay ═══════ */}
+        <div
+          className="fixed inset-0 top-14 z-30 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+          style={{ opacity: sidebarExpanded ? 1 : 0, pointerEvents: sidebarExpanded ? 'auto' : 'none' }}
+          onClick={() => setSidebarExpanded(false)}
+        />
+
+        {/* ═══════ Nav Sidebar (overlay layer) ═══════ */}
         <aside
-          className="fixed left-0 top-14 z-40 flex h-[calc(100vh-3.5rem)] flex-col border-r border-border bg-sidebar transition-all duration-300 ease-in-out"
+          className="fixed left-0 top-14 z-40 flex h-[calc(100vh-3.5rem)] flex-col border-r border-border bg-sidebar shadow-xl transition-all duration-300 ease-in-out"
           style={{ width: sidebarExpanded ? 240 : 64 }}
           onMouseEnter={() => setSidebarExpanded(true)}
           onMouseLeave={() => setSidebarExpanded(false)}
@@ -245,8 +252,8 @@ export function DashboardPage() {
             })}
           </nav>
 
-          {/* Sidebar collapse indicator */}
-          <div className="border-t border-sidebar-border px-3 py-3">
+          {/* Sidebar collapse indicator — always centered in the 64px column */}
+          <div className="border-t border-sidebar-border py-3" style={{ width: 64 }}>
             <div className="flex items-center justify-center text-muted-foreground">
               <ChevronLeft
                 className="h-4 w-4 transition-transform duration-300"
@@ -256,11 +263,8 @@ export function DashboardPage() {
           </div>
         </aside>
 
-        {/* ═══════ Main Content ═══════ */}
-        <div
-          className="flex-1 transition-all duration-300 ease-in-out"
-          style={{ marginLeft: sidebarExpanded ? 240 : 64 }}
-        >
+        {/* ═══════ Main Content (stays in place) ═══════ */}
+        <div className="flex-1" style={{ marginLeft: 64 }}>
           <div className="mx-auto max-w-6xl px-6 py-8">
             {activeTab === 'summary' && (
               <SummaryTab
