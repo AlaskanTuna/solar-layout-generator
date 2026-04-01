@@ -1271,14 +1271,83 @@
 ### 1. Refinement: Solar-Themed Visual Identity
 
 **Purpose/Issue:** The app currently uses default shadcn/Tailwind styling (stone/gray palette). It works but lacks a cohesive "solar tool" identity. A defined color palette and consistent component styling would make it feel purpose-built.
-Q
+
 **Implementation:**
 
-- [ ] Define solar color palette: deep navy/slate base, amber/gold accents (sun/energy), green accents (sustainability)
-- [ ] Update Tailwind `theme.extend.colors` with named palette tokens (e.g. `solar-amber`, `solar-navy`)
-- [ ] Apply palette across key surfaces: sidebar headers, chart colors, button accents, card borders
+- [x] Define solar color palette (orange-based) with full light/dark mode CSS variables
+- [x] Update Tailwind theme with solar colour tokens and font families
+- [x] Apply palette across key surfaces: glassmorphism cards, charts, buttons, borders
 - [x] Solar-themed favicon and page title
-- [ ] Subtle background textures or gradients on page shells (not flat white)
+- [x] Gradient backgrounds and glow orbs on page shells
+
+### 2. Fix: VSCode Workspace TypeScript Issues
+
+**Purpose/Issue:** VSCode using wrong tsserver path due to Windows backslashes in settings, missing ignoreDeprecations for baseUrl.
+
+**Implementation:**
+
+- [x] Fix `.vscode/settings.json` to use forward slashes and point to frontend TS
+- [x] Add `ignoreDeprecations: "5.0"` to `frontend/tsconfig.json`
+
+### 3. Fix: General CSS/Theming
+
+**Purpose/Issue:** Glass effects broken on Heroku, loading spinner not spinning, no custom scrollbars, toast position wrong, header/footer missing on full-screen pages.
+
+**Implementation:**
+
+- [x] Strengthen glassmorphism tokens (higher opacity values for glass-bg, glass-border)
+- [x] Add explicit `spin` keyframe to design system (Tailwind v4 needs it registered)
+- [x] Add custom themed scrollbar CSS (light/dark via CSS variables)
+- [x] Set Sonner toast position to `bottom-center`
+- [x] Always show header + footer on all pages (removed `noFooter` prop)
+- [x] Add section comments/labels to `index.css` for easier editing
+
+### 4. Feature: Dashboard Overhaul with Nav Sidebar
+
+**Purpose/Issue:** Dashboard lacked proper SaaS structure. Needed nav sidebar, subpages, notification button, cleaner layout.
+
+**Implementation:**
+
+- [x] Add collapsible nav sidebar (collapsed by default, expands on hover, smooth animations)
+- [x] Introduce 3 subpages: Summary, Projects, Analytics
+- [x] Summary subpage: hero banner, quick stats row, solar performance stats, recent projects, getting started tips
+- [x] Projects subpage: full project list with filter tabs (All/Completed/In Progress), 3-column grid
+- [x] Analytics subpage: aggregated metrics, averages per project, project breakdown table
+- [x] Remove redundant sidebar components (Quick Actions, How It Works, Solar Fact) from main content
+- [x] Install `framer-motion` and create `NotificationPopover` component (21st Dev pattern)
+- [x] Add notification button to `AppNav` (left of theme toggle)
+
+### 5. Feature: MapPage UI Improvements
+
+**Purpose/Issue:** Map spans full screen without containerization, pending project view lacks nav, address input too transparent.
+
+**Implementation:**
+
+- [x] Remove zoom control from Google Maps (keep map type control only)
+- [x] Containerize map in rounded bordered viewport with padding
+- [x] Readonly view: add nav card with "Back to Dashboard" and "Proceed to Workbench" buttons
+- [x] Readonly view: show subtext below locked search bar with "new project" hyperlink to dashboard
+- [x] Make search bar less transparent (`bg-card/95` with shadow)
+
+### 6. Fix: WorkbenchPage UI Issues
+
+**Purpose/Issue:** Panel model buttons inconsistent sizes, canvas controls overflow container.
+
+**Implementation:**
+
+- [x] Fix panel model card width to consistent `w-[200px]` with `shrink-0`
+- [x] Add `max-h-[calc(100%-2rem)]` and `overflow-y-auto` to canvas controls container
+- [x] Replace hardcoded `ring-stone-400` with `ring-muted-foreground`
+
+### 7. Fix: AnalysisPage UI Issues and Tooltips
+
+**Purpose/Issue:** Panel spec missing on direct dashboard entry, cumulative savings y-axis overflow, no tooltips on charts.
+
+**Implementation:**
+
+- [x] Fix panel model detection fallback to `DEFAULT_PANEL_MODEL_ID` for projects without saved model ID
+- [x] Fix cumulative savings chart y-axis overflow with `width={70}` and `margin={{ left: 8 }}`
+- [x] Add info tooltips to: Monthly Bill Comparison, Cumulative Savings, Net Benefit Projection, Bill Component Breakdown, Month-by-Month Breakdown, System Assumptions
 
 ---
 

@@ -1,6 +1,7 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { NotificationPopover, type Notification } from '@/components/ui/notification-popover'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -33,6 +34,23 @@ function useBreadcrumbs(): Crumb[] {
 
   return crumbs
 }
+
+const SAMPLE_NOTIFICATIONS: Notification[] = [
+  {
+    id: '1',
+    title: 'Welcome to SolarSim!',
+    description: 'Get started by creating your first solar project.',
+    timestamp: new Date(),
+    read: false
+  },
+  {
+    id: '2',
+    title: 'Solar Tip',
+    description: 'Malaysia receives 4-5 peak sun hours daily — ideal for rooftop solar.',
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    read: true
+  }
+]
 
 export function AppNav({ minimal }: { minimal?: boolean } = {}) {
   const { user, signOut } = useAuth()
@@ -69,8 +87,9 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
           )}
         </div>
 
-        {/* Right — Theme + User */}
+        {/* Right — Notifications + Theme + User */}
         <div className="flex items-center gap-1">
+          <NotificationPopover notifications={SAMPLE_NOTIFICATIONS} />
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

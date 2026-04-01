@@ -6,18 +6,17 @@ type AppLayoutProps = {
   children: ReactNode
   /** Use 'full' for pages that need the whole viewport (Map, Workbench). Default is 'scroll'. */
   mode?: 'scroll' | 'full'
-  /** Hide the footer (e.g. on full-screen pages) */
-  noFooter?: boolean
   /** Pass minimal to AppNav for full-screen pages */
   minimalNav?: boolean
 }
 
-export function AppLayout({ children, mode = 'scroll', noFooter, minimalNav }: AppLayoutProps) {
+export function AppLayout({ children, mode = 'scroll', minimalNav }: AppLayoutProps) {
   if (mode === 'full') {
     return (
       <div className="flex h-screen flex-col overflow-hidden bg-background">
         <AppNav minimal={minimalNav} />
         <main className="flex-1 overflow-hidden pt-14">{children}</main>
+        <AppFooter />
       </div>
     )
   }
@@ -26,7 +25,7 @@ export function AppLayout({ children, mode = 'scroll', noFooter, minimalNav }: A
     <div className="flex min-h-screen flex-col bg-background">
       <AppNav />
       <main className="flex-1 pt-14">{children}</main>
-      {!noFooter && <AppFooter />}
+      <AppFooter />
     </div>
   )
 }

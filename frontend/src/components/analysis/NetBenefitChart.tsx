@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { InfoTooltip } from '@/components/InfoTooltip'
 import { COLORS, CHART_TOOLTIP_STYLE } from '@/lib/constants'
 import { formatCurrency, formatTooltipCurrency } from './formatters'
 import { computeDegradedSavings } from '@/lib/analysis'
@@ -28,10 +29,15 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }:
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader>
-        <CardTitle>Net Benefit Projection</CardTitle>
-        <CardDescription>
-          How much you gain (or lose) after subtracting the cost of installing your solar system, year by year.
-        </CardDescription>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Net Benefit Projection</CardTitle>
+            <CardDescription>
+              How much you gain (or lose) after subtracting the cost of installing your solar system, year by year.
+            </CardDescription>
+          </div>
+          <InfoTooltip text="Projects your cumulative savings minus the upfront system cost over 10 years. When bars turn green, you've recovered your investment and are in net profit. Includes annual panel degradation." />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg bg-muted p-4 text-center">

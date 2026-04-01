@@ -7,7 +7,7 @@ import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { AppLayout } from '@/components/AppLayout'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
-import { AlertTriangle, ArrowLeft, Loader2, MapPin } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
 
@@ -62,6 +62,9 @@ export function MapPage() {
   const [locationId, setLocationId] = useState<string | null>(initialDraft?.locationId ?? null)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const searchParams = new URLSearchParams(window.location.search)
+  const isReadonly = searchParams.get('view') === 'readonly'
+
   useEffect(() => {
     if (!isNewProject) return
 
@@ -77,24 +80,18 @@ export function MapPage() {
     })
   }, [isNewProject, projectName, locationId, navigate, phase])
 
-  // For existing projects, load the project to get its locationId
   const { data: existingProject } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => getProject(projectId!),
     enabled: !isNewProject && !!projectId
   })
 
-  // If existing project already has a ready location, navigate to workbench
-  // Unless ?view=readonly is set (Back to Map from workbench)
-  const searchParams = new URLSearchParams(window.location.search)
-  const isReadonly = searchParams.get('view') === 'readonly'
   useEffect(() => {
     if (!isReadonly && existingProject?.location?.status === 'ready') {
       navigate(`/project/${existingProject.id}/workbench`, { replace: true })
     }
   }, [existingProject, navigate, isReadonly])
 
-  // Poll location status while processing
   const { data: statusData, error: statusError } = useQuery({
     queryKey: ['locationStatus', locationId],
     queryFn: () => getLocationStatus(locationId!),
@@ -104,31 +101,25 @@ export function MapPage() {
 
   useEffect(() => {
     if (!statusError || phase !== 'processing') return
-
     setErrorMessage(statusError instanceof Error ? statusError.message : 'Failed to check rooftop analysis status')
     setPhase('failed')
   }, [phase, statusError])
 
-  // Processing timeout — prevent infinite spinner
   useEffect(() => {
     if (phase !== 'processing') return
-
     const timeout = window.setTimeout(() => {
       setErrorMessage(
         'Rooftop analysis is taking longer than expected. The Google Solar API may be slow or this location may not have sufficient data. Please try again or try a different address.'
       )
       setPhase('failed')
     }, PROCESSING_TIMEOUT_MS)
-
     return () => window.clearTimeout(timeout)
   }, [phase])
 
   const finalizeNewProject = useCallback(
     async (readyLocationId: string) => {
       if (!isNewProject || !projectName || isCreatingProjectRef.current) return
-
       isCreatingProjectRef.current = true
-
       try {
         const project = await createProject({ name: projectName, locationId: readyLocationId })
         clearNewProjectDraft()
@@ -142,10 +133,8 @@ export function MapPage() {
     [isNewProject, navigate, projectName]
   )
 
-  // Handle status changes
   useEffect(() => {
     if (!statusData || phase !== 'processing') return
-
     if (statusData.status === 'ready') {
       if (isNewProject && projectName && locationId) {
         void finalizeNewProject(locationId)
@@ -161,19 +150,10 @@ export function MapPage() {
   const handleSelectedPlace = useCallback((lat: number, lng: number, address: string) => {
     const map = mapInstance.current
     if (!map) return
-
     map.panTo({ lat, lng })
     map.setZoom(19)
-
-    if (markerInstance.current) {
-      markerInstance.current.map = null
-    }
-
-    markerInstance.current = new google.maps.marker.AdvancedMarkerElement({
-      map,
-      position: { lat, lng }
-    })
-
+    if (markerInstance.current) markerInstance.current.map = null
+    markerInstance.current = new google.maps.marker.AdvancedMarkerElement({ map, position: { lat, lng } })
     setSelectedPlace({ lat, lng, address })
     setPhase('confirm')
   }, [])
@@ -187,54 +167,47 @@ export function MapPage() {
 
     const input = document.createElement('input')
     input.type = 'text'
-    input.placeholder = isReadonly
-      ? 'Please create new project in dashboard for new location.'
-      : 'Search for your address...'
+    input.placeholder = 'Search for your address...'
     input.disabled = isReadonly
     input.className =
-      'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground'
+      'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed'
     host.appendChild(input)
 
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-      componentRestrictions: { country: 'my' }, // Restricts map results to Malaysia only
-      fields: ['geometry', 'formatted_address']
-    })
-    autocompleteInstance.current = autocomplete
-    autocomplete.bindTo('bounds', map)
+    if (!isReadonly) {
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: 'my' },
+        fields: ['geometry', 'formatted_address']
+      })
+      autocompleteInstance.current = autocomplete
+      autocomplete.bindTo('bounds', map)
 
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace()
-      if (!place.geometry?.location) return
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace()
+        if (!place.geometry?.location) return
+        const lat = place.geometry.location.lat()
+        const lng = place.geometry.location.lng()
+        const address = place.formatted_address ?? `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+        handleSelectedPlace(lat, lng, address)
+      })
+    }
+  }, [handleSelectedPlace, isReadonly])
 
-      const lat = place.geometry.location.lat()
-      const lng = place.geometry.location.lng()
-      const address = place.formatted_address ?? `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-
-      handleSelectedPlace(lat, lng, address)
-    })
-  }, [handleSelectedPlace])
-
-  // Initialize map and autocomplete (uses legacy Autocomplete — reliable with standard Places API)
   const initMap = useCallback(() => {
     if (!mapRef.current || mapInstance.current) return
-
     const map = new google.maps.Map(mapRef.current, {
       center: MALAYSIA_CENTER,
       zoom: 16,
       mapId: 'solar-layout-map',
       disableDefaultUI: true,
-      zoomControl: true,
       mapTypeControl: true,
       mapTypeId: 'satellite'
     })
     mapInstance.current = map
-
     initLegacyAutocomplete()
   }, [initLegacyAutocomplete])
 
   useEffect(() => {
     if (!isLoaded) return
-
     initMap()
   }, [isLoaded, initMap])
 
@@ -242,7 +215,6 @@ export function MapPage() {
     if (!selectedPlace) return
     setPhase('processing')
     setErrorMessage('')
-
     try {
       const result = await resolveLocation({
         lat: selectedPlace.lat,
@@ -257,7 +229,6 @@ export function MapPage() {
           phase: result.status === 'processing' ? 'processing' : 'search'
         })
       }
-
       if (result.status === 'ready') {
         if (isNewProject && projectName) {
           await finalizeNewProject(result.locationId)
@@ -265,7 +236,6 @@ export function MapPage() {
           navigate(`/project/${projectId}/workbench`, { replace: true })
         }
       }
-      // If 'processing', the polling query above will take over
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to resolve location')
       setPhase('failed')
@@ -307,82 +277,121 @@ export function MapPage() {
   }
 
   return (
-    <AppLayout mode="full" noFooter>
-      <div className="relative h-full w-full">
-        <div ref={mapRef} className="h-full w-full" />
+    <AppLayout mode="full">
+      <div className="relative flex h-full w-full flex-col overflow-hidden p-4">
+        {/* Containerized map viewport */}
+        <div className="relative flex-1 overflow-hidden rounded-2xl border border-border shadow-sm">
+          <div ref={mapRef} className="h-full w-full" />
 
-        <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex flex-col items-center px-4">
-          <div
-            ref={searchHostRef}
-            data-tour="search-box"
-            className={`glass pointer-events-auto w-full max-w-md rounded-xl ${
-              !isLoaded || phase === 'processing' ? 'pointer-events-none opacity-70' : ''
-            }`}
-          >
-            <div className="h-12" />
-          </div>
-        </div>
-
-        <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />
-
-        {!isLoaded && <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />}
-
-        {/* Confirm panel */}
-        {phase === 'confirm' && selectedPlace && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
-            <div className="glass-card w-96 p-5">
-              <p className="text-sm font-medium">Is this your building?</p>
-              <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
-              <div className="mt-3 flex gap-2">
-                <Button onClick={handleConfirm} className="flex-1">
-                  Confirm Location
-                </Button>
-                <Button variant="outline" onClick={handleRetry} className="flex-1">
-                  Search Again
-                </Button>
+          {/* Search bar overlay */}
+          <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex flex-col items-center px-4">
+            <div className="pointer-events-auto w-full max-w-md">
+              <div
+                ref={searchHostRef}
+                data-tour="search-box"
+                className={`rounded-xl bg-card/95 shadow-lg backdrop-blur-sm border border-border ${
+                  !isLoaded || phase === 'processing' ? 'pointer-events-none opacity-70' : ''
+                } ${isReadonly ? 'cursor-not-allowed' : ''}`}
+              >
+                <div className="h-12" />
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Processing overlay */}
-        {phase === 'processing' && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
-            <div className="glass-card flex w-96 items-center gap-3 p-5">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              <div>
-                <p className="text-sm font-medium">Analyzing your rooftop...</p>
-                <p className="text-sm text-muted-foreground">
-                  Fetching satellite data and solar potential. This usually takes 15–30 seconds.
+              {isReadonly && (
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  Please create{' '}
+                  <Link to="/dashboard" className="font-medium text-primary underline underline-offset-2">
+                    new project
+                  </Link>{' '}
+                  in dashboard for new location.
                 </p>
-              </div>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Error state */}
-        {phase === 'failed' && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-fade-in-up">
-            <div className="glass-card w-96 p-5">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                <p className="text-sm text-destructive">{errorMessage}</p>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <Button variant="outline" onClick={handleRetry} className="flex-1">
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Try Another Location
-                </Button>
-                <Button variant="outline" asChild className="flex-1">
-                  <Link to="/dashboard">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </Button>
+          {/* Readonly nav card (pending project view) */}
+          {isReadonly && existingProject && (
+            <div className="absolute left-4 top-20 z-10 animate-fade-in">
+              <div className="glass-card w-64 p-4">
+                <p className="font-heading text-sm font-semibold">{existingProject.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Viewing saved location</p>
+                <div className="mt-3 flex flex-col gap-2">
+                  <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
+                    <Link to="/dashboard">
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      Back to Dashboard
+                    </Link>
+                  </Button>
+                  <Button size="sm" className="w-full justify-start gap-2" asChild>
+                    <Link to={`/project/${existingProject.id}/workbench`}>
+                      Proceed to Workbench
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />
+
+          {!isLoaded && <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />}
+
+          {/* Confirm panel */}
+          {phase === 'confirm' && selectedPlace && (
+            <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
+              <div className="glass-card w-96 p-5">
+                <p className="text-sm font-medium">Is this your building?</p>
+                <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
+                <div className="mt-3 flex gap-2">
+                  <Button onClick={handleConfirm} className="flex-1">
+                    Confirm Location
+                  </Button>
+                  <Button variant="outline" onClick={handleRetry} className="flex-1">
+                    Search Again
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Processing overlay */}
+          {phase === 'processing' && (
+            <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
+              <div className="glass-card flex w-96 items-center gap-3 p-5">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Analyzing your rooftop...</p>
+                  <p className="text-sm text-muted-foreground">
+                    Fetching satellite data and solar potential. This usually takes 15–30 seconds.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {phase === 'failed' && (
+            <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
+              <div className="glass-card w-96 p-5">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  <p className="text-sm text-destructive">{errorMessage}</p>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button variant="outline" onClick={handleRetry} className="flex-1">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Try Another Location
+                  </Button>
+                  <Button variant="outline" asChild className="flex-1">
+                    <Link to="/dashboard">
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </AppLayout>
   )

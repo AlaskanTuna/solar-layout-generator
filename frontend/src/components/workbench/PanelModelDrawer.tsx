@@ -89,7 +89,7 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
     <button
       onClick={onSelect}
       className={cn(
-        'group flex min-w-[180px] flex-col rounded-xl border-2 bg-card p-3 text-left shadow-sm transition-all hover:shadow-md',
+        'group flex w-[200px] shrink-0 flex-col rounded-xl border-2 bg-card p-3 text-left shadow-sm transition-all hover:shadow-md',
         isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-border/80'
       )}
     >

@@ -35,7 +35,7 @@ import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { ImagePopup } from '@/components/ImagePopup'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
-import { getPanelModel } from '@shared/types'
+import { getPanelModel, PANEL_MODELS, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 import { formatCurrency, formatNumber, formatTooltipCurrency } from '@/components/analysis/formatters'
 import { HeroMetrics } from '@/components/analysis/HeroMetrics'
 import { BillComparisonChart } from '@/components/analysis/BillComparisonChart'
@@ -219,13 +219,18 @@ export function AnalysisPage() {
   )
   const monthlyGeneration = useMemo(() => aggregateMonthlyGeneration(activePanels), [activePanels])
   const savedPanelModelId = useMemo(() => {
+    // Check analysisConfig first (set during layout save)
     const cfg = projectQuery.data?.analysisConfig
     if (cfg && typeof cfg === 'object' && 'selectedPanelModelId' in cfg) {
       const id = (cfg as Record<string, unknown>).selectedPanelModelId
-      return typeof id === 'string' ? id : undefined
+      if (typeof id === 'string') return id
+    }
+    // Fallback: if project has been through the workbench at all, use default model
+    if (projectQuery.data?.status === 'layout_saved' || projectQuery.data?.status === 'analysis_saved') {
+      return DEFAULT_PANEL_MODEL_ID
     }
     return undefined
-  }, [projectQuery.data?.analysisConfig])
+  }, [projectQuery.data?.analysisConfig, projectQuery.data?.status])
   const selectedPanelModel = savedPanelModelId ? getPanelModel(savedPanelModelId) : undefined
   const panelCapacityWatts = selectedPanelModel?.capacityWp ?? buildingInsights?.solarPotential.panelCapacityWatts ?? 0
   const systemKwp = useMemo(
@@ -268,7 +273,9 @@ export function AnalysisPage() {
     // the user never manually edited it — recalculate with the corrected multiplier.
     let resolvedSystemCostRm = savedConfig?.systemCostRm ?? defaultSystemCostRm
     if (savedConfig?.systemCostRm != null && selectedPanelModel && selectedPanelModel.costPerWp > 0) {
-      const oldPanelOnlyCost = Math.round(localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp)
+      const oldPanelOnlyCost = Math.round(
+        localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp
+      )
       if (savedConfig.systemCostRm === oldPanelOnlyCost) {
         resolvedSystemCostRm = defaultSystemCostRm
       }
@@ -425,7 +432,7 @@ export function AnalysisPage() {
   const paybackTooltip = `How many years until your savings cover the cost of installing the system.\n\nNet benefit projections:\n1-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 1) - formState.systemCostRm)}\n5-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 5) - formState.systemCostRm)}\n10-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 10) - formState.systemCostRm)}`
 
   return (
-    <AppLayout noFooter>
+    <AppLayout>
       <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
         {/* ───── Sidebar ───── */}
@@ -754,15 +761,20 @@ export function AnalysisPage() {
             {viewMode === 'advanced' && (
               <Card className="border-border bg-card/90 shadow-sm">
                 <CardHeader>
-                  <CardTitle>Cumulative Savings</CardTitle>
-                  <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle>Cumulative Savings</CardTitle>
+                      <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
+                    </div>
+                    <InfoTooltip text="Shows your running total of savings throughout the year. The steeper the line, the faster you're saving money from solar." />
+                  </div>
                 </CardHeader>
                 <CardContent className="h-[340px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
+                    <LineChart data={chartData} margin={{ left: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis dataKey="month" />
-                      <YAxis tickFormatter={(value) => `RM${value}`} />
+                      <YAxis width={70} tickFormatter={(value) => `RM${value}`} />
                       <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
                       <Line
                         type="monotone"
@@ -800,10 +812,15 @@ export function AnalysisPage() {
           {viewMode === 'advanced' && buildingInsights && (
             <Card className="border-border bg-card/90 shadow-sm">
               <CardHeader>
-                <CardTitle>System Assumptions</CardTitle>
-                <CardDescription>
-                  Standard industry assumptions used in this analysis. These are not site-measured values.
-                </CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle>System Assumptions</CardTitle>
+                    <CardDescription>
+                      Standard industry assumptions used in this analysis. These are not site-measured values.
+                    </CardDescription>
+                  </div>
+                  <InfoTooltip text="Technical parameters used by Google Solar API and industry standards. These include building orientation, tilt angles, panel characteristics, and environmental factors specific to your location." />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* PR + Losses side by side */}

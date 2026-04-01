@@ -959,7 +959,7 @@ export function WorkbenchPage() {
     : null
 
   return (
-    <AppLayout mode="full" noFooter>
+    <AppLayout mode="full">
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-4 overflow-y-auto px-4 py-4 xl:flex-row">
         <WorkbenchSidebar

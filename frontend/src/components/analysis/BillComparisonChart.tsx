@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { InfoTooltip } from '@/components/InfoTooltip'
 import { COLORS, CHART_TOOLTIP_STYLE } from '@/lib/constants'
 import { formatTooltipCurrency } from './formatters'
 
@@ -11,10 +12,15 @@ export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
   return (
     <Card data-tour="monthly-chart" className="border-border bg-card/90 shadow-sm">
       <CardHeader>
-        <CardTitle>Monthly Bill Comparison</CardTitle>
-        <CardDescription>
-          Your estimated monthly bill without solar (baseline) versus with solar for each month.
-        </CardDescription>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Monthly Bill Comparison</CardTitle>
+            <CardDescription>
+              Your estimated monthly bill without solar (baseline) versus with solar for each month.
+            </CardDescription>
+          </div>
+          <InfoTooltip text="Compares your estimated TNB bill with and without solar panels for each month. The orange bars show what you'd normally pay; the green bars show what you'd pay with NEM solar credits applied." />
+        </div>
       </CardHeader>
       <CardContent className="h-[340px]">
         <ResponsiveContainer width="100%" height="100%">

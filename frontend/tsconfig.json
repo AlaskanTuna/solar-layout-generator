@@ -6,6 +6,7 @@
     "noEmit": true,
     "rootDir": "src",
     "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
     "types": ["vite/client", "google.maps"],
     "paths": {
       "@/*": ["src/*"]

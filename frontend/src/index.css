@@ -4,7 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─────────────────────────────────────────────────
+   DESIGN SYSTEM TOKENS
+   Theme variables consumed by Tailwind + components
+   ───────────────────────────────────────────────── */
 @theme inline {
+  /* ── Semantic colour tokens ── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -29,6 +34,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* ── Sidebar colour tokens ── */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -37,14 +44,18 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Radius tokens ── */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
+  /* ── Font tokens ── */
   --font-heading: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
 
+  /* ── Animation tokens ── */
   --animate-fade-in: fade-in 0.4s ease-out;
   --animate-fade-in-up: fade-in-up 0.5s ease-out;
   --animate-fade-in-down: fade-in-down 0.4s ease-out;
@@ -52,6 +63,7 @@
   --animate-slide-in-right: slide-in-right 0.4s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
   --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-spin: spin 1s linear infinite;
 
   @keyframes fade-in {
     from {
@@ -120,35 +132,59 @@
       opacity: 0.8;
     }
   }
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
-/* ─── Light mode (Solar Orange) ─── */
+/* ─────────────────────────────────────────────────
+   LIGHT MODE (Solar Orange)
+   ───────────────────────────────────────────────── */
 :root {
   --radius: 0.625rem;
+
+  /* Surfaces */
   --background: #fafaf9;
   --foreground: #1c1917;
   --card: #ffffff;
   --card-foreground: #1c1917;
   --popover: #ffffff;
   --popover-foreground: #1c1917;
+
+  /* Brand */
   --primary: #ea580c;
   --primary-foreground: #ffffff;
   --secondary: #fff7ed;
   --secondary-foreground: #9a3412;
+
+  /* Neutral */
   --muted: #f5f0eb;
   --muted-foreground: #78716c;
   --accent: #ffedd5;
   --accent-foreground: #9a3412;
+
+  /* Feedback */
   --destructive: #dc2626;
   --destructive-foreground: #fafafa;
+
+  /* Borders & Input */
   --border: #e7e5e4;
   --input: #d6d3d1;
   --ring: #ea580c;
+
+  /* Charts */
   --chart-1: #ea580c;
   --chart-2: #16a34a;
   --chart-3: #f59e0b;
   --chart-4: #0ea5e9;
   --chart-5: #f43f5e;
+
+  /* Sidebar */
   --sidebar: #fff7ed;
   --sidebar-foreground: #1c1917;
   --sidebar-primary: #ea580c;
@@ -158,39 +194,54 @@
   --sidebar-border: #e7e5e4;
   --sidebar-ring: #ea580c;
 
-  /* Glass tokens (light) */
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.4);
+  /* Glassmorphism tokens */
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.45);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   --glass-blur: 16px;
 }
 
-/* ─── Dark mode (Solar Dark) ─── */
+/* ─────────────────────────────────────────────────
+   DARK MODE (Solar Dark)
+   ───────────────────────────────────────────────── */
 .dark {
+  /* Surfaces */
   --background: #0c0a09;
   --foreground: #fafaf9;
   --card: #1c1917;
   --card-foreground: #fafaf9;
   --popover: #1c1917;
   --popover-foreground: #fafaf9;
+
+  /* Brand */
   --primary: #f97316;
   --primary-foreground: #ffffff;
   --secondary: #292524;
   --secondary-foreground: #fafaf9;
+
+  /* Neutral */
   --muted: #292524;
   --muted-foreground: #a8a29e;
   --accent: #431407;
   --accent-foreground: #fed7aa;
+
+  /* Feedback */
   --destructive: #b91c1c;
   --destructive-foreground: #fafafa;
+
+  /* Borders & Input */
   --border: #292524;
   --input: #44403c;
   --ring: #f97316;
+
+  /* Charts */
   --chart-1: #fb923c;
   --chart-2: #4ade80;
   --chart-3: #fbbf24;
   --chart-4: #38bdf8;
   --chart-5: #fb7185;
+
+  /* Sidebar */
   --sidebar: #1c1917;
   --sidebar-foreground: #fafaf9;
   --sidebar-primary: #f97316;
@@ -200,14 +251,16 @@
   --sidebar-border: #292524;
   --sidebar-ring: #f97316;
 
-  /* Glass tokens (dark) */
-  --glass-bg: rgba(28, 25, 23, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  /* Glassmorphism tokens */
+  --glass-bg: rgba(28, 25, 23, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   --glass-blur: 16px;
 }
 
-/* ─── Base styles ─── */
+/* ─────────────────────────────────────────────────
+   BASE STYLES
+   ───────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
 }
@@ -220,7 +273,35 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Glassmorphism utility classes ─── */
+/* ─────────────────────────────────────────────────
+   CUSTOM SCROLLBAR (themed light/dark)
+   ───────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+}
+
+/* ─────────────────────────────────────────────────
+   GLASSMORPHISM UTILITY CLASSES
+   ───────────────────────────────────────────────── */
 .glass {
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
@@ -247,10 +328,12 @@ body {
 }
 
 .dark .glass-nav {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* ─── Respect reduced motion ─── */
+/* ─────────────────────────────────────────────────
+   ACCESSIBILITY — Reduced motion
+   ───────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -265,7 +348,11 @@ body {
   }
 }
 
-/* ─── Google Places Autocomplete dropdown must sit above the map ─── */
+/* ─────────────────────────────────────────────────
+   THIRD-PARTY OVERRIDES
+   ───────────────────────────────────────────────── */
+
+/* Google Places autocomplete dropdown above map */
 .pac-container {
   z-index: 10000 !important;
 }

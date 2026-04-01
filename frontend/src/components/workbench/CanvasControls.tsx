@@ -43,7 +43,11 @@ export function CanvasControls({
   onToggleSegments
 }: CanvasControlsProps) {
   return (
-    <div data-tour="canvas-controls" className="absolute right-4 top-4 flex flex-col gap-1">
+    <div
+      data-tour="canvas-controls"
+      className="absolute right-4 top-4 flex max-h-[calc(100%-2rem)] flex-col gap-1 overflow-y-auto"
+      style={{ scrollbarWidth: 'none' }}
+    >
       {/* Tools group */}
       <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">Tools</span>
       <ToolButton onClick={onUndo} disabled={!canUndo} tooltip="Undo">
@@ -147,7 +151,7 @@ export function CanvasControls({
       <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">Layers</span>
       <ToolButton
         onClick={onToggleOverlayExpanded}
-        className={overlayExpanded ? 'ring-1 ring-stone-400' : ''}
+        className={overlayExpanded ? 'ring-1 ring-muted-foreground' : ''}
         tooltip={overlayExpanded ? 'Hide overlays' : 'Overlays'}
       >
         <svg

@@ -6,6 +6,16 @@
 
 <!-- Record latest from here onwards. -->
 
+## [02/04/26] - Phase 6: UI/UX Production Revamp (Tasks 2–7)
+
+- **Workspace Fix:** Updated `.vscode/settings.json` to use correct forward-slash TypeScript path for WSL/pnpm monorepo. Added `ignoreDeprecations: "5.0"` to frontend tsconfig for baseUrl deprecation.
+- **CSS/Theming:** Restructured `index.css` with section comments. Strengthened glassmorphism tokens (higher opacity). Added explicit `spin` keyframe for Tailwind v4. Added themed custom scrollbars (light/dark). Set Sonner toast to `bottom-center`. Always show header + footer on all pages including MapPage, WorkbenchPage, AnalysisPage.
+- **Dashboard Overhaul:** Replaced flat sidebar+content layout with collapsible nav sidebar (collapsed by default, expands on hover with smooth 300ms ease). Added 3 subpages: Summary (hero + quick stats + recent projects), Projects (full list with All/Completed/In Progress filter tabs), Analytics (aggregated metrics + per-project breakdown table). Installed `framer-motion`, created `NotificationPopover` component, added notification bell to `AppNav`.
+- **MapPage:** Containerized map in rounded bordered viewport. Removed zoom control (kept map type). Added readonly nav card with Dashboard/Workbench links. Made search bar less transparent with `bg-card/95`. Added "new project" hyperlink subtext below locked search bar.
+- **WorkbenchPage:** Fixed panel model card sizing to consistent `w-[200px]`. Fixed canvas controls overflow with scrollable container. Replaced hardcoded `ring-stone-400` with semantic token.
+- **AnalysisPage:** Fixed panel specification missing on direct dashboard entry by falling back to `DEFAULT_PANEL_MODEL_ID`. Fixed cumulative savings chart y-axis overflow with explicit width. Added info tooltips to all 6 chart/table sections.
+- **Verification:** TSC clean, all 47 frontend tests passing.
+
 ## [31/03/26] - Phase 5.3: System Cost Accuracy & Financial Transparency
 
 - Fixed system cost calculation: added `DEFAULT_INSTALLATION_MULTIPLIER = 2.0` to convert panel module `costPerWp` to turnkey installed cost (previously underestimated by ~50%; e.g. 1.6kWp Jinko now shows ~RM 7,744 instead of RM 3,872).
