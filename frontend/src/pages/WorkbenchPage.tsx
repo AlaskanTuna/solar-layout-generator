@@ -657,6 +657,14 @@ export function WorkbenchPage() {
     }, 1000)
   }
 
+  function handleCanvasRotate(panelId: string, value: number) {
+    // Select the panel if not already selected
+    if (!selectedPanelIds.has(panelId)) {
+      setSelectedPanelIds(new Set([panelId]))
+    }
+    handleRotationInput(value)
+  }
+
   function handleRotationInput(value: number) {
     const nextRotation = ((value % 360) + 360) % 360
 
@@ -1129,6 +1137,7 @@ export function WorkbenchPage() {
                         onSnapDragMove={handleSnapDragMove}
                         onSelect={handlePanelSelect}
                         onDragEnd={handlePanelDragEnd}
+                        onRotate={handleCanvasRotate}
                       />
                       {snapGuides.length > 0 && (
                         <Layer listening={false}>

@@ -23,6 +23,7 @@ type PanelLayerProps = {
   onSnapDragMove?: (panelId: string, position: { x: number; y: number }) => { x: number; y: number }
   onSelect: (panelId: string, shiftKey: boolean) => void
   onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
+  onRotate?: (panelId: string, rotation: number) => void
 }
 
 function panelAnnualEnergy(panel: WorkbenchPanelState): number {
@@ -63,7 +64,8 @@ export function PanelLayer({
   snapEnabled = false,
   onSnapDragMove,
   onSelect,
-  onDragEnd
+  onDragEnd,
+  onRotate
 }: PanelLayerProps) {
   return (
     <Layer>
@@ -86,6 +88,7 @@ export function PanelLayer({
           onSnapDragMove={onSnapDragMove}
           onSelect={onSelect}
           onDragEnd={onDragEnd}
+          onRotate={onRotate}
         />
       ))}
     </Layer>
