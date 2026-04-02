@@ -513,7 +513,7 @@ export function AnalysisPage() {
                           alt="TNB bill showing average kWh usage"
                           className="w-full rounded"
                         />
-                        <p className="text-[10px] text-muted-foreground">Click image to enlarge</p>
+                        <p className="text-[10px]">Click image to enlarge</p>
                       </div>
                     </InfoTooltip>
                   </Label>

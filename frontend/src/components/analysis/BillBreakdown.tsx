@@ -118,92 +118,98 @@ export function BillBreakdown({
         </div>
 
         {/* "With Solar" column */}
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
-          <h3 className="text-sm font-semibold text-emerald-950">With Solar</h3>
-          <p className="text-xs text-emerald-800/50">Your bill after solar offsets your usage under NEM</p>
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/35">
+          <h3 className="text-sm font-semibold text-emerald-950 dark:text-emerald-100">With Solar</h3>
+          <p className="text-xs text-emerald-800/70 dark:text-emerald-200/75">
+            Your bill after solar offsets your usage under NEM
+          </p>
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Billable kWh <InfoTooltip text={NEM_TOOLTIPS.billableKwh} />
               </p>
               <p className="font-semibold">{formatNumber(selectedMonth.billableKwh, 'kWh')}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Credit Used <InfoTooltip text={NEM_TOOLTIPS.creditUsed} />
               </p>
               <p className="font-semibold">{formatNumber(selectedMonth.creditUsed, 'kWh')}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Credit Balance <InfoTooltip text={NEM_TOOLTIPS.creditBalance} />
               </p>
               <p className="font-semibold">{formatNumber(selectedMonth.creditBalance, 'kWh')}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Credit Forfeited <InfoTooltip text={NEM_TOOLTIPS.creditForfeited} />
               </p>
               <p className="font-semibold">{formatNumber(selectedMonth.creditForfeited, 'kWh')}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Energy <InfoTooltip text={BILL_TOOLTIPS.energy} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.energy)}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Retail <InfoTooltip text={BILL_TOOLTIPS.retail} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.retail)}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Capacity <InfoTooltip text={BILL_TOOLTIPS.capacity} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.capacity)}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 AFA <InfoTooltip text={BILL_TOOLTIPS.afa} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.afa)}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 Network <InfoTooltip text={BILL_TOOLTIPS.network} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.network)}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 EEI Rebate <InfoTooltip text={BILL_TOOLTIPS.eeiRebate} />
               </p>
               <p className="font-semibold">-{formatCurrency(selectedMonth.nemBill.eeiRebate)}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 RE Fund <InfoTooltip text={BILL_TOOLTIPS.reFund} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.reFund)}</p>
             </div>
             <div>
-              <p className="text-emerald-900/70">
+              <p className="text-emerald-900/70 dark:text-emerald-100/70">
                 SST <InfoTooltip text={BILL_TOOLTIPS.sst} />
               </p>
               <p className="font-semibold">{formatCurrency(selectedMonth.nemBill.sst)}</p>
             </div>
           </div>
-          <div className="mt-4 border-t border-emerald-200 pt-3">
-            <p className="text-sm text-emerald-900/70">
+          <div className="mt-4 border-t border-emerald-200 pt-3 dark:border-emerald-900/60">
+            <p className="text-sm text-emerald-900/70 dark:text-emerald-100/70">
               Total
               <InfoTooltip
                 text={`${formatCurrency(selectedMonth.baselineBill.total)} (without solar) − ${formatCurrency(selectedMonth.savingsRm)} (savings) = ${formatCurrency(selectedMonth.nemBill.total)}`}
               />
             </p>
-            <p className="text-xl font-semibold text-emerald-950">{formatCurrency(selectedMonth.nemBill.total)}</p>
-            <p className="text-xs text-emerald-700">You save {formatCurrency(selectedMonth.savingsRm)} this month</p>
+            <p className="text-xl font-semibold text-emerald-950 dark:text-emerald-50">
+              {formatCurrency(selectedMonth.nemBill.total)}
+            </p>
+            <p className="text-xs text-emerald-700 dark:text-emerald-200">
+              You save {formatCurrency(selectedMonth.savingsRm)} this month
+            </p>
           </div>
         </div>
       </CardContent>
