@@ -82,8 +82,10 @@ export function SortableCardContainer({ cards }: { cards: CardItem[] }) {
   })
 
   // Re-reconcile whenever the card list changes (e.g. simple ↔ advanced toggle)
+  // Always read from localStorage so ordering of temporarily-hidden cards is preserved
   useEffect(() => {
-    setOrder((prev) => reconcile(prev, currentIds))
+    const saved = loadOrder()
+    setOrder(saved ? reconcile(saved, currentIds) : currentIds)
   }, [currentIds.join(',')])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
