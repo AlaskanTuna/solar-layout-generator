@@ -18,7 +18,7 @@ type PanelInfo = {
   rotation: number
 }
 
-const SNAP_THRESHOLD = 10
+const SNAP_THRESHOLD = 14
 const ROTATION_TOLERANCE = 5
 
 /**

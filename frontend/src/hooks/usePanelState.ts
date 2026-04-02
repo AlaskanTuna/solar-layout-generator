@@ -132,7 +132,10 @@ export function usePanelState({
       parsedEdits.length > 0 ? nextPanels.filter((panel) => !panel.deleted).length : maxVisibleCount
     const nextVisibleCount = Math.max(minVisibleCount, Math.min(maxVisibleCount, savedActiveCount || maxVisibleCount))
     setVisibleCountState(nextVisibleCount)
-  }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount])
+
+    // Push initial state so the first user edit can be undone
+    undoRedo.push({ panels: nextPanels, visibleCount: nextVisibleCount })
+  }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount, undoRedo])
 
   // Auto-recompute monthly energy for panels that only have yearly data
   useEffect(() => {

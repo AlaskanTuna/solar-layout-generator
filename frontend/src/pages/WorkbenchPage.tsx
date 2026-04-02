@@ -215,6 +215,7 @@ export function WorkbenchPage() {
   const [initialBatchStatus, setInitialBatchStatus] = useState<BatchRecomputeStatus>('idle')
   const [message, setMessage] = useState<UiMessage>(null)
   const [canvasExpanded, setCanvasExpanded] = useState(false)
+  const [freeRotate, setFreeRotate] = useState(false)
   const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
   const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
   const [isModelRecomputing, setIsModelRecomputing] = useState(false)
@@ -1145,6 +1146,7 @@ export function WorkbenchPage() {
                         onSelect={handlePanelSelect}
                         onDragEnd={handlePanelDragEnd}
                         onRotate={handleCanvasRotate}
+                        freeRotate={freeRotate}
                       />
                       {snapGuides.length > 0 && (
                         <Layer listening={false}>
@@ -1204,6 +1206,8 @@ export function WorkbenchPage() {
                       onToggleCanvasExpanded={() => setCanvasExpanded((v) => !v)}
                       hasSelection={selectedPanelIds.size > 0}
                       onDeleteSelected={handleDeleteSelected}
+                      freeRotate={freeRotate}
+                      onToggleFreeRotate={() => setFreeRotate((v) => !v)}
                     />
 
                     {/* Loading overlays */}

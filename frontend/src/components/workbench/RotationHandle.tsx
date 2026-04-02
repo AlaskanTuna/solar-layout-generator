@@ -9,6 +9,7 @@ type RotationHandleProps = {
   panelWidth: number
   panelHeight: number
   rotation: number
+  snapDegrees?: number
   onRotate: (panelId: string, rotation: number) => void
 }
 
@@ -17,6 +18,7 @@ const HANDLE_RADIUS = 8
 
 export function RotationHandle({
   panelId,
+  snapDegrees = 5,
   panelX,
   panelY,
   panelWidth,
@@ -48,7 +50,7 @@ export function RotationHandle({
     const dy = pointer.y - panelY
     let angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI + 90
     angleDeg = ((angleDeg % 360) + 360) % 360
-    const snapped = Math.round(angleDeg / 5) * 5
+    const snapped = Math.round(angleDeg / snapDegrees) * snapDegrees
 
     onRotate(panelId, snapped)
     setIsRotating(true)

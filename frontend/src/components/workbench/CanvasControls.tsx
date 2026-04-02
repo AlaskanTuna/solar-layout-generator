@@ -26,6 +26,8 @@ type CanvasControlsProps = {
   onToggleCanvasExpanded?: () => void
   hasSelection?: boolean
   onDeleteSelected?: () => void
+  freeRotate?: boolean
+  onToggleFreeRotate?: () => void
 }
 
 export function CanvasControls({
@@ -50,7 +52,9 @@ export function CanvasControls({
   canvasExpanded,
   onToggleCanvasExpanded,
   hasSelection,
-  onDeleteSelected
+  onDeleteSelected,
+  freeRotate,
+  onToggleFreeRotate
 }: CanvasControlsProps) {
   const [tooltipState, setTooltipState] = useState<{ label: string | null; pinned: boolean }>({
     label: null,
@@ -238,6 +242,29 @@ export function CanvasControls({
             </svg>
           </ToolButton>
         )}
+        {onToggleFreeRotate && (
+          <ToolButton
+            tooltipState={tooltipState}
+            setTooltipState={setTooltipState}
+            onClick={onToggleFreeRotate}
+            active={freeRotate}
+            tooltip={freeRotate ? 'Free Rotate: ON' : 'Free Rotate'}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+            </svg>
+          </ToolButton>
+        )}
 
         <div className="my-1 border-t border-border" />
 
@@ -370,21 +397,21 @@ function ToolButton({
     <Tooltip open={isTooltipOpen}>
       <TooltipTrigger asChild>
         <button
-          onClick={onClick}
+          onClick={() => {
+            onClick()
+            // Keep tooltip visible after click
+            setTooltipState({ label: tooltip, pinned: true })
+          }}
           disabled={disabled}
           onPointerEnter={() => setTooltipState({ label: tooltip, pinned: false })}
           onPointerLeave={() => {
-            setTooltipState((current) =>
-              current.label === tooltip && !current.pinned ? { label: null, pinned: false } : current
-            )
+            // Delay dismissal so tooltip persists briefly after hover
+            setTimeout(() => {
+              setTooltipState((current) =>
+                current.label === tooltip && !current.pinned ? { label: null, pinned: false } : current
+              )
+            }, 1500)
           }}
-          onFocus={() => setTooltipState({ label: tooltip, pinned: false })}
-          onBlur={() => {
-            setTooltipState((current) =>
-              current.label === tooltip && !current.pinned ? { label: null, pinned: false } : current
-            )
-          }}
-          onMouseDown={() => setTooltipState({ label: tooltip, pinned: true })}
           aria-label={tooltip}
           className={cn(
             'relative z-20 flex h-8 w-8 items-center justify-center rounded-md text-sm shadow-md transition-all active:scale-90 disabled:cursor-not-allowed disabled:opacity-40',
@@ -400,7 +427,7 @@ function ToolButton({
       <TooltipContent
         side="left"
         sideOffset={8}
-        className="border border-border bg-foreground text-background dark:bg-background dark:text-foreground"
+        className="z-[80] border border-border bg-foreground text-background dark:bg-background dark:text-foreground"
       >
         {tooltip}
       </TooltipContent>
