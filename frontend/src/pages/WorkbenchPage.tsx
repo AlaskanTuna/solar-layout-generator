@@ -529,10 +529,7 @@ export function WorkbenchPage() {
       setMessage(null)
     } catch (recomputeError) {
       rollback()
-      setMessage({
-        tone: 'error',
-        text: recomputeError instanceof Error ? recomputeError.message : 'Failed to recompute panel energy'
-      })
+      notify.error(recomputeError instanceof Error ? recomputeError.message : 'Failed to recompute panel energy')
     } finally {
       setPendingPanelId(null)
     }
@@ -565,7 +562,7 @@ export function WorkbenchPage() {
       const placementError = getPlacementError(panelId, nextCenter, panel.rotation)
       if (placementError) {
         resetPosition()
-        setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
+        notify.error(getPlacementErrorMessage(placementError))
         return
       }
 
@@ -598,7 +595,7 @@ export function WorkbenchPage() {
       const placementError = getPlacementError(sp.id, nextCenter, sp.rotation, selectedPanelIds)
       if (placementError) {
         resetPosition()
-        setMessage({ tone: 'error', text: `Group move failed: ${getPlacementErrorMessage(placementError)}` })
+        notify.error(`Group move failed: ${getPlacementErrorMessage(placementError)}`)
         return
       }
       moves.push({ id: sp.id, prevCenter: sp.center, nextCenter })
@@ -637,7 +634,7 @@ export function WorkbenchPage() {
         movePanel(mv.id, mv.prevCenter)
       }
       resetPosition()
-      setMessage({ tone: 'error', text: 'Failed to recompute group move. Positions reverted.' })
+      notify.error('Failed to recompute group move. Positions reverted.')
     } finally {
       setPendingPanelId(null)
     }
@@ -675,7 +672,7 @@ export function WorkbenchPage() {
         if (!p) continue
         const placementError = getPlacementError(p.id, p.center, nextRotation)
         if (placementError) {
-          setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
+          notify.error(getPlacementErrorMessage(placementError))
           return
         }
       }
@@ -712,7 +709,7 @@ export function WorkbenchPage() {
 
     const placementError = getPlacementError(selectedPanel.id, selectedPanel.center, nextRotation)
     if (placementError) {
-      setMessage({ tone: 'error', text: getPlacementErrorMessage(placementError) })
+      notify.error(getPlacementErrorMessage(placementError))
       return
     }
 
@@ -735,7 +732,7 @@ export function WorkbenchPage() {
       .catch(() => {
         if (!cancelled) {
           setOverlayImageUrl(null)
-          setMessage({ tone: 'error', text: `Failed to load ${overlayMode} overlay` })
+          notify.error(`Failed to load ${overlayMode} overlay`)
         }
       })
       .finally(() => {
@@ -810,10 +807,7 @@ export function WorkbenchPage() {
       setMessage(null)
     } catch (err) {
       setSelectedPanelModelId(prevModelId)
-      setMessage({
-        tone: 'error',
-        text: err instanceof Error ? err.message : 'Failed to recalculate energy. Reverted panel model.'
-      })
+      notify.error(err instanceof Error ? err.message : 'Failed to recalculate energy. Reverted panel model.')
     } finally {
       setIsModelRecomputing(false)
     }
@@ -919,13 +913,11 @@ export function WorkbenchPage() {
       queryClient.setQueryData(['project', projectId], updatedProject)
       navigate(`/project/${projectId}/analysis`)
     } catch (saveError) {
-      setMessage({
-        tone: 'error',
-        text:
-          saveError instanceof Error
-            ? saveError.message
-            : 'Failed to recompute and save the current layout. Please retry.'
-      })
+      notify.error(
+        saveError instanceof Error
+          ? saveError.message
+          : 'Failed to recompute and save the current layout. Please retry.'
+      )
     } finally {
       setIsBatchRecomputing(false)
       setIsSaving(false)

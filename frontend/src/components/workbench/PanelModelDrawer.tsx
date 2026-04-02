@@ -60,7 +60,7 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
       </Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-[80] bg-black/40" />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-[80] mt-24 flex flex-col rounded-t-2xl bg-card">
+        <Drawer.Content className="fixed inset-x-0 bottom-0 z-[80] mt-24 flex flex-col rounded-t-2xl bg-card animate-in slide-in-from-bottom duration-300">
           <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted" />
           <Drawer.Title className="px-6 pt-4 pb-2 text-lg font-semibold text-foreground">
             Choose a Solar Panel
@@ -68,15 +68,23 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
           <Drawer.Description className="px-6 pb-4 text-sm text-muted-foreground">
             The model selection changes the size and energy output of all panels on your roof.
           </Drawer.Description>
-          <div className="flex gap-4 overflow-x-auto px-6 pb-8 pt-2">
-            {PANEL_MODELS.map((model) => (
-              <ModelCard
-                key={model.id}
-                model={model}
-                isSelected={model.id === selectedModelId}
-                onSelect={() => handleSelect(model.id)}
-              />
-            ))}
+          {/* Dynamic grid: fills available width, min 160px per card, scrolls if overflow */}
+          <div className="overflow-x-auto px-6 pb-8 pt-2">
+            <div
+              className="grid gap-4"
+              style={{
+                gridTemplateColumns: `repeat(${PANEL_MODELS.length}, minmax(160px, 1fr))`
+              }}
+            >
+              {PANEL_MODELS.map((model) => (
+                <ModelCard
+                  key={model.id}
+                  model={model}
+                  isSelected={model.id === selectedModelId}
+                  onSelect={() => handleSelect(model.id)}
+                />
+              ))}
+            </div>
           </div>
         </Drawer.Content>
       </Drawer.Portal>
@@ -89,11 +97,10 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
     <button
       onClick={onSelect}
       className={cn(
-        'group flex w-[200px] shrink-0 flex-col rounded-xl border-2 bg-card p-3 text-left shadow-sm transition-all hover:shadow-md',
+        'group flex flex-col rounded-xl border-2 bg-card p-3 text-left shadow-sm transition-all hover:shadow-md',
         isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-border/80'
       )}
     >
-      {/* 3D Preview */}
       <div className="mb-3 h-[120px] w-full overflow-hidden rounded-lg bg-gradient-to-b from-slate-100 to-slate-200">
         <Suspense
           fallback={
@@ -106,7 +113,6 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
         </Suspense>
       </div>
 
-      {/* Model info */}
       <p className="text-sm font-semibold text-foreground">{model.name}</p>
       <p className="text-xs text-muted-foreground">{model.manufacturer}</p>
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">

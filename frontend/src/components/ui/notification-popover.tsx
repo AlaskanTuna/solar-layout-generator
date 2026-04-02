@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
-import { Bell } from 'lucide-react'
+import { useState } from 'react'
+import { Bell, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 export type Notification = {
   id: string
@@ -10,36 +9,6 @@ export type Notification = {
   description: string
   timestamp: Date
   read: boolean
-}
-
-function NotificationItem({
-  notification,
-  index,
-  onMarkAsRead
-}: {
-  notification: Notification
-  index: number
-  onMarkAsRead: (id: string) => void
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
-      animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-      transition={{ duration: 0.3, delay: index * 0.1 }}
-      key={notification.id}
-      className="cursor-pointer p-4 transition-colors hover:bg-accent/50"
-      onClick={() => onMarkAsRead(notification.id)}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          {!notification.read && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
-          <h4 className="text-sm font-medium text-foreground">{notification.title}</h4>
-        </div>
-        <span className="text-xs text-muted-foreground">{notification.timestamp.toLocaleDateString()}</span>
-      </div>
-      <p className="mt-1 text-xs text-muted-foreground">{notification.description}</p>
-    </motion.div>
-  )
 }
 
 export function NotificationPopover({
@@ -55,7 +24,12 @@ export function NotificationPopover({
   const unreadCount = notifications.filter((n) => !n.read).length
 
   const markAllAsRead = () => {
-    const updated = notifications.map((n) => ({ ...n, read: true }))
+    setNotifications([])
+    onNotificationsChange?.([])
+  }
+
+  const dismissNotification = (id: string) => {
+    const updated = notifications.filter((n) => n.id !== id)
     setNotifications(updated)
     onNotificationsChange?.(updated)
   }
@@ -90,9 +64,9 @@ export function NotificationPopover({
             >
               <div className="flex items-center justify-between border-b border-border p-4">
                 <h3 className="text-sm font-semibold">Notifications</h3>
-                {unreadCount > 0 && (
+                {notifications.length > 0 && (
                   <Button onClick={markAllAsRead} variant="ghost" size="sm" className="h-7 text-xs">
-                    Mark all as read
+                    Clear all
                   </Button>
                 )}
               </div>
@@ -100,17 +74,43 @@ export function NotificationPopover({
               {notifications.length === 0 ? (
                 <div className="p-6 text-center">
                   <Bell className="mx-auto h-8 w-8 text-muted-foreground/40" />
-                  <p className="mt-2 text-sm text-muted-foreground">No notifications yet</p>
+                  <p className="mt-2 text-sm text-muted-foreground">No notifications</p>
                 </div>
               ) : (
                 <div className="divide-y divide-border">
                   {notifications.map((notification, index) => (
-                    <NotificationItem
+                    <motion.div
                       key={notification.id}
-                      notification={notification}
-                      index={index}
-                      onMarkAsRead={markAsRead}
-                    />
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                      className="group relative p-4 transition-colors hover:bg-accent/50"
+                      onClick={() => markAsRead(notification.id)}
+                    >
+                      <div className="flex items-start gap-2 pr-6">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {!notification.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
+                            <h4 className="text-sm font-medium text-foreground">{notification.title}</h4>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">{notification.description}</p>
+                          <p className="mt-1 text-[10px] text-muted-foreground/60">
+                            {notification.timestamp.toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Dismiss button */}
+                      <button
+                        type="button"
+                        className="absolute right-3 top-3 rounded-md p-0.5 text-muted-foreground/50 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          dismissNotification(notification.id)
+                        }}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </motion.div>
                   ))}
                 </div>
               )}

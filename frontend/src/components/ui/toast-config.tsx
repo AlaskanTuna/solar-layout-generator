@@ -14,7 +14,7 @@ const BASE_STYLE: React.CSSProperties = {
 }
 
 const baseOptions: ToastOptions = {
-  duration: 4000,
+  duration: 2500,
   style: BASE_STYLE,
   position: 'bottom-center'
 }
@@ -30,7 +30,7 @@ export const notify = {
   error: (message: string) =>
     toast.error(message, {
       ...baseOptions,
-      duration: 6000,
+      duration: 4000,
       icon: <XCircle className="h-5 w-5 text-red-500" />,
       style: { ...BASE_STYLE, borderColor: 'rgba(239, 68, 68, 0.3)' }
     }),
