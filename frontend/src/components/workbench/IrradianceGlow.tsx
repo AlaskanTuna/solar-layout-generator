@@ -56,10 +56,10 @@ export function IrradianceGlow({ month }: IrradianceGlowProps) {
     const rad = ((azimuth - 90) * Math.PI) / 180
     const gx = 50 + Math.cos(rad) * 50
     const gy = 50 + Math.sin(rad) * 50
-    const opacity = intensity * 0.35
+    const opacity = intensity * 0.42
 
     return {
-      background: `radial-gradient(ellipse at ${gx.toFixed(1)}% ${gy.toFixed(1)}%, rgba(255, 184, 0, ${opacity.toFixed(3)}) 0%, rgba(255, 184, 0, ${(opacity * 0.4).toFixed(3)}) 40%, transparent 70%)`
+      background: `radial-gradient(ellipse at ${gx.toFixed(1)}% ${gy.toFixed(1)}%, rgba(255, 184, 0, ${opacity.toFixed(3)}) 0%, rgba(255, 184, 0, ${(opacity * 0.45).toFixed(3)}) 40%, transparent 70%)`
     }
   }, [month])
 

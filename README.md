@@ -111,8 +111,8 @@ The frontend proxies `/api` requests to the backend in development.
 
 ## Commands
 
-| Command                | Description                           |
-| ---------------------- | ------------------------------------- |
+| Command             | Description                           |
+| ------------------- | ------------------------------------- |
 | `pnpm dev`          | Start frontend + backend concurrently |
 | `pnpm dev:backend`  | Start backend only                    |
 | `pnpm dev:frontend` | Start frontend only                   |

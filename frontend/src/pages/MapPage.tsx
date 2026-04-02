@@ -171,7 +171,7 @@ export function MapPage() {
     input.placeholder = 'Search for your address...'
     input.disabled = isReadonly
     input.className =
-      'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed'
+      'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-center text-base text-foreground outline-none placeholder:text-center placeholder:text-muted-foreground disabled:cursor-not-allowed'
     host.appendChild(input)
 
     if (!isReadonly) {

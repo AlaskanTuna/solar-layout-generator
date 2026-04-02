@@ -186,5 +186,6 @@ temp/
 # Custom
 # ===========
 
+design-system/
 *.tsbuildinfo
 settings.local.json

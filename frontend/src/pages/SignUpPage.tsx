@@ -38,29 +38,29 @@ export function SignUpPage() {
       {/* Left panel — branding */}
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-primary via-solar-600 to-solar-800 p-10 lg:flex">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-primary-foreground/10 blur-[100px]" />
           <div className="absolute -right-32 -top-32 h-[400px] w-[400px] rounded-full bg-solar-400/20 blur-[80px]" />
         </div>
 
         <div className="relative">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-              <Sun className="h-4.5 w-4.5 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-foreground/20 backdrop-blur-sm">
+              <Sun className="h-4.5 w-4.5 text-primary-foreground" />
             </div>
-            <span className="font-heading text-lg font-semibold text-white">SolarSim</span>
+            <span className="font-heading text-lg font-semibold text-primary-foreground">SolarSim</span>
           </Link>
         </div>
 
         <div className="relative">
-          <h2 className="font-heading text-3xl font-bold leading-tight text-white">
+          <h2 className="font-heading text-3xl font-bold leading-tight text-primary-foreground">
             Start your solar assessment today
           </h2>
-          <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
             Join homeowners across Malaysia who are making data-driven decisions about rooftop solar.
           </p>
         </div>
 
-        <p className="relative text-xs text-white/40">2026 SolarSim</p>
+        <p className="relative text-xs text-primary-foreground/40">2026 SolarSim</p>
       </div>
 
       {/* Right panel — form */}

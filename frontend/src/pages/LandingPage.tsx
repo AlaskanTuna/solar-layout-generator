@@ -147,7 +147,7 @@ export function LandingPage() {
             <StepCard
               step={3}
               icon={<FileBarChart className="h-6 w-6" />}
-              title="Analyse Your Savings"
+              title="Analyze Your Savings"
               description="See your projected monthly savings, payback period and bill breakdown based on current Malaysian NEM tariff rates."
             />
           </div>

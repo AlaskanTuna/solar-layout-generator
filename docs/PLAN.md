@@ -1369,6 +1369,17 @@
 - [x] Reconcile saved order with current cards (handles added/removed cards)
 - [x] Drag handle (grip icon) appears on hover, left of each card
 
+### 10. Fix/Rework: Export PDF Feature
+
+**Purpose/Issue:** The PDF export feature in AnalysisPage is currently broken and needs a rework.
+
+**Implementation:**
+
+- [ ] Investigate current html2pdf.js export failures (blank pages, missing charts, styling issues)
+- [ ] Evaluate alternative approaches (e.g. server-side PDF generation, jsPDF + canvas capture, @react-pdf/renderer)
+- [ ] Implement reworked PDF export with correct chart rendering and themed styling
+- [ ] Test Simple and Advanced PDF report exports
+
 ---
 
 ## Phase X: Final Documentation
