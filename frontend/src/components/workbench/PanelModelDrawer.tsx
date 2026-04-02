@@ -59,8 +59,8 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
         </button>
       </Drawer.Trigger>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40" />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-2xl bg-card">
+        <Drawer.Overlay className="fixed inset-0 z-[80] bg-black/40" />
+        <Drawer.Content className="fixed inset-x-0 bottom-0 z-[80] mt-24 flex flex-col rounded-t-2xl bg-card">
           <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted" />
           <Drawer.Title className="px-6 pt-4 pb-2 text-lg font-semibold text-foreground">
             Choose a Solar Panel

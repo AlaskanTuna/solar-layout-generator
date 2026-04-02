@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/constants'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -23,6 +24,8 @@ type CanvasControlsProps = {
   onToggleSegments: () => void
   canvasExpanded?: boolean
   onToggleCanvasExpanded?: () => void
+  hasSelection?: boolean
+  onDeleteSelected?: () => void
 }
 
 export function CanvasControls({
@@ -45,8 +48,15 @@ export function CanvasControls({
   showSegments,
   onToggleSegments,
   canvasExpanded,
-  onToggleCanvasExpanded
+  onToggleCanvasExpanded,
+  hasSelection,
+  onDeleteSelected
 }: CanvasControlsProps) {
+  const [tooltipState, setTooltipState] = useState<{ label: string | null; pinned: boolean }>({
+    label: null,
+    pinned: false
+  })
+
   return (
     <TooltipProvider delayDuration={180}>
       <div
@@ -57,7 +67,12 @@ export function CanvasControls({
         {/* Expand/Collapse view */}
         {onToggleCanvasExpanded && (
           <>
-            <ToolButton onClick={onToggleCanvasExpanded} tooltip={canvasExpanded ? 'Collapse View' : 'Expand View'}>
+            <ToolButton
+              tooltipState={tooltipState}
+              setTooltipState={setTooltipState}
+              onClick={onToggleCanvasExpanded}
+              tooltip={canvasExpanded ? 'Collapse View' : 'Expand View'}
+            >
               {canvasExpanded ? (
                 <svg
                   width="16"
@@ -98,7 +113,13 @@ export function CanvasControls({
 
         {/* Tools group */}
         <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">Tools</span>
-        <ToolButton onClick={onUndo} disabled={!canUndo} tooltip="Undo">
+        <ToolButton
+          tooltipState={tooltipState}
+          setTooltipState={setTooltipState}
+          onClick={onUndo}
+          disabled={!canUndo}
+          tooltip="Undo"
+        >
           <svg
             width="16"
             height="16"
@@ -113,7 +134,13 @@ export function CanvasControls({
             <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
           </svg>
         </ToolButton>
-        <ToolButton onClick={onRedo} disabled={!canRedo} tooltip="Redo">
+        <ToolButton
+          tooltipState={tooltipState}
+          setTooltipState={setTooltipState}
+          onClick={onRedo}
+          disabled={!canRedo}
+          tooltip="Redo"
+        >
           <svg
             width="16"
             height="16"
@@ -128,7 +155,13 @@ export function CanvasControls({
             <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
           </svg>
         </ToolButton>
-        <ToolButton onClick={onToggleMarquee} active={marqueeMode} tooltip={marqueeMode ? 'Marquee: ON' : 'Marquee'}>
+        <ToolButton
+          tooltipState={tooltipState}
+          setTooltipState={setTooltipState}
+          onClick={onToggleMarquee}
+          active={marqueeMode}
+          tooltip={marqueeMode ? 'Marquee: ON' : 'Marquee'}
+        >
           <svg
             width="16"
             height="16"
@@ -157,7 +190,13 @@ export function CanvasControls({
             <path d="M3 7v-2" />
           </svg>
         </ToolButton>
-        <ToolButton onClick={onToggleSnap} active={snapEnabled} tooltip={snapEnabled ? 'Snap: ON' : 'Snap'}>
+        <ToolButton
+          tooltipState={tooltipState}
+          setTooltipState={setTooltipState}
+          onClick={onToggleSnap}
+          active={snapEnabled}
+          tooltip={snapEnabled ? 'Snap: ON' : 'Snap'}
+        >
           <svg
             width="16"
             height="16"
@@ -175,18 +214,52 @@ export function CanvasControls({
             <path d="M14 15h4" />
           </svg>
         </ToolButton>
+        {onDeleteSelected && (
+          <ToolButton
+            tooltipState={tooltipState}
+            setTooltipState={setTooltipState}
+            onClick={onDeleteSelected}
+            disabled={!hasSelection}
+            tooltip="Delete Selected"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg>
+          </ToolButton>
+        )}
 
         <div className="my-1 border-t border-border" />
 
         {/* View group */}
         <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">View</span>
-        <ToolButton onClick={onZoomIn} tooltip="Zoom in">
+        <ToolButton tooltipState={tooltipState} setTooltipState={setTooltipState} onClick={onZoomIn} tooltip="Zoom in">
           <span className="text-sm font-bold">+</span>
         </ToolButton>
-        <ToolButton onClick={onZoomOut} tooltip="Zoom out">
+        <ToolButton
+          tooltipState={tooltipState}
+          setTooltipState={setTooltipState}
+          onClick={onZoomOut}
+          tooltip="Zoom out"
+        >
           <span className="text-sm font-bold">−</span>
         </ToolButton>
-        <ToolButton onClick={onZoomReset} tooltip="Reset zoom">
+        <ToolButton
+          tooltipState={tooltipState}
+          setTooltipState={setTooltipState}
+          onClick={onZoomReset}
+          tooltip="Reset zoom"
+        >
           <span className="text-xs font-medium">1:1</span>
         </ToolButton>
         {stageScale !== 1 && (
@@ -200,6 +273,8 @@ export function CanvasControls({
           Layers
         </span>
         <ToolButton
+          tooltipState={tooltipState}
+          setTooltipState={setTooltipState}
           onClick={onToggleOverlayExpanded}
           className={overlayExpanded ? 'ring-1 ring-muted-foreground' : ''}
           tooltip={overlayExpanded ? 'Hide overlays' : 'Overlays'}
@@ -225,30 +300,40 @@ export function CanvasControls({
           )}
         >
           <SwatchButton
+            tooltipState={tooltipState}
+            setTooltipState={setTooltipState}
             active={overlayMode === 'rgb'}
             background={COLORS.overlayRgb}
             label="RGB"
             onClick={() => onOverlayModeChange('rgb')}
           />
           <SwatchButton
+            tooltipState={tooltipState}
+            setTooltipState={setTooltipState}
             active={overlayMode === 'annual-flux'}
             background={COLORS.overlayFlux}
             label="Flux"
             onClick={() => onOverlayModeChange('annual-flux')}
           />
           <SwatchButton
+            tooltipState={tooltipState}
+            setTooltipState={setTooltipState}
             active={overlayMode === 'dsm'}
             background={COLORS.overlayDsm}
             label="DSM"
             onClick={() => onOverlayModeChange('dsm')}
           />
           <SwatchButton
+            tooltipState={tooltipState}
+            setTooltipState={setTooltipState}
             active={overlayMode === 'mask'}
             background={COLORS.overlayMask}
             label="Mask"
             onClick={() => onOverlayModeChange('mask')}
           />
           <SwatchButton
+            tooltipState={tooltipState}
+            setTooltipState={setTooltipState}
             active={showSegments}
             background={COLORS.overlaySegments}
             label="Segments"
@@ -266,6 +351,8 @@ function ToolButton({
   active,
   tooltip,
   className,
+  tooltipState,
+  setTooltipState,
   children
 }: {
   onClick: () => void
@@ -273,14 +360,31 @@ function ToolButton({
   active?: boolean
   tooltip: string
   className?: string
+  tooltipState: { label: string | null; pinned: boolean }
+  setTooltipState: React.Dispatch<React.SetStateAction<{ label: string | null; pinned: boolean }>>
   children: React.ReactNode
 }) {
+  const isTooltipOpen = tooltipState.label === tooltip
+
   return (
-    <Tooltip>
+    <Tooltip open={isTooltipOpen}>
       <TooltipTrigger asChild>
         <button
           onClick={onClick}
           disabled={disabled}
+          onPointerEnter={() => setTooltipState({ label: tooltip, pinned: false })}
+          onPointerLeave={() => {
+            setTooltipState((current) =>
+              current.label === tooltip && !current.pinned ? { label: null, pinned: false } : current
+            )
+          }}
+          onFocus={() => setTooltipState({ label: tooltip, pinned: false })}
+          onBlur={() => {
+            setTooltipState((current) =>
+              current.label === tooltip && !current.pinned ? { label: null, pinned: false } : current
+            )
+          }}
+          onMouseDown={() => setTooltipState({ label: tooltip, pinned: true })}
           aria-label={tooltip}
           className={cn(
             'relative z-20 flex h-8 w-8 items-center justify-center rounded-md text-sm shadow-md transition-all active:scale-90 disabled:cursor-not-allowed disabled:opacity-40',
@@ -308,18 +412,37 @@ function SwatchButton({
   active,
   background,
   label,
-  onClick
+  onClick,
+  tooltipState,
+  setTooltipState
 }: {
   active: boolean
   background: string
   label: string
   onClick: () => void
+  tooltipState: { label: string | null; pinned: boolean }
+  setTooltipState: React.Dispatch<React.SetStateAction<{ label: string | null; pinned: boolean }>>
 }) {
+  const isTooltipOpen = tooltipState.label === label
+
   return (
-    <Tooltip>
+    <Tooltip open={isTooltipOpen}>
       <TooltipTrigger asChild>
         <button
           onClick={onClick}
+          onPointerEnter={() => setTooltipState({ label, pinned: false })}
+          onPointerLeave={() => {
+            setTooltipState((current) =>
+              current.label === label && !current.pinned ? { label: null, pinned: false } : current
+            )
+          }}
+          onFocus={() => setTooltipState({ label, pinned: false })}
+          onBlur={() => {
+            setTooltipState((current) =>
+              current.label === label && !current.pinned ? { label: null, pinned: false } : current
+            )
+          }}
+          onMouseDown={() => setTooltipState({ label, pinned: true })}
           aria-label={label}
           className={cn(
             'relative z-20 h-8 w-8 rounded-md shadow-md transition-all active:scale-90',

@@ -25,7 +25,8 @@ function getModalPosition(step: TourStep): { top: number; left: number } | null 
   }
 
   if (placement === 'center-bottom') {
-    return { top: vh - modalH - 80 + window.scrollY, left: (vw - modalW) / 2 }
+    const sidebarW = 64
+    return { top: vh - modalH - 80 + window.scrollY, left: sidebarW + (vw - sidebarW - modalW) / 2 }
   }
 
   const el = document.querySelector(target)

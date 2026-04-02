@@ -44,8 +44,6 @@ type WorkbenchSidebarProps = {
   selectedPanel: SelectedPanelData
   selectedAnnualEnergy: number | null
   pendingPanelId: string | null
-  onRotationInput: (value: number) => void
-  onDeleteSelected: () => void
   onSave: () => void
 }
 
@@ -77,8 +75,6 @@ export function WorkbenchSidebar({
   selectedPanel,
   selectedAnnualEnergy,
   pendingPanelId,
-  onRotationInput,
-  onDeleteSelected,
   onSave
 }: WorkbenchSidebarProps) {
   const { projectId } = useParams<{ projectId: string }>()
@@ -247,40 +243,6 @@ export function WorkbenchSidebar({
                 </div>
               </div>
             )}
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>
-                  Rotate {selectedPanelIds.size > 1 ? 'Panels' : 'Panel'}
-                  <InfoTooltip text="Drag to set rotation angle (0–359°). The panel's energy yield is recomputed after each change." />
-                </Label>
-                <span className="text-sm font-medium">
-                  {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
-                </span>
-              </div>
-              <Slider
-                value={[selectedPanel?.rotation ?? 0]}
-                min={0}
-                max={359}
-                step={5}
-                disabled={selectedPanelIds.size === 0 || (selectedPanel != null && pendingPanelId === selectedPanel.id)}
-                onValueChange={(value) => {
-                  const nextValue = value[0]
-                  if (typeof nextValue === 'number') {
-                    onRotationInput(nextValue)
-                  }
-                }}
-              />
-            </div>
-
-            <Button
-              variant="destructive"
-              className="w-full"
-              disabled={selectedPanelIds.size === 0 || (selectedPanel != null && pendingPanelId === selectedPanel.id)}
-              onClick={onDeleteSelected}
-            >
-              {selectedPanelIds.size > 1 ? `Delete ${selectedPanelIds.size} Panels` : 'Delete Selected Panel'}
-            </Button>
           </div>
 
           <div className="grid gap-2">

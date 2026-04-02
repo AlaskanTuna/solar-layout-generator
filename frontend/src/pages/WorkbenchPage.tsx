@@ -986,8 +986,6 @@ export function WorkbenchPage() {
           selectedPanel={selectedPanel}
           selectedAnnualEnergy={selectedAnnualEnergy}
           pendingPanelId={pendingPanelId}
-          onRotationInput={handleRotationInput}
-          onDeleteSelected={handleDeleteSelected}
           onSave={handleSave}
         />
 
@@ -1188,6 +1186,8 @@ export function WorkbenchPage() {
                       onToggleSegments={() => setShowSegments((v) => !v)}
                       canvasExpanded={canvasExpanded}
                       onToggleCanvasExpanded={() => setCanvasExpanded((v) => !v)}
+                      hasSelection={selectedPanelIds.size > 0}
+                      onDeleteSelected={handleDeleteSelected}
                     />
 
                     {/* Loading overlays */}
