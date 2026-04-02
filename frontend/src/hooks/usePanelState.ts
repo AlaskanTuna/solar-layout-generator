@@ -233,8 +233,15 @@ export function usePanelState({
     updatePanelState(panelId, (panel) => ({ ...panel, center }))
   }
 
+  const lastRotateSnapshotRef = useRef(0)
+
   function rotatePanel(panelId: string, rotation: number) {
-    pushSnapshot()
+    // Only push a snapshot if >1s since last rotation snapshot (prevents filling undo stack during drag)
+    const now = Date.now()
+    if (now - lastRotateSnapshotRef.current > 1000) {
+      pushSnapshot()
+      lastRotateSnapshotRef.current = now
+    }
     updatePanelState(panelId, (panel) => ({ ...panel, rotation: normalizeRotation(rotation) }))
   }
 
