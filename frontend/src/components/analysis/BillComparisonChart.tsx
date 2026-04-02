@@ -1,14 +1,18 @@
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { COLORS, CHART_TOOLTIP_STYLE } from '@/lib/constants'
-import { formatTooltipCurrency } from './formatters'
+import { useTheme } from '@/hooks/useTheme'
+import { COLORS, getChartTooltipStyle } from '@/lib/constants'
+import { ChartTooltipContent } from './ChartTooltipContent'
 
 type BillComparisonChartProps = {
   chartData: { month: string; baselineBill: number; nemBill: number }[]
 }
 
 export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
+  const { resolved } = useTheme()
+  const chartTooltipStyle = getChartTooltipStyle(resolved)
+
   return (
     <Card data-tour="monthly-chart" className="border-border bg-card/90 shadow-sm">
       <CardHeader>
@@ -49,10 +53,24 @@ export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
               dx={-10}
             />
             <Tooltip
-              formatter={(value) => formatTooltipCurrency(value)}
-              cursor={CHART_TOOLTIP_STYLE.cursor}
-              contentStyle={CHART_TOOLTIP_STYLE.contentStyle}
-              labelStyle={CHART_TOOLTIP_STYLE.labelStyle}
+              cursor={chartTooltipStyle.cursor}
+              contentStyle={chartTooltipStyle.contentStyle}
+              labelStyle={chartTooltipStyle.labelStyle}
+              content={
+                <ChartTooltipContent
+                  getItemClassName={(entry) => {
+                    if (entry.name === 'With Solar') {
+                      return 'font-bold text-orange-600 dark:text-orange-400'
+                    }
+
+                    if (entry.name === 'Without Solar') {
+                      return 'font-bold text-emerald-600 dark:text-emerald-400'
+                    }
+
+                    return 'font-semibold text-foreground'
+                  }}
+                />
+              }
             />
             <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
             <Bar

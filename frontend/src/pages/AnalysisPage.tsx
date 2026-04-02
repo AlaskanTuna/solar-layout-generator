@@ -35,8 +35,11 @@ import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { ImagePopup } from '@/components/ImagePopup'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
+import { useTheme } from '@/hooks/useTheme'
 import { getPanelModel, PANEL_MODELS, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
-import { formatCurrency, formatNumber, formatTooltipCurrency } from '@/components/analysis/formatters'
+import { formatCurrency, formatNumber } from '@/components/analysis/formatters'
+import { ChartTooltipContent } from '@/components/analysis/ChartTooltipContent'
+import { getChartTooltipStyle } from '@/lib/constants'
 import { HeroMetrics } from '@/components/analysis/HeroMetrics'
 import { BillComparisonChart } from '@/components/analysis/BillComparisonChart'
 import { FinancialRoadmap } from '@/components/analysis/FinancialRoadmap'
@@ -174,6 +177,8 @@ export function AnalysisPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { resolved } = useTheme()
+  const chartTooltipStyle = getChartTooltipStyle(resolved)
   const reportRef = useRef<HTMLDivElement>(null)
   const simpleReportRef = useRef<HTMLDivElement>(null)
   const initializedProjectIdRef = useRef<string | null>(null)
@@ -793,7 +798,20 @@ export function AnalysisPage() {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="month" />
                                 <YAxis width={70} tickFormatter={(value) => `RM${value}`} />
-                                <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
+                                <Tooltip
+                                  cursor={chartTooltipStyle.cursor}
+                                  contentStyle={chartTooltipStyle.contentStyle}
+                                  labelStyle={chartTooltipStyle.labelStyle}
+                                  content={
+                                    <ChartTooltipContent
+                                      getItemClassName={(entry) =>
+                                        entry.name === 'Cumulative Savings'
+                                          ? 'font-bold text-yellow-600 dark:text-yellow-400'
+                                          : 'font-semibold text-foreground'
+                                      }
+                                    />
+                                  }
+                                />
                                 <Line
                                   type="monotone"
                                   dataKey="cumulativeSavings"

@@ -29,13 +29,30 @@ export const COLORS = {
   pdfSolarFill: '#16a34a'
 } as const
 
+type ThemeMode = 'light' | 'dark'
+
 /** Shared Recharts tooltip style config. */
-export const CHART_TOOLTIP_STYLE = {
-  contentStyle: {
-    borderRadius: '8px',
-    border: `1px solid ${COLORS.chartBorder}`,
-    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-  },
-  labelStyle: { color: COLORS.chartLabel, fontWeight: 600, paddingBottom: '4px' },
-  cursor: { fill: COLORS.chartCursor }
-} as const
+export function getChartTooltipStyle(theme: ThemeMode) {
+  const isDark = theme === 'dark'
+
+  return {
+    contentStyle: {
+      borderRadius: '8px',
+      border: `1px solid ${isDark ? '#44403c' : COLORS.chartBorder}`,
+      backgroundColor: isDark ? '#1c1917' : '#ffffff',
+      color: isDark ? '#fafaf9' : '#1c1917',
+      boxShadow: isDark ? '0 8px 24px -6px rgb(0 0 0 / 0.45)' : '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+    },
+    labelStyle: {
+      color: isDark ? '#fafaf9' : COLORS.chartLabel,
+      fontWeight: 600,
+      paddingBottom: '4px'
+    },
+    cursor: {
+      fill: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
+    }
+  } as const
+}
+
+/** Backwards-compatible default for light theme consumers. */
+export const CHART_TOOLTIP_STYLE = getChartTooltipStyle('light')

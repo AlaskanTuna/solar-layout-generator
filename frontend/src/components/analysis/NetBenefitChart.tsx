@@ -2,8 +2,10 @@ import { useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/InfoTooltip'
-import { COLORS, CHART_TOOLTIP_STYLE } from '@/lib/constants'
-import { formatCurrency, formatTooltipCurrency } from './formatters'
+import { useTheme } from '@/hooks/useTheme'
+import { COLORS, getChartTooltipStyle } from '@/lib/constants'
+import { ChartTooltipContent } from './ChartTooltipContent'
+import { formatCurrency } from './formatters'
 import { computeDegradedSavings } from '@/lib/analysis'
 
 type NetBenefitChartProps = {
@@ -15,6 +17,9 @@ type NetBenefitChartProps = {
 const round2 = (v: number) => Math.round(v * 100) / 100
 
 export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }: NetBenefitChartProps) {
+  const { resolved } = useTheme()
+  const chartTooltipStyle = getChartTooltipStyle(resolved)
+
   const netBenefitData = useMemo(
     () =>
       Array.from({ length: 10 }, (_, i) => ({
@@ -74,10 +79,24 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }:
                 dx={-10}
               />
               <Tooltip
-                formatter={(value) => formatTooltipCurrency(value)}
-                cursor={CHART_TOOLTIP_STYLE.cursor}
-                contentStyle={CHART_TOOLTIP_STYLE.contentStyle}
-                labelStyle={CHART_TOOLTIP_STYLE.labelStyle}
+                cursor={chartTooltipStyle.cursor}
+                contentStyle={chartTooltipStyle.contentStyle}
+                labelStyle={chartTooltipStyle.labelStyle}
+                content={
+                  <ChartTooltipContent
+                    getItemClassName={(entry) => {
+                      const value = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+
+                      if (entry.name === 'Net Benefit') {
+                        return value < 0
+                          ? 'font-bold text-red-600 dark:text-red-400'
+                          : 'font-bold text-emerald-600 dark:text-emerald-400'
+                      }
+
+                      return 'font-semibold text-foreground'
+                    }}
+                  />
+                }
               />
               <Bar dataKey="value" name="Net Benefit" radius={[2, 2, 0, 0]} strokeWidth={2}>
                 {netBenefitData.map((entry, index) => (
