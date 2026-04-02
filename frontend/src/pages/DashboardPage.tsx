@@ -1,5 +1,5 @@
 import { useState, useMemo, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { listProjects, deleteProject } from '@/api/projects'
@@ -8,9 +8,7 @@ import { AppLayout } from '@/components/AppLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Separator } from '@/components/ui/separator'
 import { writeNewProjectDraft } from '@/lib/projectDraftStorage'
 import {
   Dialog,
@@ -18,21 +16,15 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog'
 import {
   Plus,
-  Trash2,
-  Clock,
   Sun,
   FolderOpen,
-  ArrowRight,
-  Map,
-  Wrench,
+  Clock,
   BarChart3,
   Sparkles,
-  TrendingUp,
   Lightbulb,
   Leaf,
   Zap,
@@ -40,81 +32,17 @@ import {
   MapPin,
   SlidersHorizontal,
   FileBarChart,
-  ChevronLeft,
-  LayoutDashboard,
-  FolderKanban,
   PieChart
 } from 'lucide-react'
-import { toast } from 'sonner'
+import { notify } from '@/components/ui/toast-config'
+import { DashboardTabNav, type DashboardTab } from '@/components/dashboard/DashboardTabNav'
+import { ProjectCard } from '@/components/dashboard/ProjectCard'
+import { StatCard } from '@/components/dashboard/StatCard'
+import { aggregateStats, projectRoute } from '@/components/dashboard/helpers'
 
 /* ═══════════════════════════════════════════════
-   HELPERS
+   CONSTANTS
    ═══════════════════════════════════════════════ */
-
-const STATUS_CONFIG: Record<
-  string,
-  { label: string; variant: 'default' | 'secondary' | 'outline'; icon: React.ReactNode; color: string }
-> = {
-  draft: { label: 'Draft', variant: 'outline', icon: <Map className="h-3 w-3" />, color: 'text-muted-foreground' },
-  layout_saved: {
-    label: 'Layout Saved',
-    variant: 'secondary',
-    icon: <Wrench className="h-3 w-3" />,
-    color: 'text-amber-600 dark:text-amber-400'
-  },
-  analysis_saved: {
-    label: 'Analysis Complete',
-    variant: 'default',
-    icon: <BarChart3 className="h-3 w-3" />,
-    color: 'text-green-600 dark:text-green-400'
-  }
-}
-
-function projectRoute(p: ProjectResponse): string {
-  switch (p.status) {
-    case 'analysis_saved':
-      return `/project/${p.id}/analysis`
-    case 'layout_saved':
-      return `/project/${p.id}/workbench`
-    default:
-      return `/project/${p.id}/map`
-  }
-}
-
-function formatRelativeDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-  const diffHr = Math.floor(diffMs / 3600000)
-  const diffDay = Math.floor(diffMs / 86400000)
-  if (diffMin < 1) return 'Just now'
-  if (diffMin < 60) return `${diffMin}m ago`
-  if (diffHr < 24) return `${diffHr}h ago`
-  if (diffDay < 7) return `${diffDay}d ago`
-  return date.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
-type AggregatedStats = {
-  totalSavingsRm: number
-  totalCarbonKg: number
-  totalEnergyKwh: number
-  totalPanels: number
-}
-
-function aggregateStats(projects: ProjectResponse[]): AggregatedStats {
-  const stats: AggregatedStats = { totalSavingsRm: 0, totalCarbonKg: 0, totalEnergyKwh: 0, totalPanels: 0 }
-  for (const p of projects) {
-    if (p.status !== 'analysis_saved' || !p.analysisResults) continue
-    const r = p.analysisResults as Record<string, number>
-    stats.totalSavingsRm += r.averageMonthlySavingsRm ?? 0
-    stats.totalCarbonKg += r.carbonOffsetKg ?? 0
-    stats.totalPanels += r.activePanelCount ?? 0
-    const totals = (p.analysisResults as Record<string, Record<string, number>>).annualTotals
-    if (totals) stats.totalEnergyKwh += totals.totalGenerationKwh ?? 0
-  }
-  return stats
-}
 
 const WORKFLOW_STEPS = [
   {
@@ -126,23 +54,15 @@ const WORKFLOW_STEPS = [
   {
     step: 2,
     icon: <SlidersHorizontal className="h-4 w-4" />,
-    title: 'Adjust Layout',
+    title: 'Generate & Adjust Layout',
     desc: 'Drag, rotate, add or remove panels'
   },
   {
     step: 3,
     icon: <FileBarChart className="h-4 w-4" />,
-    title: 'Analyse Savings',
+    title: 'Analyze Savings',
     desc: 'View projections and export PDF'
   }
-]
-
-type DashboardTab = 'summary' | 'projects' | 'analytics'
-
-const NAV_ITEMS: { id: DashboardTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'summary', label: 'Summary', icon: <LayoutDashboard className="h-5 w-5" /> },
-  { id: 'projects', label: 'Projects', icon: <FolderKanban className="h-5 w-5" /> },
-  { id: 'analytics', label: 'Analytics', icon: <PieChart className="h-5 w-5" /> }
 ]
 
 /* ═══════════════════════════════════════════════
@@ -158,7 +78,6 @@ export function DashboardPage() {
   const [deleteTarget, setDeleteTarget] = useState<ProjectResponse | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [activeTab, setActiveTab] = useState<DashboardTab>('summary')
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
@@ -186,9 +105,9 @@ export function DashboardPage() {
     try {
       await deleteProject(deleteTarget.id)
       await queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(`"${deleteTarget.name}" has been deleted.`)
+      notify.success(`"${deleteTarget.name}" has been deleted.`)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete project.')
+      notify.error(err instanceof Error ? err.message : 'Failed to delete project.')
     } finally {
       setIsDeleting(false)
       setDeleteTarget(null)
@@ -196,124 +115,41 @@ export function DashboardPage() {
   }
 
   return (
-    <AppLayout>
-      <div className="relative flex min-h-[calc(100vh-3.5rem)]">
-        {/* ═══════ Backdrop blur overlay ═══════ */}
-        <div
-          className={`fixed inset-0 z-[55] bg-black/20 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${sidebarExpanded ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
-          onClick={() => setSidebarExpanded(false)}
-        />
-
-        {/* ═══════ Nav Sidebar (shadcn pattern: CSS-var width + inline transition) ═══════ */}
-        <aside
-          className="fixed left-0 top-0 z-[60] flex h-screen flex-col overflow-hidden border-r border-border bg-sidebar"
-          style={{
-            width: sidebarExpanded ? 240 : 64,
-            transition: 'width 300ms cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 300ms ease',
-            boxShadow: sidebarExpanded ? '0 8px 40px rgba(0, 0, 0, 0.16)' : 'none'
-          }}
-          onMouseEnter={() => setSidebarExpanded(true)}
-          onMouseLeave={() => setSidebarExpanded(false)}
-        >
-          {/* Logo — mirrors AppNav */}
-          <div className="flex h-14 shrink-0 items-center gap-3 px-[18px]">
-            <Link to="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-                <Sun className="h-3.5 w-3.5 text-white" />
-              </div>
-            </Link>
-            <span
-              className="whitespace-nowrap font-heading text-sm font-semibold tracking-tight transition-opacity duration-200"
-              style={{ opacity: sidebarExpanded ? 1 : 0 }}
-            >
-              SolarSim
-            </span>
-          </div>
-
-          {/* Nav items */}
-          <nav className="flex-1 space-y-1 overflow-hidden px-2 py-3">
-            {NAV_ITEMS.map((item) => {
-              const isActive = activeTab === item.id
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                  }`}
-                >
-                  <div className={`shrink-0 ${isActive ? 'text-primary' : ''}`}>{item.icon}</div>
-                  <span
-                    className="truncate whitespace-nowrap transition-opacity duration-200"
-                    style={{ opacity: sidebarExpanded ? 1 : 0 }}
-                  >
-                    {item.label}
-                  </span>
-                </button>
-              )
-            })}
-          </nav>
-
-          {/* Collapse indicator */}
-          <div className="w-16 shrink-0 py-3">
-            <div className="flex items-center justify-center text-muted-foreground">
-              <ChevronLeft
-                className="h-4 w-4 transition-transform duration-300 ease-in-out"
-                style={{ transform: sidebarExpanded ? 'rotate(0deg)' : 'rotate(180deg)' }}
-              />
-            </div>
-          </div>
-        </aside>
-
-        {/* ═══════ Main Content (stays in place) ═══════ */}
-        <div className="flex-1" style={{ marginLeft: 64 }}>
-          <div className="mx-auto max-w-6xl px-6 py-8">
-            {activeTab === 'summary' && (
-              <SummaryTab
-                user={user}
-                projects={projects ?? []}
-                isLoading={isLoading}
-                stats={stats}
-                totalProjects={totalProjects}
-                completedProjects={completedProjects}
-                inProgress={inProgress}
-                dialogOpen={dialogOpen}
-                setDialogOpen={setDialogOpen}
-                projectName={projectName}
-                setProjectName={setProjectName}
-                onCreateProject={handleCreateProject}
-                onNavigate={navigate}
-                onDeleteTarget={setDeleteTarget}
-              />
-            )}
-            {activeTab === 'projects' && (
-              <ProjectsTab
-                projects={projects ?? []}
-                isLoading={isLoading}
-                dialogOpen={dialogOpen}
-                setDialogOpen={setDialogOpen}
-                projectName={projectName}
-                setProjectName={setProjectName}
-                onCreateProject={handleCreateProject}
-                onNavigate={navigate}
-                onDeleteTarget={setDeleteTarget}
-              />
-            )}
-            {activeTab === 'analytics' && (
-              <AnalyticsTab
-                projects={projects ?? []}
-                stats={stats}
-                completedProjects={completedProjects}
-                totalProjects={totalProjects}
-              />
-            )}
-          </div>
-        </div>
+    <AppLayout sidebarChildren={<DashboardTabNav activeTab={activeTab} onTabChange={setActiveTab} />}>
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        {activeTab === 'summary' && (
+          <SummaryTab
+            user={user}
+            projects={projects ?? []}
+            isLoading={isLoading}
+            totalProjects={totalProjects}
+            completedProjects={completedProjects}
+            inProgress={inProgress}
+            setDialogOpen={setDialogOpen}
+            onNavigate={navigate}
+            onDeleteTarget={setDeleteTarget}
+          />
+        )}
+        {activeTab === 'projects' && (
+          <ProjectsTab
+            projects={projects ?? []}
+            isLoading={isLoading}
+            setDialogOpen={setDialogOpen}
+            onNavigate={navigate}
+            onDeleteTarget={setDeleteTarget}
+          />
+        )}
+        {activeTab === 'analytics' && (
+          <AnalyticsTab
+            projects={projects ?? []}
+            stats={stats}
+            completedProjects={completedProjects}
+            totalProjects={totalProjects}
+          />
+        )}
       </div>
 
-      {/* Dialogs */}
+      {/* Create Project Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <form onSubmit={handleCreateProject}>
@@ -343,6 +179,7 @@ export function DashboardPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Project Dialog */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
@@ -373,30 +210,20 @@ function SummaryTab({
   user,
   projects,
   isLoading,
-  stats,
   totalProjects,
   completedProjects,
   inProgress,
-  dialogOpen,
   setDialogOpen,
-  projectName,
-  setProjectName,
-  onCreateProject,
   onNavigate,
   onDeleteTarget
 }: {
   user: { email?: string } | null
   projects: ProjectResponse[]
   isLoading: boolean
-  stats: AggregatedStats
   totalProjects: number
   completedProjects: number
   inProgress: number
-  dialogOpen: boolean
   setDialogOpen: (v: boolean) => void
-  projectName: string
-  setProjectName: (v: string) => void
-  onCreateProject: (e: FormEvent) => void
   onNavigate: (path: string) => void
   onDeleteTarget: (p: ProjectResponse) => void
 }) {
@@ -450,40 +277,6 @@ function SummaryTab({
           </div>
         </div>
       </div>
-
-      {/* Solar Performance Stats */}
-      {completedProjects > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4 animate-fade-in-up">
-          <StatCard
-            icon={<Receipt className="h-5 w-5" />}
-            label="Monthly Savings"
-            value={`RM ${stats.totalSavingsRm.toFixed(0)}`}
-            accent="text-green-600 dark:text-green-400"
-            bg="bg-green-500/10 dark:bg-green-500/20"
-          />
-          <StatCard
-            icon={<Zap className="h-5 w-5" />}
-            label="Annual Energy"
-            value={`${(stats.totalEnergyKwh / 1000).toFixed(1)} MWh`}
-            accent="text-primary"
-            bg="bg-primary/10"
-          />
-          <StatCard
-            icon={<Leaf className="h-5 w-5" />}
-            label="CO2 Offset"
-            value={`${(stats.totalCarbonKg / 1000).toFixed(1)} t/yr`}
-            accent="text-emerald-600 dark:text-emerald-400"
-            bg="bg-emerald-500/10 dark:bg-emerald-500/20"
-          />
-          <StatCard
-            icon={<Sun className="h-5 w-5" />}
-            label="Total Panels"
-            value={`${stats.totalPanels}`}
-            accent="text-amber-600 dark:text-amber-400"
-            bg="bg-amber-500/10 dark:bg-amber-500/20"
-          />
-        </div>
-      )}
 
       {/* Recent Projects */}
       <div className="mt-8">
@@ -581,21 +374,13 @@ function SummaryTab({
 function ProjectsTab({
   projects,
   isLoading,
-  dialogOpen,
   setDialogOpen,
-  projectName,
-  setProjectName,
-  onCreateProject,
   onNavigate,
   onDeleteTarget
 }: {
   projects: ProjectResponse[]
   isLoading: boolean
-  dialogOpen: boolean
   setDialogOpen: (v: boolean) => void
-  projectName: string
-  setProjectName: (v: string) => void
-  onCreateProject: (e: FormEvent) => void
   onNavigate: (path: string) => void
   onDeleteTarget: (p: ProjectResponse) => void
 }) {
@@ -609,7 +394,6 @@ function ProjectsTab({
 
   return (
     <>
-      {/* Header */}
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight">Projects</h1>
@@ -621,7 +405,6 @@ function ProjectsTab({
         </Button>
       </div>
 
-      {/* Filter Tabs */}
       <div className="mt-6 flex gap-1 rounded-lg bg-muted/50 p-1 w-fit">
         {(['all', 'completed', 'in-progress'] as const).map((f) => (
           <button
@@ -636,7 +419,6 @@ function ProjectsTab({
         ))}
       </div>
 
-      {/* Project Grid */}
       <div className="mt-6">
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -665,7 +447,6 @@ function ProjectsTab({
               />
             ))}
 
-            {/* New project card */}
             <button
               onClick={() => setDialogOpen(true)}
               className="glass-card flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border p-8 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:shadow-lg"
@@ -693,7 +474,7 @@ function AnalyticsTab({
   totalProjects
 }: {
   projects: ProjectResponse[]
-  stats: AggregatedStats
+  stats: ReturnType<typeof aggregateStats>
   completedProjects: number
   totalProjects: number
 }) {
@@ -716,7 +497,6 @@ function AnalyticsTab({
   const avgSavings = completedProjects > 0 ? stats.totalSavingsRm / completedProjects : 0
   const avgPanels = completedProjects > 0 ? stats.totalPanels / completedProjects : 0
 
-  // Extract payback data from completed projects
   const paybackData = projects
     .filter((p) => p.status === 'analysis_saved' && p.analysisResults)
     .map((p) => {
@@ -731,7 +511,6 @@ function AnalyticsTab({
         Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
       </p>
 
-      {/* Key Metrics */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
           icon={<Receipt className="h-5 w-5" />}
@@ -763,7 +542,6 @@ function AnalyticsTab({
         />
       </div>
 
-      {/* Averages */}
       <h2 className="mt-8 font-heading text-lg font-semibold">Averages per Project</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div className="glass-card p-5">
@@ -784,7 +562,6 @@ function AnalyticsTab({
         </div>
       </div>
 
-      {/* Per-Project Breakdown */}
       <h2 className="mt-8 font-heading text-lg font-semibold">Project Breakdown</h2>
       <div className="mt-4 glass-card overflow-hidden">
         <div className="overflow-x-auto">
@@ -807,129 +584,6 @@ function AnalyticsTab({
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
-  )
-}
-
-/* ═══════════════════════════════════════════════
-   SHARED SUB-COMPONENTS
-   ═══════════════════════════════════════════════ */
-
-function StatCard({
-  icon,
-  label,
-  value,
-  accent,
-  bg
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  accent: string
-  bg: string
-}) {
-  return (
-    <div className="glass-card flex items-center gap-3 p-4">
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bg} ${accent}`}>{icon}</div>
-      <div className="min-w-0">
-        <p className="text-[11px] text-muted-foreground">{label}</p>
-        <p className={`font-heading text-lg font-bold ${accent}`}>{value}</p>
-      </div>
-    </div>
-  )
-}
-
-function ProjectCard({
-  project,
-  onOpen,
-  onDelete
-}: {
-  project: ProjectResponse
-  onOpen: () => void
-  onDelete: () => void
-}) {
-  const config = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.draft
-  const analysis = project.status === 'analysis_saved' ? (project.analysisResults as Record<string, number>) : null
-
-  return (
-    <div
-      className="glass-card group cursor-pointer p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-      onClick={onOpen}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <FolderOpen className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="truncate font-heading font-semibold">{project.name}</h3>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>{formatRelativeDate(project.updatedAt)}</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Badge variant={config.variant} className="gap-1">
-            {config.icon}
-            <span className="hidden sm:inline">{config.label}</span>
-          </Badge>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete()
-            }}
-          >
-            <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-          </Button>
-        </div>
-      </div>
-
-      {analysis && (
-        <div className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-muted/50 p-2.5 text-center">
-          <div>
-            <p className="text-[10px] text-muted-foreground">Savings/mo</p>
-            <p className="text-xs font-semibold text-green-600 dark:text-green-400">
-              RM {(analysis.averageMonthlySavingsRm ?? 0).toFixed(0)}
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground">Payback</p>
-            <p className="text-xs font-semibold">
-              {analysis.paybackYears != null ? `${(analysis.paybackYears as number).toFixed(1)} yr` : '—'}
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground">Panels</p>
-            <p className="text-xs font-semibold">{analysis.activePanelCount ?? '—'}</p>
-          </div>
-        </div>
-      )}
-
-      {project.status !== 'analysis_saved' && (
-        <div className="mt-3">
-          <div className="flex gap-1">
-            <div className="h-1 flex-1 rounded-full bg-primary" />
-            <div
-              className={`h-1 flex-1 rounded-full ${project.status === 'layout_saved' ? 'bg-primary' : 'bg-muted'}`}
-            />
-            <div className="h-1 flex-1 rounded-full bg-muted" />
-          </div>
-          <p className="mt-1.5 text-[10px] text-muted-foreground">
-            {project.status === 'draft' ? 'Next: Adjust your panel layout' : 'Next: View your savings analysis'}
-          </p>
-        </div>
-      )}
-
-      <div className="mt-2 flex items-center justify-end">
-        <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-          Open project
-          <ArrowRight className="h-3 w-3" />
-        </span>
       </div>
     </div>
   )

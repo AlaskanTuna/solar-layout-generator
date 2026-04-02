@@ -15,13 +15,11 @@ export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle>Month-by-Month Breakdown</CardTitle>
-            <CardDescription>Detailed billing inputs, credits, and savings for every month.</CardDescription>
-          </div>
+        <CardTitle>
+          Month-by-Month Breakdown
           <InfoTooltip text="Full monthly breakdown showing consumption, solar generation, net import, NEM credit usage, and resulting bill savings. Expand the table to see all 12 months." />
-        </div>
+        </CardTitle>
+        <CardDescription>Monthly billing inputs, credits and savings.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <button

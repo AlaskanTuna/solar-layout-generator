@@ -63,7 +63,6 @@
   --animate-slide-in-right: slide-in-right 0.4s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
   --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
-  --animate-spin: spin 1s linear infinite;
 
   @keyframes fade-in {
     from {
@@ -130,14 +129,6 @@
     }
     50% {
       opacity: 0.8;
-    }
-  }
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
     }
   }
 }
@@ -263,6 +254,13 @@
    ───────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
+}
+
+/* Disable transitions during theme switch to prevent laggy color cascade */
+html[style*='--theme-transition: none'] *,
+html[style*='--theme-transition: none'] *::before,
+html[style*='--theme-transition: none'] *::after {
+  transition-duration: 0s !important;
 }
 
 body {

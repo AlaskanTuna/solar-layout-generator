@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/constants'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 type CanvasControlsProps = {
   canUndo: boolean
@@ -20,6 +21,8 @@ type CanvasControlsProps = {
   onOverlayModeChange: (mode: 'rgb' | 'annual-flux' | 'dsm' | 'mask') => void
   showSegments: boolean
   onToggleSegments: () => void
+  canvasExpanded?: boolean
+  onToggleCanvasExpanded?: () => void
 }
 
 export function CanvasControls({
@@ -40,172 +43,220 @@ export function CanvasControls({
   overlayMode,
   onOverlayModeChange,
   showSegments,
-  onToggleSegments
+  onToggleSegments,
+  canvasExpanded,
+  onToggleCanvasExpanded
 }: CanvasControlsProps) {
   return (
-    <div
-      data-tour="canvas-controls"
-      className="absolute right-4 top-4 flex max-h-[calc(100%-2rem)] flex-col gap-1 overflow-y-auto"
-      style={{ scrollbarWidth: 'none' }}
-    >
-      {/* Tools group */}
-      <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">Tools</span>
-      <ToolButton onClick={onUndo} disabled={!canUndo} tooltip="Undo">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M3 7v6h6" />
-          <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
-        </svg>
-      </ToolButton>
-      <ToolButton onClick={onRedo} disabled={!canRedo} tooltip="Redo">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 7v6h-6" />
-          <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
-        </svg>
-      </ToolButton>
-      <ToolButton onClick={onToggleMarquee} active={marqueeMode} tooltip={marqueeMode ? 'Marquee: ON' : 'Marquee'}>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M5 3h2" />
-          <path d="M9 3h2" />
-          <path d="M13 3h2" />
-          <path d="M17 3h2" />
-          <path d="M21 5v2" />
-          <path d="M21 9v2" />
-          <path d="M21 13v2" />
-          <path d="M21 17v2" />
-          <path d="M19 21h-2" />
-          <path d="M15 21h-2" />
-          <path d="M11 21h-2" />
-          <path d="M7 21h-2" />
-          <path d="M3 19v-2" />
-          <path d="M3 15v-2" />
-          <path d="M3 11v-2" />
-          <path d="M3 7v-2" />
-        </svg>
-      </ToolButton>
-      <ToolButton onClick={onToggleSnap} active={snapEnabled} tooltip={snapEnabled ? 'Snap: ON' : 'Snap'}>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 15V9a6 6 0 0 1 12 0v6" />
-          <path d="M6 9h4" />
-          <path d="M14 9h4" />
-          <path d="M6 15h4" />
-          <path d="M14 15h4" />
-        </svg>
-      </ToolButton>
-
-      <div className="my-1 border-t border-border" />
-
-      {/* View group */}
-      <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">View</span>
-      <ToolButton onClick={onZoomIn} tooltip="Zoom in">
-        <span className="text-sm font-bold">+</span>
-      </ToolButton>
-      <ToolButton onClick={onZoomOut} tooltip="Zoom out">
-        <span className="text-sm font-bold">−</span>
-      </ToolButton>
-      <ToolButton onClick={onZoomReset} tooltip="Reset zoom">
-        <span className="text-xs font-medium">1:1</span>
-      </ToolButton>
-      {stageScale !== 1 && (
-        <span className="mt-1 text-center text-xs text-muted-foreground">{Math.round(stageScale * 100)}%</span>
-      )}
-
-      <div className="my-1 border-t border-border" />
-
-      {/* Layers group */}
-      <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground text-center">Layers</span>
-      <ToolButton
-        onClick={onToggleOverlayExpanded}
-        className={overlayExpanded ? 'ring-1 ring-muted-foreground' : ''}
-        tooltip={overlayExpanded ? 'Hide overlays' : 'Overlays'}
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      </ToolButton>
+    <TooltipProvider delayDuration={180}>
       <div
-        className={cn(
-          'mt-1 flex flex-col gap-1 transition-all duration-200',
-          overlayExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-        )}
+        data-tour="canvas-controls"
+        className="absolute right-4 top-4 z-30 flex max-h-[calc(100%-2rem)] flex-col gap-1 overflow-y-auto overflow-x-visible"
+        style={{ scrollbarWidth: 'none' }}
       >
-        <SwatchButton
-          active={overlayMode === 'rgb'}
-          background={COLORS.overlayRgb}
-          label="RGB"
-          onClick={() => onOverlayModeChange('rgb')}
-        />
-        <SwatchButton
-          active={overlayMode === 'annual-flux'}
-          background={COLORS.overlayFlux}
-          label="Flux"
-          onClick={() => onOverlayModeChange('annual-flux')}
-        />
-        <SwatchButton
-          active={overlayMode === 'dsm'}
-          background={COLORS.overlayDsm}
-          label="DSM"
-          onClick={() => onOverlayModeChange('dsm')}
-        />
-        <SwatchButton
-          active={overlayMode === 'mask'}
-          background={COLORS.overlayMask}
-          label="Mask"
-          onClick={() => onOverlayModeChange('mask')}
-        />
-        <SwatchButton
-          active={showSegments}
-          background={COLORS.overlaySegments}
-          label="Segments"
-          onClick={onToggleSegments}
-        />
+        {/* Expand/Collapse view */}
+        {onToggleCanvasExpanded && (
+          <>
+            <ToolButton onClick={onToggleCanvasExpanded} tooltip={canvasExpanded ? 'Collapse View' : 'Expand View'}>
+              {canvasExpanded ? (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+                  <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+                  <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+                  <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+                </svg>
+              ) : (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 3h6v6" />
+                  <path d="M9 21H3v-6" />
+                  <path d="M21 3l-7 7" />
+                  <path d="M3 21l7-7" />
+                </svg>
+              )}
+            </ToolButton>
+            <div className="my-1 border-t border-border" />
+          </>
+        )}
+
+        {/* Tools group */}
+        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">Tools</span>
+        <ToolButton onClick={onUndo} disabled={!canUndo} tooltip="Undo">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 7v6h6" />
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+          </svg>
+        </ToolButton>
+        <ToolButton onClick={onRedo} disabled={!canRedo} tooltip="Redo">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 7v6h-6" />
+            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
+          </svg>
+        </ToolButton>
+        <ToolButton onClick={onToggleMarquee} active={marqueeMode} tooltip={marqueeMode ? 'Marquee: ON' : 'Marquee'}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 3h2" />
+            <path d="M9 3h2" />
+            <path d="M13 3h2" />
+            <path d="M17 3h2" />
+            <path d="M21 5v2" />
+            <path d="M21 9v2" />
+            <path d="M21 13v2" />
+            <path d="M21 17v2" />
+            <path d="M19 21h-2" />
+            <path d="M15 21h-2" />
+            <path d="M11 21h-2" />
+            <path d="M7 21h-2" />
+            <path d="M3 19v-2" />
+            <path d="M3 15v-2" />
+            <path d="M3 11v-2" />
+            <path d="M3 7v-2" />
+          </svg>
+        </ToolButton>
+        <ToolButton onClick={onToggleSnap} active={snapEnabled} tooltip={snapEnabled ? 'Snap: ON' : 'Snap'}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 15V9a6 6 0 0 1 12 0v6" />
+            <path d="M6 9h4" />
+            <path d="M14 9h4" />
+            <path d="M6 15h4" />
+            <path d="M14 15h4" />
+          </svg>
+        </ToolButton>
+
+        <div className="my-1 border-t border-border" />
+
+        {/* View group */}
+        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">View</span>
+        <ToolButton onClick={onZoomIn} tooltip="Zoom in">
+          <span className="text-sm font-bold">+</span>
+        </ToolButton>
+        <ToolButton onClick={onZoomOut} tooltip="Zoom out">
+          <span className="text-sm font-bold">−</span>
+        </ToolButton>
+        <ToolButton onClick={onZoomReset} tooltip="Reset zoom">
+          <span className="text-xs font-medium">1:1</span>
+        </ToolButton>
+        {stageScale !== 1 && (
+          <span className="mt-1 text-center text-xs text-muted-foreground">{Math.round(stageScale * 100)}%</span>
+        )}
+
+        <div className="my-1 border-t border-border" />
+
+        {/* Layers group */}
+        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">
+          Layers
+        </span>
+        <ToolButton
+          onClick={onToggleOverlayExpanded}
+          className={overlayExpanded ? 'ring-1 ring-muted-foreground' : ''}
+          tooltip={overlayExpanded ? 'Hide overlays' : 'Overlays'}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </ToolButton>
+        <div
+          className={cn(
+            'mt-1 flex flex-col gap-1 transition-all duration-200',
+            overlayExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+          )}
+        >
+          <SwatchButton
+            active={overlayMode === 'rgb'}
+            background={COLORS.overlayRgb}
+            label="RGB"
+            onClick={() => onOverlayModeChange('rgb')}
+          />
+          <SwatchButton
+            active={overlayMode === 'annual-flux'}
+            background={COLORS.overlayFlux}
+            label="Flux"
+            onClick={() => onOverlayModeChange('annual-flux')}
+          />
+          <SwatchButton
+            active={overlayMode === 'dsm'}
+            background={COLORS.overlayDsm}
+            label="DSM"
+            onClick={() => onOverlayModeChange('dsm')}
+          />
+          <SwatchButton
+            active={overlayMode === 'mask'}
+            background={COLORS.overlayMask}
+            label="Mask"
+            onClick={() => onOverlayModeChange('mask')}
+          />
+          <SwatchButton
+            active={showSegments}
+            background={COLORS.overlaySegments}
+            label="Segments"
+            onClick={onToggleSegments}
+          />
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 }
 
@@ -225,20 +276,31 @@ function ToolButton({
   children: React.ReactNode
 }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        'group relative flex h-8 w-8 items-center justify-center rounded-md bg-card/90 text-sm shadow-md transition-all hover:bg-card active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed',
-        active && 'ring-1 ring-cyan-400 bg-cyan-50',
-        className
-      )}
-    >
-      {children}
-      <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-foreground px-1.5 py-0.5 text-[10px] font-normal text-background opacity-0 transition-opacity group-hover:opacity-100">
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={onClick}
+          disabled={disabled}
+          aria-label={tooltip}
+          className={cn(
+            'relative z-20 flex h-8 w-8 items-center justify-center rounded-md text-sm shadow-md transition-all active:scale-90 disabled:cursor-not-allowed disabled:opacity-40',
+            active
+              ? 'border border-primary/40 bg-primary text-primary-foreground shadow-lg ring-1 ring-primary/30'
+              : 'bg-card/90 text-foreground hover:bg-foreground hover:text-background dark:hover:bg-background dark:hover:text-foreground',
+            className
+          )}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="left"
+        sideOffset={8}
+        className="border border-border bg-foreground text-background dark:bg-background dark:text-foreground"
+      >
         {tooltip}
-      </span>
-    </button>
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -254,18 +316,26 @@ function SwatchButton({
   onClick: () => void
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'group relative h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
-        active ? 'outline outline-1 outline-foreground' : ''
-      )}
-      style={{ background }}
-      title={label}
-    >
-      <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-foreground px-1.5 py-0.5 text-[10px] text-background opacity-0 transition-opacity group-hover:opacity-100">
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={onClick}
+          aria-label={label}
+          className={cn(
+            'relative z-20 h-8 w-8 rounded-md shadow-md transition-all active:scale-90',
+            active ? 'outline outline-1 outline-foreground' : ''
+          )}
+          style={{ background }}
+          title={label}
+        />
+      </TooltipTrigger>
+      <TooltipContent
+        side="left"
+        sideOffset={8}
+        className="border border-border bg-foreground text-background dark:bg-background dark:text-foreground"
+      >
         {label}
-      </span>
-    </button>
+      </TooltipContent>
+    </Tooltip>
   )
 }

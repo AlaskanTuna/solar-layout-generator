@@ -29,7 +29,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const applyTheme = useCallback((t: 'light' | 'dark') => {
     const root = document.documentElement
+    // Disable all transitions during theme switch to prevent laggy cascade
+    root.style.setProperty('--theme-transition', 'none')
     root.classList.toggle('dark', t === 'dark')
+    // Re-enable after one frame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        root.style.removeProperty('--theme-transition')
+      })
+    })
   }, [])
 
   const setTheme = useCallback(

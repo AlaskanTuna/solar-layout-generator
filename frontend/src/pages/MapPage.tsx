@@ -21,13 +21,14 @@ const MAP_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="search-box"]',
     title: 'Search for Your Address',
     description:
-      'Type your full home address or postcode here. The map will zoom to your building and show its outline.'
+      'Type your full home address or postcode here. The map will zoom to your building and show its outline.',
+    placement: 'below' as const
   },
   {
-    target: '[data-tour="search-box"]',
     title: 'Confirm Your Building',
     description:
-      'After selecting an address, you\'ll see your building highlighted. Click "Analyse This Location" to fetch satellite solar data — this usually takes 15–30 seconds.'
+      'After selecting an address, you\'ll see your building highlighted. Click "Analyze This Location" to fetch satellite solar data — this usually takes 15–30 seconds.',
+    placement: 'center-bottom' as const
   }
 ]
 
@@ -277,8 +278,8 @@ export function MapPage() {
   }
 
   return (
-    <AppLayout mode="full">
-      <div className="relative flex h-full w-full flex-col overflow-hidden p-4">
+    <AppLayout>
+      <div className="relative flex w-full flex-col overflow-hidden p-4" style={{ height: 'calc(100vh - 3.5rem)' }}>
         {/* Containerized map viewport */}
         <div className="relative flex-1 overflow-hidden rounded-2xl border border-border shadow-sm">
           <div ref={mapRef} className="h-full w-full" />
@@ -296,35 +297,31 @@ export function MapPage() {
                 <div className="h-12" />
               </div>
               {isReadonly && (
-                <p className="mt-2 text-center text-xs text-muted-foreground">
-                  Please create{' '}
-                  <Link to="/dashboard" className="font-medium text-primary underline underline-offset-2">
-                    new project
-                  </Link>{' '}
-                  in dashboard for new location.
-                </p>
+                <div className="mt-2 rounded-lg bg-card/95 px-3 py-1.5 shadow-md backdrop-blur-sm border border-border">
+                  <p className="text-center text-xs text-muted-foreground">
+                    Please create{' '}
+                    <Link to="/dashboard" className="font-medium text-primary underline underline-offset-2">
+                      new project
+                    </Link>{' '}
+                    in dashboard for new location.
+                  </p>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Readonly nav card (pending project view) */}
+          {/* Readonly nav card (pending project view) — vertically centered, left-aligned */}
           {isReadonly && existingProject && (
-            <div className="absolute left-4 top-20 z-10 animate-fade-in">
+            <div className="absolute left-4 top-1/2 z-10 -translate-y-1/2 animate-fade-in">
               <div className="glass-card w-64 p-4">
                 <p className="font-heading text-sm font-semibold">{existingProject.name}</p>
                 <p className="mt-1 text-xs text-muted-foreground">Viewing saved location</p>
                 <div className="mt-3 flex flex-col gap-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
-                    <Link to="/dashboard">
-                      <ArrowLeft className="h-3.5 w-3.5" />
-                      Back to Dashboard
-                    </Link>
+                  <Button variant="outline" size="sm" className="w-full justify-center gap-2" asChild>
+                    <Link to="/dashboard">Back to Dashboard</Link>
                   </Button>
-                  <Button size="sm" className="w-full justify-start gap-2" asChild>
-                    <Link to={`/project/${existingProject.id}/workbench`}>
-                      Proceed to Workbench
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
+                  <Button size="sm" className="w-full justify-center gap-2" asChild>
+                    <Link to={`/project/${existingProject.id}/workbench`}>Proceed to Workbench</Link>
                   </Button>
                 </div>
               </div>

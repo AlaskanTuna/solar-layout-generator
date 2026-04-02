@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -81,8 +81,10 @@ export function WorkbenchSidebar({
   onDeleteSelected,
   onSave
 }: WorkbenchSidebarProps) {
+  const { projectId } = useParams<{ projectId: string }>()
+
   return (
-    <aside className="xl:w-[22rem] xl:min-w-[22rem]">
+    <aside className="xl:overflow-y-auto xl:w-[22rem] xl:min-w-[22rem]">
       <Card className="border-border bg-card/90 shadow-sm">
         <CardHeader className="space-y-3">
           <div className="flex items-start justify-between gap-3">
@@ -282,6 +284,9 @@ export function WorkbenchSidebar({
           </div>
 
           <div className="grid gap-2">
+            <Button variant="outline" size="sm" asChild className="w-full">
+              <Link to={`/project/${projectId}/map?view=readonly`}>Back to Map</Link>
+            </Button>
             <Button variant="outline" size="sm" asChild className="w-full">
               <Link to="/dashboard">Back to Dashboard</Link>
             </Button>

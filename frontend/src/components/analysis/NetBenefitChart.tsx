@@ -29,15 +29,13 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }:
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle>Net Benefit Projection</CardTitle>
-            <CardDescription>
-              How much you gain (or lose) after subtracting the cost of installing your solar system, year by year.
-            </CardDescription>
-          </div>
+        <CardTitle>
+          Net Benefit Projection
           <InfoTooltip text="Projects your cumulative savings minus the upfront system cost over 10 years. When bars turn green, you've recovered your investment and are in net profit. Includes annual panel degradation." />
-        </div>
+        </CardTitle>
+        <CardDescription>
+          How much you gain/lose after subtracting the cost of installing your solar system yearly.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg bg-muted p-4 text-center">

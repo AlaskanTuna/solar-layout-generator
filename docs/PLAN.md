@@ -1349,6 +1349,24 @@
 - [x] Fix cumulative savings chart y-axis overflow with `width={70}` and `margin={{ left: 8 }}`
 - [x] Add info tooltips to: Monthly Bill Comparison, Cumulative Savings, Net Benefit Projection, Bill Component Breakdown, Month-by-Month Breakdown, System Assumptions
 
+### 8. Deferred: Nav Sidebar Animation
+
+**Purpose/Issue:** The nav sidebar's expand/collapse width transition does not animate visually despite correct CSS. Suspected Tailwind v4 / inline style interaction issue.
+
+**Implementation:**
+
+- [ ] Investigate and fix the sidebar width animation (tried CSS classes, data-attributes, inline styles, @layer base — all produce correct CSS but animation doesn't render)
+
+### 9. Deferred: Draggable Analysis Card Reordering
+
+**Purpose/Issue:** Allow users to reorder analysis text cards (Monthly Bill, Cumulative Savings, etc.) via drag-and-drop, with layout persisted in localStorage.
+
+**Implementation:**
+
+- [ ] Install `@dnd-kit/core` and `@dnd-kit/sortable`
+- [ ] Create sortable card container for analysis section
+- [ ] Persist card order in `localStorage`
+
 ---
 
 ## Phase X: Final Documentation

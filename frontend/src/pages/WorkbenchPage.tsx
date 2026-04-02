@@ -33,6 +33,7 @@ import { AppLayout } from '@/components/AppLayout'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/GuidedTour'
+import { notify } from '@/components/ui/toast-config'
 import { CanvasControls } from '@/components/workbench/CanvasControls'
 import { WorkbenchSidebar } from '@/components/workbench/WorkbenchSidebar'
 import { computeSegmentHulls } from '@/lib/segmentVisualization'
@@ -58,16 +59,17 @@ const WORKBENCH_TOUR_STEPS: TourStep[] = [
       'Slide left to remove panels, right to add more. The system keeps the highest-performing panels first. More panels = more savings, but also higher installation cost.'
   },
   {
-    target: '[data-tour="canvas-title"]',
     title: 'Arrange Your Panels',
     description:
-      'Click a panel to select it. Drag to reposition, use the sidebar slider to rotate, or press Delete to remove.'
+      'Click a panel to select it. Drag to reposition, use the sidebar slider to rotate, or press Delete to remove. Hold spacebar to pan around while keeping your current selection.',
+    placement: 'center' as const
   },
   {
     target: '[data-tour="canvas-controls"]',
     title: 'Canvas Controls',
     description:
-      'Undo/redo your edits, use the marquee tool to drag-select groups of panels, toggle snap alignment for precise placement, zoom in/out, and switch overlay views. Hold Spacebar to pan the canvas without losing your selection.'
+      'Undo/redo your edits, use the marquee tool to drag-select groups of panels, toggle snap alignment for precise placement, zoom in/out, and switch overlay views.',
+    placement: 'left' as const
   },
   {
     target: '[data-tour="save-continue"]',
@@ -212,6 +214,7 @@ export function WorkbenchPage() {
   const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
   const [initialBatchStatus, setInitialBatchStatus] = useState<BatchRecomputeStatus>('idle')
   const [message, setMessage] = useState<UiMessage>(null)
+  const [canvasExpanded, setCanvasExpanded] = useState(false)
   const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
   const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
   const [isModelRecomputing, setIsModelRecomputing] = useState(false)
@@ -510,7 +513,7 @@ export function WorkbenchPage() {
     if (!project) return
 
     setPendingPanelId(panelId)
-    setMessage({ tone: 'info', text: 'Recomputing panel yield from cached monthly flux data...' })
+    notify.info('Recomputing panel yield from cached monthly flux data...')
 
     try {
       const result = await recomputeFlux(project.locationId, {
@@ -606,7 +609,7 @@ export function WorkbenchPage() {
 
     if (!project) return
     setPendingPanelId(panelId)
-    setMessage({ tone: 'info', text: `Recomputing yield for ${moves.length} panels...` })
+    notify.info(`Recomputing yield for ${moves.length} panels...`)
 
     try {
       const batchResponse = await recomputeFluxBatch(project.locationId, {
@@ -774,7 +777,7 @@ export function WorkbenchPage() {
     if (!project || visiblePanels.length === 0) return
 
     setIsModelRecomputing(true)
-    setMessage({ tone: 'info', text: 'Recalculating energy for new panel dimensions...' })
+    notify.info('Recalculating energy for new panel dimensions...')
 
     const nextModel = getPanelModel(nextModelId) ?? PANEL_MODELS[1]!
 
@@ -869,10 +872,7 @@ export function WorkbenchPage() {
       const serializedLayout = serializeLayout()
       const activePanels = serializedLayout.filter((panel) => panel.status !== 'deleted')
 
-      setMessage({
-        tone: 'info',
-        text: `Recomputing monthly energy for ${activePanels.length} active panels before saving...`
-      })
+      notify.info(`Recomputing monthly energy for ${activePanels.length} active panels before saving...`)
 
       const batchResponse = await recomputeFluxBatch(project.locationId, {
         panels: activePanels.map((panel) => ({
@@ -905,7 +905,7 @@ export function WorkbenchPage() {
       })
 
       setIsBatchRecomputing(false)
-      setMessage({ tone: 'info', text: 'Saving the refreshed layout to your project...' })
+      notify.info('Saving the refreshed layout to your project...')
       const updatedProject = await saveLayout(projectId, { editedLayout: nextLayout, selectedPanelModelId })
       queryClient.setQueryData(['project', projectId], updatedProject)
       navigate(`/project/${projectId}/analysis`)
@@ -933,7 +933,7 @@ export function WorkbenchPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" size="sm" className="w-full justify-center gap-2">
               <Link to="/dashboard">Back to Dashboard</Link>
             </Button>
           </CardContent>
@@ -959,9 +959,9 @@ export function WorkbenchPage() {
     : null
 
   return (
-    <AppLayout mode="full">
+    <AppLayout>
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
-      <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-4 overflow-y-auto px-4 py-4 xl:flex-row">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-4 xl:h-[calc(100vh-3.5rem)] xl:flex-row">
         <WorkbenchSidebar
           projectName={project.name}
           totalAnnualYield={totalAnnualYield}
@@ -991,14 +991,18 @@ export function WorkbenchPage() {
           onSave={handleSave}
         />
 
-        <section className="flex min-w-0 flex-1 flex-col">
+        <section
+          className={
+            canvasExpanded ? 'fixed inset-0 z-[70] flex flex-col bg-background p-4' : 'flex min-w-0 flex-1 flex-col'
+          }
+        >
           <Card data-tour="canvas" className="flex flex-1 flex-col overflow-hidden border-border bg-card/90 shadow-sm">
             <CardHeader className="border-b border-border bg-muted/50">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle data-tour="canvas-title">
                     Roof Layout Workbench
-                    <InfoTooltip text="Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it." />
+                    <InfoTooltip text="Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it. Hold spacebar to pan the view" />
                   </CardTitle>
                 </div>
                 {(pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
@@ -1182,6 +1186,8 @@ export function WorkbenchPage() {
                       onOverlayModeChange={setOverlayMode}
                       showSegments={showSegments}
                       onToggleSegments={() => setShowSegments((v) => !v)}
+                      canvasExpanded={canvasExpanded}
+                      onToggleCanvasExpanded={() => setCanvasExpanded((v) => !v)}
                     />
 
                     {/* Loading overlays */}

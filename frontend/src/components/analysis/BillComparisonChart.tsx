@@ -12,15 +12,13 @@ export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
   return (
     <Card data-tour="monthly-chart" className="border-border bg-card/90 shadow-sm">
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle>Monthly Bill Comparison</CardTitle>
-            <CardDescription>
-              Your estimated monthly bill without solar (baseline) versus with solar for each month.
-            </CardDescription>
-          </div>
+        <CardTitle>
+          Monthly Bill Comparison
           <InfoTooltip text="Compares your estimated TNB bill with and without solar panels for each month. The orange bars show what you'd normally pay; the green bars show what you'd pay with NEM solar credits applied." />
-        </div>
+        </CardTitle>
+        <CardDescription>
+          Your estimated monthly bill without solar (baseline) versus with solar for each month.
+        </CardDescription>
       </CardHeader>
       <CardContent className="h-[340px]">
         <ResponsiveContainer width="100%" height="100%">

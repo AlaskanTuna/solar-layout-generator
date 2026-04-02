@@ -6,6 +6,29 @@
 
 <!-- Record latest from here onwards. -->
 
+## [03/04/26] - Phase 6: UI/UX Continued Refinements
+
+- **AppLayout unified:** Removed `mode="full"` — all pages use scroll layout. MapPage/WorkbenchPage use viewport-relative height on their content div for canvas areas while keeping footer in document flow.
+- **WorkbenchPage responsive:** Fixed double scrollbar by moving `overflow-y-auto` to sidebar only at `xl`. Height constraint only at `xl` (row layout), narrow screens stack naturally. Added "Back to Map" nav button.
+- **Dashboard modularized:** Extracted `ProjectCard`, `StatCard`, `DashboardTabNav`, `helpers.ts` into `components/dashboard/`. Shared `AppSidebar` for all authenticated pages.
+- **Toast system:** Replaced `sonner` with `react-hot-toast`. Themed `notify` helper with 5 levels (success/error/warning/info/loading) using lucide icons.
+- **Loading spinner fixed:** Removed conflicting `@keyframes spin` — `tailwindcss-animate` now handles `animate-spin`.
+- **Theme switching:** Instant toggle by disabling `transition-duration` during `.dark` class toggle.
+- **GuidedTour:** Added `placement` prop. Tour `?` button repositioned.
+- **AppNav:** Custom framer-motion popover for user menu. Progressive breadcrumbs. Solid notification/user modals.
+- **AnalysisPage:** Extracted `SystemAssumptions`. "Back to Workbench" button. Panel specs match workbench. Inline chart tooltips.
+- **Verification:** TSC clean, all 47 frontend tests passing.
+
+## [03/04/26] - Workbench Canvas Controls Theme Fix
+
+- Updated the shared Workbench canvas tool buttons to use semantic active colors so selected tools remain readable in dark mode.
+- Allowed the shared tooltip labels to render outside the control stack and raised their stacking order so hover hints appear reliably on the workbench canvas.
+
+## [03/04/26] - Workbench Canvas Tooltips Portal Fix
+
+- Swapped the canvas tool button hover labels to the shared Radix tooltip primitive so the labels render through a portal instead of being clipped by the workbench canvas layout.
+- Kept the tooltip styling theme-aware with high-contrast light/dark colors for better readability.
+
 ## [02/04/26] - Phase 6: UI/UX Production Revamp (Tasks 2–7)
 
 - **Workspace Fix:** Updated `.vscode/settings.json` to use correct forward-slash TypeScript path for WSL/pnpm monorepo. Added `ignoreDeprecations: "5.0"` to frontend tsconfig for baseUrl deprecation.

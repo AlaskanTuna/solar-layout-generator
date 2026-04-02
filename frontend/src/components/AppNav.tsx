@@ -1,16 +1,11 @@
+import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { NotificationPopover, type Notification } from '@/components/ui/notification-popover'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { User, LogOut, LayoutDashboard, ChevronRight, Home } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { User, LogOut, ChevronRight, Home, Settings } from 'lucide-react'
 
 type Crumb = { label: string; to?: string; icon?: React.ReactNode }
 
@@ -25,13 +20,29 @@ function useBreadcrumbs(): Crumb[] {
 
   if (!projectId) return crumbs
 
-  if (pathname.includes('/map')) {
+  // Determine which MVP page is active
+  const onMap = pathname.includes('/map')
+  const onWorkbench = pathname.includes('/workbench')
+  const onAnalysis = pathname.includes('/analysis')
+
+  // Map — always shown when inside a project
+  if (onMap) {
     crumbs.push({ label: 'Map' })
-  } else if (pathname.includes('/workbench')) {
+  } else {
     crumbs.push({ label: 'Map', to: `/project/${projectId}/map?view=readonly` })
-    crumbs.push({ label: 'Workbench' })
-  } else if (pathname.includes('/analysis')) {
-    crumbs.push({ label: 'Workbench', to: `/project/${projectId}/workbench` })
+  }
+
+  // Workbench — shown when on workbench or analysis
+  if (onWorkbench || onAnalysis) {
+    if (onWorkbench) {
+      crumbs.push({ label: 'Workbench' })
+    } else {
+      crumbs.push({ label: 'Workbench', to: `/project/${projectId}/workbench` })
+    }
+  }
+
+  // Analysis — shown when on analysis
+  if (onAnalysis) {
     crumbs.push({ label: 'Analysis' })
   }
 
@@ -58,11 +69,12 @@ const SAMPLE_NOTIFICATIONS: Notification[] = [
 export function AppNav({ minimal }: { minimal?: boolean } = {}) {
   const { user, signOut } = useAuth()
   const crumbs = useBreadcrumbs()
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   return (
     <nav className="glass-nav fixed inset-x-0 top-0 z-50">
       <div className="flex h-14 items-center justify-between px-6" style={{ marginLeft: 64 }}>
-        {/* Left — Breadcrumbs (Home > Dashboard > ...) */}
+        {/* Left — Breadcrumbs */}
         <div className="flex items-center">
           {!minimal && (
             <div className="flex items-center gap-1 text-sm">
@@ -89,51 +101,61 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
           )}
         </div>
 
-        {/* Right — Notifications + Theme + User */}
-        <div className="flex items-center gap-1">
-          <NotificationPopover notifications={SAMPLE_NOTIFICATIONS} />
+        {/* Right — Theme + Notifications + User */}
+        <div className="flex items-center gap-2">
           <ThemeToggle />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                  {user?.email?.charAt(0).toUpperCase() ?? 'U'}
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{user?.email}</p>
-                <p className="text-xs text-muted-foreground">Free plan</p>
+          <NotificationPopover notifications={SAMPLE_NOTIFICATIONS} />
+
+          {/* User menu (custom popover — same pattern as notification modal) */}
+          <div className="relative">
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setUserMenuOpen(!userMenuOpen)}>
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                {user?.email?.charAt(0).toUpperCase() ?? 'U'}
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/" className="cursor-pointer">
-                  <Home className="mr-2 h-4 w-4" />
-                  Home
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/dashboard" className="cursor-pointer">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled className="cursor-default">
-                <User className="mr-2 h-4 w-4" />
-                Settings
-                <span className="ml-auto text-xs text-muted-foreground">Soon</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => signOut()}
-                className="cursor-pointer text-destructive focus:text-destructive"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Button>
+
+            <AnimatePresence>
+              {userMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-xl"
+                  >
+                    <div className="border-b border-border px-3 py-2.5">
+                      <p className="text-sm font-medium">{user?.email}</p>
+                      <p className="text-xs text-muted-foreground">Free plan</p>
+                    </div>
+                    <div className="p-1">
+                      <button
+                        disabled
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Settings
+                        <span className="ml-auto text-xs">Soon</span>
+                      </button>
+                    </div>
+                    <div className="border-t border-border p-1">
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false)
+                          signOut()
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </nav>

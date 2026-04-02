@@ -1,31 +1,29 @@
 import type { ReactNode } from 'react'
 import { AppNav } from './AppNav'
 import { AppFooter } from './AppFooter'
+import { AppSidebar } from './AppSidebar'
 
 type AppLayoutProps = {
   children: ReactNode
-  /** Use 'full' for pages that need the whole viewport (Map, Workbench). Default is 'scroll'. */
-  mode?: 'scroll' | 'full'
   /** Pass minimal to AppNav for full-screen pages */
   minimalNav?: boolean
+  /** Extra sidebar nav items (used by Dashboard for tab navigation) */
+  sidebarChildren?: ReactNode
 }
 
-export function AppLayout({ children, mode = 'scroll', minimalNav }: AppLayoutProps) {
-  if (mode === 'full') {
-    return (
-      <div className="flex h-screen flex-col overflow-hidden bg-background">
-        <AppNav minimal={minimalNav} />
-        <main className="flex-1 overflow-hidden pt-14">{children}</main>
-        <AppFooter />
-      </div>
-    )
-  }
+const SIDEBAR_W = 64
 
+export function AppLayout({ children, minimalNav, sidebarChildren }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <AppNav />
-      <main className="flex-1 pt-14">{children}</main>
-      <AppFooter />
+      <AppSidebar>{sidebarChildren}</AppSidebar>
+      <AppNav minimal={minimalNav} />
+      <main className="flex-1 pt-14" style={{ marginLeft: SIDEBAR_W }}>
+        {children}
+      </main>
+      <div style={{ marginLeft: SIDEBAR_W }}>
+        <AppFooter />
+      </div>
     </div>
   )
 }

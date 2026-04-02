@@ -24,12 +24,12 @@ export function BillBreakdown({
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-2">
-            <div>
-              <CardTitle>Bill Component Breakdown</CardTitle>
-              <CardDescription>See how your TNB bill is calculated.</CardDescription>
-            </div>
-            <InfoTooltip text="Breaks down each charge on your TNB bill side by side — without solar vs. with solar. Includes energy, capacity, network, AFA, EEI rebate, RE fund, and SST components." />
+          <div>
+            <CardTitle>
+              Bill Component Breakdown
+              <InfoTooltip text="Breaks down each charge on your TNB bill side by side — without solar vs. with solar. Includes energy, capacity, network, AFA, EEI rebate, RE fund, and SST components." />
+            </CardTitle>
+            <CardDescription>See how your TNB bill is calculated.</CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
             {MONTH_LABELS.map((label, index) => (

@@ -3,31 +3,57 @@ import { ChevronLeft, ChevronRight, HelpCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export type TourStep = {
-  target?: string // CSS selector for the element to highlight
+  target?: string
   title: string
   description: string
+  /** Hint for modal placement: 'below' (below target), 'left' (left of target),
+   *  'center' (viewport center), 'center-bottom' (bottom center of viewport) */
+  placement?: 'below' | 'left' | 'center' | 'center-bottom'
 }
 
-function getModalPosition(target: string | undefined) {
-  if (!target) return null
-  const el = document.querySelector(target)
-  if (!el) return null
-  const rect = el.getBoundingClientRect()
-  const scrollY = window.scrollY
+function getModalPosition(step: TourStep): { top: number; left: number } | null {
+  const { target, placement } = step
   const modalW = 320
+  const modalH = 200
   const gap = 12
   const vw = window.innerWidth
   const vh = window.innerHeight
 
-  // Prefer below target; if not enough room, go above
-  let top: number
-  if (rect.bottom + gap + 200 < vh) {
-    top = rect.bottom + scrollY + gap
-  } else {
-    top = rect.top + scrollY - gap - 200
+  // Placement-only (no target): center or center-bottom
+  if (!target || placement === 'center') {
+    return null // will use fixed centering
   }
 
-  // Horizontal: centre on target, clamped to viewport
+  if (placement === 'center-bottom') {
+    return { top: vh - modalH - 80 + window.scrollY, left: (vw - modalW) / 2 }
+  }
+
+  const el = document.querySelector(target)
+  if (!el) return null
+  const rect = el.getBoundingClientRect()
+  const scrollY = window.scrollY
+
+  if (placement === 'left') {
+    const top = rect.top + scrollY + rect.height / 2 - modalH / 2
+    const left = Math.max(12, rect.left - modalW - gap)
+    return { top, left }
+  }
+
+  if (placement === 'below') {
+    const top = rect.bottom + scrollY + gap
+    let left = rect.left + rect.width / 2 - modalW / 2
+    left = Math.max(12, Math.min(left, vw - modalW - 12))
+    return { top, left }
+  }
+
+  // Default: prefer below, fallback above
+  let top: number
+  if (rect.bottom + gap + modalH < vh) {
+    top = rect.bottom + scrollY + gap
+  } else {
+    top = rect.top + scrollY - gap - modalH
+  }
+
   let left = rect.left + rect.width / 2 - modalW / 2
   left = Math.max(12, Math.min(left, vw - modalW - 12))
 
@@ -40,20 +66,18 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
   const step = steps[currentStep]
 
   const updatePosition = useCallback(() => {
-    if (step.target) {
+    if (step.target && step.placement !== 'center') {
       const el = document.querySelector(step.target)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-        // Small delay to let scroll finish before measuring
-        requestAnimationFrame(() => setPos(getModalPosition(step.target)))
+        requestAnimationFrame(() => setPos(getModalPosition(step)))
         return
       }
     }
-    setPos(null)
-  }, [step.target])
+    setPos(getModalPosition(step))
+  }, [step])
 
   useEffect(() => {
-    // Delay slightly so scroll settles
     const timer = setTimeout(updatePosition, 150)
     window.addEventListener('resize', updatePosition)
     return () => {
@@ -71,10 +95,7 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
 
   return (
     <>
-      {/* Light backdrop — no blur so user can see context */}
       <div className="fixed inset-0 z-[60] bg-black/10" onClick={onClose} />
-
-      {/* Modal */}
       <div className="glass-card z-[61] w-80 p-4 shadow-xl" style={style}>
         <div className="mb-3 flex items-start justify-between">
           <h3 className="text-sm font-semibold text-foreground">{step.title}</h3>
@@ -134,10 +155,9 @@ export function GuidedTour({ storageKey, steps }: { storageKey: string; steps: T
     <>
       {showTour && <GuidedTourModal steps={steps} onClose={closeTour} />}
 
-      {/* Floating ? button */}
       <button
         type="button"
-        className="glass fixed bottom-5 left-5 z-50 flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground shadow-lg transition-colors hover:bg-accent hover:text-foreground"
+        className="fixed bottom-5 right-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black text-white shadow-lg transition-colors hover:bg-neutral-800 dark:border-black/15 dark:bg-white dark:text-black dark:hover:bg-neutral-100"
         onClick={openTour}
         title="Show guided tour"
       >

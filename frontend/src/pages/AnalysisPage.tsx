@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import html2pdf from 'html2pdf.js'
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { toast } from 'sonner'
+import { notify } from '@/components/ui/toast-config'
 import { getLocationData } from '@/api/locations'
 import { getProject, saveAnalysis } from '@/api/projects'
 import { getTariffConfig } from '@/api/tariff'
@@ -43,6 +43,7 @@ import { FinancialRoadmap } from '@/components/analysis/FinancialRoadmap'
 import { NetBenefitChart } from '@/components/analysis/NetBenefitChart'
 import { BillBreakdown } from '@/components/analysis/BillBreakdown'
 import { MonthTable } from '@/components/analysis/MonthTable'
+import { SystemAssumptions } from '@/components/analysis/SystemAssumptions'
 import SimplePdfReport from '@/components/analysis/SimplePdfReport'
 import AdvancedPdfReport from '@/components/analysis/AdvancedPdfReport'
 
@@ -97,11 +98,6 @@ const ANALYSIS_TOUR_STEPS: TourStep[] = [
       'When you\'re happy with the results, click "Save Analysis" to store your settings, or "Export PDF" to download a report you can share with solar installers or your family.'
   }
 ]
-
-function azimuthToCompass(deg: number): string {
-  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-  return directions[Math.round((((deg % 360) + 360) % 360) / 45) % 8]
-}
 
 /** Controlled text input for degradation rate that preserves intermediate states like "0." */
 function DegradationInput({ value, onChange }: { value: number; onChange: (rate: number) => void }) {
@@ -349,11 +345,11 @@ export function AnalysisPage() {
     onSuccess: (updatedProject) => {
       queryClient.setQueryData(['project', projectId], updatedProject)
       void queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success('Analysis saved to your project')
+      notify.success('Analysis saved to your project')
       navigate('/dashboard')
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Failed to save the analysis')
+      notify.error(error instanceof Error ? error.message : 'Failed to save the analysis')
     }
   })
 
@@ -379,7 +375,7 @@ export function AnalysisPage() {
         .from(element)
         .save()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to export the PDF report')
+      notify.error(error instanceof Error ? error.message : 'Failed to export the PDF report')
     } finally {
       setIsExporting(false)
     }
@@ -420,7 +416,7 @@ export function AnalysisPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" size="sm" className="w-full justify-center gap-2">
               <Link to={`/project/${projectId}/workbench`}>Back to Workbench</Link>
             </Button>
           </CardContent>
@@ -460,7 +456,7 @@ export function AnalysisPage() {
               {selectedPanelModel && (
                 <details className="rounded-lg border border-border bg-muted/50 text-sm">
                   <summary className="cursor-pointer px-3 py-2 font-medium text-foreground select-none">
-                    {selectedPanelModel.name} — {selectedPanelModel.capacityWp}Wp
+                    Panel Specifications
                   </summary>
                   <div className="space-y-1 border-t border-border px-3 py-2 text-muted-foreground">
                     <p>
@@ -469,6 +465,10 @@ export function AnalysisPage() {
                     <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
                     <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
                     {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
+                    <p>Max panels (API): {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
+                    {buildingInsights.solarPotential.panelLifetimeYears != null && (
+                      <p>Lifespan: {buildingInsights.solarPotential.panelLifetimeYears} years</p>
+                    )}
                   </div>
                 </details>
               )}
@@ -720,7 +720,17 @@ export function AnalysisPage() {
               )}
 
               <div className="grid gap-3">
-                <Button data-tour="export-pdf" variant="outline" onClick={handleExportPdf} disabled={isExporting}>
+                <Button variant="outline" size="sm" asChild className="w-full justify-center gap-2">
+                  <Link to={`/project/${projectId}/workbench`}>Back to Workbench</Link>
+                </Button>
+                <Button
+                  data-tour="export-pdf"
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-center gap-2"
+                  onClick={handleExportPdf}
+                  disabled={isExporting}
+                >
                   {isExporting ? 'Exporting PDF...' : 'Export PDF'}
                 </Button>
                 <Button onClick={() => void handleSaveAnalysis()} disabled={saveMutation.isPending}>
@@ -736,14 +746,14 @@ export function AnalysisPage() {
           <div data-tour="view-toggle" className="inline-flex rounded-lg border border-border bg-card/90 p-1 shadow-sm">
             <button
               type="button"
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-stone-900 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setViewMode('simple')}
             >
               Simple
             </button>
             <button
               type="button"
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'advanced' ? 'bg-stone-900 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'advanced' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setViewMode('advanced')}
             >
               Advanced
@@ -761,13 +771,11 @@ export function AnalysisPage() {
             {viewMode === 'advanced' && (
               <Card className="border-border bg-card/90 shadow-sm">
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle>Cumulative Savings</CardTitle>
-                      <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
-                    </div>
+                  <CardTitle>
+                    Cumulative Savings
                     <InfoTooltip text="Shows your running total of savings throughout the year. The steeper the line, the faster you're saving money from solar." />
-                  </div>
+                  </CardTitle>
+                  <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
                 </CardHeader>
                 <CardContent className="h-[340px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -810,84 +818,14 @@ export function AnalysisPage() {
           )}
 
           {viewMode === 'advanced' && buildingInsights && (
-            <Card className="border-border bg-card/90 shadow-sm">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle>System Assumptions</CardTitle>
-                    <CardDescription>
-                      Standard industry assumptions used in this analysis. These are not site-measured values.
-                    </CardDescription>
-                  </div>
-                  <InfoTooltip text="Technical parameters used by Google Solar API and industry standards. These include building orientation, tilt angles, panel characteristics, and environmental factors specific to your location." />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* PR + Losses side by side */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Performance Ratio
-                      <InfoTooltip text="The percentage of theoretical solar output your system actually delivers, accounting for real-world inefficiencies." />
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">{Math.round(formState.performanceRatio * 100)}%</p>
-                    <p className="text-xs text-muted-foreground">Typical for Malaysian residential systems</p>
-                  </div>
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Assumed Losses
-                      <InfoTooltip text="Energy lost to dust, wiring, inverter conversion, and heat. This is automatically calculated as 100% minus the Performance Ratio." />
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">{Math.round(formState.assumedLosses * 100)}%</p>
-                    <p className="text-xs text-muted-foreground">Soiling, cable, inverter, temperature</p>
-                  </div>
-                </div>
-                {/* Remaining assumptions */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Panel Degradation
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">{(formState.degradationRate * 100).toFixed(1)}%/yr</p>
-                    <p className="text-xs text-muted-foreground">Annual output decline (N-type ~0.5%)</p>
-                  </div>
-                  {buildingInsights.solarPotential.panelLifetimeYears && (
-                    <div className="rounded-lg bg-muted p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Panel Lifetime
-                        <InfoTooltip text="How long the panels are expected to generate electricity. Payback must happen within this period for the investment to be worthwhile." />
-                      </p>
-                      <p className="mt-1 text-lg font-semibold">
-                        {buildingInsights.solarPotential.panelLifetimeYears} years
-                      </p>
-                      <p className="text-xs text-muted-foreground">From Google Solar API estimate</p>
-                    </div>
-                  )}
-                  {buildingInsights.solarPotential.roofSegmentStats.length > 0 && (
-                    <div className="rounded-lg bg-muted p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Roof Azimuth / Pitch
-                        <InfoTooltip text="Azimuth is the compass direction your roof faces: 0° = North, 90° = East, 180° = South, 270° = West. In Malaysia, south-facing roofs get the most sunlight. Pitch is how steep your roof is — 0° is flat, 45° is a steep slope." />
-                      </p>
-                      <p className="mt-1 text-lg font-semibold">
-                        {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}° (
-                        {azimuthToCompass(buildingInsights.solarPotential.roofSegmentStats[0].azimuthDegrees)}) /{' '}
-                        {Math.round(buildingInsights.solarPotential.roofSegmentStats[0].pitchDegrees)}°
-                      </p>
-                      <p className="text-xs text-muted-foreground">Primary roof segment (from Solar API)</p>
-                    </div>
-                  )}
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      DC/AC Ratio
-                      <InfoTooltip text="The ratio of panel capacity to inverter capacity. A ratio of 1.2 means slightly more panel power than the inverter can handle at peak, which maximises output across the day." />
-                    </p>
-                    <p className="mt-1 text-lg font-semibold">{formState.dcAcRatio}</p>
-                    <p className="text-xs text-muted-foreground">Standard residential inverter sizing</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <SystemAssumptions
+              performanceRatio={formState.performanceRatio}
+              assumedLosses={formState.assumedLosses}
+              degradationRate={formState.degradationRate}
+              dcAcRatio={formState.dcAcRatio}
+              panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears}
+              roofSegmentStats={buildingInsights.solarPotential.roofSegmentStats}
+            />
           )}
 
           {viewMode === 'advanced' && selectedMonth && (
