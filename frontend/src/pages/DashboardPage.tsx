@@ -204,10 +204,9 @@ export function DashboardPage() {
           onClick={() => setSidebarExpanded(false)}
         />
 
-        {/* ═══════ Nav Sidebar — fixed, above topbar (z-[60] > z-50) ═══════ */}
+        {/* ═══════ Nav Sidebar — CSS :hover drives the width animation ═══════ */}
         <aside
-          className="sidebar-shell fixed left-0 top-0 z-[60] flex h-screen flex-col overflow-x-hidden overflow-y-auto border-r border-border bg-sidebar"
-          data-expanded={sidebarExpanded || undefined}
+          className="sidebar-shell fixed left-0 top-0 z-[60] flex h-screen flex-col border-r border-border bg-sidebar"
           onMouseEnter={() => setSidebarExpanded(true)}
           onMouseLeave={() => setSidebarExpanded(false)}
         >
@@ -222,7 +221,7 @@ export function DashboardPage() {
           </div>
 
           {/* Nav items */}
-          <nav className="flex-1 space-y-1 px-2 py-3">
+          <nav className="flex-1 space-y-1 overflow-hidden px-2 py-3">
             {NAV_ITEMS.map((item) => {
               const isActive = activeTab === item.id
               return (

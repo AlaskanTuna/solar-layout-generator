@@ -338,17 +338,21 @@ body {
 }
 
 /* --- DASHBOARD SIDEBAR (collapse / expand) ---
-   Collapsed 64px by default, expands to 240px on
-   hover as overlay. CSS transition, no JS width. */
+   CSS-driven animation using :hover on the aside
+   itself, no JS data-attribute needed for width.
+   Uses !important to beat Tailwind utility layer. */
 @layer base {
   .sidebar-shell {
-    width: 64px;
-    transition: width 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+    width: 64px !important;
+    transition:
+      width 300ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      box-shadow 300ms ease;
     will-change: width;
+    overflow: hidden;
   }
 
-  .sidebar-shell[data-expanded] {
-    width: 240px;
+  .sidebar-shell:hover {
+    width: 240px !important;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.16);
   }
 
@@ -356,10 +360,10 @@ body {
     opacity: 0;
     pointer-events: none;
     white-space: nowrap;
-    transition: opacity 150ms ease;
+    transition: opacity 200ms ease;
   }
 
-  .sidebar-shell[data-expanded] .sidebar-label {
+  .sidebar-shell:hover .sidebar-label {
     opacity: 1;
     pointer-events: auto;
   }
