@@ -1,6 +1,7 @@
 import toast from 'react-hot-toast'
 import type { ToastOptions } from 'react-hot-toast'
 import { CheckCircle, XCircle, AlertTriangle, Info, Loader2 } from 'lucide-react'
+import { notificationStore } from '@/lib/notificationStore'
 
 const BASE_STYLE: React.CSSProperties = {
   background: 'var(--card)',
@@ -20,12 +21,14 @@ const baseOptions: ToastOptions = {
 }
 
 export const notify = {
-  success: (message: string) =>
-    toast.success(message, {
+  success: (message: string) => {
+    notificationStore.push('Success', message)
+    return toast.success(message, {
       ...baseOptions,
       icon: <CheckCircle className="h-5 w-5 text-green-500" />,
       style: { ...BASE_STYLE, borderColor: 'rgba(34, 197, 94, 0.3)' }
-    }),
+    })
+  },
 
   error: (message: string) =>
     toast.error(message, {

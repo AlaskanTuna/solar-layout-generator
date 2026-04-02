@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Bell, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import { notificationStore } from '@/lib/notificationStore'
 
 export type Notification = {
   id: string
@@ -11,34 +12,23 @@ export type Notification = {
   read: boolean
 }
 
-export function NotificationPopover({
-  notifications: initialNotifications = [],
-  onNotificationsChange
-}: {
-  notifications?: Notification[]
-  onNotificationsChange?: (notifications: Notification[]) => void
-}) {
+function useNotifications() {
+  const [notifications, setNotifications] = useState(notificationStore.get)
+
+  useEffect(() => {
+    const unsub = notificationStore.subscribe(setNotifications)
+    return () => {
+      unsub()
+    }
+  }, [])
+
+  return notifications
+}
+
+export function NotificationPopover() {
   const [isOpen, setIsOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications)
-
+  const notifications = useNotifications()
   const unreadCount = notifications.filter((n) => !n.read).length
-
-  const markAllAsRead = () => {
-    setNotifications([])
-    onNotificationsChange?.([])
-  }
-
-  const dismissNotification = (id: string) => {
-    const updated = notifications.filter((n) => n.id !== id)
-    setNotifications(updated)
-    onNotificationsChange?.(updated)
-  }
-
-  const markAsRead = (id: string) => {
-    const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    setNotifications(updated)
-    onNotificationsChange?.(updated)
-  }
 
   return (
     <div className="relative">
@@ -65,7 +55,12 @@ export function NotificationPopover({
               <div className="flex items-center justify-between border-b border-border p-4">
                 <h3 className="text-sm font-semibold">Notifications</h3>
                 {notifications.length > 0 && (
-                  <Button onClick={markAllAsRead} variant="ghost" size="sm" className="h-7 text-xs">
+                  <Button
+                    onClick={() => notificationStore.clearAll()}
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                  >
                     Clear all
                   </Button>
                 )}
@@ -85,7 +80,7 @@ export function NotificationPopover({
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.2, delay: index * 0.05 }}
                       className="group relative p-4 transition-colors hover:bg-accent/50"
-                      onClick={() => markAsRead(notification.id)}
+                      onClick={() => notificationStore.markAsRead(notification.id)}
                     >
                       <div className="flex items-start gap-2 pr-6">
                         <div className="flex-1">
@@ -99,13 +94,12 @@ export function NotificationPopover({
                           </p>
                         </div>
                       </div>
-                      {/* Dismiss button */}
                       <button
                         type="button"
                         className="absolute right-3 top-3 rounded-md p-0.5 text-muted-foreground/50 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
                         onClick={(e) => {
                           e.stopPropagation()
-                          dismissNotification(notification.id)
+                          notificationStore.dismiss(notification.id)
                         }}
                       >
                         <X className="h-3.5 w-3.5" />
