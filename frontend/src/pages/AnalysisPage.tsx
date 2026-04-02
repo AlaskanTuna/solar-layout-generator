@@ -430,9 +430,9 @@ export function AnalysisPage() {
   return (
     <AppLayout>
       <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:flex-row">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:h-[calc(100vh-3.5rem)] xl:flex-row">
         {/* ───── Sidebar ───── */}
-        <aside className="xl:w-[24rem] xl:min-w-[24rem]">
+        <aside className="xl:overflow-y-auto xl:w-[24rem] xl:min-w-[24rem]">
           <Card className="border-border bg-card/92 shadow-sm">
             <CardHeader className="space-y-3">
               <div className="flex items-start justify-between gap-3">
@@ -742,7 +742,7 @@ export function AnalysisPage() {
         </aside>
 
         {/* ───── Main content ───── */}
-        <section className="min-w-0 flex-1 space-y-6">
+        <section className="min-w-0 flex-1 space-y-6 xl:overflow-y-auto">
           <div data-tour="view-toggle" className="inline-flex rounded-lg border border-border bg-card/90 p-1 shadow-sm">
             <button
               type="button"
