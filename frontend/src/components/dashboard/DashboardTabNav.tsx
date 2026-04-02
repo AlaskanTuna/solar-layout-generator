@@ -1,9 +1,9 @@
-import { LayoutDashboard, FolderKanban, PieChart } from 'lucide-react'
+import { Gauge, FolderKanban, PieChart } from 'lucide-react'
 
 export type DashboardTab = 'summary' | 'projects' | 'analytics'
 
 const TAB_ITEMS: { id: DashboardTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'summary', label: 'Summary', icon: <LayoutDashboard className="h-5 w-5" /> },
+  { id: 'summary', label: 'Summary', icon: <Gauge className="h-5 w-5" /> },
   { id: 'projects', label: 'Projects', icon: <FolderKanban className="h-5 w-5" /> },
   { id: 'analytics', label: 'Analytics', icon: <PieChart className="h-5 w-5" /> }
 ]

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, type ReactNode } from 'react'
+import { useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -32,6 +32,17 @@ function saveOrder(order: string[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(order))
 }
 
+/** Reconcile a saved order with the current set of card IDs.
+ *  Keeps saved ordering for existing cards, appends new ones at the end. */
+function reconcile(saved: string[], current: string[]): string[] {
+  const validIds = new Set(current)
+  const result = saved.filter((id) => validIds.has(id))
+  for (const id of current) {
+    if (!result.includes(id)) result.push(id)
+  }
+  return result
+}
+
 function SortableCard({ id, children }: { id: string; children: ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
@@ -44,7 +55,6 @@ function SortableCard({ id, children }: { id: string; children: ReactNode }) {
 
   return (
     <div ref={setNodeRef} style={style} className="group/sortable relative">
-      {/* Drag handle — appears on hover */}
       <button
         type="button"
         className="absolute -left-2 top-4 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-muted text-muted-foreground opacity-0 shadow-sm transition-opacity hover:bg-foreground hover:text-background group-hover/sortable:opacity-100"
@@ -64,19 +74,17 @@ export function SortableCardContainer({ cards }: { cards: CardItem[] }) {
     useSensor(KeyboardSensor)
   )
 
-  const defaultOrder = useMemo(() => cards.map((c) => c.id), [cards])
+  const currentIds = useMemo(() => cards.map((c) => c.id), [cards])
 
   const [order, setOrder] = useState<string[]>(() => {
     const saved = loadOrder()
-    if (!saved) return defaultOrder
-    // Reconcile: keep only IDs that exist in cards, append any new ones
-    const validIds = new Set(defaultOrder)
-    const reconciled = saved.filter((id) => validIds.has(id))
-    for (const id of defaultOrder) {
-      if (!reconciled.includes(id)) reconciled.push(id)
-    }
-    return reconciled
+    return saved ? reconcile(saved, currentIds) : currentIds
   })
+
+  // Re-reconcile whenever the card list changes (e.g. simple ↔ advanced toggle)
+  useEffect(() => {
+    setOrder((prev) => reconcile(prev, currentIds))
+  }, [currentIds.join(',')])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event
@@ -90,7 +98,6 @@ export function SortableCardContainer({ cards }: { cards: CardItem[] }) {
     })
   }, [])
 
-  // Build ordered card list based on current order
   const cardMap = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards])
   const orderedCards = useMemo(() => order.map((id) => cardMap.get(id)).filter(Boolean) as CardItem[], [order, cardMap])
 
