@@ -204,9 +204,14 @@ export function DashboardPage() {
           onClick={() => setSidebarExpanded(false)}
         />
 
-        {/* ═══════ Nav Sidebar — CSS :hover drives the width animation ═══════ */}
+        {/* ═══════ Nav Sidebar (shadcn pattern: CSS-var width + inline transition) ═══════ */}
         <aside
-          className="sidebar-shell fixed left-0 top-0 z-[60] flex h-screen flex-col border-r border-border bg-sidebar"
+          className="fixed left-0 top-0 z-[60] flex h-screen flex-col overflow-hidden border-r border-border bg-sidebar"
+          style={{
+            width: sidebarExpanded ? 240 : 64,
+            transition: 'width 300ms cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 300ms ease',
+            boxShadow: sidebarExpanded ? '0 8px 40px rgba(0, 0, 0, 0.16)' : 'none'
+          }}
           onMouseEnter={() => setSidebarExpanded(true)}
           onMouseLeave={() => setSidebarExpanded(false)}
         >
@@ -217,7 +222,12 @@ export function DashboardPage() {
                 <Sun className="h-3.5 w-3.5 text-white" />
               </div>
             </Link>
-            <span className="sidebar-label font-heading text-sm font-semibold tracking-tight">SolarSim</span>
+            <span
+              className="whitespace-nowrap font-heading text-sm font-semibold tracking-tight transition-opacity duration-200"
+              style={{ opacity: sidebarExpanded ? 1 : 0 }}
+            >
+              SolarSim
+            </span>
           </div>
 
           {/* Nav items */}
@@ -235,7 +245,12 @@ export function DashboardPage() {
                   }`}
                 >
                   <div className={`shrink-0 ${isActive ? 'text-primary' : ''}`}>{item.icon}</div>
-                  <span className="sidebar-label truncate">{item.label}</span>
+                  <span
+                    className="truncate whitespace-nowrap transition-opacity duration-200"
+                    style={{ opacity: sidebarExpanded ? 1 : 0 }}
+                  >
+                    {item.label}
+                  </span>
                 </button>
               )
             })}
