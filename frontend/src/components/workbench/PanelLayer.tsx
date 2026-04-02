@@ -2,6 +2,7 @@ import { Layer } from 'react-konva'
 import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
 import type { WorkbenchPanelState } from '@/hooks/usePanelState'
 import { PanelRect } from './PanelRect'
+import { RotationHandle } from './RotationHandle'
 
 type RenderPanel = {
   panel: WorkbenchPanelState
@@ -37,13 +38,9 @@ function getPanelColor(value: number, min: number, max: number): string {
     return 'rgba(120, 170, 250, 0.82)'
   }
 
-  // Amplify small differences: use the actual spread but ensure the ratio
-  // covers more of the 0→1 range by applying a contrast stretch.
-  // clamp ratio to [0, 1] in case of floating point edge cases.
   const raw = (value - min) / (max - min)
   const ratio = Math.max(0, Math.min(1, raw))
 
-  // blue-700 (29, 78, 216) → blue-300 (147, 197, 253) — wider visual range
   const red = Math.round(29 + ratio * (147 - 29))
   const green = Math.round(78 + ratio * (197 - 78))
   const blue = Math.round(216 + ratio * (253 - 216))
@@ -69,6 +66,7 @@ export function PanelLayer({
 }: PanelLayerProps) {
   return (
     <Layer>
+      {/* Panel rects */}
       {panels.map(({ panel, x, y }) => (
         <PanelRect
           key={panel.id}
@@ -88,9 +86,25 @@ export function PanelLayer({
           onSnapDragMove={onSnapDragMove}
           onSelect={onSelect}
           onDragEnd={onDragEnd}
-          onRotate={onRotate}
         />
       ))}
+
+      {/* Rotation handles for selected panels (rendered ABOVE panels so they're clickable) */}
+      {onRotate &&
+        panels
+          .filter(({ panel }) => selectedPanelIds.has(panel.id) && disabledPanelId !== panel.id)
+          .map(({ panel, x, y }) => (
+            <RotationHandle
+              key={`rot-${panel.id}`}
+              panelId={panel.id}
+              panelX={x}
+              panelY={y}
+              panelWidth={panelWidth}
+              panelHeight={panelHeight}
+              rotation={panel.rotation}
+              onRotate={onRotate}
+            />
+          ))}
     </Layer>
   )
 }

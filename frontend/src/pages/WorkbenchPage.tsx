@@ -1028,6 +1028,13 @@ export function WorkbenchPage() {
                 className="relative flex flex-1 items-center justify-center rounded-2xl border border-dashed border-border p-8"
                 style={irradianceStyle}
               >
+                {/* Rotation degree indicator (top-left) */}
+                {selectedPanel && (
+                  <div className="absolute left-3 top-3 z-20 rounded-md bg-black/60 px-2 py-1 font-mono text-xs text-white backdrop-blur-sm">
+                    {Math.round(selectedPanel.rotation)}°
+                  </div>
+                )}
+
                 {stageReady && panelDimensions ? (
                   <>
                     <Stage
