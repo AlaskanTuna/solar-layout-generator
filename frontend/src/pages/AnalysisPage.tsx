@@ -44,6 +44,7 @@ import { NetBenefitChart } from '@/components/analysis/NetBenefitChart'
 import { BillBreakdown } from '@/components/analysis/BillBreakdown'
 import { MonthTable } from '@/components/analysis/MonthTable'
 import { SystemAssumptions } from '@/components/analysis/SystemAssumptions'
+import { SortableCardContainer } from '@/components/analysis/SortableCardContainer'
 import SimplePdfReport from '@/components/analysis/SimplePdfReport'
 import AdvancedPdfReport from '@/components/analysis/AdvancedPdfReport'
 
@@ -763,99 +764,134 @@ export function AnalysisPage() {
             Simple shows key savings figures. Advanced adds tariff breakdowns, projections, and system details.
           </p>
 
-          <HeroMetrics analysisResults={analysisResults} paybackTooltip={paybackTooltip} />
-
-          <div className="space-y-6">
-            <BillComparisonChart chartData={chartData} />
-
-            {viewMode === 'advanced' && (
-              <Card className="border-border bg-card/90 shadow-sm">
-                <CardHeader>
-                  <CardTitle>
-                    Cumulative Savings
-                    <InfoTooltip text="Shows your running total of savings throughout the year. The steeper the line, the faster you're saving money from solar." />
-                  </CardTitle>
-                  <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[340px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ left: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="month" />
-                      <YAxis width={70} tickFormatter={(value) => `RM${value}`} />
-                      <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
-                      <Line
-                        type="monotone"
-                        dataKey="cumulativeSavings"
-                        name="Cumulative Savings"
-                        stroke="#ca8a04"
-                        strokeWidth={3}
-                        dot={{ r: 3 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {viewMode === 'advanced' && (
-            <NetBenefitChart
-              year1Savings={simulation.totalSavingsRm}
-              degradationRate={formState.degradationRate}
-              systemCostRm={formState.systemCostRm}
-            />
-          )}
-
-          {viewMode === 'advanced' && (
-            <FinancialRoadmap
-              systemCostRm={formState.systemCostRm}
-              paybackYears={analysisResults.paybackYears}
-              year1Savings={simulation.totalSavingsRm}
-              degradationRate={formState.degradationRate}
-              systemKwp={systemKwp}
-            />
-          )}
-
-          {viewMode === 'advanced' && buildingInsights && (
-            <SystemAssumptions
-              performanceRatio={formState.performanceRatio}
-              assumedLosses={formState.assumedLosses}
-              degradationRate={formState.degradationRate}
-              dcAcRatio={formState.dcAcRatio}
-              panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears}
-              roofSegmentStats={buildingInsights.solarPotential.roofSegmentStats}
-            />
-          )}
-
-          {viewMode === 'advanced' && selectedMonth && (
-            <BillBreakdown
-              selectedMonthIndex={selectedMonthIndex}
-              onMonthSelect={setSelectedMonthIndex}
-              selectedMonth={selectedMonth}
-              thresholdWarnings={thresholdWarnings}
-            />
-          )}
-
-          {viewMode === 'advanced' && (
-            <MonthTable
-              simulation={simulation}
-              isOpen={monthTableOpen}
-              onToggle={() => setMonthTableOpen((prev) => !prev)}
-            />
-          )}
-
-          <Card className="border-border bg-card/90 shadow-sm">
-            <CardHeader>
-              <CardTitle>Financial Disclaimers</CardTitle>
-              <CardDescription>All bill and savings figures should be treated as estimates.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              {ANALYSIS_DISCLAIMERS.map((disclaimer) => (
-                <p key={disclaimer}>{disclaimer}</p>
-              ))}
-            </CardContent>
-          </Card>
+          <SortableCardContainer
+            cards={[
+              {
+                id: 'hero-metrics',
+                node: <HeroMetrics analysisResults={analysisResults} paybackTooltip={paybackTooltip} />
+              },
+              {
+                id: 'bill-comparison',
+                node: <BillComparisonChart chartData={chartData} />
+              },
+              ...(viewMode === 'advanced'
+                ? [
+                    {
+                      id: 'cumulative-savings',
+                      node: (
+                        <Card className="border-border bg-card/90 shadow-sm">
+                          <CardHeader>
+                            <CardTitle>
+                              Cumulative Savings
+                              <InfoTooltip text="Shows your running total of savings throughout the year. The steeper the line, the faster you're saving money from solar." />
+                            </CardTitle>
+                            <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
+                          </CardHeader>
+                          <CardContent className="h-[340px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={chartData} margin={{ left: 8 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis dataKey="month" />
+                                <YAxis width={70} tickFormatter={(value) => `RM${value}`} />
+                                <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
+                                <Line
+                                  type="monotone"
+                                  dataKey="cumulativeSavings"
+                                  name="Cumulative Savings"
+                                  stroke="#ca8a04"
+                                  strokeWidth={3}
+                                  dot={{ r: 3 }}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </CardContent>
+                        </Card>
+                      )
+                    },
+                    {
+                      id: 'net-benefit',
+                      node: (
+                        <NetBenefitChart
+                          year1Savings={simulation.totalSavingsRm}
+                          degradationRate={formState.degradationRate}
+                          systemCostRm={formState.systemCostRm}
+                        />
+                      )
+                    },
+                    {
+                      id: 'financial-roadmap',
+                      node: (
+                        <FinancialRoadmap
+                          systemCostRm={formState.systemCostRm}
+                          paybackYears={analysisResults.paybackYears}
+                          year1Savings={simulation.totalSavingsRm}
+                          degradationRate={formState.degradationRate}
+                          systemKwp={systemKwp}
+                        />
+                      )
+                    },
+                    ...(buildingInsights
+                      ? [
+                          {
+                            id: 'system-assumptions',
+                            node: (
+                              <SystemAssumptions
+                                performanceRatio={formState.performanceRatio}
+                                assumedLosses={formState.assumedLosses}
+                                degradationRate={formState.degradationRate}
+                                dcAcRatio={formState.dcAcRatio}
+                                panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears}
+                                roofSegmentStats={buildingInsights.solarPotential.roofSegmentStats}
+                              />
+                            )
+                          }
+                        ]
+                      : []),
+                    ...(selectedMonth
+                      ? [
+                          {
+                            id: 'bill-breakdown',
+                            node: (
+                              <BillBreakdown
+                                selectedMonthIndex={selectedMonthIndex}
+                                onMonthSelect={setSelectedMonthIndex}
+                                selectedMonth={selectedMonth}
+                                thresholdWarnings={thresholdWarnings}
+                              />
+                            )
+                          }
+                        ]
+                      : []),
+                    {
+                      id: 'month-table',
+                      node: (
+                        <MonthTable
+                          simulation={simulation}
+                          isOpen={monthTableOpen}
+                          onToggle={() => setMonthTableOpen((prev) => !prev)}
+                        />
+                      )
+                    }
+                  ]
+                : []),
+              {
+                id: 'disclaimers',
+                node: (
+                  <Card className="border-border bg-card/90 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Financial Disclaimers</CardTitle>
+                      <CardDescription>All bill and savings figures should be treated as estimates.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm text-muted-foreground">
+                      {ANALYSIS_DISCLAIMERS.map((disclaimer) => (
+                        <p key={disclaimer}>{disclaimer}</p>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )
+              }
+            ]}
+          />
         </section>
       </div>
 

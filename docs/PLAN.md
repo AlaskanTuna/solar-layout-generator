@@ -1363,9 +1363,11 @@
 
 **Implementation:**
 
-- [ ] Install `@dnd-kit/core` and `@dnd-kit/sortable`
-- [ ] Create sortable card container for analysis section
-- [ ] Persist card order in `localStorage`
+- [x] Install `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`
+- [x] Create `SortableCardContainer` component with `SortableCard` wrapper
+- [x] Persist card order in `localStorage` (key: `slg-analysis-card-order`)
+- [x] Reconcile saved order with current cards (handles added/removed cards)
+- [x] Drag handle (grip icon) appears on hover, left of each card
 
 ---
 
