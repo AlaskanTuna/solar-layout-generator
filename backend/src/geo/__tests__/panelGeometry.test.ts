@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { rotatePoint, getRotatedCorners } from './panelGeometry.js'
+import { rotatePoint, getRotatedCorners } from '../panelGeometry.js'
 
 describe('rotatePoint', () => {
   it('returns same point for 0 rotation', () => {

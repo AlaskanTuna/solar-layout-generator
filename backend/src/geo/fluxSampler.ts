@@ -42,7 +42,7 @@ export function calculateAverageFlux(
   const fluxValues: number[] = []
   for (let y = minY; y <= maxY; y++) {
     for (let x = minX; x <= maxX; x++) {
-      // Test pixel CENTER (x + 0.5, y + 0.5), not corner
+      // Test pixel center, not corner
       if (pointInPolygon(x + 0.5, y + 0.5, corners)) {
         fluxValues.push(fluxData[y * width + x])
       }
@@ -63,7 +63,7 @@ export async function computeMonthlyEnergy(
   const monthlyEnergyDcKwh: number[] = []
 
   for (let band = 0; band < 12; band++) {
-    // geotiff.js bands are 0-indexed (Jan=0, Dec=11)
+    // Bands are 0-indexed: Jan=0, Dec=11
     const rasters = await image.readRasters({ samples: [band] })
     const fluxData = rasters[0] as Float32Array
     const avgFlux = calculateAverageFlux(corners, fluxData, width, height)

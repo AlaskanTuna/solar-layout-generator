@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { latLngToPixel, pixelToLatLng, metersToPixels, setupGeoTransform } from './transforms.js'
-import type { GeoTransform } from './transforms.js'
+import { latLngToPixel, pixelToLatLng, metersToPixels, setupGeoTransform } from '../transforms.js'
+import type { GeoTransform } from '../transforms.js'
 
 // Synthetic geo-transform mimicking a UTM zone GeoTIFF
 // Origin at (300000, 400000) in UTM, 0.5m resolution

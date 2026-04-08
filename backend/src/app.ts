@@ -8,12 +8,21 @@ import { projectsRouter } from './routes/projects.js'
 import { tariffRouter } from './routes/tariff.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { requestLogger } from './middleware/requestLogger.js'
+import { env } from './config/env.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const allowedOrigins = [env.FRONTEND_URL]
+if (env.NODE_ENV === 'development') {
+  const devDefault = 'http://localhost:5173'
+  if (!allowedOrigins.includes(devDefault)) {
+    allowedOrigins.push(devDefault)
+  }
+}
+
 export const app: Express = express()
 
-app.use(cors())
+app.use(cors({ origin: allowedOrigins }))
 app.use(express.json())
 app.use(requestLogger)
 

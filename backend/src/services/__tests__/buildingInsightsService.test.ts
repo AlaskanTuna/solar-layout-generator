@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parsePanelSpecs } from './buildingInsightsService.js'
+import { parsePanelSpecs } from '../buildingInsightsService.js'
 
 describe('parsePanelSpecs', () => {
   it('returns panel specs for valid building insights', () => {

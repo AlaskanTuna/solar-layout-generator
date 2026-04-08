@@ -4,7 +4,7 @@ const { findFirst } = vi.hoisted(() => ({
   findFirst: vi.fn()
 }))
 
-vi.mock('../config/prisma.js', () => ({
+vi.mock('../../config/prisma.js', () => ({
   prisma: {
     location: {
       findFirst
@@ -12,11 +12,11 @@ vi.mock('../config/prisma.js', () => ({
   }
 }))
 
-vi.mock('./locationPipeline.js', () => ({
+vi.mock('../locationPipeline.js', () => ({
   runLocationPipeline: vi.fn()
 }))
 
-import { getLocationDataForUser, getLocationStatusForUser } from './locationService.js'
+import { getLocationDataForUser, getLocationStatusForUser } from '../locationService.js'
 
 describe('locationService ownership filters', () => {
   beforeEach(() => {

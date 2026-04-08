@@ -28,7 +28,7 @@ async function convertRgbToPng(rgbTifBuffer: ArrayBuffer | Buffer): Promise<Buff
   const g = rasters[1] as Uint8Array
   const b = rasters[2] as Uint8Array
 
-  // Interleave into RGBRGBRGB...
+  // Interleave into RGB pixel buffer
   const pixels = Buffer.alloc(width * height * 3)
   for (let i = 0; i < width * height; i++) {
     pixels[i * 3] = r[i]
@@ -45,18 +45,15 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
   try {
     console.info(`[Pipeline] start location=${locationId} lat=${lat.toFixed(6)} lng=${lng.toFixed(6)}`)
 
-    // Step 1: Fetch building insights
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawInsights = (await fetchBuildingInsights(lat, lng)) as any
     const buildingInsightsJson = enrichBuildingInsights(rawInsights)
 
-    // Step 2: Calculate radius and fetch data layers
     const bbox = rawInsights.boundingBox
     const radius = calculateRadius(bbox)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dataLayers = (await fetchDataLayers(lat, lng, radius)) as Record<string, any>
 
-    // Step 3: Download GeoTIFFs and upload to Supabase Storage
     const storagePaths: Record<string, string> = {}
     let rgbBuffer: Buffer | null = null
 
@@ -64,7 +61,7 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       const url = dataLayers[field]
       if (!url) continue
 
-      // GeoTIFF URLs from dataLayers require the API key appended
+      // Append API key to GeoTIFF download URL
       const downloadUrl = new URL(url)
       downloadUrl.searchParams.set('key', env.GOOGLE_SOLAR_API_KEY)
       const response = await fetch(downloadUrl.toString())
@@ -79,7 +76,6 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       if (field === 'rgbUrl') rgbBuffer = buffer
     }
 
-    // Step 4: Convert RGB GeoTIFF to PNG
     let rgbImageUrl: string | null = null
     if (rgbBuffer) {
       const pngBuffer = await convertRgbToPng(rgbBuffer)
@@ -89,7 +85,6 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       console.info(`[Pipeline] uploaded ${pngPath}`)
     }
 
-    // Step 5: Mark location ready with all data
     await prisma.location.update({
       where: { id: locationId },
       data: {
@@ -103,9 +98,9 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       }
     })
 
-    console.info(`Pipeline completed for location ${locationId}`)
+    console.info(`[Pipeline] completed location=${locationId}`)
   } catch (error) {
-    console.error(`Pipeline failed for location ${locationId}:`, error)
+    console.error(`[Pipeline] failed location=${locationId}`, error)
     await prisma.location.update({
       where: { id: locationId },
       data: { status: 'failed' }

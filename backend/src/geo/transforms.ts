@@ -20,7 +20,7 @@ export function setupGeoTransform(image: GeoTIFFImage): GeoTransform {
     originX,
     originY,
     resX: rawResX,
-    // geotiff.js may report a positive Y resolution even though pixel rows grow downward.
+    // geotiff.js may report positive Y resolution; flip to negative for downward rows
     resY: rawResY > 0 ? -rawResY : rawResY,
     fromCRS: 'EPSG:4326',
     toCRS: `EPSG:${epsgCode}`
@@ -28,7 +28,7 @@ export function setupGeoTransform(image: GeoTIFFImage): GeoTransform {
 }
 
 export function latLngToPixel(lat: number, lng: number, geo: GeoTransform): { px: number; py: number } {
-  // proj4 uses [lng, lat] order
+  // proj4 expects [lng, lat] order
   const [projX, projY] = proj4(geo.fromCRS, geo.toCRS, [lng, lat])
   const px = Math.round((projX - geo.originX) / geo.resX)
   const py = Math.round((projY - geo.originY) / geo.resY)

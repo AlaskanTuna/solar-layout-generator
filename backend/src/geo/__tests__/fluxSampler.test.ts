@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pointInPolygon, calculateAverageFlux } from './fluxSampler.js'
+import { pointInPolygon, calculateAverageFlux } from '../fluxSampler.js'
 
 describe('pointInPolygon', () => {
   const square: [number, number][] = [

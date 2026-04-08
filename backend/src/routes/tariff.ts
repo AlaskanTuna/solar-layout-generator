@@ -1,6 +1,7 @@
 import { Router, type Router as ExpressRouter } from 'express'
 import { prisma } from '../config/prisma.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
+import { NotFoundError } from '../errors.js'
 import type { TariffConfigResponse } from '@shared/types'
 
 export const tariffRouter: ExpressRouter = Router()
@@ -10,10 +11,7 @@ tariffRouter.get(
   '/config',
   asyncHandler(async (_req, res) => {
     const config = await prisma.tariffConfig.findFirst()
-    if (!config) {
-      res.status(404).json({ error: 'Tariff config not found. Run prisma db seed.' })
-      return
-    }
+    if (!config) throw new NotFoundError('Tariff config not found. Run prisma db seed.')
 
     if (!config.defaults) {
       console.warn('[TariffConfig] defaults missing in database row, using inline fallback values')

@@ -1,16 +1,13 @@
 import { prisma } from '../config/prisma.js'
 import { runLocationPipeline } from './locationPipeline.js'
+import { NotFoundError } from '../errors.js'
 
 const COORDINATE_TOLERANCE = 0.0001
 
-type ResolveLocationResult =
-  | {
-      locationId: string
-      status: 'processing' | 'ready' | 'failed'
-    }
-  | {
-      error: 'PROJECT_NOT_FOUND'
-    }
+type ResolveLocationResult = {
+  locationId: string
+  status: 'processing' | 'ready' | 'failed'
+}
 
 async function linkOwnedProjectToLocation(userId: string, projectId: string, locationId: string): Promise<boolean> {
   const result = await prisma.project.updateMany({
@@ -35,11 +32,10 @@ export async function resolveLocation(
   })
 
   if (existing) {
-    // Cache hit — link project if provided
     if (projectId) {
       const linked = await linkOwnedProjectToLocation(userId, projectId, existing.id)
       if (!linked) {
-        return { error: 'PROJECT_NOT_FOUND' }
+        throw new NotFoundError('Project not found')
       }
     }
     return { locationId: existing.id, status: existing.status }
@@ -58,7 +54,7 @@ export async function resolveLocation(
     const linked = await linkOwnedProjectToLocation(userId, projectId, location.id)
     if (!linked) {
       await prisma.location.delete({ where: { id: location.id } })
-      return { error: 'PROJECT_NOT_FOUND' }
+      throw new NotFoundError('Project not found')
     }
   }
 

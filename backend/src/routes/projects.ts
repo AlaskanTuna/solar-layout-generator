@@ -4,6 +4,7 @@ import { validate } from '../middleware/validate.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { createProjectSchema, saveLayoutSchema, saveAnalysisSchema } from '../validators/projects.js'
 import * as projectService from '../services/projectService.js'
+import { NotFoundError } from '../errors.js'
 
 export const projectsRouter: ExpressRouter = Router()
 
@@ -40,8 +41,7 @@ projectsRouter.get(
     const project = await projectService.getProject(req.user!.id, req.params.id as string)
     if (!project) {
       console.warn(`[ProjectGet] not found user=${req.user!.id} project=${req.params.id as string}`)
-      res.status(404).json({ error: 'Project not found' })
-      return
+      throw new NotFoundError('Project not found')
     }
     res.json(project)
   })
@@ -56,8 +56,7 @@ projectsRouter.delete(
     const deleted = await projectService.deleteProject(req.user!.id, req.params.id as string)
     if (!deleted) {
       console.warn(`[ProjectDelete] not found user=${req.user!.id} project=${req.params.id as string}`)
-      res.status(404).json({ error: 'Project not found' })
-      return
+      throw new NotFoundError('Project not found')
     }
     res.json({ success: true })
   })
@@ -80,8 +79,7 @@ projectsRouter.patch(
     )
     if (!updated) {
       console.warn(`[ProjectSaveLayout] not found user=${req.user!.id} project=${req.params.id as string}`)
-      res.status(404).json({ error: 'Project not found' })
-      return
+      throw new NotFoundError('Project not found')
     }
     res.json(updated)
   })
@@ -102,8 +100,7 @@ projectsRouter.patch(
     )
     if (!updated) {
       console.warn(`[ProjectSaveAnalysis] not found user=${req.user!.id} project=${req.params.id as string}`)
-      res.status(404).json({ error: 'Project not found' })
-      return
+      throw new NotFoundError('Project not found')
     }
     res.json(updated)
   })
