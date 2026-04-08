@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { InfoTooltip } from '@/components/InfoTooltip'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { formatCurrency, formatNumber } from './formatters'
 import { type AnalysisResultsRecord } from '@/lib/analysis'
 

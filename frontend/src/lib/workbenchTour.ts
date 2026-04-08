@@ -1,4 +1,4 @@
-import type { TourStep } from '@/components/GuidedTour'
+import type { TourStep } from '@/components/ui/GuidedTour'
 
 export const WORKBENCH_TOUR_STEPS: TourStep[] = [
   {

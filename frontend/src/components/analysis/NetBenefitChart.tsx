@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { InfoTooltip } from '@/components/InfoTooltip'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { useTheme } from '@/hooks/useTheme'
 import { COLORS, getChartTooltipStyle } from '@/lib/constants'
 import { ChartTooltipContent } from './ChartTooltipContent'

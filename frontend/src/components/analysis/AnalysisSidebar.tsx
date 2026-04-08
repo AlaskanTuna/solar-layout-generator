@@ -10,9 +10,9 @@ import {
   type ConnectionPhase,
   type ConsumptionProfile
 } from '@/lib/analysis'
-import { InfoTooltip } from '@/components/InfoTooltip'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
-import { ImagePopup } from '@/components/ImagePopup'
+import { ImagePopup } from '@/components/ui/ImagePopup'
 import { formatNumber } from '@/components/analysis/formatters'
 import type { AnalysisFormState } from '@/hooks/useAnalysisForm'
 import type { ParsedBuildingInsights } from '@/lib/buildingInsights'

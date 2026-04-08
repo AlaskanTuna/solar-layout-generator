@@ -5,11 +5,11 @@ import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { resolveLocation, getLocationStatus } from '@/api/locations'
 import { createProject, getProject } from '@/api/projects'
 import { Button } from '@/components/ui/button'
-import { AppLayout } from '@/components/AppLayout'
+import { AppLayout } from '@/components/layout/AppLayout'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
 import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react'
-import { LoadingOverlay } from '@/components/LoadingOverlay'
-import { GuidedTour, type TourStep } from '@/components/GuidedTour'
+import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
+import { GuidedTour, type TourStep } from '@/components/ui/GuidedTour'
 
 const MAP_TOUR_STEPS: TourStep[] = [
   {

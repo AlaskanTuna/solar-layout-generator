@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { InfoTooltip } from '@/components/InfoTooltip'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { formatCurrency } from './formatters'
 
 type FinancialRoadmapProps = {

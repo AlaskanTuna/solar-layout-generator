@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { InfoTooltip } from '@/components/InfoTooltip'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { MONTH_LABELS } from '@/lib/analysis'
 import { formatCurrency, formatNumber } from './formatters'
 import type { runAnnualSimulation } from '@/lib/billingEngine'

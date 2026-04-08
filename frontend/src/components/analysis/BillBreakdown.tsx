@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { InfoTooltip } from '@/components/InfoTooltip'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { MONTH_LABELS } from '@/lib/analysis'
 import { formatCurrency, formatNumber, BILL_TOOLTIPS, NEM_TOOLTIPS } from './formatters'
 import type { runAnnualSimulation } from '@/lib/billingEngine'

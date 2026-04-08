@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { NotificationPopover } from '@/components/ui/NotificationPopover'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'

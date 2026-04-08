@@ -12,10 +12,10 @@ import {
   type AnalysisConfig,
   type AnalysisResultsRecord
 } from '@/lib/analysis'
-import { InfoTooltip } from '@/components/InfoTooltip'
-import { AppLayout } from '@/components/AppLayout'
-import { LoadingOverlay } from '@/components/LoadingOverlay'
-import { GuidedTour, type TourStep } from '@/components/GuidedTour'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
+import { AppLayout } from '@/components/layout/AppLayout'
+import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
+import { GuidedTour, type TourStep } from '@/components/ui/GuidedTour'
 import { useTheme } from '@/hooks/useTheme'
 import { formatCurrency } from '@/components/analysis/formatters'
 import { ChartTooltipContent } from '@/components/analysis/ChartTooltipContent'
