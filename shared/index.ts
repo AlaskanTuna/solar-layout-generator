@@ -1,12 +1,12 @@
-// ── Location ──
+/* LOCATION */
 
 export type LocationStatus = 'processing' | 'ready' | 'failed'
 
-// ── Project ──
+/* PROJECT */
 
 export type ProjectStatus = 'draft' | 'layout_saved' | 'analysis_saved'
 
-// ── Panel Edit (stored as JSONB in Project.editedLayout) ──
+/* PANEL EDIT */
 
 export type PanelEdit = {
   id: string
@@ -16,7 +16,7 @@ export type PanelEdit = {
   monthlyEnergyDcKwh: number[]
 }
 
-// ── API Request / Response Types ──
+/* API REQUEST / RESPONSE TYPES */
 
 export type ResolveLocationRequest = {
   lat: number
@@ -114,7 +114,7 @@ export type HealthResponse = {
   status: 'ok'
 }
 
-// ── Panel Model ──
+/* PANEL MODEL */
 
 export interface PanelModel {
   id: string
