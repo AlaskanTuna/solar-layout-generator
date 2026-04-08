@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { usePanelState } from './usePanelState'
+import { usePanelState } from '../usePanelState'
 
 const solarPanels = [
   {

@@ -1,4 +1,5 @@
 import type { ProjectResponse } from '@/api/projects'
+import type { AnalysisResultsRecord } from '@/lib/analysis'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -14,12 +15,11 @@ const STATUS_CONFIG: Record<
   analysis_saved: { label: 'Analysis Complete', variant: 'default', icon: <BarChart3 className="h-3 w-3" /> }
 }
 
-function ProjectMetricsTooltip({ analysis }: { analysis: Record<string, unknown> }) {
-  const annualTotals = (analysis.annualTotals ?? {}) as Record<string, number>
-  const energyKwh = annualTotals?.totalGenerationKwh ?? 0
-  const carbonKg = (analysis.carbonOffsetKg as number) ?? 0
-  const panels = (analysis.activePanelCount as number) ?? 0
-  const savings = (analysis.averageMonthlySavingsRm as number) ?? 0
+function ProjectMetricsTooltip({ analysis }: { analysis: AnalysisResultsRecord }) {
+  const energyKwh = analysis.annualTotals.totalGenerationKwh
+  const carbonKg = analysis.carbonOffsetKg
+  const panels = analysis.activePanelCount
+  const savings = analysis.averageMonthlySavingsRm
 
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-white">
@@ -60,7 +60,7 @@ export function ProjectCard({
   onDelete: () => void
 }) {
   const config = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.draft
-  const analysis = project.status === 'analysis_saved' ? (project.analysisResults as Record<string, unknown>) : null
+  const analysis = project.status === 'analysis_saved' ? project.analysisResults : null
 
   return (
     <div

@@ -5,7 +5,7 @@ import {
   normalizeRotation,
   parseBuildingInsights,
   parsePanelEdits
-} from './buildingInsights'
+} from '../buildingInsights'
 
 describe('buildingInsights', () => {
   it('parses building insights and falls back optional values safely', () => {

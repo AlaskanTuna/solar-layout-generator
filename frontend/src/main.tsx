@@ -7,7 +7,7 @@ import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { AuthProvider } from './hooks/useAuth'
 import { ThemeProvider } from './hooks/useTheme'
 import { App } from './App'
-import './index.css'
+import './globals.css'
 
 const queryClient = new QueryClient()
 

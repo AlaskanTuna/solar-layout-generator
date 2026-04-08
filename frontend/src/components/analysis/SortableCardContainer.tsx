@@ -32,8 +32,7 @@ function saveOrder(order: string[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(order))
 }
 
-/** Reconcile a saved order with the current set of card IDs.
- *  Keeps saved ordering for existing cards, appends new ones at the end. */
+/** Reconcile a saved order with the current set of card IDs */
 function reconcile(saved: string[], current: string[]): string[] {
   const validIds = new Set(current)
   const result = saved.filter((id) => validIds.has(id))

@@ -9,7 +9,7 @@ import {
   latLngToPixel,
   panelMetersToPixels,
   pixelToLatLng
-} from './canvasTransforms'
+} from '../canvasTransforms'
 
 const imageGeoTransform = {
   originX: 0,

@@ -1,4 +1,4 @@
-import type { Notification } from '@/components/ui/notification-popover'
+import type { Notification } from '@/components/ui/NotificationPopover'
 
 const STORAGE_KEY = 'slg-notifications'
 

@@ -1,5 +1,9 @@
 import { apiFetch } from './client'
 import type { CreateProjectRequest, SaveLayoutRequest, SaveAnalysisRequest } from '@shared/types'
+import type { AnalysisConfig, AnalysisResultsRecord } from '@/lib/analysis'
+
+/** Partial after layout save (only selectedPanelModelId), full after analysis save */
+export type ProjectAnalysisConfig = Partial<AnalysisConfig> & { selectedPanelModelId?: string }
 
 export type ProjectResponse = {
   id: string
@@ -8,8 +12,8 @@ export type ProjectResponse = {
   name: string
   status: 'draft' | 'layout_saved' | 'analysis_saved'
   editedLayout: unknown[] | null
-  analysisConfig: Record<string, unknown> | null
-  analysisResults: Record<string, unknown> | null
+  analysisConfig: ProjectAnalysisConfig | null
+  analysisResults: AnalysisResultsRecord | null
   createdAt: string
   updatedAt: string
   location?: {

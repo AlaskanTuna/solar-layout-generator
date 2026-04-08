@@ -29,7 +29,7 @@ export function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background font-body">
-      {/* ─── Navbar ─── */}
+      {/* Navbar */}
       <nav className="glass-nav fixed inset-x-0 top-0 z-50">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2.5">
@@ -60,7 +60,7 @@ export function LandingPage() {
         </div>
       </nav>
 
-      {/* ─── Hero ─── */}
+      {/* Hero */}
       <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-6 pt-24 text-center">
         {/* Decorative gradient orbs */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -118,7 +118,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── How It Works ─── */}
+      {/* How It Works */}
       <section id="how-it-works" className="relative px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <div className="text-center animate-fade-in">
@@ -154,7 +154,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Features ─── */}
+      {/* Features */}
       <section className="px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <div className="text-center">
@@ -192,7 +192,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Social Proof ─── */}
+      {/* Social Proof */}
       <section className="px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <div className="text-center">
@@ -225,7 +225,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Pricing Preview ─── */}
+      {/* Pricing Preview */}
       <section className="px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <div className="text-center">
@@ -281,7 +281,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Disclaimers ─── */}
+      {/* Disclaimers */}
       <section className="px-6 py-16">
         <div className="mx-auto max-w-3xl">
           <div className="glass-card flex items-start gap-4 p-6">
@@ -299,7 +299,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Final CTA ─── */}
+      {/* Final CTA */}
       <section className="relative overflow-hidden px-6 py-24 text-center">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px]" />
@@ -322,7 +322,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
+      {/* Footer */}
       <footer className="border-t border-border px-6 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-between">
@@ -367,7 +367,7 @@ export function LandingPage() {
   )
 }
 
-/* ─── Sub-components ─── */
+/* SUB-COMPONENTS */
 
 function StepCard({
   step,

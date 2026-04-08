@@ -39,12 +39,7 @@ export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'A
 
 export type ConsumptionProfile = 'flat' | 'seasonal'
 
-/**
- * Malaysian seasonal monthly multipliers for residential electricity consumption.
- * Based on typical patterns: higher AC usage during hot dry months (Mar–Jun),
- * moderate during transition (Jul–Oct), lower during northeast monsoon (Nov–Feb).
- * Normalised so the 12-month average equals 1.0 (annual total unchanged).
- */
+/** Malaysian seasonal monthly consumption multipliers, normalised to average 1.0 */
 export const SEASONAL_MULTIPLIERS: readonly number[] = [
   0.93, // Jan — monsoon, cooler
   0.95, // Feb — monsoon tail
@@ -60,18 +55,12 @@ export const SEASONAL_MULTIPLIERS: readonly number[] = [
   0.91 // Dec — monsoon, school holidays
 ] as const
 
-/** Apply seasonal multipliers to a base consumption value, returning 12 monthly values. */
+/** Apply seasonal multipliers to a base consumption value, returning 12 monthly values */
 export function applySeasonalProfile(baseKwh: number): number[] {
   return SEASONAL_MULTIPLIERS.map((m) => round2(baseKwh * m))
 }
 
-/**
- * Default installation multiplier applied to panel module cost (costPerWp) to estimate
- * turnkey installed system cost. Panel modules are roughly 50% of total installed cost;
- * the remainder covers inverter (~15-20%), mounting/wiring (~15%), labour (~15%), and
- * permitting (~5%). A 2.0× multiplier yields RM 4,000–5,000/kWp — consistent with
- * Malaysian residential turnkey pricing (2025-2026).
- */
+/** Multiplier from panel module cost to turnkey installed system cost (2.0x ~ RM 4-5k/kWp) */
 export const DEFAULT_INSTALLATION_MULTIPLIER = 2.0
 
 export const ANALYSIS_DISCLAIMERS = [
@@ -173,7 +162,7 @@ export function buildAnalysisResults({
   const averageMonthlySavingsPct =
     simulation.totalBaselineRm > 0 ? round2((year1Savings / simulation.totalBaselineRm) * 100) : 0
 
-  // Degradation-aware payback: iterate year-by-year
+  // Degradation-aware payback
   let paybackYears: number | null = null
   if (year1Savings > 0) {
     let cumulative = 0
@@ -191,7 +180,7 @@ export function buildAnalysisResults({
     }
   }
 
-  // Degradation-aware 10-year totals
+  // 10-year totals with degradation
   const tenYearSavings = computeDegradedSavings(year1Savings, degradationRate, 10)
 
   const tenYearNetBenefitRm = round2(tenYearSavings - systemCostRm)

@@ -185,7 +185,7 @@ export function getInitialPanelRotation(panel: SolarPanel, roofSegments: RoofSeg
   const orientationDegrees = panel.orientation === 'PORTRAIT' ? 90 : 0
   const azimuthDegrees = roofSegments[panel.segmentIndex]?.azimuthDegrees ?? 0
 
-  // Match the validated prototype's image-space rotation, where Y grows downward.
+  // Match prototype's image-space rotation where Y grows downward
   return normalizeRotation(azimuthDegrees + orientationDegrees - 90)
 }
 

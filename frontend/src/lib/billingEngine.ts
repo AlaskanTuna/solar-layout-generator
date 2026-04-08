@@ -1,6 +1,6 @@
 import type { TariffRates, TariffThresholds } from '@shared/types'
 
-// ── Output types ──
+/* OUTPUT TYPES */
 
 export interface BillBreakdown {
   kwh: number
@@ -39,7 +39,7 @@ export interface AnnualSimulationResult {
   totalCreditsForfeited: number
 }
 
-// ── Config ──
+/* CONFIG */
 
 export interface BillingConfig {
   rates: TariffRates
@@ -48,7 +48,7 @@ export interface BillingConfig {
   afaRate: number // sen/kWh for the billing period
 }
 
-// ── Helpers ──
+/* HELPERS */
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100
@@ -58,11 +58,7 @@ function round5sen(n: number): number {
   return Math.round(n * 20) / 20
 }
 
-/**
- * Look up EEI rebate rate (sen/kWh) for a given consumption level.
- * The table is sorted ascending by upper-bound kWh.
- * Returns 0 if consumption is 0, negative, or above the cutoff.
- */
+/** Look up EEI rebate rate (sen/kWh) for a given consumption level */
 export function lookupEeiRebate(consumptionKwh: number, eeiTable: [number, number][]): number {
   if (consumptionKwh <= 0) return 0
   for (const [upperBound, rebateSen] of eeiTable) {
@@ -71,14 +67,12 @@ export function lookupEeiRebate(consumptionKwh: number, eeiTable: [number, numbe
   return 0
 }
 
-// ── Core billing ──
+/* CORE BILLING */
 
 /**
  * Compute a monthly TNB domestic bill under RP4 tariff.
- * All tariff parameters come from BillingConfig — nothing is hardcoded.
- *
- * Follows the 10-step algorithm from the Knowledge Vault §4.
- * Returns amounts in RM (ringgit), converting from sen internally.
+ * Follows the 10-step algorithm from Knowledge Vault S4,
+ * returns amounts in RM (converting from sen internally)
  */
 export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
   if (kwh <= 0) {
@@ -119,8 +113,7 @@ export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
   const eeiRateSen = lookupEeiRebate(kwh, eeiTable)
   const eeiRebate = (kwh * eeiRateSen) / 100
 
-  // Round each line item individually (matches real utility billing where
-  // each component appears as a rounded RM amount on the bill)
+  // Round each line item to match real utility billing
   const rEnergy = round2(energy)
   const rCapacity = round2(capacity)
   const rNetwork = round2(network)
@@ -156,18 +149,9 @@ export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
   }
 }
 
-// ── NEM monthly computation ──
+/* NEM MONTHLY COMPUTATION */
 
-/**
- * Compute one month of NEM billing with credit carry-forward.
- *
- * Implements the 3-phase algorithm from the Knowledge Vault §4:
- * Phase 1: Net import + credit offset
- * Phase 2: Bill on billable kWh
- * Phase 3: Savings = baseline − NEM bill
- *
- * December triggers year-end credit forfeiture.
- */
+/** Compute one month of NEM billing with credit carry-forward (December forfeits) */
 export function computeNemMonth(
   consumptionKwh: number,
   generationKwh: number,
@@ -222,17 +206,9 @@ export function computeNemMonth(
   }
 }
 
-// ── Annual simulation ──
+/* ANNUAL SIMULATION */
 
-/**
- * Run a 12-month NEM billing simulation.
- *
- * @param monthlyConsumption - constant or per-month consumption (kWh). A single number is applied to all 12 months;
- *                             an array of 12 values supplies per-month consumption.
- * @param monthlyGeneration  - array of 12 monthly generation values (kWh), index 0 = January
- * @param config             - tariff parameters from TariffConfig
- * @returns Annual simulation with per-month breakdown and totals
- */
+/** Run a 12-month NEM billing simulation with credit carry-forward */
 export function runAnnualSimulation(
   monthlyConsumption: number | number[],
   monthlyGeneration: number[],

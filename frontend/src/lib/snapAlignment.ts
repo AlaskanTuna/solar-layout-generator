@@ -21,12 +21,7 @@ type PanelInfo = {
 const SNAP_THRESHOLD = 14
 const ROTATION_TOLERANCE = 5
 
-/**
- * Given a panel being dragged, compute snapped position and guide lines
- * by projecting center-to-center distances onto the panel's local axes
- * (U along width, V along height) and snapping to edge-to-edge or
- * center-aligned targets. This properly handles rotated panels.
- */
+/** Compute snapped position and guide lines for a dragged panel using local-axis projection */
 export function computeSnap(
   dragged: { x: number; y: number; rotation: number; id: string },
   others: PanelInfo[],

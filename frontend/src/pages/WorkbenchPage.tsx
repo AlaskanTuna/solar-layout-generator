@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
+import { useRef, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
-import type { KonvaEventObject } from 'konva/lib/Node'
-import { recomputeFlux, recomputeFluxBatch, getOverlayUrl } from '@/api/locations'
-import { saveLayout } from '@/api/projects'
 import { MONTHLY_AZIMUTH, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
 import { Badge } from '@/components/ui/badge'
@@ -15,218 +11,40 @@ import { usePanelState, type BatchRecomputeStatus } from '@/hooks/usePanelState'
 import { useWorkbenchData } from '@/hooks/useWorkbenchData'
 import { useWorkbenchKeyboard } from '@/hooks/useWorkbenchKeyboard'
 import { useIrradiance } from '@/hooks/useIrradiance'
+import { useOverlayImages, type OverlayMode } from '@/hooks/useOverlayImages'
+import { useWorkbenchSave } from '@/hooks/useWorkbenchSave'
+import { useCanvasZoom } from '@/hooks/useCanvasZoom'
+import { useCanvasInteractions } from '@/hooks/useCanvasInteractions'
+import { useStageSize } from '@/hooks/useStageSize'
 import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
-import {
-  aabbsOverlap,
-  createCanvasGeo,
-  getRectAabb,
-  getRotatedRectPoints,
-  isAabbInsideStage,
-  isPolygonInsideRasterMask,
-  latLngToPixel,
-  panelMetersToPixels,
-  pixelToLatLng,
-  type CanvasGeo
-} from '@/lib/canvasTransforms'
 import { COLORS } from '@/lib/constants'
+import { WORKBENCH_TOUR_STEPS } from '@/lib/workbenchTour'
 import { AppLayout } from '@/components/AppLayout'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
-import { GuidedTour, type TourStep } from '@/components/GuidedTour'
-import { notify } from '@/components/ui/toast-config'
+import { GuidedTour } from '@/components/GuidedTour'
 import { CanvasControls } from '@/components/workbench/CanvasControls'
+import { CanvasLegends } from '@/components/workbench/CanvasLegends'
 import { WorkbenchSidebar } from '@/components/workbench/WorkbenchSidebar'
-import { computeSegmentHulls } from '@/lib/segmentVisualization'
-import { computeSnap, type SnapGuide } from '@/lib/snapAlignment'
 import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
-
-const WORKBENCH_TOUR_STEPS: TourStep[] = [
-  {
-    title: 'Your Roof Layout',
-    description:
-      'Welcome! This page shows solar panels placed on your rooftop by satellite analysis. The blue rectangles are solar panels — you can customise this layout before calculating your savings.'
-  },
-  {
-    target: '[data-tour="panel-model"]',
-    title: 'Choose Your Panel Model',
-    description:
-      'Pick a solar panel brand and model. Different panels have different sizes, efficiency, and prices. The default (Jinko Tiger Neo) is a popular choice in Malaysia.'
-  },
-  {
-    target: '[data-tour="panel-count"]',
-    title: 'How Many Panels?',
-    description:
-      'Slide left to remove panels, right to add more. The system keeps the highest-performing panels first. More panels = more savings, but also higher installation cost.'
-  },
-  {
-    title: 'Arrange Your Panels',
-    description:
-      'Click a panel to select it. Drag to reposition, use the sidebar slider to rotate, or press Delete to remove. Hold spacebar to pan around while keeping your current selection.',
-    placement: 'center' as const
-  },
-  {
-    target: '[data-tour="canvas-controls"]',
-    title: 'Canvas Controls',
-    description:
-      'Undo/redo your edits, use the marquee tool to drag-select groups of panels, toggle snap alignment for precise placement, zoom in/out, and switch overlay views.',
-    placement: 'left' as const
-  },
-  {
-    target: '[data-tour="save-continue"]',
-    title: 'Save & Continue',
-    description:
-      'Happy with the layout? Click "Save & Continue" to save your arrangement and move to the savings analysis page. You can always come back to adjust later.'
-  }
-]
-
-type UiMessage = {
-  tone: 'error' | 'info'
-  text: string
-} | null
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-MY', { maximumFractionDigits: 1 }).format(value)
-}
-
-function useLoadedImage(src: string | undefined) {
-  const [image, setImage] = useState<HTMLImageElement | null>(null)
-  const [imageError, setImageError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!src) {
-      setImage(null)
-      setImageError(null)
-      return
-    }
-
-    const nextImage = new window.Image()
-    const loadTimeout = window.setTimeout(() => {
-      setImage(null)
-      setImageError('Timed out while loading the rooftop preview image')
-    }, 15000)
-
-    if (import.meta.env.DEV) {
-      console.info('[WorkbenchImage] Loading rooftop image', { src })
-    }
-
-    nextImage.crossOrigin = 'anonymous'
-    nextImage.onload = () => {
-      window.clearTimeout(loadTimeout)
-      setImage(nextImage)
-      setImageError(null)
-
-      if (import.meta.env.DEV) {
-        console.info('[WorkbenchImage] Rooftop image loaded', {
-          width: nextImage.width,
-          height: nextImage.height
-        })
-      }
-    }
-    nextImage.onerror = () => {
-      window.clearTimeout(loadTimeout)
-      setImage(null)
-      setImageError(`Failed to load rooftop image from: ${src.slice(0, 120)}`)
-
-      if (import.meta.env.DEV) {
-        console.error('[WorkbenchImage] Rooftop image failed to load', { src })
-      }
-    }
-    nextImage.src = src
-
-    return () => {
-      window.clearTimeout(loadTimeout)
-      nextImage.onload = null
-      nextImage.onerror = null
-    }
-  }, [src])
-
-  return { image, imageError }
-}
-
-function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTMLImageElement | null) {
-  const [size, setSize] = useState({ width: 0, height: 0 })
-
-  useEffect(() => {
-    if (!containerRef.current || !image) {
-      setSize({ width: 0, height: 0 })
-      return
-    }
-
-    const element = containerRef.current
-
-    const update = () => {
-      const maxWidth = Math.max(element.clientWidth - 64, 1)
-      const maxHeight = Math.max(window.innerHeight - 280, 200)
-      const scale = Math.min(maxWidth / image.width, maxHeight / image.height)
-
-      setSize({
-        width: Math.max(1, Math.round(image.width * scale)),
-        height: Math.max(1, Math.round(image.height * scale))
-      })
-    }
-
-    update()
-
-    const observer = new ResizeObserver(update)
-    observer.observe(element)
-    window.addEventListener('resize', update)
-
-    return () => {
-      observer.disconnect()
-      window.removeEventListener('resize', update)
-    }
-  }, [containerRef, image])
-
-  return size
-}
 
 function getPanelAnnualEnergy(monthlyEnergyDcKwh: number[], yearlyEnergyDcKwh: number): number {
   return monthlyEnergyDcKwh.length > 0 ? annualEnergyFromMonthly(monthlyEnergyDcKwh) : yearlyEnergyDcKwh
 }
 
-function getPlacementErrorMessage(reason: 'bounds' | 'mask' | 'overlap') {
-  switch (reason) {
-    case 'mask':
-      return 'That placement leaves the detected roof boundary.'
-    case 'overlap':
-      return 'That placement overlaps another panel.'
-    default:
-      return 'That placement leaves the roof image bounds.'
-  }
-}
-
 export function WorkbenchPage() {
   const { projectId } = useParams<{ projectId: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const containerRef = useRef<HTMLDivElement>(null)
-  const rotationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [selectedPanelIds, setSelectedPanelIds] = useState<Set<string>>(new Set())
-  const [snapEnabled, setSnapEnabled] = useState(true)
-  const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
-  const [marqueeMode, setMarqueeMode] = useState(false)
-  const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
-  const marqueeStartRef = useRef<{ x: number; y: number } | null>(null)
-  const [spaceHeld, setSpaceHeld] = useState(false)
-  const [pendingPanelId, setPendingPanelId] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isBatchRecomputing, setIsBatchRecomputing] = useState(false)
   const [initialBatchStatus, setInitialBatchStatus] = useState<BatchRecomputeStatus>('idle')
-  const [message, setMessage] = useState<UiMessage>(null)
   const [canvasExpanded, setCanvasExpanded] = useState(false)
   const [freeRotate, setFreeRotate] = useState(false)
   const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
   const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
-  const [isModelRecomputing, setIsModelRecomputing] = useState(false)
-  const [stageScale, setStageScale] = useState(1)
-  const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 })
-  const [overlayMode, setOverlayMode] = useState<'rgb' | 'annual-flux' | 'dsm' | 'mask'>('rgb')
-  const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null)
+  const [overlayMode, setOverlayMode] = useState<OverlayMode>('rgb')
   const [overlayExpanded, setOverlayExpanded] = useState(false)
   const [showSegments, setShowSegments] = useState(false)
-  const zoomSnapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [isOverlayLoading, setIsOverlayLoading] = useState(false)
+  const [spaceHeld, setSpaceHeld] = useState(false)
 
   const { irradianceMonth, setIrradianceMonth, irradianceStyle } = useIrradiance()
 
@@ -239,36 +57,15 @@ export function WorkbenchPage() {
     isLoading,
     error: dataError
   } = useWorkbenchData(projectId)
-  const { image: backgroundImage, imageError } = useLoadedImage(rgbImageUrl)
-  const { image: overlayImage } = useLoadedImage(overlayMode !== 'rgb' ? (overlayImageUrl ?? undefined) : undefined)
-  const displayImage = overlayMode !== 'rgb' && overlayImage ? overlayImage : backgroundImage
+
+  const { backgroundImage, displayImage, imageError, isOverlayLoading } = useOverlayImages(
+    rgbImageUrl,
+    project?.locationId,
+    overlayMode
+  )
+
   const error = dataError ?? (imageError ? new Error(imageError) : null)
   const stageSize = useStageSize(containerRef, backgroundImage)
-
-  const geo = useMemo(() => {
-    if (!imageGeoTransform || stageSize.width === 0 || stageSize.height === 0) {
-      return null
-    }
-
-    return createCanvasGeo(imageGeoTransform, stageSize.width, stageSize.height)
-  }, [imageGeoTransform, stageSize])
-
-  const panelDimensions = useMemo(() => {
-    if (!geo) return null
-    return panelMetersToPixels(selectedPanelModel.widthM, selectedPanelModel.heightM, geo)
-  }, [selectedPanelModel, geo])
-  const maskGeo = useMemo(() => {
-    if (!roofMask) {
-      return null
-    }
-
-    return createCanvasGeo(roofMask.geoTransform, roofMask.width, roofMask.height)
-  }, [roofMask])
-  const maskPanelDimensions = useMemo(() => {
-    if (!maskGeo) return null
-    return panelMetersToPixels(selectedPanelModel.widthM, selectedPanelModel.heightM, maskGeo)
-  }, [selectedPanelModel, maskGeo])
-  const stageReady = stageSize.width > 0 && stageSize.height > 0 && !!geo && !!panelDimensions
 
   const {
     visiblePanels,
@@ -303,626 +100,44 @@ export function WorkbenchPage() {
     onBatchRecomputeStatusChange: setInitialBatchStatus
   })
 
-  const selectedPanelId = selectedPanelIds.size === 1 ? [...selectedPanelIds][0]! : null
-  const selectedPanel = selectedPanelId ? (getPanel(selectedPanelId) ?? null) : null
+  const interactions = useCanvasInteractions({
+    locationId: project?.locationId,
+    imageGeoTransform,
+    roofMask,
+    stageSize,
+    selectedPanelModel,
+    selectedPanelModelId,
+    setSelectedPanelModelId,
+    visiblePanels,
+    getPanel,
+    movePanel,
+    rotatePanel,
+    deletePanel,
+    updatePanelEnergy,
+    showSegments,
+    solarPanels: buildingInsights?.solarPotential.solarPanels ?? [],
+    roofSegments: buildingInsights?.solarPotential.roofSegmentStats ?? []
+  })
 
-  const renderPanels = useMemo(() => {
-    if (!geo) return []
+  const { isSaving, isBatchRecomputing, handleSave } = useWorkbenchSave({
+    projectId,
+    locationId: project?.locationId,
+    selectedPanelModel,
+    selectedPanelModelId,
+    serializeLayout,
+    updatePanelEnergy
+  })
 
-    return visiblePanels.map((panel) => ({
-      panel,
-      ...latLngToPixel(panel.center.lat, panel.center.lng, geo)
-    }))
-  }, [visiblePanels, geo])
-
-  const segmentHulls = useMemo(() => {
-    if (!showSegments || !buildingInsights || !geo || !panelDimensions) return []
-
-    const solarPanels = buildingInsights.solarPotential.solarPanels
-    const roofSegments = buildingInsights.solarPotential.roofSegmentStats
-    const activePanelIds = new Set(visiblePanels.map((p) => p.id))
-
-    const pixelMap = new Map<string, { x: number; y: number; rotation: number }>()
-    for (const { panel, x, y } of renderPanels) {
-      pixelMap.set(panel.id, { x, y, rotation: panel.rotation })
-    }
-
-    return computeSegmentHulls(
-      solarPanels,
-      roofSegments,
-      pixelMap,
-      activePanelIds,
-      panelDimensions.width,
-      panelDimensions.height
-    )
-  }, [showSegments, buildingInsights, geo, panelDimensions, visiblePanels, renderPanels])
-
-  const handleSnapDragMove = useCallback(
-    (panelId: string, position: { x: number; y: number }) => {
-      if (!snapEnabled || !panelDimensions) {
-        setSnapGuides([])
-        return position
-      }
-
-      const panel = getPanel(panelId)
-      if (!panel) return position
-
-      const otherPanels = renderPanels
-        .filter(({ panel: p }) => p.id !== panelId)
-        .map(({ panel: p, x, y }) => ({ id: p.id, x, y, rotation: p.rotation }))
-
-      const result = computeSnap(
-        { x: position.x, y: position.y, rotation: panel.rotation, id: panelId },
-        otherPanels,
-        panelDimensions.width,
-        panelDimensions.height,
-        stageSize.width,
-        stageSize.height
-      )
-
-      setSnapGuides(result.guides)
-      return { x: result.x, y: result.y }
-    },
-    [snapEnabled, panelDimensions, getPanel, renderPanels, stageSize]
-  )
-
-  useEffect(() => {
-    if (visiblePanels.length === 0) {
-      setSelectedPanelIds(new Set())
-      return
-    }
-    setSelectedPanelIds((prev) => {
-      const visibleIds = new Set(visiblePanels.map((p) => p.id))
-      const next = new Set([...prev].filter((id) => visibleIds.has(id)))
-      if (next.size === 0 && visiblePanels.length > 0) {
-        next.add(visiblePanels[0]!.id)
-      }
-      if (next.size === prev.size && [...next].every((id) => prev.has(id))) return prev
-      return next
-    })
-  }, [visiblePanels])
-
-  useEffect(() => {
-    return () => {
-      if (rotationTimeoutRef.current) {
-        clearTimeout(rotationTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  function handleDeleteSelected() {
-    if (selectedPanelIds.size === 0) return
-
-    if (rotationTimeoutRef.current) {
-      clearTimeout(rotationTimeoutRef.current)
-    }
-
-    for (const id of selectedPanelIds) {
-      deletePanel(id)
-    }
-    setSelectedPanelIds(new Set())
-    setMessage(null)
-  }
+  const zoom = useCanvasZoom(stageSize)
 
   useWorkbenchKeyboard({
     undo,
     redo,
-    selectedPanelIds,
-    onDeleteSelected: handleDeleteSelected,
+    selectedPanelIds: interactions.selectedPanelIds,
+    onDeleteSelected: interactions.handleDeleteSelected,
     onSpaceDown: () => setSpaceHeld(true),
     onSpaceUp: () => setSpaceHeld(false)
   })
-
-  useEffect(() => {
-    if (!import.meta.env.DEV) return
-
-    console.info('[WorkbenchPage]', {
-      projectId: projectId ?? null,
-      hasProject: Boolean(project),
-      hasBuildingInsights: Boolean(buildingInsights),
-      hasImageGeoTransform: Boolean(imageGeoTransform),
-      hasRgbImageUrl: Boolean(rgbImageUrl),
-      hasBackgroundImage: Boolean(backgroundImage),
-      stageWidth: stageSize.width,
-      stageHeight: stageSize.height,
-      hasPanelDimensions: Boolean(panelDimensions),
-      isLoading,
-      error: error instanceof Error ? error.message : null
-    })
-  }, [
-    projectId,
-    project,
-    buildingInsights,
-    imageGeoTransform,
-    rgbImageUrl,
-    backgroundImage,
-    stageSize.width,
-    stageSize.height,
-    panelDimensions,
-    isLoading,
-    error
-  ])
-
-  function getPlacementAabb(
-    panelId: string,
-    center: { lat: number; lng: number },
-    rotation: number,
-    canvasGeo: CanvasGeo
-  ) {
-    if (!panelDimensions) return null
-
-    const pixelCenter = latLngToPixel(center.lat, center.lng, canvasGeo)
-    const points = getRotatedRectPoints(
-      pixelCenter.x,
-      pixelCenter.y,
-      panelDimensions.width,
-      panelDimensions.height,
-      rotation
-    )
-
-    return getRectAabb(points)
-  }
-
-  function getPlacementError(
-    panelId: string,
-    center: { lat: number; lng: number },
-    rotation: number,
-    excludeIds?: Set<string>
-  ) {
-    if (!geo || !panelDimensions) return 'bounds' as const
-
-    const proposedAabb = getPlacementAabb(panelId, center, rotation, geo)
-    if (!proposedAabb) return 'bounds' as const
-
-    if (!isAabbInsideStage(proposedAabb, stageSize.width, stageSize.height)) {
-      return 'bounds' as const
-    }
-
-    if (roofMask && maskGeo && maskPanelDimensions) {
-      const maskCenter = latLngToPixel(center.lat, center.lng, maskGeo)
-      const maskPoints = getRotatedRectPoints(
-        maskCenter.x,
-        maskCenter.y,
-        maskPanelDimensions.width,
-        maskPanelDimensions.height,
-        rotation
-      )
-
-      if (!isPolygonInsideRasterMask(maskPoints, roofMask)) {
-        return 'mask' as const
-      }
-    }
-
-    for (const otherPanel of visiblePanels) {
-      if (otherPanel.id === panelId) continue
-      if (excludeIds?.has(otherPanel.id)) continue
-      const otherAabb = getPlacementAabb(otherPanel.id, otherPanel.center, otherPanel.rotation, geo)
-      if (otherAabb && aabbsOverlap(proposedAabb, otherAabb)) {
-        return 'overlap' as const
-      }
-    }
-
-    return null
-  }
-
-  async function recomputePanel(
-    panelId: string,
-    center: { lat: number; lng: number },
-    rotation: number,
-    rollback: () => void
-  ) {
-    if (!project) return
-
-    setPendingPanelId(panelId)
-    notify.info('Recomputing panel yield from cached monthly flux data...')
-
-    try {
-      const result = await recomputeFlux(project.locationId, {
-        panelId,
-        center,
-        rotation,
-        widthM: selectedPanelModel.widthM,
-        heightM: selectedPanelModel.heightM,
-        capacityWp: selectedPanelModel.capacityWp
-      })
-      updatePanelEnergy(result.panelId, result.monthlyEnergyDcKwh)
-      setMessage(null)
-    } catch (recomputeError) {
-      rollback()
-      notify.error(recomputeError instanceof Error ? recomputeError.message : 'Failed to recompute panel energy')
-    } finally {
-      setPendingPanelId(null)
-    }
-  }
-
-  function handlePanelSelect(panelId: string, shiftKey: boolean) {
-    setSelectedPanelIds((prev) => {
-      if (shiftKey) {
-        const next = new Set(prev)
-        if (next.has(panelId)) {
-          next.delete(panelId)
-        } else {
-          next.add(panelId)
-        }
-        return next
-      }
-      return new Set([panelId])
-    })
-  }
-
-  async function handlePanelDragEnd(panelId: string, position: { x: number; y: number }, resetPosition: () => void) {
-    setSnapGuides([])
-    if (!geo) return
-
-    const panel = getPanel(panelId)
-    if (!panel) return
-
-    if (!selectedPanelIds.has(panelId) || selectedPanelIds.size <= 1) {
-      const nextCenter = pixelToLatLng(position.x, position.y, geo)
-      const placementError = getPlacementError(panelId, nextCenter, panel.rotation)
-      if (placementError) {
-        resetPosition()
-        notify.error(getPlacementErrorMessage(placementError))
-        return
-      }
-
-      const previousCenter = panel.center
-      movePanel(panelId, nextCenter)
-      await recomputePanel(panelId, nextCenter, panel.rotation, () => {
-        movePanel(panelId, previousCenter)
-        resetPosition()
-      })
-      return
-    }
-
-    // Group drag
-    const origPixel = latLngToPixel(panel.center.lat, panel.center.lng, geo)
-    const deltaX = position.x - origPixel.x
-    const deltaY = position.y - origPixel.y
-
-    const selectedPanels = [...selectedPanelIds]
-      .map((id) => getPanel(id))
-      .filter((p): p is NonNullable<typeof p> => p != null)
-
-    const moves: { id: string; prevCenter: { lat: number; lng: number }; nextCenter: { lat: number; lng: number } }[] =
-      []
-
-    for (const sp of selectedPanels) {
-      const spPixel = latLngToPixel(sp.center.lat, sp.center.lng, geo)
-      const newPixel = { x: spPixel.x + deltaX, y: spPixel.y + deltaY }
-      const nextCenter = pixelToLatLng(newPixel.x, newPixel.y, geo)
-
-      const placementError = getPlacementError(sp.id, nextCenter, sp.rotation, selectedPanelIds)
-      if (placementError) {
-        resetPosition()
-        notify.error(`Group move failed: ${getPlacementErrorMessage(placementError)}`)
-        return
-      }
-      moves.push({ id: sp.id, prevCenter: sp.center, nextCenter })
-    }
-
-    for (const mv of moves) {
-      movePanel(mv.id, mv.nextCenter)
-    }
-
-    if (!project) return
-    setPendingPanelId(panelId)
-    notify.info(`Recomputing yield for ${moves.length} panels...`)
-
-    try {
-      const batchResponse = await recomputeFluxBatch(project.locationId, {
-        panels: moves.map((mv) => {
-          const p = getPanel(mv.id)!
-          return {
-            panelId: mv.id,
-            center: mv.nextCenter,
-            rotation: p.rotation,
-            widthM: selectedPanelModel.widthM,
-            heightM: selectedPanelModel.heightM,
-            capacityWp: selectedPanelModel.capacityWp
-          }
-        })
-      })
-      for (const result of batchResponse.results) {
-        if (result.monthlyEnergyDcKwh.length === 12) {
-          updatePanelEnergy(result.panelId, result.monthlyEnergyDcKwh)
-        }
-      }
-      setMessage(null)
-    } catch {
-      for (const mv of moves) {
-        movePanel(mv.id, mv.prevCenter)
-      }
-      resetPosition()
-      notify.error('Failed to recompute group move. Positions reverted.')
-    } finally {
-      setPendingPanelId(null)
-    }
-  }
-
-  function scheduleRotationRecompute(
-    panelId: string,
-    center: { lat: number; lng: number },
-    rotation: number,
-    previousRotation: number
-  ) {
-    if (rotationTimeoutRef.current) {
-      clearTimeout(rotationTimeoutRef.current)
-    }
-
-    rotationTimeoutRef.current = setTimeout(() => {
-      void recomputePanel(panelId, center, rotation, () => rotatePanel(panelId, previousRotation))
-    }, 1000)
-  }
-
-  function handleCanvasRotate(panelId: string, value: number) {
-    // Select the panel if not already selected
-    if (!selectedPanelIds.has(panelId)) {
-      setSelectedPanelIds(new Set([panelId]))
-    }
-    handleRotationInput(value)
-  }
-
-  function handleRotationInput(value: number) {
-    const nextRotation = ((value % 360) + 360) % 360
-
-    if (selectedPanelIds.size > 1) {
-      for (const id of selectedPanelIds) {
-        const p = getPanel(id)
-        if (!p) continue
-        const placementError = getPlacementError(p.id, p.center, nextRotation)
-        if (placementError) {
-          notify.error(getPlacementErrorMessage(placementError))
-          return
-        }
-      }
-      for (const id of selectedPanelIds) {
-        rotatePanel(id, nextRotation)
-      }
-      if (rotationTimeoutRef.current) clearTimeout(rotationTimeoutRef.current)
-      rotationTimeoutRef.current = setTimeout(() => {
-        if (!project) return
-        const panels = [...selectedPanelIds]
-          .map((id) => getPanel(id))
-          .filter((p): p is NonNullable<typeof p> => p != null)
-        void recomputeFluxBatch(project.locationId, {
-          panels: panels.map((p) => ({
-            panelId: p.id,
-            center: p.center,
-            rotation: nextRotation,
-            widthM: selectedPanelModel.widthM,
-            heightM: selectedPanelModel.heightM,
-            capacityWp: selectedPanelModel.capacityWp
-          }))
-        })
-          .then((resp) => {
-            for (const r of resp.results) {
-              if (r.monthlyEnergyDcKwh.length === 12) updatePanelEnergy(r.panelId, r.monthlyEnergyDcKwh)
-            }
-          })
-          .catch(() => {})
-      }, 1000)
-      return
-    }
-
-    if (!selectedPanel) return
-
-    const placementError = getPlacementError(selectedPanel.id, selectedPanel.center, nextRotation)
-    if (placementError) {
-      notify.error(getPlacementErrorMessage(placementError))
-      return
-    }
-
-    const previousRotation = selectedPanel.rotation
-    rotatePanel(selectedPanel.id, nextRotation)
-    scheduleRotationRecompute(selectedPanel.id, selectedPanel.center, nextRotation, previousRotation)
-  }
-
-  useEffect(() => {
-    if (overlayMode === 'rgb' || !project?.locationId) {
-      setOverlayImageUrl(null)
-      return
-    }
-    let cancelled = false
-    setIsOverlayLoading(true)
-    getOverlayUrl(project.locationId, overlayMode)
-      .then((data) => {
-        if (!cancelled) setOverlayImageUrl(data.url)
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setOverlayImageUrl(null)
-          notify.error(`Failed to load ${overlayMode} overlay`)
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setIsOverlayLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [overlayMode, project?.locationId])
-
-  // Auto zoom-back to 1:1 when zoomed out below 100%, with 3s debounce
-  useEffect(() => {
-    if (zoomSnapTimerRef.current) {
-      clearTimeout(zoomSnapTimerRef.current)
-      zoomSnapTimerRef.current = null
-    }
-    if (stageScale >= 1) return
-
-    zoomSnapTimerRef.current = setTimeout(() => {
-      const duration = 300
-      const startScale = stageScale
-      const startPos = { ...stagePosition }
-      const startTime = performance.now()
-
-      function animate(now: number) {
-        const elapsed = now - startTime
-        const t = Math.min(1, elapsed / duration)
-        const ease = t * (2 - t)
-        const nextScale = startScale + (1 - startScale) * ease
-        const nextX = startPos.x * (1 - ease)
-        const nextY = startPos.y * (1 - ease)
-        setStageScale(nextScale)
-        setStagePosition({ x: nextX, y: nextY })
-        if (t < 1) requestAnimationFrame(animate)
-      }
-      requestAnimationFrame(animate)
-    }, 1000)
-
-    return () => {
-      if (zoomSnapTimerRef.current) clearTimeout(zoomSnapTimerRef.current)
-    }
-  }, [stageScale, stagePosition])
-
-  async function handleModelChange(nextModelId: string) {
-    const prevModelId = selectedPanelModelId
-    setSelectedPanelModelId(nextModelId)
-
-    if (!project || visiblePanels.length === 0) return
-
-    setIsModelRecomputing(true)
-    notify.info('Recalculating energy for new panel dimensions...')
-
-    const nextModel = getPanelModel(nextModelId) ?? PANEL_MODELS[1]!
-
-    try {
-      const batchResponse = await recomputeFluxBatch(project.locationId, {
-        panels: visiblePanels.map((panel) => ({
-          panelId: panel.id,
-          center: panel.center,
-          rotation: panel.rotation,
-          widthM: nextModel.widthM,
-          heightM: nextModel.heightM,
-          capacityWp: nextModel.capacityWp
-        }))
-      })
-
-      for (const result of batchResponse.results) {
-        if (result.monthlyEnergyDcKwh.length === 12) {
-          updatePanelEnergy(result.panelId, result.monthlyEnergyDcKwh)
-        }
-      }
-      setMessage(null)
-    } catch (err) {
-      setSelectedPanelModelId(prevModelId)
-      notify.error(err instanceof Error ? err.message : 'Failed to recalculate energy. Reverted panel model.')
-    } finally {
-      setIsModelRecomputing(false)
-    }
-  }
-
-  const MIN_ZOOM = 0.5
-  const MAX_ZOOM = 3
-
-  const handleWheel = useCallback(
-    (e: KonvaEventObject<WheelEvent>) => {
-      e.evt.preventDefault()
-      const stage = e.target.getStage()
-      const pointer = stage?.getPointerPosition()
-      if (!pointer) return
-
-      const direction = e.evt.deltaY > 0 ? -1 : 1
-      const factor = 1.1
-      const newScale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, stageScale * Math.pow(factor, direction)))
-
-      const mousePointTo = {
-        x: (pointer.x - stagePosition.x) / stageScale,
-        y: (pointer.y - stagePosition.y) / stageScale
-      }
-
-      setStageScale(newScale)
-      setStagePosition({
-        x: pointer.x - mousePointTo.x * newScale,
-        y: pointer.y - mousePointTo.y * newScale
-      })
-    },
-    [stageScale, stagePosition]
-  )
-
-  function handleZoomIn() {
-    const newScale = Math.min(MAX_ZOOM, stageScale * 1.25)
-    const cx = stageSize.width / 2
-    const cy = stageSize.height / 2
-    const mousePointTo = { x: (cx - stagePosition.x) / stageScale, y: (cy - stagePosition.y) / stageScale }
-    setStageScale(newScale)
-    setStagePosition({ x: cx - mousePointTo.x * newScale, y: cy - mousePointTo.y * newScale })
-  }
-
-  function handleZoomOut() {
-    const newScale = Math.max(MIN_ZOOM, stageScale / 1.25)
-    const cx = stageSize.width / 2
-    const cy = stageSize.height / 2
-    const mousePointTo = { x: (cx - stagePosition.x) / stageScale, y: (cy - stagePosition.y) / stageScale }
-    setStageScale(newScale)
-    setStagePosition({ x: cx - mousePointTo.x * newScale, y: cy - mousePointTo.y * newScale })
-  }
-
-  function handleZoomReset() {
-    setStageScale(1)
-    setStagePosition({ x: 0, y: 0 })
-  }
-
-  async function handleSave() {
-    if (!projectId || !project) return
-
-    setIsSaving(true)
-    setIsBatchRecomputing(true)
-    setMessage(null)
-
-    try {
-      const serializedLayout = serializeLayout()
-      const activePanels = serializedLayout.filter((panel) => panel.status !== 'deleted')
-
-      notify.info(`Recomputing monthly energy for ${activePanels.length} active panels before saving...`)
-
-      const batchResponse = await recomputeFluxBatch(project.locationId, {
-        panels: activePanels.map((panel) => ({
-          panelId: panel.id,
-          center: panel.center,
-          rotation: panel.rotation,
-          widthM: selectedPanelModel.widthM,
-          heightM: selectedPanelModel.heightM,
-          capacityWp: selectedPanelModel.capacityWp
-        }))
-      })
-
-      const energyByPanelId = new Map(
-        batchResponse.results.map((result) => [result.panelId, result.monthlyEnergyDcKwh] as const)
-      )
-      const incompletePanels = activePanels.filter((panel) => {
-        const monthlyEnergyDcKwh = energyByPanelId.get(panel.id)
-        return !monthlyEnergyDcKwh || monthlyEnergyDcKwh.length !== 12
-      })
-
-      if (incompletePanels.length > 0) {
-        throw new Error(
-          `Batch recompute returned incomplete results for ${incompletePanels.length} panel(s). Please retry.`
-        )
-      }
-
-      const nextLayout = serializedLayout.map((panel) => {
-        const monthlyEnergyDcKwh = energyByPanelId.get(panel.id)
-        return monthlyEnergyDcKwh ? { ...panel, monthlyEnergyDcKwh } : panel
-      })
-
-      setIsBatchRecomputing(false)
-      notify.info('Saving the refreshed layout to your project...')
-      const updatedProject = await saveLayout(projectId, { editedLayout: nextLayout, selectedPanelModelId })
-      queryClient.setQueryData(['project', projectId], updatedProject)
-      navigate(`/project/${projectId}/analysis`)
-    } catch (saveError) {
-      notify.error(
-        saveError instanceof Error
-          ? saveError.message
-          : 'Failed to recompute and save the current layout. Please retry.'
-      )
-    } finally {
-      setIsBatchRecomputing(false)
-      setIsSaving(false)
-    }
-  }
 
   if (error) {
     return (
@@ -955,8 +170,8 @@ export function WorkbenchPage() {
     )
   }
 
-  const selectedAnnualEnergy = selectedPanel
-    ? getPanelAnnualEnergy(selectedPanel.monthlyEnergyDcKwh, selectedPanel.yearlyEnergyDcKwh)
+  const selectedAnnualEnergy = interactions.selectedPanel
+    ? getPanelAnnualEnergy(interactions.selectedPanel.monthlyEnergyDcKwh, interactions.selectedPanel.yearlyEnergyDcKwh)
     : null
 
   return (
@@ -972,21 +187,21 @@ export function WorkbenchPage() {
           panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears ?? undefined}
           selectedPanelModelId={selectedPanelModelId}
           selectedPanelModel={selectedPanelModel}
-          onModelChange={handleModelChange}
-          isModelRecomputing={isModelRecomputing}
+          onModelChange={interactions.handleModelChange}
+          isModelRecomputing={interactions.isModelRecomputing}
           isSaving={isSaving}
           isBatchRecomputing={isBatchRecomputing}
           initialBatchStatus={initialBatchStatus}
-          message={message}
+          message={interactions.message}
           visiblePanelCount={visiblePanels.length}
           visibleCount={visibleCount}
           minVisibleCount={minVisibleCount}
           maxVisibleCount={maxVisibleCount}
           onVisibleCountChange={setVisibleCount}
-          selectedPanelIds={selectedPanelIds}
-          selectedPanel={selectedPanel}
+          selectedPanelIds={interactions.selectedPanelIds}
+          selectedPanel={interactions.selectedPanel}
           selectedAnnualEnergy={selectedAnnualEnergy}
-          pendingPanelId={pendingPanelId}
+          pendingPanelId={interactions.pendingPanelId}
           onSave={handleSave}
         />
 
@@ -1004,7 +219,7 @@ export function WorkbenchPage() {
                     <InfoTooltip text="Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it. Hold spacebar to pan the view" />
                   </CardTitle>
                 </div>
-                {(pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
+                {(interactions.pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
                   <Badge className="bg-amber-600 text-white hover:bg-amber-600">
                     {isBatchRecomputing
                       ? 'Batch Recompute'
@@ -1021,85 +236,46 @@ export function WorkbenchPage() {
                 className="relative flex flex-1 items-center justify-center rounded-2xl border border-dashed border-border p-8"
                 style={irradianceStyle}
               >
-                {/* Rotation degree indicator (top-left) */}
-                {selectedPanel && (
+                {interactions.selectedPanel && (
                   <div className="absolute left-3 top-3 z-20 rounded-md bg-black/60 px-2 py-1 font-mono text-xs text-white backdrop-blur-sm">
-                    {Math.round(selectedPanel.rotation)}°
+                    {Math.round(interactions.selectedPanel.rotation)}°
                   </div>
                 )}
 
-                {stageReady && panelDimensions ? (
+                {interactions.stageReady && interactions.panelDimensions ? (
                   <>
                     <Stage
                       width={stageSize.width}
                       height={stageSize.height}
-                      scaleX={stageScale}
-                      scaleY={stageScale}
-                      x={stagePosition.x}
-                      y={stagePosition.y}
-                      draggable={(stageScale > 1 && !marqueeMode) || spaceHeld}
+                      scaleX={zoom.stageScale}
+                      scaleY={zoom.stageScale}
+                      x={zoom.stagePosition.x}
+                      y={zoom.stagePosition.y}
+                      draggable={(zoom.stageScale > 1 && !interactions.marqueeMode) || spaceHeld}
                       style={{ cursor: spaceHeld ? 'grab' : undefined }}
-                      onWheel={handleWheel}
+                      onWheel={zoom.handleWheel}
                       className="overflow-hidden rounded-xl shadow-lg"
                       onClick={(e) => {
                         if (spaceHeld) return
-                        if (e.target === e.target.getStage()) {
-                          setSelectedPanelIds(new Set())
-                        }
+                        if (e.target === e.target.getStage()) interactions.setSelectedPanelIds(new Set())
                       }}
                       onMouseDown={(e) => {
-                        if (!marqueeMode || spaceHeld) return
+                        if (!interactions.marqueeMode || spaceHeld) return
                         if (e.target !== e.target.getStage()) return
                         const stage = e.target.getStage()
                         if (!stage) return
                         const pos = stage.getPointerPosition()
                         if (!pos) return
-                        const sx = stage.scaleX()
-                        const stagePos = {
-                          x: (pos.x - stage.x()) / sx,
-                          y: (pos.y - stage.y()) / sx
-                        }
-                        marqueeStartRef.current = stagePos
-                        setMarqueeRect({ x: stagePos.x, y: stagePos.y, width: 0, height: 0 })
+                        interactions.handleMarqueeStart(pos.x, pos.y, stage.scaleX(), stage.x(), stage.y())
                       }}
                       onMouseMove={(e) => {
-                        if (!marqueeStartRef.current || !marqueeRect) return
                         const stage = e.target.getStage()
                         if (!stage) return
                         const pos = stage.getPointerPosition()
                         if (!pos) return
-                        const sx = stage.scaleX()
-                        const stagePos = {
-                          x: (pos.x - stage.x()) / sx,
-                          y: (pos.y - stage.y()) / sx
-                        }
-                        const start = marqueeStartRef.current
-                        setMarqueeRect({
-                          x: Math.min(start.x, stagePos.x),
-                          y: Math.min(start.y, stagePos.y),
-                          width: Math.abs(stagePos.x - start.x),
-                          height: Math.abs(stagePos.y - start.y)
-                        })
+                        interactions.handleMarqueeMove(pos.x, pos.y, stage.scaleX(), stage.x(), stage.y())
                       }}
-                      onMouseUp={() => {
-                        if (!marqueeRect || !marqueeStartRef.current) return
-                        const selected = new Set<string>()
-                        for (const { panel, x, y } of renderPanels) {
-                          if (
-                            x >= marqueeRect.x &&
-                            x <= marqueeRect.x + marqueeRect.width &&
-                            y >= marqueeRect.y &&
-                            y <= marqueeRect.y + marqueeRect.height
-                          ) {
-                            selected.add(panel.id)
-                          }
-                        }
-                        if (selected.size > 0) {
-                          setSelectedPanelIds(selected)
-                        }
-                        setMarqueeRect(null)
-                        marqueeStartRef.current = null
-                      }}
+                      onMouseUp={() => interactions.handleMarqueeEnd()}
                     >
                       <Layer listening={false}>
                         <KonvaImage
@@ -1108,9 +284,9 @@ export function WorkbenchPage() {
                           height={stageSize.height}
                         />
                       </Layer>
-                      {showSegments && segmentHulls.length > 0 && (
+                      {showSegments && interactions.segmentHulls.length > 0 && (
                         <Layer listening={false}>
-                          {segmentHulls.map((hull) => (
+                          {interactions.segmentHulls.map((hull) => (
                             <KonvaLine
                               key={`seg-${hull.segmentIndex}`}
                               points={hull.hullPoints.flatMap((p) => [p.x, p.y])}
@@ -1124,25 +300,25 @@ export function WorkbenchPage() {
                         </Layer>
                       )}
                       <PanelLayer
-                        panels={renderPanels}
-                        panelWidth={panelDimensions.width}
-                        panelHeight={panelDimensions.height}
-                        selectedPanelIds={selectedPanelIds}
+                        panels={interactions.renderPanels}
+                        panelWidth={interactions.panelDimensions.width}
+                        panelHeight={interactions.panelDimensions.height}
+                        selectedPanelIds={interactions.selectedPanelIds}
                         stageWidth={stageSize.width}
                         stageHeight={stageSize.height}
-                        disabledPanelId={pendingPanelId}
+                        disabledPanelId={interactions.pendingPanelId}
                         energyMin={allPanelsEnergyRange.min}
                         energyMax={allPanelsEnergyRange.max}
-                        snapEnabled={snapEnabled}
-                        onSnapDragMove={handleSnapDragMove}
-                        onSelect={handlePanelSelect}
-                        onDragEnd={handlePanelDragEnd}
-                        onRotate={handleCanvasRotate}
+                        snapEnabled={interactions.snapEnabled}
+                        onSnapDragMove={interactions.handleSnapDragMove}
+                        onSelect={interactions.handlePanelSelect}
+                        onDragEnd={interactions.handlePanelDragEnd}
+                        onRotate={interactions.handleCanvasRotate}
                         freeRotate={freeRotate}
                       />
-                      {snapGuides.length > 0 && (
+                      {interactions.snapGuides.length > 0 && (
                         <Layer listening={false}>
-                          {snapGuides.map((guide, i) => (
+                          {interactions.snapGuides.map((guide, i) => (
                             <KonvaLine
                               key={i}
                               points={
@@ -1158,13 +334,13 @@ export function WorkbenchPage() {
                           ))}
                         </Layer>
                       )}
-                      {marqueeRect && (
+                      {interactions.marqueeRect && (
                         <Layer>
                           <KonvaRect
-                            x={marqueeRect.x}
-                            y={marqueeRect.y}
-                            width={marqueeRect.width}
-                            height={marqueeRect.height}
+                            x={interactions.marqueeRect.x}
+                            y={interactions.marqueeRect.y}
+                            width={interactions.marqueeRect.width}
+                            height={interactions.marqueeRect.height}
                             stroke={COLORS.selectionCyan}
                             strokeWidth={1}
                             dash={[6, 4]}
@@ -1180,14 +356,14 @@ export function WorkbenchPage() {
                       canRedo={canRedo}
                       onUndo={undo}
                       onRedo={redo}
-                      marqueeMode={marqueeMode}
-                      onToggleMarquee={() => setMarqueeMode((v) => !v)}
-                      snapEnabled={snapEnabled}
-                      onToggleSnap={() => setSnapEnabled((v) => !v)}
-                      stageScale={stageScale}
-                      onZoomIn={handleZoomIn}
-                      onZoomOut={handleZoomOut}
-                      onZoomReset={handleZoomReset}
+                      marqueeMode={interactions.marqueeMode}
+                      onToggleMarquee={() => interactions.setMarqueeMode((v) => !v)}
+                      snapEnabled={interactions.snapEnabled}
+                      onToggleSnap={() => interactions.setSnapEnabled((v) => !v)}
+                      stageScale={zoom.stageScale}
+                      onZoomIn={zoom.handleZoomIn}
+                      onZoomOut={zoom.handleZoomOut}
+                      onZoomReset={zoom.handleZoomReset}
                       overlayExpanded={overlayExpanded}
                       onToggleOverlayExpanded={() => setOverlayExpanded((v) => !v)}
                       overlayMode={overlayMode}
@@ -1196,80 +372,27 @@ export function WorkbenchPage() {
                       onToggleSegments={() => setShowSegments((v) => !v)}
                       canvasExpanded={canvasExpanded}
                       onToggleCanvasExpanded={() => setCanvasExpanded((v) => !v)}
-                      hasSelection={selectedPanelIds.size > 0}
-                      onDeleteSelected={handleDeleteSelected}
+                      hasSelection={interactions.selectedPanelIds.size > 0}
+                      onDeleteSelected={interactions.handleDeleteSelected}
                       freeRotate={freeRotate}
                       onToggleFreeRotate={() => setFreeRotate((v) => !v)}
                     />
 
-                    {/* Loading overlays */}
-                    {isOverlayLoading && (
+                    {(isOverlayLoading || interactions.isModelRecomputing) && (
                       <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-background/60 backdrop-blur-[1px]">
                         <div className="glass flex items-center gap-3 rounded-lg px-5 py-3 text-sm font-medium">
                           <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
-                          Loading overlay...
-                        </div>
-                      </div>
-                    )}
-                    {isModelRecomputing && (
-                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-background/60 backdrop-blur-[1px]">
-                        <div className="glass flex items-center gap-3 rounded-lg px-5 py-3 text-sm font-medium">
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
-                          Recalculating energy for new panel dimensions...
+                          {isOverlayLoading ? 'Loading overlay...' : 'Recalculating energy for new panel dimensions...'}
                         </div>
                       </div>
                     )}
 
-                    {/* Bottom-left legends */}
-                    <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-2">
-                      {showSegments && segmentHulls.length > 0 && (
-                        <div className="rounded-lg bg-black/70 px-3 py-2 text-xs text-white backdrop-blur-sm">
-                          <p className="mb-1 font-medium">Roof Segments</p>
-                          {segmentHulls.map((hull) => (
-                            <p key={hull.segmentIndex} className="flex items-center gap-1.5">
-                              <span
-                                className="inline-block h-2.5 w-2.5 rounded-full"
-                                style={{ background: hull.color.replace('0.35)', '1)') }}
-                              />
-                              Seg {hull.segmentIndex + 1}: {hull.azimuth.toFixed(0)}° / {hull.pitch.toFixed(0)}° (
-                              {hull.panelCount} panels)
-                            </p>
-                          ))}
-                        </div>
-                      )}
-                      {overlayMode !== 'rgb' && !isOverlayLoading && (
-                        <div className="rounded-lg bg-black/60 px-2.5 py-2 backdrop-blur-sm">
-                          {overlayMode === 'mask' ? (
-                            <div className="flex flex-col items-start gap-1.5">
-                              <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded-sm bg-green-500/60" />
-                                <span className="text-[9px] font-medium text-white/90">Roof</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded-sm bg-black/40 ring-1 ring-white/20" />
-                                <span className="text-[9px] font-medium text-white/90">Off-roof</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center gap-1">
-                              <span className="text-[9px] font-medium text-white/90">
-                                {overlayMode === 'annual-flux' ? 'Sunny' : 'High'}
-                              </span>
-                              <div
-                                className="w-3 rounded-sm"
-                                style={{
-                                  height: '120px',
-                                  background: overlayMode === 'annual-flux' ? COLORS.legendFlux : COLORS.legendDsm
-                                }}
-                              />
-                              <span className="text-[9px] font-medium text-white/90">
-                                {overlayMode === 'annual-flux' ? 'Shady' : 'Low'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <CanvasLegends
+                      showSegments={showSegments}
+                      segmentHulls={interactions.segmentHulls}
+                      overlayMode={overlayMode}
+                      isOverlayLoading={isOverlayLoading}
+                    />
                   </>
                 ) : (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -1279,7 +402,6 @@ export function WorkbenchPage() {
                 )}
               </div>
 
-              {/* Irradiance month slider */}
               <div className="mt-3 flex items-center gap-3">
                 <span className="w-8 text-xs font-medium text-amber-600">{MONTH_LABELS[irradianceMonth]}</span>
                 <Slider

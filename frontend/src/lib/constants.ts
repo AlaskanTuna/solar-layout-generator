@@ -1,4 +1,4 @@
-/** Centralized color tokens used across pages and charts. */
+/** Centralized color tokens used across pages and charts */
 export const COLORS = {
   // Chart colors
   chartBaseline: '#ea580c',
@@ -31,7 +31,7 @@ export const COLORS = {
 
 type ThemeMode = 'light' | 'dark'
 
-/** Shared Recharts tooltip style config. */
+/** Shared Recharts tooltip style config */
 export function getChartTooltipStyle(theme: ThemeMode) {
   const isDark = theme === 'dark'
 
@@ -54,5 +54,5 @@ export function getChartTooltipStyle(theme: ThemeMode) {
   } as const
 }
 
-/** Backwards-compatible default for light theme consumers. */
+/** Backwards-compatible default for light theme consumers */
 export const CHART_TOOLTIP_STYLE = getChartTooltipStyle('light')

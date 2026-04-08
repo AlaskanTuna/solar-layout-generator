@@ -9,17 +9,12 @@ export type SegmentHull = {
   color: string
 }
 
-/**
- * Assign a color based on azimuth angle.
- * South-facing (180°) = warm amber/red, North-facing (0°/360°) = cool blue/teal.
- * East (90°) = green, West (270°) = purple.
- */
+/** Map azimuth angle to an HSL colour: S=amber, N=blue, E=green, W=purple */
 export function azimuthColor(azimuth: number): string {
-  // Normalize azimuth to 0-360
+  // Normalize to 0-360
   const a = ((azimuth % 360) + 360) % 360
 
-  // HSL color wheel: map azimuth to hue
-  // 0° (N) = 200 (blue), 90° (E) = 120 (green), 180° (S) = 30 (amber), 270° (W) = 280 (purple)
+  // Map azimuth to hue: N=200, E=120, S=30, W=280
   let hue: number
   if (a <= 90) {
     hue = 200 + (120 - 200) * (a / 90) // blue to green
@@ -37,9 +32,7 @@ export function azimuthColor(azimuth: number): string {
   return `hsla(${Math.round(hue)}, 70%, 55%, 0.35)`
 }
 
-/**
- * Compute convex hull of 2D points using Graham scan.
- */
+/** Compute convex hull of 2D points using Graham scan */
 export function convexHull(points: { x: number; y: number }[]): { x: number; y: number }[] {
   if (points.length <= 2) return [...points]
 
@@ -74,15 +67,10 @@ export function convexHull(points: { x: number; y: number }[]): { x: number; y: 
   return hull
 }
 
-/** Padding around panel corners for the segment hull outline. */
+/** Padding around panel corners for the segment hull outline */
 const HULL_PADDING = 4
 
-/**
- * Group panels by segment, expand each panel center into its four
- * corners (using panelWidth/panelHeight + padding), then compute
- * convex hulls so that even segments with 1-2 panels produce a
- * visible filled polygon.
- */
+/** Group panels by segment and compute padded convex hulls for each */
 export function computeSegmentHulls(
   solarPanels: SolarPanel[],
   roofSegments: RoofSegment[],
@@ -91,7 +79,7 @@ export function computeSegmentHulls(
   panelWidth: number,
   panelHeight: number
 ): SegmentHull[] {
-  // Group visible panels by segmentIndex, expanding centers into corners
+  // Group visible panels by segment, expanding centers into rotated corners
   const groups = new Map<number, { x: number; y: number }[]>()
   const panelCounts = new Map<number, number>()
 
@@ -112,7 +100,7 @@ export function computeSegmentHulls(
     const cosR = Math.cos(rot)
     const sinR = Math.sin(rot)
 
-    // Expand center into 4 rotated corners
+    // 4 rotated corners around center
     const corners = [
       { lx: -halfW, ly: -halfH },
       { lx: halfW, ly: -halfH },

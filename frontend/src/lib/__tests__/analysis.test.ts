@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateMonthlyGeneration, buildThresholdWarnings } from './analysis'
-import type { NemMonthResult } from './billingEngine'
+import { aggregateMonthlyGeneration, buildThresholdWarnings } from '../analysis'
+import type { NemMonthResult } from '../billingEngine'
 
 const monthResult: NemMonthResult = {
   month: 3,

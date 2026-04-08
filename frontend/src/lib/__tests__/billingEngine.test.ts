@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { computeBill, computeNemMonth, lookupEeiRebate, runAnnualSimulation, type BillingConfig } from './billingEngine'
+import { computeBill, computeNemMonth, lookupEeiRebate, runAnnualSimulation, type BillingConfig } from '../billingEngine'
 
-// ── Tariff config matching the seeded RP4-2025 data ──
+/* TARIFF CONFIG */
 
 const config: BillingConfig = {
   rates: {
@@ -43,7 +43,7 @@ const config: BillingConfig = {
   afaRate: -2.77
 }
 
-// ── lookupEeiRebate ──
+/* LOOKUP EEI REBATE */
 
 describe('lookupEeiRebate', () => {
   it('returns 25.00 for 100 kWh (first bracket)', () => {
@@ -79,7 +79,7 @@ describe('lookupEeiRebate', () => {
   })
 })
 
-// ── computeBill — golden test cases from Knowledge Vault §9 ──
+/* COMPUTE BILL */
 
 describe('computeBill', () => {
   it('T5: zero usage returns minimum charge RM3.00', () => {
@@ -218,7 +218,7 @@ describe('computeBill', () => {
   })
 })
 
-// ── computeNemMonth — golden test cases ──
+/* COMPUTE NEM MONTH */
 
 describe('computeNemMonth', () => {
   it('T1: 800 kWh consumption, 480 kWh generation, 0 credit → savings RM246.05', () => {
@@ -295,7 +295,7 @@ describe('computeNemMonth', () => {
   })
 })
 
-// ── runAnnualSimulation ──
+/* RUN ANNUAL SIMULATION */
 
 describe('runAnnualSimulation', () => {
   it('12-month simulation with zero generation equals 12x baseline', () => {

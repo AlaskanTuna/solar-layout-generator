@@ -100,8 +100,7 @@ export function usePanelState({
       return
     }
 
-    // Only initialize once per project to prevent TanStack Query refetches
-    // from overwriting in-progress local edits (drag, rotate, delete)
+    // Only initialize once per project to avoid overwriting in-progress edits
     if (initializedProjectIdRef.current === projectId) return
     initializedProjectIdRef.current = projectId
 
@@ -133,7 +132,7 @@ export function usePanelState({
     const nextVisibleCount = Math.max(minVisibleCount, Math.min(maxVisibleCount, savedActiveCount || maxVisibleCount))
     setVisibleCountState(nextVisibleCount)
 
-    // Push initial state so the first user edit can be undone
+    // Push initial state so first edit can be undone
     undoRedo.push({ panels: nextPanels, visibleCount: nextVisibleCount })
   }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount, undoRedo])
 
@@ -236,7 +235,7 @@ export function usePanelState({
   const lastRotateSnapshotRef = useRef(0)
 
   function rotatePanel(panelId: string, rotation: number) {
-    // Only push a snapshot if >1s since last rotation snapshot (prevents filling undo stack during drag)
+    // Throttle snapshots to avoid filling undo stack during continuous rotation
     const now = Date.now()
     if (now - lastRotateSnapshotRef.current > 1000) {
       pushSnapshot()

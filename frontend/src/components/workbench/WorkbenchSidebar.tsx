@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { PanelModelDrawer } from '@/components/workbench/PanelModelDrawer'
+import { formatNumber } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import type { BatchRecomputeStatus } from '@/hooks/usePanelState'
 import type { PanelModel } from '@shared/types'
@@ -45,10 +46,6 @@ type WorkbenchSidebarProps = {
   selectedAnnualEnergy: number | null
   pendingPanelId: string | null
   onSave: () => void
-}
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-MY', { maximumFractionDigits: 1 }).format(value)
 }
 
 export function WorkbenchSidebar({

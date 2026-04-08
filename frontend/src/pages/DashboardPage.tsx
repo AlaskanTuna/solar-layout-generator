@@ -34,15 +34,13 @@ import {
   FileBarChart,
   PieChart
 } from 'lucide-react'
-import { notify } from '@/components/ui/toast-config'
+import { notify } from '@/components/ui/toastConfig'
 import { DashboardTabNav, type DashboardTab } from '@/components/dashboard/DashboardTabNav'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { aggregateStats, projectRoute } from '@/components/dashboard/helpers'
 
-/* ═══════════════════════════════════════════════
-   CONSTANTS
-   ═══════════════════════════════════════════════ */
+/* CONSTANTS */
 
 const WORKFLOW_STEPS = [
   {
@@ -65,9 +63,7 @@ const WORKFLOW_STEPS = [
   }
 ]
 
-/* ═══════════════════════════════════════════════
-   DASHBOARD PAGE
-   ═══════════════════════════════════════════════ */
+/* DASHBOARD PAGE */
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -202,9 +198,7 @@ export function DashboardPage() {
   )
 }
 
-/* ═══════════════════════════════════════════════
-   SUMMARY TAB
-   ═══════════════════════════════════════════════ */
+/* SUMMARY TAB */
 
 function SummaryTab({
   user,
@@ -367,9 +361,7 @@ function SummaryTab({
   )
 }
 
-/* ═══════════════════════════════════════════════
-   PROJECTS TAB
-   ═══════════════════════════════════════════════ */
+/* PROJECTS TAB */
 
 function ProjectsTab({
   projects,
@@ -463,9 +455,7 @@ function ProjectsTab({
   )
 }
 
-/* ═══════════════════════════════════════════════
-   ANALYTICS TAB
-   ═══════════════════════════════════════════════ */
+/* ANALYTICS TAB */
 
 function AnalyticsTab({
   projects,
@@ -500,8 +490,8 @@ function AnalyticsTab({
   const paybackData = projects
     .filter((p) => p.status === 'analysis_saved' && p.analysisResults)
     .map((p) => {
-      const r = p.analysisResults as Record<string, number>
-      return { name: p.name, payback: r.paybackYears ?? null, savings: r.averageMonthlySavingsRm ?? 0 }
+      const r = p.analysisResults!
+      return { name: p.name, payback: r.paybackYears ?? null, savings: r.averageMonthlySavingsRm }
     })
 
   return (
