@@ -54,12 +54,16 @@ export function DashboardPage() {
   return (
     <>
       <div className="mx-auto max-w-6xl px-6 py-8">
-        {/* Greeting */}
-        <div className="animate-fade-in">
-          <h1 className="font-heading text-2xl font-bold tracking-tight">
-            {greeting}{userName ? `, ${userName}` : ''}
-          </h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">Here's your workspace at a glance.</p>
+        {/* Greeting Card */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-8 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20 animate-fade-in">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-solar-400/10 blur-3xl" />
+          <div className="relative">
+            <h1 className="font-heading text-3xl font-bold tracking-tight">
+              {greeting}{userName ? `, ${userName}` : ''}
+            </h1>
+            <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
+          </div>
         </div>
 
         {/* Quick Action Cards */}

@@ -22,7 +22,7 @@ function NavLink({ to, icon: Icon, label, active }: { to: string; icon: React.El
   return (
     <Link
       to={to}
-      className={`group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors ${
+      className={`group flex h-12 items-center gap-2.5 rounded-lg px-2 text-sm transition-colors ${
         active
           ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
           : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
@@ -91,7 +91,7 @@ export function AppSidebar() {
         </div>
 
         {/* Nav sections */}
-        <nav className="flex-1 space-y-0.5 overflow-x-hidden overflow-y-auto px-2 py-3">
+        <nav className="flex-1 space-y-1.5 overflow-x-hidden overflow-y-auto px-2 py-3">
           {NAV_SECTIONS.map((section, i) => (
             <div key={section.title}>
               <SectionHeading title={section.title} first={i === 0} />
