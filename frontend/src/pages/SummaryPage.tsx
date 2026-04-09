@@ -68,7 +68,7 @@ export function SummaryPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="px-6 py-8">
         <div className="animate-fade-in">
           <h1 className="font-heading text-2xl font-bold tracking-tight">Summary</h1>
           <p className="mt-1 text-sm text-muted-foreground">Overview of your solar portfolio</p>
@@ -166,26 +166,24 @@ export function SummaryPage() {
           </div>
         </div>
 
-        {/* Getting Started Tips */}
-        {!isLoading && totalProjects > 0 && totalProjects <= 2 && completedProjects === 0 && (
-          <div className="mt-8 glass-card overflow-hidden animate-fade-in">
-            <div className="border-b border-border bg-muted/30 px-5 py-3">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-amber-500" />
-                <h3 className="font-heading text-sm font-semibold">Complete your first analysis</h3>
-              </div>
-            </div>
-            <div className="grid gap-px bg-border sm:grid-cols-3">
-              {WORKFLOW_STEPS.map((s) => (
-                <div key={s.step} className="bg-card p-5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">{s.icon}</div>
-                  <p className="mt-3 text-sm font-semibold">{s.title}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
-                </div>
-              ))}
+        {/* Project Creation Guide — always visible */}
+        <div className="mt-8 glass-card overflow-hidden animate-fade-in">
+          <div className="border-b border-border bg-muted/30 px-5 py-3">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              <h3 className="font-heading text-sm font-semibold">How it works</h3>
             </div>
           </div>
-        )}
+          <div className="grid gap-px bg-border sm:grid-cols-3">
+            {WORKFLOW_STEPS.map((s) => (
+              <div key={s.step} className="bg-card p-5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">{s.icon}</div>
+                <p className="mt-3 text-sm font-semibold">{s.title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Create Project Dialog */}

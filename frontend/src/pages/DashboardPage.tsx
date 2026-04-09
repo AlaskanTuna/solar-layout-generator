@@ -53,7 +53,7 @@ export function DashboardPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="flex min-h-[calc(100vh-3.5rem)] flex-col px-6 py-8">
         {/* Greeting Card */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-8 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20 animate-fade-in">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
@@ -66,13 +66,13 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Action Cards */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 animate-fade-in-up">
+        {/* Quick Action Cards — flex-1 fills remaining viewport height */}
+        <div className="mt-6 grid flex-1 gap-4 sm:grid-cols-2 animate-fade-in-up">
           {QUICK_ACTIONS.map((action) => (
             <Link
               key={action.to}
               to={action.to}
-              className="glass-card flex flex-col items-center justify-center gap-3 rounded-xl p-12 text-muted-foreground transition-all duration-200 hover:border-primary/30 hover:text-foreground hover:shadow-lg"
+              className="glass-card flex flex-col items-center justify-center gap-3 rounded-xl text-muted-foreground transition-all duration-200 hover:border-primary/30 hover:text-foreground hover:shadow-lg"
             >
               <action.icon className="h-8 w-8" />
               <span className="text-sm font-medium">{action.label}</span>
@@ -81,7 +81,7 @@ export function DashboardPage() {
 
           <button
             onClick={() => setDialogOpen(true)}
-            className="glass-card flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border p-12 text-muted-foreground transition-all duration-200 hover:border-primary/50 hover:text-primary hover:shadow-lg"
+            className="glass-card flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-all duration-200 hover:border-primary/50 hover:text-primary hover:shadow-lg"
           >
             <MapPin className="h-8 w-8" />
             <span className="text-sm font-medium">New Project</span>

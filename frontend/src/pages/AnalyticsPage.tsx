@@ -14,7 +14,7 @@ export function AnalyticsPage() {
 
   if (completedProjects === 0) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-8 animate-fade-in">
+      <div className="px-6 py-8 animate-fade-in">
         <h1 className="font-heading text-2xl font-bold tracking-tight">Analytics</h1>
         <p className="mt-1 text-sm text-muted-foreground">Performance insights across all your projects</p>
         <div className="mt-12 glass-card flex flex-col items-center py-16 text-center">
@@ -39,7 +39,7 @@ export function AnalyticsPage() {
     })
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8 animate-fade-in">
+    <div className="px-6 py-8 animate-fade-in">
       <h1 className="font-heading text-2xl font-bold tracking-tight">Analytics</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
