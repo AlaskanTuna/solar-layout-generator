@@ -7,16 +7,14 @@ type AppLayoutProps = {
   children: ReactNode
   /** Pass minimal to AppNav for full-screen pages */
   minimalNav?: boolean
-  /** Extra sidebar nav items (used by Dashboard for tab navigation) */
-  sidebarChildren?: ReactNode
 }
 
 const SIDEBAR_W = 64
 
-export function AppLayout({ children, minimalNav, sidebarChildren }: AppLayoutProps) {
+export function AppLayout({ children, minimalNav }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <AppSidebar>{sidebarChildren}</AppSidebar>
+      <AppSidebar />
       <AppNav minimal={minimalNav} />
       <main className="flex-1 pt-14" style={{ marginLeft: SIDEBAR_W }}>
         {children}

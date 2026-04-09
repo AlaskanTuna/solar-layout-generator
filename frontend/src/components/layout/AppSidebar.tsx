@@ -1,17 +1,15 @@
 import { useState, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Sun, ChevronLeft, LayoutDashboard } from 'lucide-react'
+import { Sun, ChevronLeft, LayoutDashboard, Gauge, FolderKanban, PieChart } from 'lucide-react'
 
 const SIDEBAR_EXPANDED = 200
 const SIDEBAR_COLLAPSED = 64
 
 /** Crossfade section heading: divider when collapsed, title text when expanded */
-export function SectionHeading({ title, first }: { title: string; first?: boolean }) {
+function SectionHeading({ title, first }: { title: string; first?: boolean }) {
   return (
     <div className={`relative mb-1 flex h-5 items-center ${first ? '' : 'mt-4'}`}>
-      {/* Divider — visible when collapsed */}
       <div className="absolute inset-x-0 h-px bg-sidebar-border transition-opacity duration-150 group-hover/sidebar:opacity-0" />
-      {/* Title — visible when expanded */}
       <p className="whitespace-nowrap px-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40 opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
         {title}
       </p>
@@ -19,22 +17,12 @@ export function SectionHeading({ title, first }: { title: string; first?: boolea
   )
 }
 
-/** Standard sidebar nav link with icon + label */
-export function SidebarNavLink({
-  to,
-  icon: Icon,
-  label,
-  active,
-}: {
-  to: string
-  icon: React.ElementType
-  label: string
-  active: boolean
-}) {
+/** Sidebar nav link — icon always at fixed w-8 center, label fades in on expand */
+function NavLink({ to, icon: Icon, label, active }: { to: string; icon: React.ElementType; label: string; active: boolean }) {
   return (
     <Link
       to={to}
-      className={`group flex aspect-square w-full items-center gap-2.5 rounded-lg px-2 text-sm transition-colors group-hover/sidebar:aspect-auto group-hover/sidebar:py-1.5 ${
+      className={`group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors ${
         active
           ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
           : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
@@ -56,18 +44,30 @@ export function SidebarNavLink({
   )
 }
 
-export function AppSidebar({ children }: { children?: React.ReactNode }) {
+const NAV_SECTIONS = [
+  {
+    title: 'Overview',
+    items: [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true }],
+  },
+  {
+    title: 'Insights',
+    items: [
+      { to: '/dashboard/summary', label: 'Summary', icon: Gauge },
+      { to: '/dashboard/projects', label: 'Projects', icon: FolderKanban },
+      { to: '/dashboard/analytics', label: 'Analytics', icon: PieChart },
+    ],
+  },
+]
+
+export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true)
   const { pathname } = useLocation()
 
   const handleMouseEnter = useCallback(() => setCollapsed(false), [])
   const handleMouseLeave = useCallback(() => setCollapsed(true), [])
 
-  const isDashboardActive = pathname === '/dashboard'
-
   return (
     <>
-      {/* Sidebar — transition defined in CSS [data-sidebar], width via inline style */}
       <aside
         data-sidebar
         onMouseEnter={handleMouseEnter}
@@ -90,14 +90,22 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
           </span>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 space-y-1 overflow-x-hidden overflow-y-auto px-2 py-3">
-          {/* Section: Overview */}
-          <SectionHeading title="Overview" first />
-          <SidebarNavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" active={isDashboardActive} />
-
-          {/* Injected sections (e.g. Dashboard tabs under INSIGHTS heading) */}
-          {children}
+        {/* Nav sections */}
+        <nav className="flex-1 space-y-0.5 overflow-x-hidden overflow-y-auto px-2 py-3">
+          {NAV_SECTIONS.map((section, i) => (
+            <div key={section.title}>
+              <SectionHeading title={section.title} first={i === 0} />
+              {section.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  icon={item.icon}
+                  label={item.label}
+                  active={item.exact ? pathname === item.to : pathname.startsWith(item.to)}
+                />
+              ))}
+            </div>
+          ))}
         </nav>
 
         {/* Collapse indicator */}
