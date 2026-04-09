@@ -66,7 +66,7 @@ export function ProjectsPage() {
 
   return (
     <>
-      <div className="px-6 py-8 animate-fade-in">
+      <div className="min-h-[calc(100vh-3.5rem)] px-6 py-8 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-heading text-2xl font-bold tracking-tight">Projects</h1>
