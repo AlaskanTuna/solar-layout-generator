@@ -1,6 +1,14 @@
 import { useState, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import type { LucideIcon } from 'lucide-react'
 import { Sun, ChevronLeft, LayoutDashboard, Gauge, FolderKanban, PieChart } from 'lucide-react'
+
+interface NavItem {
+  to: string
+  label: string
+  icon: LucideIcon
+  exact?: boolean
+}
 
 const SIDEBAR_EXPANDED = 200
 const SIDEBAR_COLLAPSED = 64
@@ -18,7 +26,7 @@ function SectionHeading({ title, first }: { title: string; first?: boolean }) {
 }
 
 /** Sidebar nav link — icon always at fixed w-8 center, label fades in on expand */
-function NavLink({ to, icon: Icon, label, active }: { to: string; icon: React.ElementType; label: string; active: boolean }) {
+function NavLink({ to, icon: Icon, label, active }: { to: string; icon: LucideIcon; label: string; active: boolean }) {
   return (
     <Link
       to={to}
@@ -44,7 +52,7 @@ function NavLink({ to, icon: Icon, label, active }: { to: string; icon: React.El
   )
 }
 
-const NAV_SECTIONS = [
+const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Overview',
     items: [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true }],
