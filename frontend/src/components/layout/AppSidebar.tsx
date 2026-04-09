@@ -6,9 +6,9 @@ const SIDEBAR_EXPANDED = 200
 const SIDEBAR_COLLAPSED = 64
 
 /** Crossfade section heading: divider when collapsed, title text when expanded */
-function SectionHeading({ title, first }: { title: string; first?: boolean }) {
+export function SectionHeading({ title, first }: { title: string; first?: boolean }) {
   return (
-    <div className={`relative mb-1 flex h-5 items-center ${first ? '' : 'mt-3'}`}>
+    <div className={`relative mb-1 flex h-5 items-center ${first ? '' : 'mt-4'}`}>
       {/* Divider — visible when collapsed */}
       <div className="absolute inset-x-0 h-px bg-sidebar-border transition-opacity duration-150 group-hover/sidebar:opacity-0" />
       {/* Title — visible when expanded */}
@@ -19,6 +19,43 @@ function SectionHeading({ title, first }: { title: string; first?: boolean }) {
   )
 }
 
+/** Standard sidebar nav link with icon + label */
+export function SidebarNavLink({
+  to,
+  icon: Icon,
+  label,
+  active,
+}: {
+  to: string
+  icon: React.ElementType
+  label: string
+  active: boolean
+}) {
+  return (
+    <Link
+      to={to}
+      className={`group flex aspect-square w-full items-center gap-2.5 rounded-lg px-2 text-sm transition-colors group-hover/sidebar:aspect-auto group-hover/sidebar:py-1.5 ${
+        active
+          ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+      }`}
+    >
+      <span className="flex w-8 shrink-0 items-center justify-center">
+        <Icon
+          className={`h-4 w-4 shrink-0 ${
+            active
+              ? 'text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground'
+          }`}
+        />
+      </span>
+      <span className="flex-1 truncate whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
+        {label}
+      </span>
+    </Link>
+  )
+}
+
 export function AppSidebar({ children }: { children?: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(true)
   const { pathname } = useLocation()
@@ -26,7 +63,7 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
   const handleMouseEnter = useCallback(() => setCollapsed(false), [])
   const handleMouseLeave = useCallback(() => setCollapsed(true), [])
 
-  const isDashboardActive = pathname === '/dashboard' || pathname === '/'
+  const isDashboardActive = pathname === '/dashboard'
 
   return (
     <>
@@ -54,31 +91,10 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-x-hidden overflow-y-auto px-2 py-3">
+        <nav className="flex-1 space-y-1 overflow-x-hidden overflow-y-auto px-2 py-3">
           {/* Section: Overview */}
           <SectionHeading title="Overview" first />
-
-          <Link
-            to="/dashboard"
-            className={`group flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors ${
-              isDashboardActive
-                ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-            }`}
-          >
-            <span className="flex w-8 shrink-0 items-center justify-center">
-              <LayoutDashboard
-                className={`h-4 w-4 shrink-0 ${
-                  isDashboardActive
-                    ? 'text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground'
-                }`}
-              />
-            </span>
-            <span className="flex-1 truncate whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
-              Dashboard
-            </span>
-          </Link>
+          <SidebarNavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" active={isDashboardActive} />
 
           {/* Injected sections (e.g. Dashboard tabs under INSIGHTS heading) */}
           {children}
@@ -104,5 +120,3 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
     </>
   )
 }
-
-export { SectionHeading }

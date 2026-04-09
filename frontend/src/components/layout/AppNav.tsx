@@ -18,6 +18,15 @@ function useBreadcrumbs(): Crumb[] {
     { label: 'Dashboard', to: '/dashboard' }
   ]
 
+  // Dashboard sub-pages
+  if (pathname.startsWith('/dashboard/')) {
+    const sub = pathname.split('/')[2]
+    if (sub === 'summary') crumbs.push({ label: 'Summary' })
+    else if (sub === 'projects') crumbs.push({ label: 'Projects' })
+    else if (sub === 'analytics') crumbs.push({ label: 'Analytics' })
+    return crumbs
+  }
+
   if (!projectId) return crumbs
 
   // Determine which MVP page is active
