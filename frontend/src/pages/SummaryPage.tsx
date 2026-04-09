@@ -68,7 +68,7 @@ export function SummaryPage() {
 
   return (
     <>
-      <div className="flex min-h-[calc(100vh-3.5rem)] gap-6 px-6 py-8">
+      <div className="flex min-h-[calc(100vh-3.5rem)] gap-6 px-8 py-10">
         {/* Main content — left */}
         <div className="flex-1">
           <div className="animate-fade-in">

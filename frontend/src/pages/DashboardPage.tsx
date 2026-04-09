@@ -53,7 +53,7 @@ export function DashboardPage() {
 
   return (
     <>
-      <div className="flex min-h-[calc(100vh-3.5rem)] flex-col px-6 py-8">
+      <div className="flex min-h-[calc(100vh-3.5rem)] flex-col px-8 py-10">
         {/* Greeting Card */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-8 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20 animate-fade-in">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
