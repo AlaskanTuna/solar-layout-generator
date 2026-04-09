@@ -31,8 +31,7 @@ export function DashboardTabNav({
             }`}
           >
             <div className={`shrink-0 ${isActive ? 'text-primary' : ''}`}>{item.icon}</div>
-            {/* Uses group-data on the parent sidebar aside[data-expanded] for opacity */}
-            <span className="truncate whitespace-nowrap opacity-0 transition-opacity duration-200 group-data-[expanded]/sidebar:opacity-100">
+            <span className="truncate whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover/sidebar:opacity-100">
               {item.label}
             </span>
           </button>

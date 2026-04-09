@@ -180,6 +180,11 @@
   --sidebar-border: #e7e5e4;
   --sidebar-ring: #ea580c;
 
+  /* Layout tokens */
+  --sidebar-width: 200px;
+  --sidebar-collapsed: 64px;
+  --topbar-height: 52px;
+
   /* Glassmorphism tokens */
   --glass-bg: rgba(255, 255, 255, 0.65);
   --glass-border: rgba(255, 255, 255, 0.45);
@@ -319,20 +324,28 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* ACCESSIBILITY */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  html {
-    scroll-behavior: auto;
-  }
+/* SIDEBAR TRANSITION — defined in CSS so it's never re-set by React renders */
+[data-sidebar] {
+  transition: width 150ms ease-in-out, box-shadow 150ms ease-in-out;
 }
+
+/* SIDEBAR EXPANDED BACKDROP — matches MediaFlows reference implementation */
+.sidebar-expanded-backdrop {
+  backdrop-filter: blur(12px);
+  background: oklch(0 0 0 / 0.08);
+  transition:
+    opacity 200ms ease-in-out,
+    backdrop-filter 200ms ease-in-out;
+}
+
+.sidebar-expanded-backdrop.opacity-0 {
+  backdrop-filter: blur(0px);
+}
+
+.dark .sidebar-expanded-backdrop {
+  background: oklch(0 0 0 / 0.25);
+}
+
 
 /* THIRD-PARTY OVERRIDES */
 
