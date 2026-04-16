@@ -335,6 +335,27 @@ export function useCanvasInteractions({
 
         const correctedCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
         placementError = getPlacementError(panelId, correctedCenter, panel.rotation)
+
+        // After overlap-snap resolves the dominant SAT axis, try one axis-alignment pass
+        // to clean up residual perpendicular offset (e.g. corner-overlap cases). Revert if
+        // the alignment would re-introduce any placement error.
+        if (!placementError && snapEnabled) {
+          const otherPanels = renderPanels
+            .filter(({ panel: p }) => p.id !== panelId)
+            .map(({ panel: p, x, y }) => ({ id: p.id, x, y, rotation: p.rotation }))
+          const aligned = computeSnap(
+            { x: candidatePixel.x, y: candidatePixel.y, rotation: panel.rotation, id: panelId },
+            otherPanels,
+            panelDimensions.width,
+            panelDimensions.height,
+            stageSize.width,
+            stageSize.height
+          )
+          const alignedCenter = pixelToLatLng(aligned.x, aligned.y, geo)
+          if (!getPlacementError(panelId, alignedCenter, panel.rotation)) {
+            candidatePixel = { x: aligned.x, y: aligned.y }
+          }
+        }
       }
 
       if (placementError) {
@@ -354,12 +375,55 @@ export function useCanvasInteractions({
     }
 
     const origPixel = latLngToPixel(panel.center.lat, panel.center.lng, geo)
-    const deltaX = position.x - origPixel.x
-    const deltaY = position.y - origPixel.y
+    let deltaX = position.x - origPixel.x
+    let deltaY = position.y - origPixel.y
 
     const selectedPanels = [...selectedPanelIds]
       .map((id) => getPanel(id))
       .filter((p): p is NonNullable<typeof p> => p != null)
+
+    // Iteratively resolve group-vs-outside overlaps by shifting the shared delta.
+    // Preserves intra-group geometry; the whole group translates as one unit.
+    if (panelDimensions) {
+      const outsidePanels = renderPanels.filter(({ panel: p }) => !selectedPanelIds.has(p.id))
+      const maxIterations = Math.max(4, outsidePanels.length)
+
+      for (let iter = 0; iter < maxIterations; iter++) {
+        let worst: { axis: { x: number; y: number }; penetration: number; rotDiff: number } | null = null
+
+        for (const sp of selectedPanels) {
+          const spPixel = latLngToPixel(sp.center.lat, sp.center.lng, geo)
+          const draggedPoly = getRotatedRectPoints(
+            spPixel.x + deltaX,
+            spPixel.y + deltaY,
+            panelDimensions.width,
+            panelDimensions.height,
+            sp.rotation
+          )
+          for (const rp of outsidePanels) {
+            const neighborPoly = getRotatedRectPoints(
+              rp.x,
+              rp.y,
+              panelDimensions.width,
+              panelDimensions.height,
+              rp.panel.rotation
+            )
+            const overlap = obbsOverlapWithMinSeparation(draggedPoly, neighborPoly)
+            if (!overlap) continue
+            const rotDiff = Math.abs(((sp.rotation - rp.panel.rotation + 180) % 360) - 180)
+            if (!worst || overlap.penetration > worst.penetration) {
+              worst = { axis: overlap.axis, penetration: overlap.penetration, rotDiff }
+            }
+          }
+        }
+
+        if (!worst) break // no overlaps
+        if (worst.rotDiff > 3) break // rotation mismatch — cannot resolve
+
+        deltaX += worst.axis.x * (worst.penetration + 0.01)
+        deltaY += worst.axis.y * (worst.penetration + 0.01)
+      }
+    }
 
     const moves: { id: string; prevCenter: { lat: number; lng: number }; nextCenter: { lat: number; lng: number } }[] =
       []
