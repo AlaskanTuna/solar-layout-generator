@@ -8,6 +8,7 @@ import {
   isAabbInsideStage,
   latLngToPixel,
   obbsOverlap,
+  obbsOverlapWithMinSeparation,
   panelMetersToPixels,
   pixelToLatLng
 } from '../canvasTransforms'
@@ -106,6 +107,76 @@ describe('canvasTransforms', () => {
       const a = getRotatedRectPoints(100, 100, 40, 20, 0)
       const b = getRotatedRectPoints(140, 100, 40, 20, 0)
       expect(obbsOverlap(a, b)).toBe(false)
+    })
+  })
+
+  describe('obbsOverlapWithMinSeparation', () => {
+    it('returns null when panels are clearly separated', () => {
+      const a = getRotatedRectPoints(100, 100, 40, 20, 0)
+      const b = getRotatedRectPoints(200, 100, 40, 20, 0)
+      expect(obbsOverlapWithMinSeparation(a, b)).toBeNull()
+    })
+
+    it('returns null for touching edge-to-edge panels (zero penetration uses strict inequality)', () => {
+      const a = getRotatedRectPoints(100, 100, 40, 20, 0)
+      const b = getRotatedRectPoints(140, 100, 40, 20, 0)
+      expect(obbsOverlapWithMinSeparation(a, b)).toBeNull()
+    })
+
+    it('returns penetration depth and axis for a small axis-aligned overlap', () => {
+      // Panel A center at (100,100), panel B center at (135,100): 5px penetration on X axis
+      const a = getRotatedRectPoints(100, 100, 40, 20, 0)
+      const b = getRotatedRectPoints(135, 100, 40, 20, 0)
+      const result = obbsOverlapWithMinSeparation(a, b)
+      expect(result).not.toBeNull()
+      expect(result!.penetration).toBeCloseTo(5, 4)
+      // Axis should be roughly horizontal (x≈±1, y≈0)
+      expect(Math.abs(result!.axis.x)).toBeCloseTo(1, 4)
+      expect(Math.abs(result!.axis.y)).toBeCloseTo(0, 4)
+    })
+
+    it('axis points from B toward A (pushes A away from B)', () => {
+      // A is to the left of B; axis.x should be negative (push A further left)
+      const a = getRotatedRectPoints(100, 100, 40, 20, 0)
+      const b = getRotatedRectPoints(135, 100, 40, 20, 0)
+      const result = obbsOverlapWithMinSeparation(a, b)
+      expect(result).not.toBeNull()
+      expect(result!.axis.x).toBeLessThan(0)
+    })
+
+    it('correcting position by penetration * axis lands panels exactly edge-to-edge', () => {
+      const W = 40
+      const H = 20
+      // 5px penetration: A at (100,100), B at (135,100)
+      const penetration = 5
+      const aX = 100
+      const bX = 135
+      const a = getRotatedRectPoints(aX, 100, W, H, 0)
+      const b = getRotatedRectPoints(bX, 100, W, H, 0)
+      const result = obbsOverlapWithMinSeparation(a, b)!
+      const correctedX = aX + result.axis.x * result.penetration
+      // After correction A center should be at 100 - 5 = 95, distance to B = 40 = W (edge-to-edge)
+      expect(Math.abs(correctedX - bX)).toBeCloseTo(W, 4)
+      // Corrected A must not overlap B
+      const aCorrected = getRotatedRectPoints(correctedX, 100, W, H, 0)
+      expect(obbsOverlap(aCorrected, b)).toBe(false)
+    })
+
+    it('returns penetration for a small overlap between same-rotation rotated panels', () => {
+      const DEG = 30
+      const RAD = (DEG * Math.PI) / 180
+      const W = 40
+      const H = 20
+      // Place B at (200,200), A at exact edge-to-edge minus 4px overlap along local U
+      const exactX = 200 - W * Math.cos(RAD)
+      const exactY = 200 - W * Math.sin(RAD)
+      const aOverlapX = exactX + 4 * Math.cos(RAD)
+      const aOverlapY = exactY + 4 * Math.sin(RAD)
+      const a = getRotatedRectPoints(aOverlapX, aOverlapY, W, H, DEG)
+      const b = getRotatedRectPoints(200, 200, W, H, DEG)
+      const result = obbsOverlapWithMinSeparation(a, b)
+      expect(result).not.toBeNull()
+      expect(result!.penetration).toBeCloseTo(4, 1)
     })
   })
 })

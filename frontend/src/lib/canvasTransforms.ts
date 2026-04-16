@@ -155,6 +155,57 @@ export function obbsOverlap(polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
   return true
 }
 
+export type MinSeparationResult = {
+  /** Signed penetration depth (positive = overlap, negative = gap). */
+  penetration: number
+  /** Unit axis along which penetration is minimised (points from B toward A). */
+  axis: PixelPoint
+}
+
+/**
+ * SAT overlap test that also returns the minimum-separation axis and penetration depth.
+ * Returns null when the shapes are separated (no overlap).
+ * When the shapes overlap the returned penetration depth is the smallest push-out distance,
+ * and axis points in the direction that moves polyA out of polyB.
+ */
+export function obbsOverlapWithMinSeparation(polyA: PixelPoint[], polyB: PixelPoint[]): MinSeparationResult | null {
+  const axes = [...getEdgeNormals(polyA), ...getEdgeNormals(polyB)]
+  let minPenetration = Infinity
+  let minAxis: PixelPoint = { x: 1, y: 0 }
+
+  for (const axis of axes) {
+    let minA = Infinity
+    let maxA = -Infinity
+    for (const p of polyA) {
+      const proj = p.x * axis.x + p.y * axis.y
+      if (proj < minA) minA = proj
+      if (proj > maxA) maxA = proj
+    }
+    let minB = Infinity
+    let maxB = -Infinity
+    for (const p of polyB) {
+      const proj = p.x * axis.x + p.y * axis.y
+      if (proj < minB) minB = proj
+      if (proj > maxB) maxB = proj
+    }
+
+    // SAT: gap on this axis means shapes are separated
+    if (maxA <= minB || maxB <= minA) return null
+
+    // Overlap amount on this axis
+    const overlap = Math.min(maxA - minB, maxB - minA)
+    if (overlap < minPenetration) {
+      minPenetration = overlap
+      // Orient axis so it pushes A away from B (A center > B center on axis)
+      const aCentre = (minA + maxA) / 2
+      const bCentre = (minB + maxB) / 2
+      minAxis = aCentre >= bCentre ? axis : { x: -axis.x, y: -axis.y }
+    }
+  }
+
+  return { penetration: minPenetration, axis: minAxis }
+}
+
 export function isAabbInsideStage(aabb: RectAabb, stageWidth: number, stageHeight: number): boolean {
   return aabb.minX >= 0 && aabb.maxX <= stageWidth && aabb.minY >= 0 && aabb.maxY <= stageHeight
 }

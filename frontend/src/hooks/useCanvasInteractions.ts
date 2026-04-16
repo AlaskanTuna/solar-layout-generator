@@ -13,7 +13,7 @@ import {
   type CanvasGeo
 } from '@/lib/canvasTransforms'
 import { notify } from '@/components/ui/toastConfig'
-import { computeSnap, type SnapGuide } from '@/lib/snapAlignment'
+import { computeSnap, computeOverlapSnap, type SnapGuide } from '@/lib/snapAlignment'
 import type { LocationImageGeoTransform } from '@/api/locations'
 import type { DecodedRoofMask } from '@/hooks/useWorkbenchData'
 import type { WorkbenchPanelState } from '@/hooks/usePanelState'
@@ -151,11 +151,7 @@ export function useCanvasInteractions({
     }
   }, [])
 
-  function getPlacementPoints(
-    center: { lat: number; lng: number },
-    rotation: number,
-    canvasGeo: CanvasGeo
-  ) {
+  function getPlacementPoints(center: { lat: number; lng: number }, rotation: number, canvasGeo: CanvasGeo) {
     if (!panelDimensions) return null
     const pixelCenter = latLngToPixel(center.lat, center.lng, canvasGeo)
     return getRotatedRectPoints(pixelCenter.x, pixelCenter.y, panelDimensions.width, panelDimensions.height, rotation)
@@ -284,14 +280,38 @@ export function useCanvasInteractions({
     if (!panel) return
 
     if (!selectedPanelIds.has(panelId) || selectedPanelIds.size <= 1) {
-      const nextCenter = pixelToLatLng(position.x, position.y, geo)
-      const placementError = getPlacementError(panelId, nextCenter, panel.rotation)
+      let candidatePixel = { x: position.x, y: position.y }
+      const rawCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
+      let placementError = getPlacementError(panelId, rawCenter, panel.rotation)
+
+      // If the only problem is a small overlap with a same-rotation neighbor, auto-correct
+      // the position to edge-to-edge using the SAT minimum-separation axis.
+      if (placementError === 'overlap' && panelDimensions) {
+        for (const rp of renderPanels) {
+          if (rp.panel.id === panelId) continue
+          const overlapSnap = computeOverlapSnap(
+            { x: candidatePixel.x, y: candidatePixel.y, rotation: panel.rotation },
+            { x: rp.x, y: rp.y, rotation: rp.panel.rotation },
+            panelDimensions.width,
+            panelDimensions.height
+          )
+          if (overlapSnap.snapped) {
+            candidatePixel = { x: overlapSnap.x, y: overlapSnap.y }
+            const correctedCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
+            placementError = getPlacementError(panelId, correctedCenter, panel.rotation)
+            // Re-run against all neighbors; stop iterating once clean or still blocked
+            if (!placementError) break
+          }
+        }
+      }
+
       if (placementError) {
         resetPosition()
         notify.error(getPlacementErrorMessage(placementError))
         return
       }
 
+      const nextCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
       const previousCenter = panel.center
       movePanel(panelId, nextCenter)
       await recomputePanel(panelId, nextCenter, panel.rotation, () => {

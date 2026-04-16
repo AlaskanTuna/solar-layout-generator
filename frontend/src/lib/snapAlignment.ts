@@ -1,3 +1,5 @@
+import { getRotatedRectPoints, obbsOverlapWithMinSeparation } from './canvasTransforms'
+
 export type SnapGuide = {
   orientation: 'horizontal' | 'vertical'
   position: number
@@ -11,6 +13,8 @@ export type SnapResult = {
   guides: SnapGuide[]
 }
 
+export type OverlapSnapResult = { snapped: true; x: number; y: number } | { snapped: false }
+
 type PanelInfo = {
   id: string
   x: number
@@ -19,7 +23,10 @@ type PanelInfo = {
 }
 
 const SNAP_THRESHOLD = 14
+/** Rotation difference (degrees) within which two panels are treated as same-orientation. */
 const ROTATION_TOLERANCE = 5
+/** Maximum overlap as a fraction of the panel short dimension that qualifies for auto-correction. */
+const MAX_OVERLAP_SNAP_RATIO = 0.3
 
 /** Compute snapped position and guide lines for a dragged panel using local-axis projection */
 export function computeSnap(
@@ -94,4 +101,46 @@ export function computeSnap(
   }
 
   return { x, y, guides }
+}
+
+/**
+ * Overlap-as-snap-intent correction.
+ *
+ * Called at drag-end when the naive placement already overlaps a neighbor.
+ * If — and only if — both conditions are met:
+ *   1. rotations are within ROTATION_TOLERANCE (≤5°, tightened to ≤3° for same-axis intent)
+ *   2. SAT penetration depth ≤ MAX_OVERLAP_SNAP_RATIO × panelShortDimension
+ * …the dragged panel is auto-corrected along the SAT minimum-separation axis so it sits
+ * exactly edge-to-edge (zero gap, not overlapping).
+ *
+ * Returns { snapped: true, x, y } on success, or { snapped: false } when the overlap is
+ * too large or rotations are mismatched — caller should still block the placement.
+ */
+export function computeOverlapSnap(
+  dragged: { x: number; y: number; rotation: number },
+  neighbor: { x: number; y: number; rotation: number },
+  panelWidth: number,
+  panelHeight: number
+): OverlapSnapResult {
+  const rotDiff = Math.abs(((dragged.rotation - neighbor.rotation + 180) % 360) - 180)
+  // Tighter tolerance for overlap-snap: same-orientation intent only
+  if (rotDiff > 3) return { snapped: false }
+
+  const shortDim = Math.min(panelWidth, panelHeight)
+  const maxAllowedOverlap = MAX_OVERLAP_SNAP_RATIO * shortDim
+
+  const draggedPoly = getRotatedRectPoints(dragged.x, dragged.y, panelWidth, panelHeight, dragged.rotation)
+  const neighborPoly = getRotatedRectPoints(neighbor.x, neighbor.y, panelWidth, panelHeight, neighbor.rotation)
+
+  const result = obbsOverlapWithMinSeparation(draggedPoly, neighborPoly)
+  if (!result) return { snapped: false } // shapes not actually overlapping
+
+  if (result.penetration > maxAllowedOverlap) return { snapped: false }
+
+  // Push dragged center along the SAT axis by the penetration depth — lands edge-to-edge
+  return {
+    snapped: true,
+    x: dragged.x + result.axis.x * result.penetration,
+    y: dragged.y + result.axis.y * result.penetration
+  }
 }
