@@ -5,6 +5,7 @@ import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { Sun, Loader2 } from 'lucide-react'
 
 export function SignInPage() {
@@ -82,6 +83,14 @@ export function SignInPage() {
             <div className="mb-8">
               <h1 className="font-heading text-2xl font-bold tracking-tight">Welcome back</h1>
               <p className="mt-1 text-sm text-muted-foreground">Enter your credentials to access your projects</p>
+            </div>
+
+            <GoogleSignInButton label="Sign in with Google" onError={setError} />
+
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">Or continue with email</span>
+              <div className="h-px flex-1 bg-border" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

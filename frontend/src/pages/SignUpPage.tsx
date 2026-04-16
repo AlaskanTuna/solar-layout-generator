@@ -5,6 +5,7 @@ import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { Sun, Loader2, Mail } from 'lucide-react'
 
 export function SignUpPage() {
@@ -100,6 +101,14 @@ export function SignUpPage() {
                 <div className="mb-8">
                   <h1 className="font-heading text-2xl font-bold tracking-tight">Create an account</h1>
                   <p className="mt-1 text-sm text-muted-foreground">Get started with your free solar assessment</p>
+                </div>
+
+                <GoogleSignInButton label="Sign up with Google" onError={setError} />
+
+                <div className="my-6 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">Or continue with email</span>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
