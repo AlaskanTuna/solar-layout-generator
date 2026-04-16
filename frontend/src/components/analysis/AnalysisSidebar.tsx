@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -95,6 +95,9 @@ export function AnalysisSidebar({
   onExportPdf,
   onSaveAnalysis
 }: AnalysisSidebarProps) {
+  const [billImageOpen, setBillImageOpen] = useState(false)
+  const handleBillImageOpenChange = useCallback((open: boolean) => setBillImageOpen(open), [])
+
   return (
     <aside className="xl:overflow-y-auto xl:w-[24rem] xl:min-w-[24rem]">
       <Card className="border-border bg-card/92 shadow-sm">
@@ -161,10 +164,15 @@ export function AnalysisSidebar({
             <div className="space-y-1">
               <Label>
                 Monthly Electricity Consumption (kWh)
-                <InfoTooltip>
+                <InfoTooltip open={billImageOpen || undefined}>
                   <div className="space-y-1.5">
                     <p>Your average monthly electricity usage in kWh. Look for "Purata Penggunaan" on your TNB bill:</p>
-                    <ImagePopup src={tnbBillImg} alt="TNB bill showing average kWh usage" className="w-full rounded" />
+                    <ImagePopup
+                      src={tnbBillImg}
+                      alt="TNB bill showing average kWh usage"
+                      className="w-full rounded"
+                      onOpenChange={handleBillImageOpenChange}
+                    />
                     <p className="text-[10px]">Click image to enlarge</p>
                   </div>
                 </InfoTooltip>
