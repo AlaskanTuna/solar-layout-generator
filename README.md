@@ -1,6 +1,6 @@
 # Solar Layout Generator
 
-A web-based tool for Malaysian homeowners to assess rooftop solar potential using Google Solar API satellite data. Users search for their property, view an auto-generated solar panel layout on a satellite image, interactively adjust it, and receive NEM Rakyat 3.0 financial projections with PDF export.
+A web-based tool for Malaysian homeowners to assess rooftop solar potential using Google Solar API satellite data. Users search for their property, view an auto-generated solar panel layout on a satellite image, interactively adjust it and receive NEM Rakyat 3.0 financial projections with PDF export.
 
 ---
 
@@ -46,7 +46,7 @@ Monorepo with pnpm workspaces:
 
 - **Node.js** 24.x
 - **pnpm** 10.x via Corepack (`corepack enable`)
-- **Supabase project** with PostgreSQL, Auth enabled, and a Storage bucket named `geotiffs`
+- **Supabase project** with PostgreSQL, Auth enabled and a Storage bucket named `geotiffs`
 - **Google Cloud project** with these APIs enabled:
   - Solar API
   - Maps JavaScript API
@@ -84,6 +84,8 @@ Fill in all values in `.env`:
 | `VITE_SUPABASE_URL`         | Same as `SUPABASE_PROJECT_URL` (frontend)     |
 | `VITE_SUPABASE_ANON_KEY`    | Same as `SUPABASE_ANON_KEY` (frontend)        |
 | `VITE_GOOGLE_MAPS_API_KEY`  | Same as `GOOGLE_MAPS_API_KEY` (frontend)      |
+| `GOOGLE_OAUTH_CLIENT_ID`    | Google OAuth 2.0 client ID (for SSO)          |
+| `GOOGLE_OAUTH_SECRET`       | Google OAuth 2.0 client secret (for SSO)      |
 
 ### 3. Set up the database
 
@@ -131,6 +133,9 @@ The frontend proxies `/api` requests to the backend in development.
 solar-layout-generator/
 ├── shared/                 # Shared TypeScript types
 │   └── index.ts
+├── supabase/
+│   ├── config.toml         # Supabase project config (auth, email, OAuth)
+│   └── templates/          # Branded auth email templates
 ├── backend/
 │   └── src/
 │       ├── config/         # Environment, Prisma, Supabase clients
@@ -165,10 +170,10 @@ The repo now includes [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.ym
 
 It behaves like this:
 
-- Pull requests run pnpm install, build, and unit tests only
+- Pull requests run pnpm install, build and unit tests only
 - Pushes to `main` run the same CI checks, then deploy the passing commit to Heroku automatically
 - Deployment still uses your existing Heroku Git app endpoint, so Heroku continues to build the app with the current `Procfile` and `heroku-postbuild`
-- Heroku now detects `pnpm-lock.yaml`, installs the exact pnpm version from `packageManager`, and builds the app with pnpm
+- Heroku now detects `pnpm-lock.yaml`, installs the exact pnpm version from `packageManager` and builds the app with pnpm
 - The old `package-lock.json` should stay out of the repo so Heroku and contributors do not accidentally fall back to npm
 
 Before the workflow can deploy, add these GitHub repository secrets:
@@ -203,7 +208,7 @@ git push heroku main                # deploy to Heroku
 
 With the workflow configured, you should not need `git push heroku main` for normal releases. Keep it only as an emergency/manual fallback.
 
-The `heroku-postbuild` script still builds all workspaces on Heroku. The `Procfile` now starts the app with `pnpm start`, and the Express server serves the frontend static files in production.
+The `heroku-postbuild` script still builds all workspaces on Heroku. The `Procfile` now starts the app with `pnpm start` and the Express server serves the frontend static files in production.
 
 > **Note:** This project uses Express 5 with `path-to-regexp` v8+, which requires named catch-all parameters (e.g. `'{*path}'` instead of `'*'`).
 
