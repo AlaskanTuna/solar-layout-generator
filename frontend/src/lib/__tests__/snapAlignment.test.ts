@@ -114,8 +114,10 @@ describe('computeOverlapSnap', () => {
       const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
       const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
       expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
-      // Center distance should equal W
-      expect(Math.hypot(result.x - 100, result.y - 100)).toBeCloseTo(W, 3)
+      // Center distance should be W plus a small epsilon buffer guarding against FP slop
+      const dist = Math.hypot(result.x - 100, result.y - 100)
+      expect(dist).toBeGreaterThanOrEqual(W)
+      expect(dist).toBeLessThan(W + 0.1)
     })
 
     it('snaps a small overlap on the short edge (top/bottom) to edge-to-edge', () => {
@@ -128,11 +130,25 @@ describe('computeOverlapSnap', () => {
       expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
     })
 
-    it('returns snapped=false when overlap exceeds 30% of short dimension', () => {
-      // Short dim = H = 20; 30% = 6px. Overlap of 8px exceeds threshold.
-      // Neighbor at (100,100), dragged at (132,100) = 8px penetration on long edge
-      const result = computeOverlapSnap({ x: 132, y: 100, rotation: 0 }, { x: 100, y: 100, rotation: 0 }, W, H)
-      expect(result.snapped).toBe(false)
+    it('snaps a deep overlap (> old 30% cap) to edge-to-edge when rotations match', () => {
+      // Neighbor at (100,100), dragged at (110,100) = 30px penetration on long edge
+      // (far beyond the old 6px short-dim cap). Should still resolve cleanly.
+      const result = computeOverlapSnap({ x: 110, y: 100, rotation: 0 }, { x: 100, y: 100, rotation: 0 }, W, H)
+      expect(result.snapped).toBe(true)
+      if (!result.snapped) return
+      const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+      const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
+      expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+    })
+
+    it('snaps even when dragged center coincides with neighbor center', () => {
+      // Pathological full-overlap case — must still produce a valid non-overlapping placement.
+      const result = computeOverlapSnap({ x: 100, y: 100, rotation: 0 }, { x: 100, y: 100, rotation: 0 }, W, H)
+      expect(result.snapped).toBe(true)
+      if (!result.snapped) return
+      const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+      const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
+      expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
     })
 
     it('returns snapped=false when shapes do not actually overlap', () => {

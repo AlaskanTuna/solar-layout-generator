@@ -7,6 +7,7 @@ import {
   isAabbInsideStage,
   isPolygonInsideRasterMask,
   obbsOverlap,
+  obbsOverlapWithMinSeparation,
   latLngToPixel,
   panelMetersToPixels,
   pixelToLatLng,
@@ -284,25 +285,56 @@ export function useCanvasInteractions({
       const rawCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
       let placementError = getPlacementError(panelId, rawCenter, panel.rotation)
 
-      // If the only problem is a small overlap with a same-rotation neighbor, auto-correct
-      // the position to edge-to-edge using the SAT minimum-separation axis.
+      // Auto-correct overlap against same-rotation neighbors by snapping edge-to-edge.
+      // Iteratively resolves: each pass pushes the dragged panel out of its most-overlapping
+      // neighbor; repeats until no overlap, until rotation mismatch blocks the snap, or the
+      // iteration cap is hit (guards against oscillation between neighbors).
       if (placementError === 'overlap' && panelDimensions) {
-        for (const rp of renderPanels) {
-          if (rp.panel.id === panelId) continue
+        const maxIterations = Math.max(4, renderPanels.length)
+
+        for (let iter = 0; iter < maxIterations; iter++) {
+          let worst: { neighbor: { x: number; y: number; rotation: number }; penetration: number } | null = null
+
+          for (const rp of renderPanels) {
+            if (rp.panel.id === panelId) continue
+            const draggedPoly = getRotatedRectPoints(
+              candidatePixel.x,
+              candidatePixel.y,
+              panelDimensions.width,
+              panelDimensions.height,
+              panel.rotation
+            )
+            const neighborPoly = getRotatedRectPoints(
+              rp.x,
+              rp.y,
+              panelDimensions.width,
+              panelDimensions.height,
+              rp.panel.rotation
+            )
+            const overlap = obbsOverlapWithMinSeparation(draggedPoly, neighborPoly)
+            if (overlap && (!worst || overlap.penetration > worst.penetration)) {
+              worst = {
+                neighbor: { x: rp.x, y: rp.y, rotation: rp.panel.rotation },
+                penetration: overlap.penetration
+              }
+            }
+          }
+
+          if (!worst) break // no more overlaps
+
           const overlapSnap = computeOverlapSnap(
             { x: candidatePixel.x, y: candidatePixel.y, rotation: panel.rotation },
-            { x: rp.x, y: rp.y, rotation: rp.panel.rotation },
+            worst.neighbor,
             panelDimensions.width,
             panelDimensions.height
           )
-          if (overlapSnap.snapped) {
-            candidatePixel = { x: overlapSnap.x, y: overlapSnap.y }
-            const correctedCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
-            placementError = getPlacementError(panelId, correctedCenter, panel.rotation)
-            // Re-run against all neighbors; stop iterating once clean or still blocked
-            if (!placementError) break
-          }
+          if (!overlapSnap.snapped) break // rotation mismatch — cannot resolve cleanly
+
+          candidatePixel = { x: overlapSnap.x, y: overlapSnap.y }
         }
+
+        const correctedCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
+        placementError = getPlacementError(panelId, correctedCenter, panel.rotation)
       }
 
       if (placementError) {
