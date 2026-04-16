@@ -85,7 +85,7 @@ Fill in all values in `.env`:
 | `VITE_SUPABASE_ANON_KEY`    | Same as `SUPABASE_ANON_KEY` (frontend)        |
 | `VITE_GOOGLE_MAPS_API_KEY`  | Same as `GOOGLE_MAPS_API_KEY` (frontend)      |
 | `GOOGLE_OAUTH_CLIENT_ID`    | Google OAuth 2.0 client ID (for SSO)          |
-| `GOOGLE_OAUTH_SECRET`       | Google OAuth 2.0 client secret (for SSO)      |
+| `GOOGLE_OAUTH_SECRET`       | Google OAuth 2.0 client secret (for SSOs)     |
 
 ### 3. Set up the database
 
