@@ -85,7 +85,7 @@ describe('usePanelState', () => {
     expect(result.current.getPanel('panel_4')?.deleted).toBe(true)
   })
 
-  it('serializes moved, deleted, and slider-hidden panels correctly', () => {
+  it('serializes moved, deleted and slider-hidden panels correctly', () => {
     const { result } = renderHook(() =>
       usePanelState({
         projectId: 'project_1',

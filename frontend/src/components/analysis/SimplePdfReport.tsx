@@ -99,8 +99,8 @@ const SimplePdfReport = forwardRef<HTMLDivElement, SimplePdfReportProps>(
 
           <p className="mt-6 text-[10px] text-stone-400">
             This is a preliminary estimate based on Google Solar API data and Malaysian NEM Rakyat 3.0 tariff rates.
-            Actual savings depend on real electricity usage, installation quality, and tariff changes. Consult a
-            licensed solar installer for an accurate quotation.
+            Actual savings depend on real electricity usage, installation quality and tariff changes. Consult a licensed
+            solar installer for an accurate quotation.
           </p>
         </div>
       </div>

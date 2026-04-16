@@ -249,7 +249,7 @@ export function AnalysisSidebar({
                 <InfoTooltip
                   text={
                     selectedPanelModel && selectedPanelModel.costPerWp > 0
-                      ? `Estimated turnkey cost: ${activePanelCount} panels × ${selectedPanelModel.capacityWp} Wp × RM ${selectedPanelModel.costPerWp.toFixed(2)}/Wp × ${DEFAULT_INSTALLATION_MULTIPLIER.toFixed(1)} (installation multiplier) = RM ${Math.round(activePanelCount * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp * DEFAULT_INSTALLATION_MULTIPLIER).toLocaleString()}. The ${DEFAULT_INSTALLATION_MULTIPLIER.toFixed(1)}× multiplier accounts for inverter, mounting hardware, wiring, labour, and permitting — typical for Malaysian residential installations. Adjust to match your actual installer quote.`
+                      ? `Estimated turnkey cost: ${activePanelCount} panels × ${selectedPanelModel.capacityWp} Wp × RM ${selectedPanelModel.costPerWp.toFixed(2)}/Wp × ${DEFAULT_INSTALLATION_MULTIPLIER.toFixed(1)} (installation multiplier) = RM ${Math.round(activePanelCount * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp * DEFAULT_INSTALLATION_MULTIPLIER).toLocaleString()}. The ${DEFAULT_INSTALLATION_MULTIPLIER.toFixed(1)}× multiplier accounts for inverter, mounting hardware, wiring, labour and permitting — typical for Malaysian residential installations. Adjust to match your actual installer quote.`
                       : 'Total estimated installation cost based on average Malaysian turnkey pricing. Adjust to match your actual installer quote.'
                   }
                 />

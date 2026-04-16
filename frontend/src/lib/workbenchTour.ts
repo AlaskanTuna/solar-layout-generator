@@ -10,7 +10,7 @@ export const WORKBENCH_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="panel-model"]',
     title: 'Choose Your Panel Model',
     description:
-      'Pick a solar panel brand and model. Different panels have different sizes, efficiency, and prices. The default (Jinko Tiger Neo) is a popular choice in Malaysia.'
+      'Pick a solar panel brand and model. Different panels have different sizes, efficiency and prices. The default (Jinko Tiger Neo) is a popular choice in Malaysia.'
   },
   {
     target: '[data-tour="panel-count"]',
@@ -28,7 +28,7 @@ export const WORKBENCH_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="canvas-controls"]',
     title: 'Canvas Controls',
     description:
-      'Undo/redo your edits, use the marquee tool to drag-select groups of panels, toggle snap alignment for precise placement, zoom in/out, and switch overlay views.',
+      'Undo/redo your edits, use the marquee tool to drag-select groups of panels, toggle snap alignment for precise placement, zoom in/out and switch overlay views.',
     placement: 'left' as const
   },
   {

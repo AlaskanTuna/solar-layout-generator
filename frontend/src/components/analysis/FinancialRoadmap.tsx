@@ -29,7 +29,7 @@ export function FinancialRoadmap({
   const milestones: Milestone[] = [
     {
       label: 'Year 0',
-      description: `Initial investment of ${formatCurrency(systemCostRm)} for a ${systemKwp} kWp turnkey system (panels, inverter, mounting, wiring, labour, and permitting).`,
+      description: `Initial investment of ${formatCurrency(systemCostRm)} for a ${systemKwp} kWp turnkey system (panels, inverter, mounting, wiring, labour and permitting).`,
       accent: 'bg-primary/20 border-primary/40'
     },
     {
@@ -65,7 +65,7 @@ export function FinancialRoadmap({
       <CardHeader>
         <CardTitle>
           Financial Roadmap
-          <InfoTooltip text="A simplified timeline of key financial milestones for your solar investment. Actual results depend on tariff changes, maintenance, weather, and equipment lifespan." />
+          <InfoTooltip text="A simplified timeline of key financial milestones for your solar investment. Actual results depend on tariff changes, maintenance, weather and equipment lifespan." />
         </CardTitle>
         <CardDescription>Key milestones for your solar investment over its lifetime.</CardDescription>
       </CardHeader>

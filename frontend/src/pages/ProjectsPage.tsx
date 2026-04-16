@@ -66,7 +66,7 @@ export function ProjectsPage() {
 
   return (
     <>
-      <div className="min-h-[calc(100vh-3.5rem)] px-8 py-10 animate-fade-in">
+      <div className="min-h-[calc(100vh-3.5rem)] px-12 py-14 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-heading text-2xl font-bold tracking-tight">Projects</h1>
@@ -139,7 +139,9 @@ export function ProjectsPage() {
           <form onSubmit={handleCreateProject}>
             <DialogHeader>
               <DialogTitle>Create New Project</DialogTitle>
-              <DialogDescription>Give your solar assessment project a name, then search for your building.</DialogDescription>
+              <DialogDescription>
+                Give your solar assessment project a name, then search for your building.
+              </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-2">
               <Label htmlFor="project-name">Project Name</Label>
@@ -153,7 +155,9 @@ export function ProjectsPage() {
               />
             </div>
             <DialogFooter className="mt-6">
-              <Button type="submit" disabled={!projectName.trim()}>Continue</Button>
+              <Button type="submit" disabled={!projectName.trim()}>
+                Continue
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -169,7 +173,9 @@ export function ProjectsPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>
+              Cancel
+            </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
               {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>

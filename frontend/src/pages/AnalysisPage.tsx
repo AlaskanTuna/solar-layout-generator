@@ -50,13 +50,13 @@ const ANALYSIS_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="view-toggle"]',
     title: 'Simple vs Advanced',
     description:
-      'Start with Simple view for a quick summary. Switch to Advanced when you want detailed tariff breakdowns, bill components, and system assumptions you can customise.'
+      'Start with Simple view for a quick summary. Switch to Advanced when you want detailed tariff breakdowns, bill components and system assumptions you can customise.'
   },
   {
     target: '[data-tour="hero-cards"]',
     title: 'Key Numbers at a Glance',
     description:
-      "These four cards tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself, and how much CO2 you're offsetting."
+      "These four cards tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself and how much CO2 you're offsetting."
   },
   {
     target: '[data-tour="monthly-chart"]',
@@ -227,7 +227,7 @@ export function AnalysisPage() {
             </button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Simple shows key savings figures. Advanced adds tariff breakdowns, projections, and system details.
+            Simple shows key savings figures. Advanced adds tariff breakdowns, projections and system details.
           </p>
 
           <SortableCardContainer

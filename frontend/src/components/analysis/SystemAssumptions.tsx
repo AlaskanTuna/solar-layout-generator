@@ -30,7 +30,7 @@ export function SystemAssumptions({
       <CardHeader>
         <CardTitle>
           System Assumptions
-          <InfoTooltip text="Technical parameters used by Google Solar API and industry standards. These include building orientation, tilt angles, panel characteristics, and environmental factors specific to your location." />
+          <InfoTooltip text="Technical parameters used by Google Solar API and industry standards. These include building orientation, tilt angles, panel characteristics and environmental factors specific to your location." />
         </CardTitle>
         <CardDescription>
           Standard industry assumptions used in this analysis (not site-measured values).
@@ -49,7 +49,7 @@ export function SystemAssumptions({
           <div className="rounded-lg bg-muted p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Assumed Losses
-              <InfoTooltip text="Energy lost to dust, wiring, inverter conversion, and heat. This is automatically calculated as 100% minus the Performance Ratio." />
+              <InfoTooltip text="Energy lost to dust, wiring, inverter conversion and heat. This is automatically calculated as 100% minus the Performance Ratio." />
             </p>
             <p className="mt-1 text-lg font-semibold">{Math.round(assumedLosses * 100)}%</p>
             <p className="text-xs text-muted-foreground">Soiling, cable, inverter, temperature</p>

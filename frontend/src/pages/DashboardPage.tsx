@@ -25,7 +25,7 @@ function getGreeting(): string {
 const QUICK_ACTIONS = [
   { to: '/dashboard/summary', icon: Gauge, label: 'Summary', desc: 'Portfolio overview and stats' },
   { to: '/dashboard/projects', icon: FolderKanban, label: 'Projects', desc: 'Manage your solar projects' },
-  { to: '/dashboard/analytics', icon: PieChart, label: 'Analytics', desc: 'Performance insights' },
+  { to: '/dashboard/analytics', icon: PieChart, label: 'Analytics', desc: 'Performance insights' }
 ]
 
 export function DashboardPage() {
@@ -53,14 +53,15 @@ export function DashboardPage() {
 
   return (
     <>
-      <div className="flex min-h-[calc(100vh-3.5rem)] flex-col px-8 py-10">
+      <div className="flex min-h-[calc(100vh-3.5rem)] flex-col px-12 py-14">
         {/* Greeting Card */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-8 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20 animate-fade-in">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-solar-400/10 blur-3xl" />
           <div className="relative">
             <h1 className="font-heading text-3xl font-bold tracking-tight">
-              {greeting}{userName ? `, ${userName}` : ''}
+              {greeting}
+              {userName ? `, ${userName}` : ''}
             </h1>
             <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
           </div>
@@ -95,7 +96,9 @@ export function DashboardPage() {
           <form onSubmit={handleCreateProject}>
             <DialogHeader>
               <DialogTitle>Create New Project</DialogTitle>
-              <DialogDescription>Give your solar assessment project a name, then search for your building.</DialogDescription>
+              <DialogDescription>
+                Give your solar assessment project a name, then search for your building.
+              </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-2">
               <Label htmlFor="project-name">Project Name</Label>
@@ -109,7 +112,9 @@ export function DashboardPage() {
               />
             </div>
             <DialogFooter className="mt-6">
-              <Button type="submit" disabled={!projectName.trim()}>Continue</Button>
+              <Button type="submit" disabled={!projectName.trim()}>
+                Continue
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

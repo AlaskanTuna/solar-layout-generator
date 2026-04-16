@@ -14,7 +14,7 @@ export function AnalyticsPage() {
 
   if (completedProjects === 0) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] px-8 py-10 animate-fade-in">
+      <div className="min-h-[calc(100vh-3.5rem)] px-12 py-14 animate-fade-in">
         <h1 className="font-heading text-2xl font-bold tracking-tight">Analytics</h1>
         <p className="mt-1 text-sm text-muted-foreground">Performance insights across all your projects</p>
         <div className="mt-12 glass-card flex flex-col items-center py-16 text-center">
@@ -80,7 +80,9 @@ export function AnalyticsPage() {
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div className="glass-card p-5">
           <p className="text-xs text-muted-foreground">Avg. Monthly Savings</p>
-          <p className="mt-1 font-heading text-xl font-bold text-green-600 dark:text-green-400">RM {avgSavings.toFixed(0)}</p>
+          <p className="mt-1 font-heading text-xl font-bold text-green-600 dark:text-green-400">
+            RM {avgSavings.toFixed(0)}
+          </p>
         </div>
         <div className="glass-card p-5">
           <p className="text-xs text-muted-foreground">Avg. Panels per Project</p>

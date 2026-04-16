@@ -66,7 +66,7 @@ describe('aggregateMonthlyGeneration', () => {
 })
 
 describe('buildThresholdWarnings', () => {
-  it('combines retail, AFA, and SST warnings when the thresholds match', () => {
+  it('combines retail, AFA and SST warnings when the thresholds match', () => {
     const warnings = buildThresholdWarnings(monthResult, {
       energyCliff: 1500,
       retailWaiver: 600,
@@ -77,11 +77,11 @@ describe('buildThresholdWarnings', () => {
     })
 
     expect(warnings).toContain(
-      'This month drops below 600 kWh after NEM offset, so retail charge, AFA, and SST are waived.'
+      'This month drops below 600 kWh after NEM offset, so retail charge, AFA and SST are waived.'
     )
   })
 
-  it('splits threshold warnings when retail, AFA, and SST thresholds differ', () => {
+  it('splits threshold warnings when retail, AFA and SST thresholds differ', () => {
     const warnings = buildThresholdWarnings(monthResult, {
       energyCliff: 1500,
       retailWaiver: 700,

@@ -64,13 +64,13 @@ export function applySeasonalProfile(baseKwh: number): number[] {
 export const DEFAULT_INSTALLATION_MULTIPLIER = 2.0
 
 export const ANALYSIS_DISCLAIMERS = [
-  'Estimates are based on published TNB tariff rates under Regulatory Period 4 (effective 1 July 2025) and NEM Rakyat 3.0 rules. Actual bills may vary due to billing cycle length, meter reading dates, and tariff adjustments.',
+  'Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and NEM Rakyat 3.0 rules by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in "Advanced" view as needed.',
   'The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes.',
   'PETRA has indicated that Energy Efficiency Incentive (EEI) rates may be adjusted for NEM users. Current calculations use standard EEI rates pending official modification.',
-  'Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling, and equipment condition.',
+  'Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling and equipment condition.',
   'Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits.',
-  'System cost is estimated using panel module pricing with a 2.0× installation multiplier (covering inverter, mounting hardware, wiring, labour, and permitting). This reflects typical Malaysian residential turnkey pricing of RM 3,500–5,500 per kWp as of 2025–2026. Always confirm with a licensed SEDA-registered installer.',
-  'Payback and savings projections do not account for annual maintenance (~RM 500/yr), inverter replacement (typically needed at year 10–15, costing ~RM 3,000–6,000), electricity tariff escalation, or inflation. Actual long-term returns may differ.'
+  'System cost is estimated using panel module pricing with a 2.0× installation multiplier (e.g., covering inverter, mounting hardware, wiring, labour, permitting). This reflects typical Malaysian residential turnkey pricing of RM 3,500–5,500 per kWp as of 2025–2026. Always confirm with a licensed SEDA-registered installer.',
+  'Payback and savings projections do not account for annual maintenance (~RM 500/yr), inverter replacement (typically needed at year 10–15, costing ~RM 3,000–6,000), electricity tariff escalation or inflation. Actual long-term returns may differ.'
 ]
 
 function round2(value: number): number {
@@ -223,7 +223,7 @@ export function buildThresholdWarnings(month: NemMonthResult, thresholds: Tariff
     thresholds.afaWaiver === thresholds.sstExemption
   ) {
     warnings.push(
-      `This month drops below ${thresholds.retailWaiver} kWh after NEM offset, so retail charge, AFA, and SST are waived.`
+      `This month drops below ${thresholds.retailWaiver} kWh after NEM offset, so retail charge, AFA and SST are waived.`
     )
   } else {
     if (retailTriggered) {

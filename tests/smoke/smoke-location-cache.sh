@@ -343,7 +343,7 @@ if [[ "$FIRST_HAS_BUILDING_INSIGHTS" != "true" || "$FIRST_HAS_RGB_PNG" != "true"
   echo "$FIRST_LOCATION_JSON"
   exit 1
 fi
-echo "[PASS] First resolve persisted buildingInsightsJson, rgbImageUrl, monthlyFluxPath, and maskPath"
+echo "[PASS] First resolve persisted buildingInsightsJson, rgbImageUrl, monthlyFluxPath and maskPath"
 
 FIRST_PROJECT_NAME="${PROJECT_NAME_PREFIX}-first"
 create_project "$TOKEN" "$FIRST_PROJECT_NAME" "$FIRST_LOCATION_ID"
