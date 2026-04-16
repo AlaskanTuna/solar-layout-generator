@@ -4,6 +4,7 @@ import { listProjects } from '@/api/projects'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { aggregateStats } from '@/components/dashboard/helpers'
 import { Receipt, Zap, Leaf, Sun, PieChart } from 'lucide-react'
+import { PageContainer } from '@/components/layout/PageContainer'
 
 export function AnalyticsPage() {
   const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: listProjects })
@@ -14,7 +15,7 @@ export function AnalyticsPage() {
 
   if (completedProjects === 0) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] px-12 py-14 animate-fade-in">
+      <PageContainer className="animate-fade-in">
         <h1 className="font-heading text-2xl font-bold tracking-tight">Analytics</h1>
         <p className="mt-1 text-sm text-muted-foreground">Performance insights across all your projects</p>
         <div className="mt-12 glass-card flex flex-col items-center py-16 text-center">
@@ -24,7 +25,7 @@ export function AnalyticsPage() {
             Complete at least one solar analysis to see aggregated performance metrics here.
           </p>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
@@ -39,7 +40,7 @@ export function AnalyticsPage() {
     })
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] px-8 py-10 animate-fade-in">
+    <PageContainer className="animate-fade-in">
       <h1 className="font-heading text-2xl font-bold tracking-tight">Analytics</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
@@ -119,6 +120,6 @@ export function AnalyticsPage() {
           </table>
         </div>
       </div>
-    </div>
+    </PageContainer>
   )
 }

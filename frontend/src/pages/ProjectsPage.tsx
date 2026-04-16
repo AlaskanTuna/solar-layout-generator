@@ -17,6 +17,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Plus, FolderOpen } from 'lucide-react'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { notify } from '@/components/ui/toastConfig'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { projectRoute } from '@/components/dashboard/helpers'
@@ -66,7 +67,7 @@ export function ProjectsPage() {
 
   return (
     <>
-      <div className="min-h-[calc(100vh-3.5rem)] px-12 py-14 animate-fade-in">
+      <PageContainer className="animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-heading text-2xl font-bold tracking-tight">Projects</h1>
@@ -131,7 +132,7 @@ export function ProjectsPage() {
             </div>
           )}
         </div>
-      </div>
+      </PageContainer>
 
       {/* Create Project Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

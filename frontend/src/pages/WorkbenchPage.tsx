@@ -20,6 +20,7 @@ import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
 import { COLORS } from '@/lib/constants'
 import { WORKBENCH_TOUR_STEPS } from '@/lib/workbenchTour'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 import { GuidedTour } from '@/components/ui/GuidedTour'
@@ -177,7 +178,7 @@ export function WorkbenchPage() {
   return (
     <AppLayout>
       <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-4 xl:h-[calc(100vh-3.5rem)] xl:flex-row">
+      <PageContainer variant="mvp">
         <WorkbenchSidebar
           projectName={project.name}
           totalAnnualYield={totalAnnualYield}
@@ -433,7 +434,7 @@ export function WorkbenchPage() {
             </CardContent>
           </Card>
         </section>
-      </div>
+      </PageContainer>
     </AppLayout>
   )
 }

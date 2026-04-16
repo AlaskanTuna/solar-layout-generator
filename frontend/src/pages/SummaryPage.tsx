@@ -17,6 +17,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Plus, Sun, FolderOpen, Clock, BarChart3, Lightbulb, MapPin, SlidersHorizontal, FileBarChart } from 'lucide-react'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { notify } from '@/components/ui/toastConfig'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { projectRoute } from '@/components/dashboard/helpers'
@@ -68,7 +69,7 @@ export function SummaryPage() {
 
   return (
     <>
-      <div className="flex min-h-[calc(100vh-3.5rem)] flex-col px-12 py-14">
+      <PageContainer flex>
         {/* Heading */}
         <div className="animate-fade-in">
           <h1 className="font-heading text-2xl font-bold tracking-tight">Summary</h1>
@@ -193,7 +194,7 @@ export function SummaryPage() {
             </div>
           </div>
         </div>
-      </div>
+      </PageContainer>
 
       {/* Create Project Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

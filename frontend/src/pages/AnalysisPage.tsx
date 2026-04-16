@@ -14,6 +14,7 @@ import {
 } from '@/lib/analysis'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/ui/GuidedTour'
 import { useTheme } from '@/hooks/useTheme'
@@ -189,7 +190,7 @@ export function AnalysisPage() {
   return (
     <AppLayout>
       <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 xl:h-[calc(100vh-3.5rem)] xl:flex-row">
+      <PageContainer variant="mvp" className="gap-6 py-6">
         <AnalysisSidebar
           projectId={projectId}
           projectName={projectQuery.data.name}
@@ -372,7 +373,7 @@ export function AnalysisPage() {
             ]}
           />
         </section>
-      </div>
+      </PageContainer>
 
       <SimplePdfReport
         ref={simpleReportRef}
