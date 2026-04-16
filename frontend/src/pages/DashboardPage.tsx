@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { useQuota } from '@/hooks/useQuota'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,7 +14,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { Plus, Gauge, FolderKanban, PieChart, MapPin } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Gauge, FolderKanban, PieChart, MapPin } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 
 function getGreeting(): string {
@@ -21,6 +23,11 @@ function getGreeting(): string {
   if (hour < 12) return 'Good morning'
   if (hour < 18) return 'Good afternoon'
   return 'Good evening'
+}
+
+function formatResetTime(resetsAt: string): string {
+  const d = new Date(resetsAt)
+  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
 const QUICK_ACTIONS = [
@@ -32,6 +39,7 @@ const QUICK_ACTIONS = [
 export function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const quotaQuery = useQuota()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
   const [greeting, setGreeting] = useState('Welcome back')
@@ -40,10 +48,19 @@ export function DashboardPage() {
     setGreeting(getGreeting())
   }, [])
 
+  const quota = quotaQuery.data
+  const isUnlimited = quota?.limit === null
+  const quotaReached = !!quota && quota.limit !== null && quota.used >= quota.limit
+  const quotaLabel = !quota
+    ? null
+    : isUnlimited
+      ? 'Unlimited projects today'
+      : `${quota.used} / ${quota.limit} projects today · resets at ${formatResetTime(quota.resetsAt)}`
+
   function handleCreateProject(e: FormEvent) {
     e.preventDefault()
     const name = projectName.trim()
-    if (!name) return
+    if (!name || quotaReached) return
     writeNewProjectDraft({ projectName: name, phase: 'search' })
     setDialogOpen(false)
     setProjectName('')
@@ -51,6 +68,22 @@ export function DashboardPage() {
   }
 
   const userName = user?.email?.split('@')[0] ?? ''
+
+  const newProjectTile = (
+    <button
+      onClick={() => !quotaReached && setDialogOpen(true)}
+      disabled={quotaReached}
+      aria-disabled={quotaReached}
+      className={`glass-card flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-all duration-200 ${
+        quotaReached
+          ? 'cursor-not-allowed opacity-60'
+          : 'hover:border-primary/50 hover:text-primary hover:shadow-lg'
+      }`}
+    >
+      <MapPin className="h-8 w-8" />
+      <span className="text-sm font-medium">New Project</span>
+    </button>
+  )
 
   return (
     <>
@@ -65,6 +98,9 @@ export function DashboardPage() {
               {userName ? `, ${userName}` : ''}
             </h1>
             <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
+            {quotaLabel && (
+              <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
+            )}
           </div>
         </div>
 
@@ -81,13 +117,18 @@ export function DashboardPage() {
             </Link>
           ))}
 
-          <button
-            onClick={() => setDialogOpen(true)}
-            className="glass-card flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-all duration-200 hover:border-primary/50 hover:text-primary hover:shadow-lg"
-          >
-            <MapPin className="h-8 w-8" />
-            <span className="text-sm font-medium">New Project</span>
-          </button>
+          {quotaReached && quota ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>{newProjectTile}</TooltipTrigger>
+                <TooltipContent>
+                  Daily limit reached — resets at {formatResetTime(quota.resetsAt)}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            newProjectTile
+          )}
         </div>
       </PageContainer>
 
@@ -113,7 +154,7 @@ export function DashboardPage() {
               />
             </div>
             <DialogFooter className="mt-6">
-              <Button type="submit" disabled={!projectName.trim()}>
+              <Button type="submit" disabled={!projectName.trim() || quotaReached}>
                 Continue
               </Button>
             </DialogFooter>

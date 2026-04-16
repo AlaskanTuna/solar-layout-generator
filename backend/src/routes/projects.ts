@@ -1,5 +1,6 @@
 import { Router, type Router as ExpressRouter } from 'express'
 import { requireAuth } from '../middleware/auth.js'
+import { checkQuota } from '../middleware/checkQuota.js'
 import { validate } from '../middleware/validate.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { createProjectSchema, saveLayoutSchema, saveAnalysisSchema } from '../validators/projects.js'
@@ -12,6 +13,7 @@ export const projectsRouter: ExpressRouter = Router()
 projectsRouter.post(
   '/',
   requireAuth,
+  checkQuota,
   validate(createProjectSchema),
   asyncHandler(async (req, res) => {
     const { name, locationId } = req.body

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { healthRouter } from './routes/health.js'
 import { locationsRouter } from './routes/locations.js'
 import { projectsRouter } from './routes/projects.js'
+import { quotaRouter } from './routes/quota.js'
 import { tariffRouter } from './routes/tariff.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { requestLogger } from './middleware/requestLogger.js'
@@ -29,6 +30,7 @@ app.use(requestLogger)
 app.use('/api/health', healthRouter)
 app.use('/api/locations', locationsRouter)
 app.use('/api/projects', projectsRouter)
+app.use('/api/quota', quotaRouter)
 app.use('/api/tariff', tariffRouter)
 
 // In production, serve the built frontend static files

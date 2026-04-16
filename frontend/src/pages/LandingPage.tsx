@@ -243,7 +243,7 @@ export function LandingPage() {
               tier="Free"
               price="RM 0"
               description="Perfect for homeowners exploring solar"
-              features={['1 project', 'Basic analysis', 'Simple PDF export', 'NEM billing simulation']}
+              features={['5 projects per day', 'Basic analysis', 'Simple PDF export', 'NEM billing simulation']}
               cta="Get Started"
               ctaLink="/sign-up"
             />
@@ -253,7 +253,7 @@ export function LandingPage() {
               period="/month"
               description="For serious solar planners"
               features={[
-                'Unlimited projects',
+                '20 projects per day',
                 'Advanced analysis',
                 'Detailed PDF reports',
                 'Seasonal consumption profiles',
@@ -268,6 +268,7 @@ export function LandingPage() {
               price="Custom"
               description="For solar installers and consultants"
               features={[
+                'Unlimited projects',
                 'Everything in Pro',
                 'Team collaboration',
                 'White-label reports',

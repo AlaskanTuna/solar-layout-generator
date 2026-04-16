@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { resolveLocation, getLocationStatus } from '@/api/locations'
 import { createProject, getProject } from '@/api/projects'
+import { ApiError } from '@/api/client'
+import { notify } from '@/components/ui/toastConfig'
 import { Button } from '@/components/ui/button'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
@@ -42,6 +44,7 @@ export function MapPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const location = useLocation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { isLoaded, error: mapsError } = useGoogleMaps()
 
   const isNewProject = projectId === 'new'
@@ -127,11 +130,15 @@ export function MapPage() {
         navigate(`/project/${project.id}/workbench`, { replace: true })
       } catch (err) {
         isCreatingProjectRef.current = false
+        if (err instanceof ApiError && err.status === 429) {
+          notify.warning(err.message)
+          void queryClient.invalidateQueries({ queryKey: ['quota'] })
+        }
         setErrorMessage(err instanceof Error ? err.message : 'Failed to create project')
         setPhase('failed')
       }
     },
-    [isNewProject, navigate, projectName]
+    [isNewProject, navigate, projectName, queryClient]
   )
 
   useEffect(() => {

@@ -131,3 +131,6 @@ export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelMode
 
 export { computeSystemCost, MOUNTING_PER_PANEL } from './costModel'
 export type { CostBreakdown, CostInputs, RoofType, SupplyPhase } from './costModel'
+
+export { TIER_DAILY_LIMITS, WARNING_THRESHOLD } from './quota'
+export type { UserTier, QuotaSummary } from './quota'
