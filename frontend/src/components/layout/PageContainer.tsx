@@ -18,7 +18,7 @@ type PageContainerProps = {
 }
 
 const VARIANTS: Record<NonNullable<PageContainerProps['variant']>, string> = {
-  dashboard: 'min-h-[calc(100vh-3.5rem)] px-12 py-14',
+  dashboard: 'mx-auto max-w-[1600px] min-h-[calc(100vh-3.5rem)] px-4 py-4',
   mvp: 'mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-4 xl:h-[calc(100vh-3.5rem)] xl:flex-row',
   'full-bleed': 'relative flex w-full flex-col overflow-hidden p-4'
 }
