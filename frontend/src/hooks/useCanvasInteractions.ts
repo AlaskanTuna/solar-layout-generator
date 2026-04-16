@@ -387,16 +387,10 @@ export function useCanvasInteractions({
   }
 
   function handleCanvasRotate(panelId: string, value: number) {
-    if (!selectedPanelIds.has(panelId)) {
-      setSelectedPanelIds(new Set([panelId]))
-    }
-    handleRotationInput(value)
-  }
-
-  function handleRotationInput(value: number) {
     const nextRotation = ((value % 360) + 360) % 360
 
-    if (selectedPanelIds.size > 1) {
+    // Multi-panel rotation: rotate all selected panels together
+    if (selectedPanelIds.size > 1 && selectedPanelIds.has(panelId)) {
       for (const id of selectedPanelIds) {
         const p = getPanel(id)
         if (!p) continue
@@ -435,17 +429,23 @@ export function useCanvasInteractions({
       return
     }
 
-    if (!selectedPanel) return
+    // Single-panel rotation: use panelId directly to avoid stale closure on selectedPanel
+    const panel = getPanel(panelId)
+    if (!panel) return
 
-    const placementError = getPlacementError(selectedPanel.id, selectedPanel.center, nextRotation)
+    if (!selectedPanelIds.has(panelId)) {
+      setSelectedPanelIds(new Set([panelId]))
+    }
+
+    const placementError = getPlacementError(panel.id, panel.center, nextRotation)
     if (placementError) {
       notify.error(getPlacementErrorMessage(placementError))
       return
     }
 
-    const previousRotation = selectedPanel.rotation
-    rotatePanel(selectedPanel.id, nextRotation)
-    scheduleRotationRecompute(selectedPanel.id, selectedPanel.center, nextRotation, previousRotation)
+    const previousRotation = panel.rotation
+    rotatePanel(panel.id, nextRotation)
+    scheduleRotationRecompute(panel.id, panel.center, nextRotation, previousRotation)
   }
 
   function handleDeleteSelected() {

@@ -35,12 +35,15 @@ export async function saveLayout(
   const existingConfig = (project.analysisConfig as Record<string, unknown>) ?? {}
   const nextAnalysisConfig = selectedPanelModelId ? { ...existingConfig, selectedPanelModelId } : existingConfig
 
+  // Preserve analysis_saved status — only set layout_saved if not already completed
+  const nextStatus = project.status === 'analysis_saved' ? 'analysis_saved' : 'layout_saved'
+
   return prisma.project.update({
     where: { id: projectId },
     data: {
       editedLayout: editedLayout as unknown as Prisma.InputJsonValue,
       analysisConfig: nextAnalysisConfig as Prisma.InputJsonValue,
-      status: 'layout_saved'
+      status: nextStatus
     },
     include: { location: true }
   })
