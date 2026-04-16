@@ -173,18 +173,17 @@ export function SummaryPage() {
             </div>
           </div>
 
-          {/* How it works — right column, top-aligned with stats, stretches to bottom */}
           <div className="hidden w-64 shrink-0 lg:flex lg:flex-col animate-fade-in">
-            <div className="glass-card flex flex-1 flex-col overflow-hidden">
+            <div className="glass-card flex flex-col overflow-hidden">
               <div className="border-b border-border bg-muted/30 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Lightbulb className="h-4 w-4 text-amber-500" />
                   <h3 className="font-heading text-sm font-semibold">How it works</h3>
                 </div>
               </div>
-              <div className="flex flex-1 flex-col divide-y divide-border">
+              <div className="flex flex-col divide-y divide-border">
                 {WORKFLOW_STEPS.map((s) => (
-                  <div key={s.step} className="flex-1 p-4">
+                  <div key={s.step} className="p-4">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">{s.icon}</div>
                     <p className="mt-2 text-sm font-semibold">{s.title}</p>
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
