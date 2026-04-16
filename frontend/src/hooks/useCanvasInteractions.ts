@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { recomputeFlux, recomputeFluxBatch } from '@/api/locations'
 import {
-  aabbsOverlap,
   createCanvasGeo,
   getRectAabb,
   getRotatedRectPoints,
   isAabbInsideStage,
   isPolygonInsideRasterMask,
+  obbsOverlap,
   latLngToPixel,
   panelMetersToPixels,
   pixelToLatLng,
@@ -151,22 +151,14 @@ export function useCanvasInteractions({
     }
   }, [])
 
-  function getPlacementAabb(
-    panelId: string,
+  function getPlacementPoints(
     center: { lat: number; lng: number },
     rotation: number,
     canvasGeo: CanvasGeo
   ) {
     if (!panelDimensions) return null
     const pixelCenter = latLngToPixel(center.lat, center.lng, canvasGeo)
-    const points = getRotatedRectPoints(
-      pixelCenter.x,
-      pixelCenter.y,
-      panelDimensions.width,
-      panelDimensions.height,
-      rotation
-    )
-    return getRectAabb(points)
+    return getRotatedRectPoints(pixelCenter.x, pixelCenter.y, panelDimensions.width, panelDimensions.height, rotation)
   }
 
   function getPlacementError(
@@ -177,10 +169,10 @@ export function useCanvasInteractions({
   ) {
     if (!geo || !panelDimensions) return 'bounds' as const
 
-    const proposedAabb = getPlacementAabb(panelId, center, rotation, geo)
-    if (!proposedAabb) return 'bounds' as const
+    const proposedPoints = getPlacementPoints(center, rotation, geo)
+    if (!proposedPoints) return 'bounds' as const
 
-    if (!isAabbInsideStage(proposedAabb, stageSize.width, stageSize.height)) {
+    if (!isAabbInsideStage(getRectAabb(proposedPoints), stageSize.width, stageSize.height)) {
       return 'bounds' as const
     }
 
@@ -201,8 +193,8 @@ export function useCanvasInteractions({
     for (const otherPanel of visiblePanels) {
       if (otherPanel.id === panelId) continue
       if (excludeIds?.has(otherPanel.id)) continue
-      const otherAabb = getPlacementAabb(otherPanel.id, otherPanel.center, otherPanel.rotation, geo)
-      if (otherAabb && aabbsOverlap(proposedAabb, otherAabb)) {
+      const otherPoints = getPlacementPoints(otherPanel.center, otherPanel.rotation, geo)
+      if (otherPoints && obbsOverlap(proposedPoints, otherPoints)) {
         return 'overlap' as const
       }
     }

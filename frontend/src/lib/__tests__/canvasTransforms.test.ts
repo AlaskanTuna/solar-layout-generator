@@ -7,6 +7,7 @@ import {
   isPolygonInsideRasterMask,
   isAabbInsideStage,
   latLngToPixel,
+  obbsOverlap,
   panelMetersToPixels,
   pixelToLatLng
 } from '../canvasTransforms'
@@ -66,5 +67,45 @@ describe('canvasTransforms', () => {
 
     expect(isPolygonInsideRasterMask(inside, mask)).toBe(true)
     expect(isPolygonInsideRasterMask(outside, mask)).toBe(false)
+  })
+
+  describe('obbsOverlap (SAT)', () => {
+    it('returns true for two axis-aligned panels that overlap', () => {
+      const a = getRotatedRectPoints(100, 100, 40, 20, 0)
+      const b = getRotatedRectPoints(110, 100, 40, 20, 0)
+      expect(obbsOverlap(a, b)).toBe(true)
+    })
+
+    it('returns false for two axis-aligned panels that are clearly separated', () => {
+      const a = getRotatedRectPoints(100, 100, 40, 20, 0)
+      const b = getRotatedRectPoints(200, 100, 40, 20, 0)
+      expect(obbsOverlap(a, b)).toBe(false)
+    })
+
+    it('returns false for two rotated panels whose AABBs overlap but shapes do not', () => {
+      // Two 45°-rotated panels (width=80, height=6) with centers 50px apart along X.
+      // Their diagonal AABBs overlap on both axes, but the actual rotated shapes
+      // are offset perpendicular to the panel width axis and do not intersect.
+      const a = getRotatedRectPoints(200, 200, 80, 6, 45)
+      const b = getRotatedRectPoints(250, 200, 80, 6, 45)
+      const aAabb = getRectAabb(a)
+      const bAabb = getRectAabb(b)
+      expect(aabbsOverlap(aAabb, bAabb)).toBe(true)
+      expect(obbsOverlap(a, b)).toBe(false)
+    })
+
+    it('returns true for two rotated panels at different angles that genuinely intersect', () => {
+      const a = getRotatedRectPoints(100, 100, 60, 20, 0)
+      const b = getRotatedRectPoints(100, 100, 60, 20, 90)
+      expect(obbsOverlap(a, b)).toBe(true)
+    })
+
+    it('returns false for panels touching edge-to-edge (no penetration)', () => {
+      // Panels side by side with exactly zero gap — touching but not overlapping.
+      // Using strict inequality in SAT (maxA > minB) so touching edges return false.
+      const a = getRotatedRectPoints(100, 100, 40, 20, 0)
+      const b = getRotatedRectPoints(140, 100, 40, 20, 0)
+      expect(obbsOverlap(a, b)).toBe(false)
+    })
   })
 })

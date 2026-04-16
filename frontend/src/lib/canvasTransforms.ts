@@ -112,6 +112,49 @@ export function aabbsOverlap(a: RectAabb, b: RectAabb): boolean {
   return a.minX < b.maxX && a.maxX > b.minX && a.minY < b.maxY && a.maxY > b.minY
 }
 
+/**
+ * SAT (Separating Axis Theorem) overlap test for two convex polygons.
+ * Returns true only when the shapes actually intersect — no false positives from AABB inflation.
+ */
+function satProjectionsOverlap(axis: PixelPoint, polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
+  let minA = Infinity
+  let maxA = -Infinity
+  for (const p of polyA) {
+    const proj = p.x * axis.x + p.y * axis.y
+    if (proj < minA) minA = proj
+    if (proj > maxA) maxA = proj
+  }
+  let minB = Infinity
+  let maxB = -Infinity
+  for (const p of polyB) {
+    const proj = p.x * axis.x + p.y * axis.y
+    if (proj < minB) minB = proj
+    if (proj > maxB) maxB = proj
+  }
+  return maxA > minB && maxB > minA
+}
+
+function getEdgeNormals(poly: PixelPoint[]): PixelPoint[] {
+  const normals: PixelPoint[] = []
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i]!
+    const b = poly[(i + 1) % poly.length]!
+    const edgeX = b.x - a.x
+    const edgeY = b.y - a.y
+    const len = Math.hypot(edgeX, edgeY) || 1
+    normals.push({ x: -edgeY / len, y: edgeX / len })
+  }
+  return normals
+}
+
+export function obbsOverlap(polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
+  const axes = [...getEdgeNormals(polyA), ...getEdgeNormals(polyB)]
+  for (const axis of axes) {
+    if (!satProjectionsOverlap(axis, polyA, polyB)) return false
+  }
+  return true
+}
+
 export function isAabbInsideStage(aabb: RectAabb, stageWidth: number, stageHeight: number): boolean {
   return aabb.minX >= 0 && aabb.maxX <= stageWidth && aabb.minY >= 0 && aabb.maxY <= stageHeight
 }
