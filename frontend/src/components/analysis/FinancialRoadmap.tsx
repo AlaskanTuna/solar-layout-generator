@@ -24,7 +24,10 @@ export function FinancialRoadmap({
   systemKwp
 }: FinancialRoadmapProps) {
   const outputAtYear25 = Math.round((1 - degradationRate) ** 24 * 100)
-  const estimatedInverterCost = Math.round(systemKwp * 800)
+  // Midpoint of the RM 3,000–6,000 residential string inverter replacement range
+  // documented in MVP-PAGE-2-SOLAR-COST-MODEL.md §7. Flat figure since replacement
+  // SKUs don't scale linearly with kWp for residential sizes.
+  const estimatedInverterCost = 4500
 
   const milestones: Milestone[] = [
     {

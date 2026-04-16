@@ -128,3 +128,6 @@ export interface PanelModel {
 }
 
 export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelModels'
+
+export { computeSystemCost, MOUNTING_PER_PANEL } from './costModel'
+export type { CostBreakdown, CostInputs, RoofType, SupplyPhase } from './costModel'

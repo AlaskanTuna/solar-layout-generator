@@ -4,7 +4,6 @@ import { getLocationData } from '@/api/locations'
 import { getProject } from '@/api/projects'
 import { getTariffConfig } from '@/api/tariff'
 import {
-  DEFAULT_INSTALLATION_MULTIPLIER,
   MONTH_LABELS,
   aggregateMonthlyGeneration,
   applySeasonalProfile,
@@ -15,7 +14,7 @@ import {
 } from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation, type AnnualSimulationResult } from '@/lib/billingEngine'
-import { getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
+import { computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 export type AnalysisFormState = Omit<AnalysisConfig, 'systemKwp'>
 
 export type ChartDataPoint = {
@@ -101,33 +100,24 @@ export function useAnalysisForm(projectId: string | undefined) {
     const savedConfig = parseSavedAnalysisConfig(projectQuery.data.analysisConfig)
     const localPanels = parsePanelEdits(projectQuery.data.editedLayout).filter((p) => p.status !== 'deleted')
     const localPanelCapacity = selectedPanelModel?.capacityWp ?? buildingInsights.solarPotential.panelCapacityWatts ?? 0
-    const localSystemKwp = Math.round(((localPanels.length * localPanelCapacity) / 1000) * 100) / 100
 
-    let defaultSystemCostRm: number
-    if (selectedPanelModel && selectedPanelModel.costPerWp > 0) {
-      defaultSystemCostRm = Math.round(
-        localPanels.length *
-          selectedPanelModel.capacityWp *
-          selectedPanelModel.costPerWp *
-          DEFAULT_INSTALLATION_MULTIPLIER
-      )
-    } else {
-      defaultSystemCostRm = Math.round(localSystemKwp * tariffQuery.data.defaults.systemCostPerKwp)
-    }
+    const roofType = savedConfig?.roofType ?? 'metal'
+    const connectionPhase = savedConfig?.connectionPhase ?? 'single'
+    const panelCostPerWp = selectedPanelModel?.costPerWp && selectedPanelModel.costPerWp > 0 ? selectedPanelModel.costPerWp : 0.95
+    const defaultSystemCostRm = computeSystemCost({
+      panelCount: localPanels.length,
+      panelWattageWp: localPanelCapacity,
+      panelCostPerWp,
+      roofType,
+      supplyPhase: connectionPhase
+    }).total
 
-    let resolvedSystemCostRm = savedConfig?.systemCostRm ?? defaultSystemCostRm
-    if (savedConfig?.systemCostRm != null && selectedPanelModel && selectedPanelModel.costPerWp > 0) {
-      const oldPanelOnlyCost = Math.round(
-        localPanels.length * selectedPanelModel.capacityWp * selectedPanelModel.costPerWp
-      )
-      if (savedConfig.systemCostRm === oldPanelOnlyCost) {
-        resolvedSystemCostRm = defaultSystemCostRm
-      }
-    }
+    const resolvedSystemCostRm = savedConfig?.systemCostRm ?? defaultSystemCostRm
 
     setFormState({
       monthlyConsumptionKwh: savedConfig?.monthlyConsumptionKwh ?? 600,
-      connectionPhase: savedConfig?.connectionPhase ?? 'single',
+      connectionPhase,
+      roofType,
       systemCostRm: resolvedSystemCostRm,
       afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault,
       degradationRate: savedConfig?.degradationRate ?? 0.005,

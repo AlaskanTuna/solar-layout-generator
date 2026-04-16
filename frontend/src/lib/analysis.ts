@@ -1,4 +1,4 @@
-import type { PanelEdit, TariffThresholds } from '@shared/types'
+import type { PanelEdit, RoofType, TariffThresholds } from '@shared/types'
 import type { AnnualSimulationResult, NemMonthResult } from './billingEngine'
 
 export type ConnectionPhase = 'single' | 'three'
@@ -6,6 +6,7 @@ export type ConnectionPhase = 'single' | 'three'
 export type AnalysisConfig = {
   monthlyConsumptionKwh: number
   connectionPhase: ConnectionPhase
+  roofType: RoofType
   systemCostRm: number
   afaRateSenPerKwh: number
   systemKwp: number
@@ -60,16 +61,13 @@ export function applySeasonalProfile(baseKwh: number): number[] {
   return SEASONAL_MULTIPLIERS.map((m) => round2(baseKwh * m))
 }
 
-/** Multiplier from panel module cost to turnkey installed system cost (2.0x ~ RM 4-5k/kWp) */
-export const DEFAULT_INSTALLATION_MULTIPLIER = 2.0
-
 export const ANALYSIS_DISCLAIMERS = [
-  'Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and NEM Rakyat 3.0 rules by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in "Advanced" view as needed.',
+  'Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and Solar ATAP rules (launched 1 January 2026) by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in "Advanced" view as needed.',
   'The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes.',
   'PETRA has indicated that Energy Efficiency Incentive (EEI) rates may be adjusted for NEM users. Current calculations use standard EEI rates pending official modification.',
   'Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling and equipment condition.',
   'Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits.',
-  'System cost is estimated using panel module pricing with a 2.0× installation multiplier (e.g., covering inverter, mounting hardware, wiring, labour, permitting). This reflects typical Malaysian residential turnkey pricing of RM 3,500–5,500 per kWp as of 2025–2026. Always confirm with a licensed SEDA-registered installer.',
+  'System cost is estimated bottom-up: distributor panel pricing + inverter SKU lookup + roof-type-dependent mounting + electrical BOS + permits + labour markup + installer margin. Assumes mid-tier installer pricing and single-storey installation. Typical Malaysian turnkey quotes land within ±10% of this figure. Always confirm with a licensed SEDA-registered installer.',
   'Payback and savings projections do not account for annual maintenance (~RM 500/yr), inverter replacement (typically needed at year 10–15, costing ~RM 3,000–6,000), electricity tariff escalation or inflation. Actual long-term returns may differ.'
 ]
 
@@ -98,6 +96,10 @@ function getConnectionPhase(value: unknown): ConnectionPhase | null {
   return value === 'single' || value === 'three' ? value : null
 }
 
+function getRoofType(value: unknown): RoofType | null {
+  return value === 'metal' || value === 'tile' || value === 'flat' ? value : null
+}
+
 export function aggregateMonthlyGeneration(activePanels: PanelEdit[]): number[] {
   const totals = Array.from({ length: 12 }, () => 0)
 
@@ -121,6 +123,7 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
 
   const monthlyConsumptionKwh = getNumber(raw.monthlyConsumptionKwh)
   const connectionPhase = getConnectionPhase(raw.connectionPhase)
+  const roofType = getRoofType(raw.roofType)
   const systemCostRm = getNumber(raw.systemCostRm)
   const afaRateSenPerKwh = getNumber(raw.afaRateSenPerKwh)
   const systemKwp = getNumber(raw.systemKwp)
@@ -133,6 +136,7 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   return {
     ...(monthlyConsumptionKwh !== null ? { monthlyConsumptionKwh } : {}),
     ...(connectionPhase ? { connectionPhase } : {}),
+    ...(roofType ? { roofType } : {}),
     ...(systemCostRm !== null ? { systemCostRm } : {}),
     ...(afaRateSenPerKwh !== null ? { afaRateSenPerKwh } : {}),
     ...(systemKwp !== null ? { systemKwp } : {}),
