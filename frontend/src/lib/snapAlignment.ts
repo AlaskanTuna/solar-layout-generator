@@ -64,7 +64,9 @@ export function computeSnap(
       const dist = Math.abs(u - target)
       if (dist < bestUDist) {
         bestUDist = dist
-        bestU = { correction: target - u, otherX: other.x, otherY: other.y }
+        // t = u - target: moving dragged by t along U makes new u equal target.
+        // Derivation: new_u = (other - (dragged + t*U)) · U = u - t, set to target => t = u - target.
+        bestU = { correction: u - target, otherX: other.x, otherY: other.y }
       }
     }
 
@@ -73,7 +75,7 @@ export function computeSnap(
       const dist = Math.abs(v - target)
       if (dist < bestVDist) {
         bestVDist = dist
-        bestV = { correction: target - v, otherX: other.x, otherY: other.y }
+        bestV = { correction: v - target, otherX: other.x, otherY: other.y }
       }
     }
   }
@@ -82,14 +84,12 @@ export function computeSnap(
   if (bestU && bestUDist <= SNAP_THRESHOLD) {
     x += bestU.correction * cosR
     y += bestU.correction * sinR
-    // Draw vertical guide through the aligned axis
     guides.push({ orientation: 'vertical', position: bestU.otherX, start: 0, end: stageHeight })
   }
 
   if (bestV && bestVDist <= SNAP_THRESHOLD) {
     x += bestV.correction * -sinR
     y += bestV.correction * cosR
-    // Draw horizontal guide through the aligned axis
     guides.push({ orientation: 'horizontal', position: bestV.otherY, start: 0, end: stageWidth })
   }
 
