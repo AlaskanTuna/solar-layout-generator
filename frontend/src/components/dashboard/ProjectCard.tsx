@@ -1,17 +1,9 @@
 import type { ProjectResponse } from '@/api/projects'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Trash2, Clock, FolderOpen, ArrowRight, Map, Wrench, BarChart3, Receipt, Zap, Leaf, Sun } from 'lucide-react'
+import { Trash2, Clock, FolderOpen, ArrowRight, Receipt, Zap, Leaf, Sun } from 'lucide-react'
 import { formatRelativeDate } from './helpers'
-
-const STATUS_CONFIG: Record<
-  string,
-  { label: string; variant: 'default' | 'secondary' | 'outline'; icon: React.ReactNode }
-> = {
-  draft: { label: 'Draft', variant: 'outline', icon: <Map className="h-3 w-3" /> },
-  layout_saved: { label: 'Layout Saved', variant: 'secondary', icon: <Wrench className="h-3 w-3" /> },
-  analysis_saved: { label: 'Analysis Complete', variant: 'default', icon: <BarChart3 className="h-3 w-3" /> },
-}
+import { getProjectStatusConfig } from '@/lib/projectStatus'
 
 export function ProjectCard({
   project,
@@ -22,7 +14,7 @@ export function ProjectCard({
   onOpen: () => void
   onDelete: () => void
 }) {
-  const config = STATUS_CONFIG[project.status] ?? STATUS_CONFIG.draft
+  const config = getProjectStatusConfig(project.status)
   const analysis = project.status === 'analysis_saved' ? project.analysisResults : null
 
   return (
@@ -46,7 +38,7 @@ export function ProjectCard({
         </div>
         <div className="flex items-center gap-1.5">
           <Badge variant={config.variant} className="gap-1">
-            {config.icon}
+            <config.icon className="h-3 w-3" />
             <span className="hidden sm:inline">{config.label}</span>
           </Badge>
           <Button

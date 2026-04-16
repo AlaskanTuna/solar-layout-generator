@@ -59,7 +59,7 @@ const AdvancedPdfReport = forwardRef<HTMLDivElement, AdvancedPdfReportProps>(
               </div>
               <div className="rounded-2xl border border-stone-200 px-4 py-3 text-right">
                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Project Status</p>
-                <p className="mt-1 text-lg font-semibold">Analysis Ready</p>
+                <p className="mt-1 text-lg font-semibold">Analysis Computed</p>
               </div>
             </div>
 
