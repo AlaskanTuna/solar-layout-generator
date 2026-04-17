@@ -27,30 +27,12 @@ export function BillBreakdown({
           <div>
             <CardTitle>
               Bill Component Breakdown
-              <InfoTooltip text="Compares each charge on your TNB bill side by side: without solar vs. with solar. Includes energy, capacity, network, AFA, EEI rebate, RE fund and SST components." />
-            </CardTitle>
-            <CardDescription>See how your TNB bill is calculated.</CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {MONTH_LABELS.map((label, index) => (
-              <Button
-                key={label}
-                type="button"
-                size="sm"
-                variant={selectedMonthIndex === index ? 'default' : 'outline'}
-                onClick={() => onMonthSelect(index)}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-        </div>
-        {thresholdWarnings.length > 0 && (
-          <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <div className="flex items-center">
-              <p className="font-semibold">Lower TNB tariff tier reached</p>
               <InfoTooltip>
                 <div className="space-y-2">
+                  <p>
+                    Compares each charge on your TNB bill side by side: without solar vs. with solar. Includes energy,
+                    capacity, network, AFA, EEI rebate, RE fund and SST components.
+                  </p>
                   <p>
                     TNB stacks several extra fees onto monthly usage above{' '}
                     <span className="font-semibold">600 kWh</span>. When your solar credits bring billable usage under
@@ -70,12 +52,31 @@ export function BillBreakdown({
                     </p>
                   </div>
                   <p className="text-primary-foreground/80">
-                    Solar pushed you into the lower tariff tier this month, so your true savings are larger than the
+                    If solar pushes you into the lower tariff tier for a month, your true savings are larger than the
                     energy cost alone suggests.
                   </p>
                 </div>
               </InfoTooltip>
-            </div>
+            </CardTitle>
+            <CardDescription>See how your TNB bill is calculated.</CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {MONTH_LABELS.map((label, index) => (
+              <Button
+                key={label}
+                type="button"
+                size="sm"
+                variant={selectedMonthIndex === index ? 'default' : 'outline'}
+                onClick={() => onMonthSelect(index)}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        </div>
+        {thresholdWarnings.length > 0 && (
+          <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <p className="font-semibold">Lower TNB Tariff Tier Reached</p>
             {thresholdWarnings.map((warning) => (
               <p key={warning}>{warning}</p>
             ))}
