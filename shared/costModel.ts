@@ -25,7 +25,7 @@ export type CostInputs = {
   supplyPhase: SupplyPhase
 }
 
-// Mid-range mounting RM/panel by roof type. Source: docs/MVP-PAGE-2-SOLAR-COST-MODEL.md §3.
+// Mid-range mounting RM/panel by roof type. Source: docs/MVP-PAGE-3-SOLAR-COST-MODEL.md §3.
 export const MOUNTING_PER_PANEL: Record<RoofType, number> = {
   metal: 200,
   tile: 330,
@@ -55,20 +55,20 @@ const INVERTER_SKUS: readonly InverterSku[] = [
 // (8 kW inverter paired with 10 kWp array at ratio 1.25).
 const DC_AC_MAX_RATIO = 1.33
 
-// Solar ATAP (2026) capacity caps per supply phase. Doc §5.
-const ATAP_CAP_KWAC: Record<SupplyPhase, number> = {
+// NEM Rakyat 3.0 capacity caps per supply phase (5 kWac single / 12.5 kWac three). Doc §5.
+const NEM_RAKYAT_CAP_KWAC: Record<SupplyPhase, number> = {
   single: 5,
-  three: 15
+  three: 12.5
 }
 
 const CCC_FEE_RM = 1000
 
 function permitCost(kwac: number, phase: SupplyPhase): { total: number; cccTriggered: boolean } {
-  const atapBase = 7.5 * kwac
+  const sedaFee = 7.5 * kwac
   const stampDuty = 10
   const cccTriggered = phase === 'single' && kwac > 5
   return {
-    total: atapBase + stampDuty + (cccTriggered ? CCC_FEE_RM : 0),
+    total: sedaFee + stampDuty + (cccTriggered ? CCC_FEE_RM : 0),
     cccTriggered
   }
 }
@@ -88,14 +88,14 @@ const LABOUR_MARKUP = 0.18
 const INSTALLER_MARGIN = 0.15
 
 function selectInverter(kwp: number, phase: SupplyPhase): InverterSku {
-  const phaseCap = ATAP_CAP_KWAC[phase]
+  const phaseCap = NEM_RAKYAT_CAP_KWAC[phase]
   const candidates = INVERTER_SKUS.filter((sku) => sku.phase === phase && sku.kwac <= phaseCap).sort(
     (a, b) => a.kwac - b.kwac
   )
   for (const sku of candidates) {
     if (sku.kwac * DC_AC_MAX_RATIO >= kwp) return sku
   }
-  // kWp exceeds the ATAP cap for this phase — pick the largest cap-compliant SKU.
+  // kWp exceeds the NEM Rakyat cap for this phase — pick the largest cap-compliant SKU.
   // AnalysisSidebar already warns when system size exceeds the phase capacity cap.
   return candidates[candidates.length - 1]!
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { computeSystemCost, MOUNTING_PER_PANEL } from '@shared/types'
 
-// Worked examples reference: docs/MVP-PAGE-2-SOLAR-COST-MODEL.md §8.
+// Worked examples reference: docs/MVP-PAGE-3-SOLAR-COST-MODEL.md §8.
 // Tolerance ±RM 20 accounts for rounding differences vs. the doc
 // (the doc rounds intermediate figures; our implementation preserves precision).
 
@@ -68,7 +68,7 @@ describe('computeSystemCost', () => {
     expect(b.inverterKwac).toBe(8)
   })
 
-  it('respects single-phase ATAP cap (5 kWac) and triggers CCC fee above it', () => {
+  it('respects single-phase NEM Rakyat cap (5 kWac) and triggers CCC fee above it', () => {
     // 6 kWp single-phase: only 5 kWac SKU available under cap. 5*1.33=6.65 ≥ 6 ✓
     const breakdown = computeSystemCost({
       panelCount: 15,

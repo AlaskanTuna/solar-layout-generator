@@ -62,7 +62,7 @@ export function applySeasonalProfile(baseKwh: number): number[] {
 }
 
 export const ANALYSIS_DISCLAIMERS = [
-  'Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and Solar ATAP rules (launched 1 January 2026) by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in "Advanced" view as needed.',
+  'Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and NEM Rakyat 3.0 rules by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in "Advanced" view as needed.',
   'The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes.',
   'PETRA has indicated that Energy Efficiency Incentive (EEI) rates may be adjusted for NEM users. Current calculations use standard EEI rates pending official modification.',
   'Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling and equipment condition.',

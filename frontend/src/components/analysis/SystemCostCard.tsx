@@ -190,7 +190,7 @@ export function SystemCostCard({
           </ul>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
-          Mid-tier pricing from Solar ATAP (2026). Actual installer quotes typically land within ±10% of this figure.
+          Mid-tier Malaysian market pricing (2026). Actual installer quotes typically land within ±10% of this figure.
         </p>
       </CardContent>
     </Card>
