@@ -80,14 +80,10 @@ export function FinancialRoadmap({
           </div>
         ))}
 
-        <div className="mt-4 rounded-lg bg-muted/50 p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Keep in mind</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            This roadmap does not account for electricity tariff escalation (which would shorten payback), annual
-            maintenance costs (~RM 500/yr), or inflation. Malaysian tariffs have historically risen over time, meaning
-            real-world savings may grow faster than projected.
-          </p>
-        </div>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Excludes tariff escalation (would shorten payback), annual maintenance (~RM 500/yr) and inflation. Malaysian
+          tariffs have historically risen, so real-world savings may grow faster than projected.
+        </p>
       </CardContent>
     </Card>
   )
