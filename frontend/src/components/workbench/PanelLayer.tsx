@@ -3,6 +3,7 @@ import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
 import type { WorkbenchPanelState } from '@/hooks/usePanelState'
 import { PanelRect } from './PanelRect'
 import { RotationHandle } from './RotationHandle'
+import { GroupRotationHandle } from './GroupRotationHandle'
 
 type RenderPanel = {
   panel: WorkbenchPanelState
@@ -91,8 +92,19 @@ export function PanelLayer({
         />
       ))}
 
-      {/* Rotation handles for selected panels (rendered ABOVE panels so they're clickable) */}
-      {onRotate &&
+      {/* Rotation handle: single per-panel handle on single-select, unified group handle on multi-select */}
+      {onRotate && selectedPanelIds.size > 1 ? (
+        <GroupRotationHandle
+          panels={panels
+            .filter(({ panel }) => selectedPanelIds.has(panel.id) && disabledPanelId !== panel.id)
+            .map(({ panel, x, y }) => ({ id: panel.id, x, y, rotation: panel.rotation }))}
+          panelWidth={panelWidth}
+          panelHeight={panelHeight}
+          snapDegrees={freeRotate ? 1 : 5}
+          onRotate={onRotate}
+        />
+      ) : (
+        onRotate &&
         panels
           .filter(({ panel }) => selectedPanelIds.has(panel.id) && disabledPanelId !== panel.id)
           .map(({ panel, x, y }) => (
@@ -107,7 +119,8 @@ export function PanelLayer({
               snapDegrees={freeRotate ? 1 : 5}
               onRotate={onRotate}
             />
-          ))}
+          ))
+      )}
     </Layer>
   )
 }

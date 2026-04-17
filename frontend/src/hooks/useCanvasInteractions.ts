@@ -497,12 +497,13 @@ export function useCanvasInteractions({
   function handleCanvasRotate(panelId: string, value: number) {
     const nextRotation = ((value % 360) + 360) % 360
 
-    // Multi-panel rotation: rotate all selected panels together
+    // Multi-panel rotation: rotate all selected panels together. Exclude the selection from
+    // overlap candidates so tight-packed groups don't flag their own siblings as collisions.
     if (selectedPanelIds.size > 1 && selectedPanelIds.has(panelId)) {
       for (const id of selectedPanelIds) {
         const p = getPanel(id)
         if (!p) continue
-        const placementError = getPlacementError(p.id, p.center, nextRotation)
+        const placementError = getPlacementError(p.id, p.center, nextRotation, selectedPanelIds)
         if (placementError) {
           notify.error(getPlacementErrorMessage(placementError))
           return
