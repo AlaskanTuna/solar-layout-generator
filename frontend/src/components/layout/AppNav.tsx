@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useQuota } from '@/hooks/useQuota'
@@ -63,9 +63,21 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
   const { user, signOut } = useAuth()
   const crumbs = useBreadcrumbs()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const quotaQuery = useQuota()
   const tier = quotaQuery.data?.tier
   const planLabel = tier ? `${tier.charAt(0) + tier.slice(1).toLowerCase()} plan` : 'Loading plan…'
+
+  useEffect(() => {
+    if (!userMenuOpen) return
+    const handlePointerDown = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => document.removeEventListener('mousedown', handlePointerDown)
+  }, [userMenuOpen])
 
   return (
     <nav className="glass-nav fixed inset-x-0 top-0 z-50">
@@ -103,7 +115,7 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
           <NotificationPopover />
 
           {/* User menu (custom popover — same pattern as notification modal) */}
-          <div className="relative">
+          <div ref={userMenuRef} className="relative">
             <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setUserMenuOpen(!userMenuOpen)}>
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
                 {user?.email?.charAt(0).toUpperCase() ?? 'U'}
@@ -112,43 +124,40 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
 
             <AnimatePresence>
               {userMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-xl"
-                  >
-                    <div className="border-b border-border px-3 py-2.5">
-                      <p className="text-sm font-medium">{user?.email}</p>
-                      <p className="text-xs text-muted-foreground">{planLabel}</p>
-                    </div>
-                    <div className="p-1">
-                      <button
-                        disabled
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground"
-                      >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                        <span className="ml-auto text-xs">Soon</span>
-                      </button>
-                    </div>
-                    <div className="border-t border-border p-1">
-                      <button
-                        onClick={() => {
-                          setUserMenuOpen(false)
-                          signOut()
-                        }}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Sign Out
-                      </button>
-                    </div>
-                  </motion.div>
-                </>
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-xl"
+                >
+                  <div className="border-b border-border px-3 py-2.5">
+                    <p className="text-sm font-medium">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground">{planLabel}</p>
+                  </div>
+                  <div className="p-1">
+                    <button
+                      disabled
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                      <span className="ml-auto text-xs">Soon</span>
+                    </button>
+                  </div>
+                  <div className="border-t border-border p-1">
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false)
+                        signOut()
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>

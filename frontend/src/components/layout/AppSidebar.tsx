@@ -87,7 +87,7 @@ export function AppSidebar() {
         className="group/sidebar fixed inset-y-0 left-0 z-[60] flex flex-col overflow-hidden border-r border-border bg-sidebar"
       >
         {/* Logo */}
-        <div className="flex h-14 shrink-0 items-center gap-3 px-[18px]">
+        <div className="sidebar-logo-divider flex h-14 shrink-0 items-center gap-3 px-[18px]">
           <Link to="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
               <Sun className="h-3.5 w-3.5 text-white" />

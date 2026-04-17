@@ -324,6 +324,39 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+/* Sidebar logo strip — draws the 1px divider via ::after at bottom: -1px so it sits at the same
+   y as the topbar's appended border-bottom (nav has auto height + border-bottom; strip has
+   explicit h-14 with border-box, which would put an inline border 1px higher). Fades on expand. */
+.sidebar-logo-divider {
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 200ms ease-in-out;
+}
+
+.sidebar-logo-divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--glass-border);
+  transition: opacity 200ms ease-in-out;
+  pointer-events: none;
+}
+
+[data-sidebar]:hover .sidebar-logo-divider {
+  box-shadow: none;
+}
+
+[data-sidebar]:hover .sidebar-logo-divider::after {
+  opacity: 0;
+}
+
+.dark .sidebar-logo-divider {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 /* SIDEBAR TRANSITION — defined in CSS so it's never re-set by React renders */
 [data-sidebar] {
   transition: width 150ms ease-in-out, box-shadow 150ms ease-in-out;
