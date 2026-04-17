@@ -3,6 +3,7 @@ import { Drawer } from 'vaul'
 import type { PanelModel } from '@shared/types'
 import { PANEL_MODELS } from '@shared/types'
 import { cn } from '@/lib/utils'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 
 const PanelPreview3D = lazy(() => import('./PanelPreview3D'))
 
@@ -94,10 +95,18 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
 
 function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelected: boolean; onSelect: () => void }) {
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelect()
+        }
+      }}
       className={cn(
-        'group flex flex-col rounded-xl border-2 bg-card p-3 text-left shadow-sm transition-all hover:shadow-md',
+        'group flex cursor-pointer flex-col rounded-xl border-2 bg-card p-3 text-left shadow-sm transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-border/80'
       )}
     >
@@ -113,7 +122,14 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
         </Suspense>
       </div>
 
-      <p className="text-sm font-semibold text-foreground">{model.name}</p>
+      <div className="flex items-center">
+        <p className="text-sm font-semibold text-foreground">{model.name}</p>
+        {model.tagline && (
+          <span onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+            <InfoTooltip text={model.tagline} contentClassName="z-[90]" />
+          </span>
+        )}
+      </div>
       <p className="text-xs text-muted-foreground">{model.manufacturer}</p>
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>{model.capacityWp} Wp</span>
@@ -131,6 +147,6 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
           Selected
         </div>
       )}
-    </button>
+    </div>
   )
 }
