@@ -101,7 +101,7 @@ export function useAnalysisForm(projectId: string | undefined) {
     const localPanels = parsePanelEdits(projectQuery.data.editedLayout).filter((p) => p.status !== 'deleted')
     const localPanelCapacity = selectedPanelModel?.capacityWp ?? buildingInsights.solarPotential.panelCapacityWatts ?? 0
 
-    const roofType = savedConfig?.roofType ?? 'metal'
+    const roofType = savedConfig?.roofType ?? 'tile'
     const connectionPhase = savedConfig?.connectionPhase ?? 'single'
     const panelCostPerWp = selectedPanelModel?.costPerWp && selectedPanelModel.costPerWp > 0 ? selectedPanelModel.costPerWp : 0.95
     const defaultSystemCostRm = computeSystemCost({

@@ -277,31 +277,33 @@ export function AnalysisSidebar({
             </select>
           </div>
 
-          <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
-            <div className="space-y-1">
-              <Label>
-                Roof Type
-                <InfoTooltip text="Roof construction affects mounting hardware and labour. Tile roofs need scaffolding and specialised hooks; flat roofs use ballasted frames; metal roofs use simple L-feet clamps." />
-              </Label>
-              <p className="text-xs text-muted-foreground">Affects mounting cost and, for tile, scaffolding.</p>
+          {viewMode === 'advanced' && (
+            <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
+              <div className="space-y-1">
+                <Label>
+                  Roof Type
+                  <InfoTooltip text="Roof construction affects mounting hardware and labour. Tile roofs need scaffolding and specialised hooks; flat roofs use ballasted frames; metal roofs use simple L-feet clamps. Simple view assumes tile, which is most common in Malaysian homes." />
+                </Label>
+                <p className="text-xs text-muted-foreground">Affects mounting cost and, for tile, scaffolding.</p>
+              </div>
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={formState.roofType}
+                onChange={(event) => {
+                  const newRoof = event.target.value as RoofType
+                  setFormState((current) => {
+                    if (!current) return current
+                    const newCost = recomputeDefaultCost(newRoof, current.connectionPhase)
+                    return { ...current, roofType: newRoof, systemCostRm: newCost ?? current.systemCostRm }
+                  })
+                }}
+              >
+                <option value="tile">Tile (clay/concrete)</option>
+                <option value="metal">Metal</option>
+                <option value="flat">Flat (concrete slab)</option>
+              </select>
             </div>
-            <select
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={formState.roofType}
-              onChange={(event) => {
-                const newRoof = event.target.value as RoofType
-                setFormState((current) => {
-                  if (!current) return current
-                  const newCost = recomputeDefaultCost(newRoof, current.connectionPhase)
-                  return { ...current, roofType: newRoof, systemCostRm: newCost ?? current.systemCostRm }
-                })
-              }}
-            >
-              <option value="metal">Metal (most common)</option>
-              <option value="tile">Tile (clay/concrete)</option>
-              <option value="flat">Flat (concrete slab)</option>
-            </select>
-          </div>
+          )}
 
           <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
             <div className="space-y-1">
