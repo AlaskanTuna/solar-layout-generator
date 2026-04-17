@@ -244,6 +244,35 @@ export function AnalysisPage() {
                 id: 'bill-comparison',
                 node: <BillComparisonChart chartData={chartData} />
               },
+              ...(viewMode === 'advanced' && selectedMonth
+                ? [
+                    {
+                      id: 'bill-breakdown',
+                      node: (
+                        <BillBreakdown
+                          selectedMonthIndex={selectedMonthIndex}
+                          onMonthSelect={setSelectedMonthIndex}
+                          selectedMonth={selectedMonth}
+                          thresholdWarnings={thresholdWarnings}
+                        />
+                      )
+                    }
+                  ]
+                : []),
+              ...(viewMode === 'advanced'
+                ? [
+                    {
+                      id: 'month-table',
+                      node: (
+                        <MonthTable
+                          simulation={simulation}
+                          isOpen={monthTableOpen}
+                          onToggle={() => setMonthTableOpen((prev) => !prev)}
+                        />
+                      )
+                    }
+                  ]
+                : []),
               {
                 id: 'system-cost',
                 node: (
@@ -257,14 +286,12 @@ export function AnalysisPage() {
                 )
               },
               {
-                id: 'financial-roadmap',
+                id: 'net-benefit',
                 node: (
-                  <FinancialRoadmap
-                    systemCostRm={formState.systemCostRm}
-                    paybackYears={analysisResults.paybackYears}
+                  <NetBenefitChart
                     year1Savings={simulation.totalSavingsRm}
                     degradationRate={formState.degradationRate}
-                    systemKwp={systemKwp}
+                    systemCostRm={formState.systemCostRm}
                   />
                 )
               },
@@ -314,56 +341,33 @@ export function AnalysisPage() {
                           </CardContent>
                         </Card>
                       )
-                    },
+                    }
+                  ]
+                : []),
+              {
+                id: 'financial-roadmap',
+                node: (
+                  <FinancialRoadmap
+                    systemCostRm={formState.systemCostRm}
+                    paybackYears={analysisResults.paybackYears}
+                    year1Savings={simulation.totalSavingsRm}
+                    degradationRate={formState.degradationRate}
+                    systemKwp={systemKwp}
+                  />
+                )
+              },
+              ...(viewMode === 'advanced' && buildingInsights
+                ? [
                     {
-                      id: 'net-benefit',
+                      id: 'system-assumptions',
                       node: (
-                        <NetBenefitChart
-                          year1Savings={simulation.totalSavingsRm}
+                        <SystemAssumptions
+                          performanceRatio={formState.performanceRatio}
+                          assumedLosses={formState.assumedLosses}
                           degradationRate={formState.degradationRate}
-                          systemCostRm={formState.systemCostRm}
-                        />
-                      )
-                    },
-                    ...(buildingInsights
-                      ? [
-                          {
-                            id: 'system-assumptions',
-                            node: (
-                              <SystemAssumptions
-                                performanceRatio={formState.performanceRatio}
-                                assumedLosses={formState.assumedLosses}
-                                degradationRate={formState.degradationRate}
-                                dcAcRatio={formState.dcAcRatio}
-                                panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears}
-                                roofSegmentStats={buildingInsights.solarPotential.roofSegmentStats}
-                              />
-                            )
-                          }
-                        ]
-                      : []),
-                    ...(selectedMonth
-                      ? [
-                          {
-                            id: 'bill-breakdown',
-                            node: (
-                              <BillBreakdown
-                                selectedMonthIndex={selectedMonthIndex}
-                                onMonthSelect={setSelectedMonthIndex}
-                                selectedMonth={selectedMonth}
-                                thresholdWarnings={thresholdWarnings}
-                              />
-                            )
-                          }
-                        ]
-                      : []),
-                    {
-                      id: 'month-table',
-                      node: (
-                        <MonthTable
-                          simulation={simulation}
-                          isOpen={monthTableOpen}
-                          onToggle={() => setMonthTableOpen((prev) => !prev)}
+                          dcAcRatio={formState.dcAcRatio}
+                          panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears}
+                          roofSegmentStats={buildingInsights.solarPotential.roofSegmentStats}
                         />
                       )
                     }
