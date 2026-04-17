@@ -1,7 +1,15 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
+import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger
+} from '@/components/ui/DropdownMenu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SEASONAL_MULTIPLIERS, type ConnectionPhase, type ConsumptionProfile } from '@/lib/analysis'
@@ -12,6 +20,17 @@ import { formatNumber } from '@/components/analysis/formatters'
 import type { AnalysisFormState } from '@/hooks/useAnalysisForm'
 import type { ParsedBuildingInsights } from '@/lib/buildingInsights'
 import type { PanelModel, RoofType } from '@shared/types'
+
+const CONNECTION_PHASE_LABELS: Record<ConnectionPhase, string> = {
+  single: 'Single Phase',
+  three: 'Three Phase'
+}
+
+const ROOF_TYPE_LABELS: Record<RoofType, string> = {
+  tile: 'Tile (Clay/Concrete)',
+  metal: 'Metal',
+  flat: 'Flat (Concrete Slab)'
+}
 
 function DegradationInput({ value, onChange }: { value: number; onChange: (rate: number) => void }) {
   const [text, setText] = useState(() => (value === 0 ? '' : String(Math.round(value * 10000) / 100)))
@@ -258,17 +277,36 @@ export function AnalysisSidebar({
                 Capacity cap: {phaseCapacityCapKw || 0} kW for the selected connection type.
               </p>
             </div>
-            <select
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={formState.connectionPhase}
-              onChange={(event) => {
-                const newPhase = event.target.value as ConnectionPhase
-                setFormState((current) => (current ? { ...current, connectionPhase: newPhase } : current))
-              }}
-            >
-              <option value="single">Single Phase</option>
-              <option value="three">Three Phase</option>
-            </select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-10 w-full justify-between px-3 font-normal text-foreground"
+                >
+                  {CONNECTION_PHASE_LABELS[formState.connectionPhase]}
+                  <ChevronDown className="h-4 w-4 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-[var(--radix-dropdown-menu-trigger-width)]"
+              >
+                <DropdownMenuRadioGroup
+                  value={formState.connectionPhase}
+                  onValueChange={(v) =>
+                    setFormState((current) =>
+                      current ? { ...current, connectionPhase: v as ConnectionPhase } : current
+                    )
+                  }
+                >
+                  {(Object.keys(CONNECTION_PHASE_LABELS) as ConnectionPhase[]).map((phase) => (
+                    <DropdownMenuRadioItem key={phase} value={phase}>
+                      {CONNECTION_PHASE_LABELS[phase]}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {viewMode === 'advanced' && (
@@ -280,18 +318,36 @@ export function AnalysisSidebar({
                 </Label>
                 <p className="text-xs text-muted-foreground">Affects mounting cost and, for tile, scaffolding.</p>
               </div>
-              <select
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={formState.roofType}
-                onChange={(event) => {
-                  const newRoof = event.target.value as RoofType
-                  setFormState((current) => (current ? { ...current, roofType: newRoof } : current))
-                }}
-              >
-                <option value="tile">Tile (Clay/Concrete)</option>
-                <option value="metal">Metal</option>
-                <option value="flat">Flat (Concrete Slab)</option>
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-10 w-full justify-between px-3 font-normal text-foreground"
+                  >
+                    {ROOF_TYPE_LABELS[formState.roofType]}
+                    <ChevronDown className="h-4 w-4 opacity-60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuRadioGroup
+                    value={formState.roofType}
+                    onValueChange={(v) =>
+                      setFormState((current) =>
+                        current ? { ...current, roofType: v as RoofType } : current
+                      )
+                    }
+                  >
+                    {(Object.keys(ROOF_TYPE_LABELS) as RoofType[]).map((roof) => (
+                      <DropdownMenuRadioItem key={roof} value={roof}>
+                        {ROOF_TYPE_LABELS[roof]}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
 
