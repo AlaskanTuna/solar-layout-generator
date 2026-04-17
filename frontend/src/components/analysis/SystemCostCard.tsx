@@ -181,7 +181,7 @@ export function SystemCostCard({
                   cy="50%"
                   innerRadius={58}
                   outerRadius={92}
-                  paddingAngle={1.5}
+                  paddingAngle={0}
                 >
                   {segments.map((segment) => (
                     <Cell
