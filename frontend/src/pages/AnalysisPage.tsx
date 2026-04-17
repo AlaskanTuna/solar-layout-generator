@@ -21,7 +21,6 @@ import { useTheme } from '@/hooks/useTheme'
 import { formatCurrency } from '@/components/analysis/formatters'
 import { ChartTooltipContent } from '@/components/analysis/ChartTooltipContent'
 import { getChartTooltipStyle } from '@/lib/constants'
-import { HeroMetrics } from '@/components/analysis/HeroMetrics'
 import { BillComparisonChart } from '@/components/analysis/BillComparisonChart'
 import { FinancialRoadmap } from '@/components/analysis/FinancialRoadmap'
 import { NetBenefitChart } from '@/components/analysis/NetBenefitChart'
@@ -29,6 +28,7 @@ import { BillBreakdown } from '@/components/analysis/BillBreakdown'
 import { MonthTable } from '@/components/analysis/MonthTable'
 import { SystemAssumptions } from '@/components/analysis/SystemAssumptions'
 import { SystemCostCard } from '@/components/analysis/SystemCostCard'
+import { SolarVerdict } from '@/components/analysis/SolarVerdict'
 import { SortableCardContainer } from '@/components/analysis/SortableCardContainer'
 import SimplePdfReport from '@/components/analysis/SimplePdfReport'
 import AdvancedPdfReport from '@/components/analysis/AdvancedPdfReport'
@@ -58,7 +58,7 @@ const ANALYSIS_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="hero-cards"]',
     title: 'Key Numbers at a Glance',
     description:
-      "These four cards tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself and how much CO2 you're offsetting."
+      "These four metrics tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself and how much CO2 you're offsetting."
   },
   {
     target: '[data-tour="monthly-chart"]',
@@ -237,8 +237,8 @@ export function AnalysisPage() {
           <SortableCardContainer
             cards={[
               {
-                id: 'hero-metrics',
-                node: <HeroMetrics analysisResults={analysisResults} paybackTooltip={paybackTooltip} />
+                id: 'solar-verdict',
+                node: <SolarVerdict analysisResults={analysisResults} paybackTooltip={paybackTooltip} />
               },
               {
                 id: 'bill-comparison',
@@ -253,6 +253,18 @@ export function AnalysisPage() {
                     panelCapacityWp={selectedPanelModel?.capacityWp ?? 0}
                     panelCostPerWp={panelCostPerWp}
                     roofType={formState.roofType}
+                  />
+                )
+              },
+              {
+                id: 'financial-roadmap',
+                node: (
+                  <FinancialRoadmap
+                    systemCostRm={formState.systemCostRm}
+                    paybackYears={analysisResults.paybackYears}
+                    year1Savings={simulation.totalSavingsRm}
+                    degradationRate={formState.degradationRate}
+                    systemKwp={systemKwp}
                   />
                 )
               },
@@ -310,18 +322,6 @@ export function AnalysisPage() {
                           year1Savings={simulation.totalSavingsRm}
                           degradationRate={formState.degradationRate}
                           systemCostRm={formState.systemCostRm}
-                        />
-                      )
-                    },
-                    {
-                      id: 'financial-roadmap',
-                      node: (
-                        <FinancialRoadmap
-                          systemCostRm={formState.systemCostRm}
-                          paybackYears={analysisResults.paybackYears}
-                          year1Savings={simulation.totalSavingsRm}
-                          degradationRate={formState.degradationRate}
-                          systemKwp={systemKwp}
                         />
                       )
                     },
