@@ -11,7 +11,7 @@ import { ImagePopup } from '@/components/ui/ImagePopup'
 import { formatNumber } from '@/components/analysis/formatters'
 import type { AnalysisFormState } from '@/hooks/useAnalysisForm'
 import type { ParsedBuildingInsights } from '@/lib/buildingInsights'
-import { computeSystemCost, type PanelModel, type RoofType } from '@shared/types'
+import type { PanelModel, RoofType } from '@shared/types'
 
 function DegradationInput({ value, onChange }: { value: number; onChange: (rate: number) => void }) {
   const [text, setText] = useState(() => (value === 0 ? '' : String(Math.round(value * 10000) / 100)))
@@ -92,31 +92,6 @@ export function AnalysisSidebar({
 }: AnalysisSidebarProps) {
   const [billImageOpen, setBillImageOpen] = useState(false)
   const handleBillImageOpenChange = useCallback((open: boolean) => setBillImageOpen(open), [])
-
-  const panelCostPerWp =
-    selectedPanelModel?.costPerWp && selectedPanelModel.costPerWp > 0 ? selectedPanelModel.costPerWp : 0.95
-  const panelCapacityWp = selectedPanelModel?.capacityWp ?? 0
-  const costBreakdown =
-    activePanelCount > 0 && panelCapacityWp > 0
-      ? computeSystemCost({
-          panelCount: activePanelCount,
-          panelWattageWp: panelCapacityWp,
-          panelCostPerWp,
-          roofType: formState.roofType,
-          supplyPhase: formState.connectionPhase
-        })
-      : null
-
-  const recomputeDefaultCost = (roofType: RoofType, phase: ConnectionPhase): number | null => {
-    if (activePanelCount === 0 || panelCapacityWp === 0) return null
-    return computeSystemCost({
-      panelCount: activePanelCount,
-      panelWattageWp: panelCapacityWp,
-      panelCostPerWp,
-      roofType,
-      supplyPhase: phase
-    }).total
-  }
 
   return (
     <aside className="xl:overflow-y-auto xl:w-[24rem] xl:min-w-[24rem]">
@@ -267,15 +242,7 @@ export function AnalysisSidebar({
               value={formState.connectionPhase}
               onChange={(event) => {
                 const newPhase = event.target.value as ConnectionPhase
-                setFormState((current) => {
-                  if (!current) return current
-                  const newCost = recomputeDefaultCost(current.roofType, newPhase)
-                  return {
-                    ...current,
-                    connectionPhase: newPhase,
-                    systemCostRm: newCost ?? current.systemCostRm
-                  }
-                })
+                setFormState((current) => (current ? { ...current, connectionPhase: newPhase } : current))
               }}
             >
               <option value="single">Single Phase</option>
@@ -297,11 +264,7 @@ export function AnalysisSidebar({
                 value={formState.roofType}
                 onChange={(event) => {
                   const newRoof = event.target.value as RoofType
-                  setFormState((current) => {
-                    if (!current) return current
-                    const newCost = recomputeDefaultCost(newRoof, current.connectionPhase)
-                    return { ...current, roofType: newRoof, systemCostRm: newCost ?? current.systemCostRm }
-                  })
+                  setFormState((current) => (current ? { ...current, roofType: newRoof } : current))
                 }}
               >
                 <option value="tile">Tile (Clay/Concrete)</option>
@@ -310,88 +273,6 @@ export function AnalysisSidebar({
               </select>
             </div>
           )}
-
-          <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
-            <div className="space-y-1">
-              <Label>
-                System Cost (RM)
-                <InfoTooltip>
-                  {costBreakdown ? (
-                    <div className="space-y-1.5 text-xs">
-                      <p className="text-sm font-medium">Bottom-up turnkey estimate</p>
-                      <div className="space-y-0.5">
-                        <div className="flex justify-between gap-3">
-                          <span>
-                            Panels ({activePanelCount} × {panelCapacityWp} Wp @ RM {panelCostPerWp.toFixed(2)}/Wp)
-                          </span>
-                          <span>RM {costBreakdown.panels.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-3">
-                          <span>
-                            Inverter ({costBreakdown.inverterSku}, {costBreakdown.inverterKwac} kWac)
-                          </span>
-                          <span>RM {costBreakdown.inverter.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-3">
-                          <span>Mounting ({formState.roofType})</span>
-                          <span>RM {costBreakdown.mounting.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-3">
-                          <span>Electrical BOS</span>
-                          <span>RM {costBreakdown.electricalBos.toLocaleString()}</span>
-                        </div>
-                        {costBreakdown.scaffolding > 0 && (
-                          <div className="flex justify-between gap-3">
-                            <span>Scaffolding</span>
-                            <span>RM {costBreakdown.scaffolding.toLocaleString()}</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between gap-3">
-                          <span>Permit{costBreakdown.cccFeeTriggered ? ' (incl. CCC fee)' : ''}</span>
-                          <span>RM {costBreakdown.permit.toLocaleString()}</span>
-                        </div>
-                        <div className="mt-1 flex justify-between gap-3 border-t border-border pt-1">
-                          <span>Labour (+18%)</span>
-                          <span>RM {costBreakdown.labour.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-3">
-                          <span>Installer margin (+15%)</span>
-                          <span>RM {costBreakdown.installerMargin.toLocaleString()}</span>
-                        </div>
-                        <div className="mt-1 flex justify-between gap-3 border-t border-border pt-1 font-semibold">
-                          <span>Total</span>
-                          <span>RM {costBreakdown.total.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground">
-                        Mid-tier pricing assumption. Typical quotes land within ±10%. Adjust to match your actual
-                        installer quote.
-                      </p>
-                    </div>
-                  ) : (
-                    <p>
-                      Total estimated installation cost based on average Malaysian turnkey pricing. Adjust to match your
-                      actual installer quote.
-                    </p>
-                  )}
-                </InfoTooltip>
-              </Label>
-              <p className="text-xs text-muted-foreground">Used for payback and 10-year net benefit calculations.</p>
-            </div>
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="e.g. 15000"
-              value={formState.systemCostRm === 0 ? '' : String(formState.systemCostRm)}
-              onChange={(event) => {
-                const raw = event.target.value.replace(/[^0-9]/g, '')
-                setFormState((current) =>
-                  current ? { ...current, systemCostRm: raw === '' ? 0 : Number(raw) } : current
-                )
-              }}
-            />
-          </div>
 
           {viewMode === 'advanced' && (
             <>

@@ -129,6 +129,30 @@ export function useAnalysisForm(projectId: string | undefined) {
     initializedProjectIdRef.current = projectId
   }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights, selectedPanelModel])
 
+  const panelCostPerWp = useMemo(
+    () => (selectedPanelModel?.costPerWp && selectedPanelModel.costPerWp > 0 ? selectedPanelModel.costPerWp : 0.95),
+    [selectedPanelModel]
+  )
+
+  const costBreakdown = useMemo(() => {
+    if (!formState || activePanels.length === 0 || panelCapacityWatts === 0) return null
+    return computeSystemCost({
+      panelCount: activePanels.length,
+      panelWattageWp: panelCapacityWatts,
+      panelCostPerWp,
+      roofType: formState.roofType,
+      supplyPhase: formState.connectionPhase
+    })
+  }, [formState?.roofType, formState?.connectionPhase, activePanels.length, panelCapacityWatts, panelCostPerWp])
+
+  useEffect(() => {
+    if (!costBreakdown) return
+    setFormState((current) => {
+      if (!current || current.systemCostRm === costBreakdown.total) return current
+      return { ...current, systemCostRm: costBreakdown.total }
+    })
+  }, [costBreakdown])
+
   const billingConfig = useMemo(() => {
     if (!tariffQuery.data || !formState) return null
     return {
@@ -203,6 +227,8 @@ export function useAnalysisForm(projectId: string | undefined) {
     chartData,
     selectedMonth,
     thresholdWarnings,
-    phaseCapacityCapKw
+    phaseCapacityCapKw,
+    costBreakdown,
+    panelCostPerWp
   }
 }

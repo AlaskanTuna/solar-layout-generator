@@ -28,6 +28,7 @@ import { NetBenefitChart } from '@/components/analysis/NetBenefitChart'
 import { BillBreakdown } from '@/components/analysis/BillBreakdown'
 import { MonthTable } from '@/components/analysis/MonthTable'
 import { SystemAssumptions } from '@/components/analysis/SystemAssumptions'
+import { SystemCostCard } from '@/components/analysis/SystemCostCard'
 import { SortableCardContainer } from '@/components/analysis/SortableCardContainer'
 import SimplePdfReport from '@/components/analysis/SimplePdfReport'
 import AdvancedPdfReport from '@/components/analysis/AdvancedPdfReport'
@@ -112,7 +113,9 @@ export function AnalysisPage() {
     chartData,
     selectedMonth,
     thresholdWarnings,
-    phaseCapacityCapKw
+    phaseCapacityCapKw,
+    costBreakdown,
+    panelCostPerWp
   } = useAnalysisForm(projectId)
 
   const { reportRef, simpleReportRef, isExporting, handleExportPdf } = useAnalysisPdf()
@@ -240,6 +243,18 @@ export function AnalysisPage() {
               {
                 id: 'bill-comparison',
                 node: <BillComparisonChart chartData={chartData} />
+              },
+              {
+                id: 'system-cost',
+                node: (
+                  <SystemCostCard
+                    costBreakdown={costBreakdown}
+                    activePanelCount={activePanels.length}
+                    panelCapacityWp={selectedPanelModel?.capacityWp ?? 0}
+                    panelCostPerWp={panelCostPerWp}
+                    roofType={formState.roofType}
+                  />
+                )
               },
               ...(viewMode === 'advanced'
                 ? [
