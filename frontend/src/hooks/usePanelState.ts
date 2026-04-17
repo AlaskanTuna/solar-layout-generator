@@ -254,6 +254,24 @@ export function usePanelState({
     updatePanelState(panelId, (panel) => ({ ...panel, monthlyEnergyDcKwh }))
   }
 
+  function bulkUpdatePanels(
+    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
+  ) {
+    if (updates.length === 0) return
+    const updateMap = new Map(updates.map((u) => [u.id, u]))
+    setPanels((current) =>
+      current.map((panel) => {
+        const update = updateMap.get(panel.id)
+        if (!update) return panel
+        return {
+          ...panel,
+          ...(update.center !== undefined && { center: update.center }),
+          ...(update.rotation !== undefined && { rotation: normalizeRotation(update.rotation) })
+        }
+      })
+    )
+  }
+
   function getPanel(panelId: string) {
     return panelMap.get(panelId)
   }
@@ -319,6 +337,8 @@ export function usePanelState({
     rotatePanel,
     deletePanel,
     updatePanelEnergy,
+    bulkUpdatePanels,
+    pushSnapshot,
     setVisibleCount,
     serializeLayout,
     undo,

@@ -14,7 +14,9 @@ type GroupRotationHandleProps = {
   panelWidth: number
   panelHeight: number
   snapDegrees?: number
-  onRotate: (panelId: string, rotation: number) => void
+  onRotateStart: (pointerX: number, pointerY: number) => void
+  onRotateMove: (pointerX: number, pointerY: number, snapDegrees: number) => void
+  onRotateEnd: () => void
 }
 
 const HANDLE_DISTANCE = 24
@@ -25,7 +27,9 @@ export function GroupRotationHandle({
   panelWidth,
   panelHeight,
   snapDegrees = 5,
-  onRotate
+  onRotateStart,
+  onRotateMove,
+  onRotateEnd
 }: GroupRotationHandleProps) {
   const [isRotating, setIsRotating] = useState(false)
 
@@ -53,24 +57,28 @@ export function GroupRotationHandle({
   const edgeX = cx + -edgeDist * Math.sin(-rad)
   const edgeY = cy + -edgeDist * Math.cos(-rad)
 
-  const representativeId = panels[0]!.id
+  function handleDragStart(e: KonvaEventObject<DragEvent>) {
+    const stage = e.target.getStage()
+    const pointer = stage?.getPointerPosition()
+    if (!pointer) return
+    setIsRotating(true)
+    onRotateStart(pointer.x, pointer.y)
+  }
 
   function handleDragMove(e: KonvaEventObject<DragEvent>) {
     const stage = e.target.getStage()
-    if (!stage) return
-    const pointer = stage.getPointerPosition()
+    const pointer = stage?.getPointerPosition()
     if (!pointer) return
-
-    const dx = pointer.x - cx
-    const dy = pointer.y - cy
-    let angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI + 90
-    angleDeg = ((angleDeg % 360) + 360) % 360
-    const snapped = Math.round(angleDeg / snapDegrees) * snapDegrees
-
-    onRotate(representativeId, snapped)
-    setIsRotating(true)
-
+    onRotateMove(pointer.x, pointer.y, snapDegrees)
     e.target.position({ x: handleX, y: handleY })
+  }
+
+  function handleDragEnd(e: KonvaEventObject<DragEvent>) {
+    setIsRotating(false)
+    const c = e.target.getStage()?.container()
+    if (c) c.style.cursor = 'default'
+    e.target.position({ x: handleX, y: handleY })
+    onRotateEnd()
   }
 
   return (
@@ -102,14 +110,9 @@ export function GroupRotationHandle({
             if (c) c.style.cursor = 'default'
           }
         }}
-        onDragStart={() => setIsRotating(true)}
+        onDragStart={handleDragStart}
         onDragMove={handleDragMove}
-        onDragEnd={(e) => {
-          setIsRotating(false)
-          const c = e.target.getStage()?.container()
-          if (c) c.style.cursor = 'default'
-          e.target.position({ x: handleX, y: handleY })
-        }}
+        onDragEnd={handleDragEnd}
       />
       <Path
         x={handleX - 5}

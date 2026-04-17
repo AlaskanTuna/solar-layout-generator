@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
 import { MONTHLY_AZIMUTH, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
@@ -41,6 +41,7 @@ export function WorkbenchPage() {
   const [canvasExpanded, setCanvasExpanded] = useState(false)
   const [freeRotate, setFreeRotate] = useState(false)
   const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
+  const hydratedPanelModelProjectIdRef = useRef<string | null>(null)
   const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('rgb')
   const [overlayExpanded, setOverlayExpanded] = useState(false)
@@ -58,6 +59,20 @@ export function WorkbenchPage() {
     isLoading,
     error: dataError
   } = useWorkbenchData(projectId)
+
+  useEffect(() => {
+    if (!projectId) {
+      hydratedPanelModelProjectIdRef.current = null
+      return
+    }
+    if (hydratedPanelModelProjectIdRef.current === projectId) return
+    if (!project) return
+    hydratedPanelModelProjectIdRef.current = projectId
+    const savedId = project.analysisConfig?.selectedPanelModelId
+    if (savedId && getPanelModel(savedId)) {
+      setSelectedPanelModelId(savedId)
+    }
+  }, [projectId, project])
 
   const { backgroundImage, displayImage, imageError, isOverlayLoading } = useOverlayImages(
     rgbImageUrl,
@@ -81,6 +96,8 @@ export function WorkbenchPage() {
     rotatePanel,
     deletePanel,
     updatePanelEnergy,
+    bulkUpdatePanels,
+    pushSnapshot,
     setVisibleCount,
     serializeLayout,
     undo,
@@ -115,6 +132,8 @@ export function WorkbenchPage() {
     rotatePanel,
     deletePanel,
     updatePanelEnergy,
+    bulkUpdatePanels,
+    pushSnapshot,
     showSegments,
     solarPanels: buildingInsights?.solarPotential.solarPanels ?? [],
     roofSegments: buildingInsights?.solarPotential.roofSegmentStats ?? []
@@ -313,8 +332,13 @@ export function WorkbenchPage() {
                         snapEnabled={interactions.snapEnabled}
                         onSnapDragMove={interactions.handleSnapDragMove}
                         onSelect={interactions.handlePanelSelect}
+                        onDragStart={interactions.handlePanelDragStart}
+                        onDragMove={interactions.handlePanelDragMove}
                         onDragEnd={interactions.handlePanelDragEnd}
                         onRotate={interactions.handleCanvasRotate}
+                        onGroupRotateStart={interactions.handleGroupRotateStart}
+                        onGroupRotateMove={interactions.handleGroupRotateMove}
+                        onGroupRotateEnd={interactions.handleGroupRotateEnd}
                         freeRotate={freeRotate}
                       />
                       {interactions.snapGuides.length > 0 && (

@@ -47,6 +47,10 @@ type UseCanvasInteractionsOptions = {
   rotatePanel: (id: string, rotation: number) => void
   deletePanel: (id: string) => void
   updatePanelEnergy: (panelId: string, monthlyEnergyDcKwh: number[]) => void
+  bulkUpdatePanels: (
+    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
+  ) => void
+  pushSnapshot: () => void
   showSegments: boolean
   solarPanels: SolarPanel[]
   roofSegments: RoofSegment[]
@@ -65,12 +69,23 @@ export function useCanvasInteractions({
   rotatePanel,
   deletePanel,
   updatePanelEnergy,
+  bulkUpdatePanels,
+  pushSnapshot,
   setSelectedPanelModelId,
   showSegments,
   solarPanels,
   roofSegments
 }: UseCanvasInteractionsOptions) {
   const rotationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const groupRotateStateRef = useRef<{
+    snapshots: Map<string, { centerPx: { x: number; y: number }; rotation: number }>
+    centroid: { x: number; y: number }
+    startAngle: number
+  } | null>(null)
+  const groupDragStateRef = useRef<{
+    snapshots: Map<string, { centerPx: { x: number; y: number } }>
+    grabbedPanelId: string
+  } | null>(null)
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<string>>(new Set())
   const [snapEnabled, setSnapEnabled] = useState(true)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
@@ -236,6 +251,13 @@ export function useCanvasInteractions({
         return position
       }
 
+      // Disable snap during group drag: other selected panels drift mid-drag, which would
+      // cause the grabbed panel to snap to their temporary positions.
+      if (groupDragStateRef.current) {
+        setSnapGuides([])
+        return position
+      }
+
       const panel = getPanel(panelId)
       if (!panel) return position
 
@@ -271,6 +293,35 @@ export function useCanvasInteractions({
       }
       return new Set([panelId])
     })
+  }
+
+  function handlePanelDragStart(panelId: string) {
+    if (selectedPanelIds.size <= 1 || !selectedPanelIds.has(panelId) || !geo) return
+    pushSnapshot()
+    const snapshots = new Map<string, { centerPx: { x: number; y: number } }>()
+    for (const id of selectedPanelIds) {
+      const p = getPanel(id)
+      if (!p) continue
+      snapshots.set(id, { centerPx: latLngToPixel(p.center.lat, p.center.lng, geo) })
+    }
+    groupDragStateRef.current = { snapshots, grabbedPanelId: panelId }
+  }
+
+  function handlePanelDragMove(panelId: string, position: { x: number; y: number }) {
+    const state = groupDragStateRef.current
+    if (!state || state.grabbedPanelId !== panelId || !geo) return
+    const grabbedSnap = state.snapshots.get(panelId)
+    if (!grabbedSnap) return
+    const deltaX = position.x - grabbedSnap.centerPx.x
+    const deltaY = position.y - grabbedSnap.centerPx.y
+
+    const updates: Array<{ id: string; center: { lat: number; lng: number } }> = []
+    for (const [id, snap] of state.snapshots) {
+      if (id === panelId) continue
+      const newPixel = { x: snap.centerPx.x + deltaX, y: snap.centerPx.y + deltaY }
+      updates.push({ id, center: pixelToLatLng(newPixel.x, newPixel.y, geo) })
+    }
+    bulkUpdatePanels(updates)
   }
 
   async function handlePanelDragEnd(panelId: string, position: { x: number; y: number }, resetPosition: () => void) {
@@ -374,13 +425,26 @@ export function useCanvasInteractions({
       return
     }
 
-    const origPixel = latLngToPixel(panel.center.lat, panel.center.lng, geo)
+    // Group branch: use cached pre-drag pixel positions from handlePanelDragStart.
+    // Mid-drag updates via bulkUpdatePanels have drifted non-grabbed selected panels' centers,
+    // so reading them directly would double-apply the drag delta.
+    const groupState = groupDragStateRef.current
+    groupDragStateRef.current = null
+
+    const grabbedSnap = groupState?.snapshots.get(panelId)
+    const origPixel = grabbedSnap?.centerPx ?? latLngToPixel(panel.center.lat, panel.center.lng, geo)
     let deltaX = position.x - origPixel.x
     let deltaY = position.y - origPixel.y
 
-    const selectedPanels = [...selectedPanelIds]
-      .map((id) => getPanel(id))
-      .filter((p): p is NonNullable<typeof p> => p != null)
+    const selectedPanelsWithOrigin = [...selectedPanelIds]
+      .map((id) => {
+        const p = getPanel(id)
+        if (!p) return null
+        const snap = groupState?.snapshots.get(id)
+        const origPx = snap?.centerPx ?? latLngToPixel(p.center.lat, p.center.lng, geo)
+        return { panel: p, origPx }
+      })
+      .filter((x): x is NonNullable<typeof x> => x != null)
 
     // Iteratively resolve group-vs-outside overlaps by shifting the shared delta.
     // Preserves intra-group geometry; the whole group translates as one unit.
@@ -391,11 +455,10 @@ export function useCanvasInteractions({
       for (let iter = 0; iter < maxIterations; iter++) {
         let worst: { axis: { x: number; y: number }; penetration: number; rotDiff: number } | null = null
 
-        for (const sp of selectedPanels) {
-          const spPixel = latLngToPixel(sp.center.lat, sp.center.lng, geo)
+        for (const { panel: sp, origPx } of selectedPanelsWithOrigin) {
           const draggedPoly = getRotatedRectPoints(
-            spPixel.x + deltaX,
-            spPixel.y + deltaY,
+            origPx.x + deltaX,
+            origPx.y + deltaY,
             panelDimensions.width,
             panelDimensions.height,
             sp.rotation
@@ -428,23 +491,29 @@ export function useCanvasInteractions({
     const moves: { id: string; prevCenter: { lat: number; lng: number }; nextCenter: { lat: number; lng: number } }[] =
       []
 
-    for (const sp of selectedPanels) {
-      const spPixel = latLngToPixel(sp.center.lat, sp.center.lng, geo)
-      const newPixel = { x: spPixel.x + deltaX, y: spPixel.y + deltaY }
+    for (const { panel: sp, origPx } of selectedPanelsWithOrigin) {
+      const newPixel = { x: origPx.x + deltaX, y: origPx.y + deltaY }
       const nextCenter = pixelToLatLng(newPixel.x, newPixel.y, geo)
+      const prevCenter = pixelToLatLng(origPx.x, origPx.y, geo)
 
       const placementError = getPlacementError(sp.id, nextCenter, sp.rotation, selectedPanelIds)
       if (placementError) {
+        // Restore all selected panels to pre-drag positions (non-grabbed ones have drifted).
+        bulkUpdatePanels(
+          selectedPanelsWithOrigin.map(({ panel: p, origPx: px }) => ({
+            id: p.id,
+            center: pixelToLatLng(px.x, px.y, geo)
+          }))
+        )
         resetPosition()
         notify.error(`Group move failed: ${getPlacementErrorMessage(placementError)}`)
         return
       }
-      moves.push({ id: sp.id, prevCenter: sp.center, nextCenter })
+      moves.push({ id: sp.id, prevCenter, nextCenter })
     }
 
-    for (const mv of moves) {
-      movePanel(mv.id, mv.nextCenter)
-    }
+    // No snapshot — handlePanelDragStart already pushed one at gesture start.
+    bulkUpdatePanels(moves.map((mv) => ({ id: mv.id, center: mv.nextCenter })))
 
     if (!locationId) return
     setPendingPanelId(panelId)
@@ -471,9 +540,7 @@ export function useCanvasInteractions({
       }
       setMessage(null)
     } catch {
-      for (const mv of moves) {
-        movePanel(mv.id, mv.prevCenter)
-      }
+      bulkUpdatePanels(moves.map((mv) => ({ id: mv.id, center: mv.prevCenter })))
       resetPosition()
       notify.error('Failed to recompute group move. Positions reverted.')
     } finally {
@@ -497,47 +564,6 @@ export function useCanvasInteractions({
   function handleCanvasRotate(panelId: string, value: number) {
     const nextRotation = ((value % 360) + 360) % 360
 
-    // Multi-panel rotation: rotate all selected panels together. Exclude the selection from
-    // overlap candidates so tight-packed groups don't flag their own siblings as collisions.
-    if (selectedPanelIds.size > 1 && selectedPanelIds.has(panelId)) {
-      for (const id of selectedPanelIds) {
-        const p = getPanel(id)
-        if (!p) continue
-        const placementError = getPlacementError(p.id, p.center, nextRotation, selectedPanelIds)
-        if (placementError) {
-          notify.error(getPlacementErrorMessage(placementError))
-          return
-        }
-      }
-      for (const id of selectedPanelIds) {
-        rotatePanel(id, nextRotation)
-      }
-      if (rotationTimeoutRef.current) clearTimeout(rotationTimeoutRef.current)
-      rotationTimeoutRef.current = setTimeout(() => {
-        if (!locationId) return
-        const panels = [...selectedPanelIds]
-          .map((id) => getPanel(id))
-          .filter((p): p is NonNullable<typeof p> => p != null)
-        void recomputeFluxBatch(locationId, {
-          panels: panels.map((p) => ({
-            panelId: p.id,
-            center: p.center,
-            rotation: nextRotation,
-            widthM: selectedPanelModel.widthM,
-            heightM: selectedPanelModel.heightM,
-            capacityWp: selectedPanelModel.capacityWp
-          }))
-        })
-          .then((resp) => {
-            for (const r of resp.results) {
-              if (r.monthlyEnergyDcKwh.length === 12) updatePanelEnergy(r.panelId, r.monthlyEnergyDcKwh)
-            }
-          })
-          .catch(() => {})
-      }, 1000)
-      return
-    }
-
     // Single-panel rotation: use panelId directly to avoid stale closure on selectedPanel
     const panel = getPanel(panelId)
     if (!panel) return
@@ -555,6 +581,88 @@ export function useCanvasInteractions({
     const previousRotation = panel.rotation
     rotatePanel(panel.id, nextRotation)
     scheduleRotationRecompute(panel.id, panel.center, nextRotation, previousRotation)
+  }
+
+  function handleGroupRotateStart(pointerX: number, pointerY: number) {
+    if (!geo) return
+    pushSnapshot()
+    const snapshots = new Map<string, { centerPx: { x: number; y: number }; rotation: number }>()
+    for (const id of selectedPanelIds) {
+      const p = getPanel(id)
+      if (!p) continue
+      snapshots.set(id, {
+        centerPx: latLngToPixel(p.center.lat, p.center.lng, geo),
+        rotation: p.rotation
+      })
+    }
+    if (snapshots.size === 0) return
+    const xs = [...snapshots.values()].map((s) => s.centerPx.x)
+    const ys = [...snapshots.values()].map((s) => s.centerPx.y)
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2
+    const cy = (Math.min(...ys) + Math.max(...ys)) / 2
+    const startAngle = Math.atan2(pointerY - cy, pointerX - cx)
+    groupRotateStateRef.current = { snapshots, centroid: { x: cx, y: cy }, startAngle }
+  }
+
+  function handleGroupRotateMove(pointerX: number, pointerY: number, snapDegrees: number) {
+    const state = groupRotateStateRef.current
+    if (!state || !geo) return
+    const { snapshots, centroid, startAngle } = state
+    const currentAngle = Math.atan2(pointerY - centroid.y, pointerX - centroid.x)
+    let deltaDeg = ((currentAngle - startAngle) * 180) / Math.PI
+    deltaDeg = (((deltaDeg + 180) % 360) + 360) % 360 - 180
+    const snapped = Math.round(deltaDeg / snapDegrees) * snapDegrees
+    const deltaRad = (snapped * Math.PI) / 180
+    const cosD = Math.cos(deltaRad)
+    const sinD = Math.sin(deltaRad)
+
+    const proposals: Array<{ id: string; newCenter: { lat: number; lng: number }; newRotation: number }> = []
+    for (const [id, snap] of snapshots) {
+      const dx = snap.centerPx.x - centroid.x
+      const dy = snap.centerPx.y - centroid.y
+      const newX = centroid.x + dx * cosD - dy * sinD
+      const newY = centroid.y + dx * sinD + dy * cosD
+      const newCenter = pixelToLatLng(newX, newY, geo)
+      const newRotation = (((snap.rotation + snapped) % 360) + 360) % 360
+      proposals.push({ id, newCenter, newRotation })
+    }
+
+    for (const proposal of proposals) {
+      const error = getPlacementError(proposal.id, proposal.newCenter, proposal.newRotation, selectedPanelIds)
+      if (error) return
+    }
+
+    bulkUpdatePanels(proposals.map((p) => ({ id: p.id, center: p.newCenter, rotation: p.newRotation })))
+  }
+
+  function handleGroupRotateEnd() {
+    const state = groupRotateStateRef.current
+    groupRotateStateRef.current = null
+    if (!state || !locationId) return
+    const panels = [...state.snapshots.keys()]
+      .map((id) => getPanel(id))
+      .filter((p): p is NonNullable<typeof p> => p != null)
+    if (panels.length === 0) return
+
+    if (rotationTimeoutRef.current) clearTimeout(rotationTimeoutRef.current)
+    rotationTimeoutRef.current = setTimeout(() => {
+      void recomputeFluxBatch(locationId, {
+        panels: panels.map((p) => ({
+          panelId: p.id,
+          center: p.center,
+          rotation: p.rotation,
+          widthM: selectedPanelModel.widthM,
+          heightM: selectedPanelModel.heightM,
+          capacityWp: selectedPanelModel.capacityWp
+        }))
+      })
+        .then((resp) => {
+          for (const r of resp.results) {
+            if (r.monthlyEnergyDcKwh.length === 12) updatePanelEnergy(r.panelId, r.monthlyEnergyDcKwh)
+          }
+        })
+        .catch(() => {})
+    }, 500)
   }
 
   function handleDeleteSelected() {
@@ -669,8 +777,13 @@ export function useCanvasInteractions({
     marqueeRect,
     handleSnapDragMove,
     handlePanelSelect,
+    handlePanelDragStart,
+    handlePanelDragMove,
     handlePanelDragEnd,
     handleCanvasRotate,
+    handleGroupRotateStart,
+    handleGroupRotateMove,
+    handleGroupRotateEnd,
     handleDeleteSelected,
     handleModelChange,
     handleMarqueeStart,

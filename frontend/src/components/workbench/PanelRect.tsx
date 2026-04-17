@@ -17,6 +17,8 @@ type PanelRectProps = {
   snapEnabled?: boolean
   onSnapDragMove?: (panelId: string, position: { x: number; y: number }) => { x: number; y: number }
   onSelect: (panelId: string, shiftKey: boolean) => void
+  onDragStart?: (panelId: string) => void
+  onDragMove?: (panelId: string, position: { x: number; y: number }) => void
   onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
 }
 
@@ -42,6 +44,8 @@ export function PanelRect({
   snapEnabled = false,
   onSnapDragMove,
   onSelect,
+  onDragStart,
+  onDragMove,
   onDragEnd
 }: PanelRectProps) {
   const [hovered, setHovered] = useState(false)
@@ -93,6 +97,12 @@ export function PanelRect({
       onTap={() => onSelect(id, false)}
       onDragStart={() => {
         if (!selected) onSelect(id, false)
+        onDragStart?.(id)
+      }}
+      onDragMove={(event) => {
+        if (!onDragMove) return
+        const node = event.target
+        onDragMove(id, { x: node.x(), y: node.y() })
       }}
       onDragEnd={(event) => {
         const node = event.target

@@ -24,8 +24,13 @@ type PanelLayerProps = {
   snapEnabled?: boolean
   onSnapDragMove?: (panelId: string, position: { x: number; y: number }) => { x: number; y: number }
   onSelect: (panelId: string, shiftKey: boolean) => void
+  onDragStart?: (panelId: string) => void
+  onDragMove?: (panelId: string, position: { x: number; y: number }) => void
   onDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) => void
   onRotate?: (panelId: string, rotation: number) => void
+  onGroupRotateStart?: (pointerX: number, pointerY: number) => void
+  onGroupRotateMove?: (pointerX: number, pointerY: number, snapDegrees: number) => void
+  onGroupRotateEnd?: () => void
   freeRotate?: boolean
 }
 
@@ -63,8 +68,13 @@ export function PanelLayer({
   snapEnabled = false,
   onSnapDragMove,
   onSelect,
+  onDragStart,
+  onDragMove,
   onDragEnd,
   onRotate,
+  onGroupRotateStart,
+  onGroupRotateMove,
+  onGroupRotateEnd,
   freeRotate
 }: PanelLayerProps) {
   return (
@@ -88,12 +98,14 @@ export function PanelLayer({
           snapEnabled={snapEnabled}
           onSnapDragMove={onSnapDragMove}
           onSelect={onSelect}
+          onDragStart={onDragStart}
+          onDragMove={onDragMove}
           onDragEnd={onDragEnd}
         />
       ))}
 
       {/* Rotation handle: single per-panel handle on single-select, unified group handle on multi-select */}
-      {onRotate && selectedPanelIds.size > 1 ? (
+      {selectedPanelIds.size > 1 && onGroupRotateStart && onGroupRotateMove && onGroupRotateEnd ? (
         <GroupRotationHandle
           panels={panels
             .filter(({ panel }) => selectedPanelIds.has(panel.id) && disabledPanelId !== panel.id)
@@ -101,7 +113,9 @@ export function PanelLayer({
           panelWidth={panelWidth}
           panelHeight={panelHeight}
           snapDegrees={freeRotate ? 1 : 5}
-          onRotate={onRotate}
+          onRotateStart={onGroupRotateStart}
+          onRotateMove={onGroupRotateMove}
+          onRotateEnd={onGroupRotateEnd}
         />
       ) : (
         onRotate &&
