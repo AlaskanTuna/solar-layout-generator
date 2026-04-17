@@ -273,28 +273,6 @@ export function AnalysisPage() {
                     }
                   ]
                 : []),
-              {
-                id: 'system-cost',
-                node: (
-                  <SystemCostCard
-                    costBreakdown={costBreakdown}
-                    activePanelCount={activePanels.length}
-                    panelCapacityWp={selectedPanelModel?.capacityWp ?? 0}
-                    panelCostPerWp={panelCostPerWp}
-                    roofType={formState.roofType}
-                  />
-                )
-              },
-              {
-                id: 'net-benefit',
-                node: (
-                  <NetBenefitChart
-                    year1Savings={simulation.totalSavingsRm}
-                    degradationRate={formState.degradationRate}
-                    systemCostRm={formState.systemCostRm}
-                  />
-                )
-              },
               ...(viewMode === 'advanced'
                 ? [
                     {
@@ -345,14 +323,14 @@ export function AnalysisPage() {
                   ]
                 : []),
               {
-                id: 'financial-roadmap',
+                id: 'system-cost',
                 node: (
-                  <FinancialRoadmap
-                    systemCostRm={formState.systemCostRm}
-                    paybackYears={analysisResults.paybackYears}
-                    year1Savings={simulation.totalSavingsRm}
-                    degradationRate={formState.degradationRate}
-                    systemKwp={systemKwp}
+                  <SystemCostCard
+                    costBreakdown={costBreakdown}
+                    activePanelCount={activePanels.length}
+                    panelCapacityWp={selectedPanelModel?.capacityWp ?? 0}
+                    panelCostPerWp={panelCostPerWp}
+                    roofType={formState.roofType}
                   />
                 )
               },
@@ -373,6 +351,28 @@ export function AnalysisPage() {
                     }
                   ]
                 : []),
+              {
+                id: 'net-benefit',
+                node: (
+                  <NetBenefitChart
+                    year1Savings={simulation.totalSavingsRm}
+                    degradationRate={formState.degradationRate}
+                    systemCostRm={formState.systemCostRm}
+                  />
+                )
+              },
+              {
+                id: 'financial-roadmap',
+                node: (
+                  <FinancialRoadmap
+                    systemCostRm={formState.systemCostRm}
+                    paybackYears={analysisResults.paybackYears}
+                    year1Savings={simulation.totalSavingsRm}
+                    degradationRate={formState.degradationRate}
+                    systemKwp={systemKwp}
+                  />
+                )
+              },
               {
                 id: 'disclaimers',
                 node: (
