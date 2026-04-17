@@ -12,10 +12,10 @@ export function aggregateStats(projects: ProjectResponse[]): AggregatedStats {
   for (const p of projects) {
     if (p.status !== 'analysis_saved' || !p.analysisResults) continue
     const r = p.analysisResults
-    stats.totalSavingsRm += r.averageMonthlySavingsRm
-    stats.totalCarbonKg += r.carbonOffsetKg
-    stats.totalPanels += r.activePanelCount
-    stats.totalEnergyKwh += r.annualTotals.totalGenerationKwh
+    stats.totalSavingsRm += r.averageMonthlySavingsRm ?? 0
+    stats.totalCarbonKg += r.carbonOffsetKg ?? 0
+    stats.totalPanels += r.activePanelCount ?? 0
+    stats.totalEnergyKwh += r.annualTotals?.totalGenerationKwh ?? 0
   }
   return stats
 }

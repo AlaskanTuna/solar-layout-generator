@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { useQuota } from '@/hooks/useQuota'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { NotificationPopover } from '@/components/ui/NotificationPopover'
 import { Button } from '@/components/ui/button'
@@ -62,6 +63,9 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
   const { user, signOut } = useAuth()
   const crumbs = useBreadcrumbs()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const quotaQuery = useQuota()
+  const tier = quotaQuery.data?.tier
+  const planLabel = tier ? `${tier.charAt(0) + tier.slice(1).toLowerCase()} plan` : 'Loading plan…'
 
   return (
     <nav className="glass-nav fixed inset-x-0 top-0 z-50">
@@ -119,7 +123,7 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
                   >
                     <div className="border-b border-border px-3 py-2.5">
                       <p className="text-sm font-medium">{user?.email}</p>
-                      <p className="text-xs text-muted-foreground">Free plan</p>
+                      <p className="text-xs text-muted-foreground">{planLabel}</p>
                     </div>
                     <div className="p-1">
                       <button

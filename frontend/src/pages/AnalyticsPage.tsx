@@ -5,6 +5,7 @@ import { StatCard } from '@/components/dashboard/StatCard'
 import { aggregateStats } from '@/components/dashboard/helpers'
 import { Receipt, Zap, Leaf, Sun, PieChart } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
+import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
 export function AnalyticsPage() {
   const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: listProjects })
@@ -15,10 +16,12 @@ export function AnalyticsPage() {
 
   if (completedProjects === 0) {
     return (
-      <PageContainer className="animate-fade-in">
-        <h1 className="font-heading text-2xl font-bold tracking-tight">Analytics</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Performance insights across all your projects</p>
-        <div className="mt-12 glass-card flex flex-col items-center py-16 text-center">
+      <PageContainer>
+        <PageHeaderCard>
+          <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
+          <p className="mt-1 max-w-lg text-muted-foreground">Performance insights across all your projects</p>
+        </PageHeaderCard>
+        <div className="mt-6 glass-card flex flex-col items-center py-16 text-center">
           <PieChart className="h-12 w-12 text-muted-foreground/30" />
           <h2 className="mt-4 font-heading text-lg font-semibold">No data yet</h2>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
@@ -36,15 +39,17 @@ export function AnalyticsPage() {
     .filter((p) => p.status === 'analysis_saved' && p.analysisResults)
     .map((p) => {
       const r = p.analysisResults!
-      return { name: p.name, payback: r.paybackYears ?? null, savings: r.averageMonthlySavingsRm }
+      return { name: p.name, payback: r.paybackYears ?? null, savings: r.averageMonthlySavingsRm ?? 0 }
     })
 
   return (
-    <PageContainer className="animate-fade-in">
-      <h1 className="font-heading text-2xl font-bold tracking-tight">Analytics</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
-      </p>
+    <PageContainer>
+      <PageHeaderCard>
+        <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
+        <p className="mt-1 max-w-lg text-muted-foreground">
+          Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
+        </p>
+      </PageHeaderCard>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard

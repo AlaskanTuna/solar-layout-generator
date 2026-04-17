@@ -17,6 +17,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Gauge, FolderKanban, PieChart, MapPin } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
+import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -88,21 +89,16 @@ export function DashboardPage() {
   return (
     <>
       <PageContainer flex>
-        {/* Greeting Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-8 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20 animate-fade-in">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-solar-400/10 blur-3xl" />
-          <div className="relative">
-            <h1 className="font-heading text-3xl font-bold tracking-tight">
-              {greeting}
-              {userName ? `, ${userName}` : ''}
-            </h1>
-            <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
-            {quotaLabel && (
-              <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
-            )}
-          </div>
-        </div>
+        <PageHeaderCard>
+          <h1 className="font-heading text-3xl font-bold tracking-tight">
+            {greeting}
+            {userName ? `, ${userName}` : ''}
+          </h1>
+          <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
+          {quotaLabel && (
+            <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
+          )}
+        </PageHeaderCard>
 
         {/* Quick Action Cards — flex-1 fills remaining viewport height */}
         <div className="mt-6 grid flex-1 gap-4 sm:grid-cols-2 animate-fade-in-up">

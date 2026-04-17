@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog'
 import { Plus, Sun, FolderOpen, Clock, BarChart3, Lightbulb, MapPin, SlidersHorizontal, FileBarChart } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
+import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 import { notify } from '@/components/ui/toastConfig'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { projectRoute } from '@/components/dashboard/helpers'
@@ -70,11 +71,10 @@ export function SummaryPage() {
   return (
     <>
       <PageContainer flex>
-        {/* Heading */}
-        <div className="animate-fade-in">
-          <h1 className="font-heading text-2xl font-bold tracking-tight">Summary</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Overview of your solar portfolio</p>
-        </div>
+        <PageHeaderCard>
+          <h1 className="font-heading text-3xl font-bold tracking-tight">Summary</h1>
+          <p className="mt-1 max-w-lg text-muted-foreground">Overview of your solar portfolio</p>
+        </PageHeaderCard>
 
         {/* Two-column: stats+projects on left, how-it-works on right — fills remaining height */}
         <div className="mt-6 flex flex-1 gap-6">

@@ -18,9 +18,16 @@ import {
 } from '@/components/ui/dialog'
 import { Plus, FolderOpen } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
+import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 import { notify } from '@/components/ui/toastConfig'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { projectRoute } from '@/components/dashboard/helpers'
+import { useQuota } from '@/hooks/useQuota'
+
+function formatResetTime(resetsAt: string): string {
+  const d = new Date(resetsAt)
+  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
+}
 
 export function ProjectsPage() {
   const navigate = useNavigate()
@@ -32,6 +39,15 @@ export function ProjectsPage() {
   const [filter, setFilter] = useState<'all' | 'completed' | 'in-progress'>('all')
 
   const { data: projects, isLoading } = useQuery({ queryKey: ['projects'], queryFn: listProjects })
+  const quotaQuery = useQuota()
+  const quota = quotaQuery.data
+  const isUnlimited = quota?.limit === null
+  const quotaLabel = !quota
+    ? null
+    : isUnlimited
+      ? 'Unlimited projects today'
+      : `${quota.used} / ${quota.limit} projects today · resets at ${formatResetTime(quota.resetsAt)}`
+  const quotaReached = !!quota && quota.limit !== null && quota.used >= quota.limit
 
   const filtered = useMemo(() => {
     const list = projects ?? []
@@ -67,17 +83,22 @@ export function ProjectsPage() {
 
   return (
     <>
-      <PageContainer className="animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-2xl font-bold tracking-tight">Projects</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Manage all your solar assessment projects</p>
+      <PageContainer>
+        <PageHeaderCard>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">Projects</h1>
+              <p className="mt-1 max-w-lg text-muted-foreground">Manage all your solar assessment projects</p>
+              {quotaLabel && (
+                <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
+              )}
+            </div>
+            <Button className="gap-2 shadow-sm" onClick={() => setDialogOpen(true)} disabled={quotaReached}>
+              <Plus className="h-4 w-4" />
+              New Project
+            </Button>
           </div>
-          <Button className="gap-2 shadow-sm" onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4" />
-            New Project
-          </Button>
-        </div>
+        </PageHeaderCard>
 
         <div className="mt-6 flex gap-1 rounded-lg bg-muted/50 p-1 w-fit">
           {(['all', 'completed', 'in-progress'] as const).map((f) => (
