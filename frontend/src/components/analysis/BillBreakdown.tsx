@@ -27,7 +27,7 @@ export function BillBreakdown({
           <div>
             <CardTitle>
               Bill Component Breakdown
-              <InfoTooltip text="Breaks down each charge on your TNB bill side by side — without solar vs. with solar. Includes energy, capacity, network, AFA, EEI rebate, RE fund and SST components." />
+              <InfoTooltip text="Compares each charge on your TNB bill side by side: without solar vs. with solar. Includes energy, capacity, network, AFA, EEI rebate, RE fund and SST components." />
             </CardTitle>
             <CardDescription>See how your TNB bill is calculated.</CardDescription>
           </div>

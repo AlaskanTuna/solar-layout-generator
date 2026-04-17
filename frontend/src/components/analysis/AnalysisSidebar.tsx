@@ -106,7 +106,7 @@ export function AnalysisSidebar({
             <div className="rounded-lg bg-muted p-3">
               <p className="text-muted-foreground">
                 System Size
-                <InfoTooltip text="Kilowatt-peak (kWp) — the maximum power your solar system can produce under ideal sunlight conditions." />
+                <InfoTooltip text="Kilowatt-peak (kWp) is the maximum power your solar system can produce under ideal sunlight conditions." />
               </p>
               <p className="mt-1 text-lg font-semibold">{formatNumber(systemKwp, 'kWp')}</p>
             </div>
@@ -231,7 +231,28 @@ export function AnalysisSidebar({
             <div className="space-y-1">
               <Label>
                 Connection Phase
-                <InfoTooltip text="Single phase is standard for most Malaysian homes. Three phase is common for larger properties. This determines the NEM capacity cap." />
+                <InfoTooltip>
+                  <div className="space-y-2">
+                    <p>
+                      How electricity enters your home from the grid. You can check this on your TNB bill under "Jenis
+                      Fasa" or from the labels on your meter box.
+                    </p>
+                    <div className="space-y-1">
+                      <p>
+                        <span className="font-semibold">Single Phase:</span> standard in most Malaysian homes. Solar
+                        export is capped at 5 kW under TNB's NEM 3.0 rules.
+                      </p>
+                      <p>
+                        <span className="font-semibold">Three Phase:</span> common in larger bungalows or homes with
+                        heavy appliances. The cap rises to 12.5 kW.
+                      </p>
+                    </div>
+                    <p className="text-primary-foreground/80">
+                      If your array is larger than the cap, you'll need to remove panels on the Workbench or apply to
+                      upgrade your TNB connection before installation.
+                    </p>
+                  </div>
+                </InfoTooltip>
               </Label>
               <p className="text-xs text-muted-foreground">
                 Capacity cap: {phaseCapacityCapKw || 0} kW for the selected connection type.

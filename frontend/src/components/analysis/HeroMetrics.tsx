@@ -58,7 +58,7 @@ export function HeroMetrics({ analysisResults, paybackTooltip }: HeroMetricsProp
         <CardContent className="space-y-1 p-5">
           <p className="text-sm text-muted-foreground">
             Annual Savings
-            <InfoTooltip text="Total savings across the full year — your bill without solar minus your bill with solar." />
+            <InfoTooltip text="Total savings across the full year. This is your bill without solar minus your bill with solar." />
           </p>
           <p className="text-2xl font-semibold">{formatCurrency(analysisResults.annualTotals.totalSavingsRm)}</p>
           <p className="text-sm text-muted-foreground">

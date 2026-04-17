@@ -16,7 +16,7 @@ type SystemCostCardProps = {
   roofType: RoofType
 }
 
-const ROOF_LABEL: Record<RoofType, string> = { tile: 'tile', metal: 'metal', flat: 'flat' }
+const ROOF_LABEL: Record<RoofType, string> = { tile: 'Tile', metal: 'Metal', flat: 'Flat' }
 
 type Segment = { key: string; name: string; detail: string; value: number; color: string }
 
@@ -61,14 +61,14 @@ export function SystemCostCard({
       {
         key: 'mounting',
         name: 'Mounting',
-        detail: `${ROOF_LABEL[roofType]} roof`,
+        detail: `${ROOF_LABEL[roofType]} Roof`,
         value: costBreakdown.mounting,
         color: SEGMENT_COLORS.mounting
       },
       {
         key: 'electricalBos',
         name: 'Electrical BOS',
-        detail: 'Wiring, protection',
+        detail: 'Wiring, Protection',
         value: costBreakdown.electricalBos,
         color: SEGMENT_COLORS.electricalBos
       }
@@ -77,7 +77,7 @@ export function SystemCostCard({
       items.push({
         key: 'scaffolding',
         name: 'Scaffolding',
-        detail: 'Tile roof only',
+        detail: 'Tile Roof Only',
         value: costBreakdown.scaffolding,
         color: SEGMENT_COLORS.scaffolding
       })
@@ -85,21 +85,21 @@ export function SystemCostCard({
     items.push({
       key: 'permit',
       name: 'Permit',
-      detail: costBreakdown.cccFeeTriggered ? 'Incl. CCC fee' : 'SEDA registration',
+      detail: costBreakdown.cccFeeTriggered ? 'Incl. CCC Fee' : 'SEDA Registration',
       value: costBreakdown.permit,
       color: SEGMENT_COLORS.permit
     })
     items.push({
       key: 'labour',
       name: 'Labour',
-      detail: '+18% of hardware',
+      detail: '+18% of Hardware',
       value: costBreakdown.labour,
       color: SEGMENT_COLORS.labour
     })
     items.push({
       key: 'installerMargin',
       name: 'Installer margin',
-      detail: '+15% of hardware + labour',
+      detail: '+15% of Hardware + Labour',
       value: costBreakdown.installerMargin,
       color: SEGMENT_COLORS.installerMargin
     })
@@ -124,13 +124,13 @@ export function SystemCostCard({
           <div>
             <CardTitle>
               System Cost
-              <InfoTooltip text="Bottom-up turnkey estimate based on general residential solar cost model in Malaysia. Covers panels, inverter, mounting, electrical BOS, permits, labour and installer margin." />
+              <InfoTooltip text="A bottom-up turnkey estimate based on typical residential solar costs in Malaysia. Covers panels, inverter, mounting, wiring and electrical components, permits, labour and installer margin." />
             </CardTitle>
             <CardDescription>Estimated total turnkey installation cost.</CardDescription>
           </div>
           <div className="text-right">
             <p className="text-3xl font-semibold text-foreground tabular-nums">{formatCurrency(costBreakdown.total)}</p>
-            <p className="text-xs text-muted-foreground">±10% typical quote variance</p>
+            <p className="text-xs text-muted-foreground">±10% Typical Quote Variance</p>
           </div>
         </div>
       </CardHeader>
