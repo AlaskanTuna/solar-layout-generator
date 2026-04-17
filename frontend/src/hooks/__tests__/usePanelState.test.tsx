@@ -71,6 +71,7 @@ describe('usePanelState', () => {
     const { result } = renderHook(() =>
       usePanelState({
         projectId: 'project_1',
+        locationId: undefined,
         solarPanels,
         roofSegments,
         editedLayout,
@@ -89,6 +90,7 @@ describe('usePanelState', () => {
     const { result } = renderHook(() =>
       usePanelState({
         projectId: 'project_1',
+        locationId: undefined,
         solarPanels,
         roofSegments,
         editedLayout: null,

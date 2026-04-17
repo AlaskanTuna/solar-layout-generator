@@ -298,9 +298,9 @@ export function AnalysisSidebar({
                   })
                 }}
               >
-                <option value="tile">Tile (clay/concrete)</option>
+                <option value="tile">Tile (Clay/Concrete)</option>
                 <option value="metal">Metal</option>
-                <option value="flat">Flat (concrete slab)</option>
+                <option value="flat">Flat (Concrete Slab)</option>
               </select>
             </div>
           )}

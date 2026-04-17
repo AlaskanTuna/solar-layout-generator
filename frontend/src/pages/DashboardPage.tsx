@@ -50,13 +50,7 @@ export function DashboardPage() {
   }, [])
 
   const quota = quotaQuery.data
-  const isUnlimited = quota?.limit === null
   const quotaReached = !!quota && quota.limit !== null && quota.used >= quota.limit
-  const quotaLabel = !quota
-    ? null
-    : isUnlimited
-      ? 'Unlimited projects today'
-      : `${quota.used} / ${quota.limit} projects today · resets at ${formatResetTime(quota.resetsAt)}`
 
   function handleCreateProject(e: FormEvent) {
     e.preventDefault()
@@ -76,9 +70,7 @@ export function DashboardPage() {
       disabled={quotaReached}
       aria-disabled={quotaReached}
       className={`glass-card flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-all duration-200 ${
-        quotaReached
-          ? 'cursor-not-allowed opacity-60'
-          : 'hover:border-primary/50 hover:text-primary hover:shadow-lg'
+        quotaReached ? 'cursor-not-allowed opacity-60' : 'hover:border-primary/50 hover:text-primary hover:shadow-lg'
       }`}
     >
       <MapPin className="h-8 w-8" />
@@ -95,9 +87,6 @@ export function DashboardPage() {
             {userName ? `, ${userName}` : ''}
           </h1>
           <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
-          {quotaLabel && (
-            <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
-          )}
         </PageHeaderCard>
 
         {/* Quick Action Cards — flex-1 fills remaining viewport height */}
@@ -117,9 +106,7 @@ export function DashboardPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>{newProjectTile}</TooltipTrigger>
-                <TooltipContent>
-                  Daily limit reached — resets at {formatResetTime(quota.resetsAt)}
-                </TooltipContent>
+                <TooltipContent>Daily limit reached — resets at {formatResetTime(quota.resetsAt)}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           ) : (
