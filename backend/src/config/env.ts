@@ -19,7 +19,8 @@ const envSchema = z.object({
   SUPABASE_PROJECT_URL: z.string().url(),
   SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  FRONTEND_URL: z.string().url().optional().default('http://localhost:5173')
+  FRONTEND_URL: z.string().url().optional().default('http://localhost:5173'),
+  PDF_TOKEN_SECRET: z.string().min(32)
 })
 
 const parsed = envSchema.parse(process.env)
