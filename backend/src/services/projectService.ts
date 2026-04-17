@@ -64,10 +64,12 @@ export async function saveAnalysis(
 ) {
   const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
   if (!project) return null
+  const existingConfig = (project.analysisConfig as Record<string, unknown>) ?? {}
+  const nextAnalysisConfig = { ...existingConfig, ...analysisConfig }
   return prisma.project.update({
     where: { id: projectId },
     data: {
-      analysisConfig: analysisConfig as Prisma.InputJsonValue,
+      analysisConfig: nextAnalysisConfig as Prisma.InputJsonValue,
       analysisResults: analysisResults as Prisma.InputJsonValue,
       status: 'analysis_saved'
     },

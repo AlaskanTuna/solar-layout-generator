@@ -141,6 +141,12 @@ export function AnalysisSidebar({
             </div>
           </div>
           {selectedPanelModel && (
+            <div className="rounded-lg bg-muted p-3">
+              <p className="text-xs text-muted-foreground">Panel Model</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{selectedPanelModel.name}</p>
+            </div>
+          )}
+          {selectedPanelModel && (
             <details className="rounded-lg border border-border bg-muted/50 text-sm">
               <summary className="cursor-pointer px-3 py-2 font-medium text-foreground select-none">
                 Panel Specifications
