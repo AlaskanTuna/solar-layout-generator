@@ -129,7 +129,7 @@ export function AnalysisPage() {
       queryClient.setQueryData(['project', projectId], updatedProject)
       void queryClient.invalidateQueries({ queryKey: ['projects'] })
       notify.success('Analysis saved to your project')
-      navigate('/dashboard')
+      navigate('/dashboard/projects')
     },
     onError: (error) => {
       notify.error(error instanceof Error ? error.message : 'Failed to save the analysis')
