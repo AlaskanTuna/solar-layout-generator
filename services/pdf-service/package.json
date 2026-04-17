@@ -1,0 +1,26 @@
+{
+  "name": "pdf-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vercel serverless function that renders a given frontend URL to PDF using headless Chromium.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy:preview": "vercel",
+    "deploy": "vercel --prod",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^138.0.0",
+    "puppeteer-core": "^24.10.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@vercel/node": "^3.2.0",
+    "typescript": "^5.6.3"
+  }
+}
