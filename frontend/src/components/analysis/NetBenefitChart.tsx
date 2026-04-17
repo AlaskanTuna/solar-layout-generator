@@ -1,6 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger
+} from '@/components/ui/DropdownMenu'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { useTheme } from '@/hooks/useTheme'
 import { COLORS, getChartTooltipStyle } from '@/lib/constants'
@@ -14,39 +23,70 @@ type NetBenefitChartProps = {
   systemCostRm: number
 }
 
+const YEAR_RANGES = [5, 10, 15, 20, 25] as const
+type YearRange = (typeof YEAR_RANGES)[number]
+
 const round2 = (v: number) => Math.round(v * 100) / 100
 
 export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }: NetBenefitChartProps) {
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
+  const [yearRange, setYearRange] = useState<YearRange>(10)
 
   const netBenefitData = useMemo(
     () =>
-      Array.from({ length: 10 }, (_, i) => ({
+      Array.from({ length: yearRange }, (_, i) => ({
         year: `Yr ${i + 1}`,
         value: round2(computeDegradedSavings(year1Savings, degradationRate, i + 1) - systemCostRm)
       })),
-    [year1Savings, degradationRate, systemCostRm]
+    [year1Savings, degradationRate, systemCostRm, yearRange]
   )
 
-  const tenYearBenefit = netBenefitData[9].value
+  const finalYearBenefit = netBenefitData[netBenefitData.length - 1].value
+  const xAxisInterval = yearRange <= 10 ? 0 : yearRange <= 20 ? 1 : 2
 
   return (
     <Card className="border-border bg-card/90 shadow-sm">
-      <CardHeader>
-        <CardTitle>
-          Net Benefit Projection
-          <InfoTooltip text="Projects your cumulative savings minus the upfront system cost over 10 years. When bars turn green, you've recovered your investment and are in net profit. Includes annual panel degradation." />
-        </CardTitle>
-        <CardDescription>
-          How much you gain/lose after subtracting the cost of installing your solar system yearly.
-        </CardDescription>
+      <CardHeader className="space-y-2">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <CardTitle>
+              Net Benefit Projection
+              <InfoTooltip
+                text={`Projects your cumulative savings minus the upfront system cost over ${yearRange} years. When bars turn green, you've recovered your investment and are in net profit. Includes annual panel degradation.`}
+              />
+            </CardTitle>
+            <CardDescription>
+              How much you gain/lose after subtracting the cost of installing your solar system yearly.
+            </CardDescription>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                {yearRange}-Year
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuRadioGroup
+                value={String(yearRange)}
+                onValueChange={(v) => setYearRange(Number(v) as YearRange)}
+              >
+                {YEAR_RANGES.map((range) => (
+                  <DropdownMenuRadioItem key={range} value={String(range)}>
+                    {range}-Year
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg bg-muted p-4 text-center">
-          <p className="text-sm text-muted-foreground">10-Year Net Benefit</p>
-          <p className={`text-3xl font-semibold ${tenYearBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
-            {formatCurrency(tenYearBenefit)}
+          <p className="text-sm text-muted-foreground">{yearRange}-Year Net Benefit</p>
+          <p className={`text-3xl font-semibold ${finalYearBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+            {formatCurrency(finalYearBenefit)}
           </p>
         </div>
         <div className="h-[260px]">
@@ -69,9 +109,10 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm }:
                 axisLine={false}
                 tick={{ fill: COLORS.chartTick, fontSize: 11 }}
                 dy={10}
+                interval={xAxisInterval}
               />
               <YAxis
-                tickFormatter={(value) => `RM${value >= 0 ? '' : ''}${value.toLocaleString()}`}
+                tickFormatter={(value) => `RM${value.toLocaleString()}`}
                 width={70}
                 tickLine={false}
                 axisLine={false}
