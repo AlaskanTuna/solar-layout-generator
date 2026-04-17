@@ -139,6 +139,40 @@ export function SystemCostCard({
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
+                <defs>
+                  <linearGradient id="systemCostGradient-panels" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.panels} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.panels} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="systemCostGradient-inverter" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.inverter} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.inverter} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="systemCostGradient-mounting" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.mounting} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.mounting} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="systemCostGradient-electricalBos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.electricalBos} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.electricalBos} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="systemCostGradient-scaffolding" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.scaffolding} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.scaffolding} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="systemCostGradient-permit" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.permit} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.permit} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="systemCostGradient-labour" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.labour} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.labour} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="systemCostGradient-installerMargin" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={SEGMENT_COLORS.installerMargin} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={SEGMENT_COLORS.installerMargin} stopOpacity={0.05} />
+                  </linearGradient>
+                </defs>
                 <Pie
                   data={segments}
                   dataKey="value"
@@ -148,10 +182,14 @@ export function SystemCostCard({
                   innerRadius={58}
                   outerRadius={92}
                   paddingAngle={1.5}
-                  stroke="transparent"
                 >
                   {segments.map((segment) => (
-                    <Cell key={segment.key} fill={segment.color} />
+                    <Cell
+                      key={segment.key}
+                      fill={`url(#systemCostGradient-${segment.key})`}
+                      stroke={segment.color}
+                      strokeWidth={2}
+                    />
                   ))}
                 </Pie>
                 <Tooltip
