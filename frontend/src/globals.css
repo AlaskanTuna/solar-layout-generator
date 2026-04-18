@@ -389,16 +389,13 @@ body {
 
 /* PDF PRINT VIEW — rendered by Puppeteer via /project/:id/pdf-preview. See docs/TRD.md §14. */
 .pdf-document {
-  width: 297mm;
-  margin: 0 auto;
-  padding: 12mm;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
 }
 
 .pdf-page {
-  padding: 4mm 0;
+  padding: 0;
 }
 
 .pdf-page-break {
@@ -406,23 +403,25 @@ body {
   page-break-after: always;
 }
 
-.pdf-card-break {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-
 @page {
   size: A4 landscape;
-  margin: 10mm;
+  margin: 12mm;
+}
+
+@media screen {
+  /* Web preview only: simulate A4 landscape page width + padding so the preview
+     resembles the final PDF before Puppeteer prints it. */
+  .pdf-document {
+    width: 297mm;
+    margin: 0 auto;
+    padding: 12mm;
+  }
 }
 
 @media print {
   html,
   body {
     background: var(--background);
-  }
-  .pdf-document {
-    padding: 0;
   }
   /* Let Recharts SVG render without animation artifacts in print capture */
   * {

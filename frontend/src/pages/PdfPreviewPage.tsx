@@ -10,25 +10,47 @@ declare global {
   }
 }
 
-const VALID_CARD_IDS: CardId[] = [
+// Canonical full list of cards to include in a PDF export, in default order.
+// Matches the order used on AnalysisPage (advanced view), minus bill-breakdown which is skipped.
+const CANONICAL_CARD_ORDER: CardId[] = [
   'solar-verdict',
   'bill-comparison',
+  'month-table',
   'cumulative-savings',
   'system-cost',
-  'financial-roadmap',
+  'system-assumptions',
   'net-benefit',
-  'month-table',
-  'system-assumptions'
+  'financial-roadmap'
 ]
-const DEFAULT_CARD_ORDER: CardId[] = ['solar-verdict', 'bill-comparison', 'system-cost', 'financial-roadmap']
 
 function parseCardOrder(raw: string | null): CardId[] {
-  if (!raw) return DEFAULT_CARD_ORDER
+  if (!raw) return CANONICAL_CARD_ORDER
+  const validSet = new Set<CardId>(CANONICAL_CARD_ORDER)
   const parts = raw
     .split(',')
     .map((s) => s.trim())
-    .filter((s): s is CardId => VALID_CARD_IDS.includes(s as CardId))
-  return parts.length > 0 ? parts : DEFAULT_CARD_ORDER
+    .filter((s): s is CardId => validSet.has(s as CardId))
+  // Merge provided order with canonical: respect user ordering, append any missing so all cards render.
+  const result: CardId[] = []
+  const seen = new Set<CardId>()
+  for (const id of parts) {
+    if (!seen.has(id)) {
+      result.push(id)
+      seen.add(id)
+    }
+  }
+  for (const id of CANONICAL_CARD_ORDER) {
+    if (!seen.has(id)) {
+      result.push(id)
+      seen.add(id)
+    }
+  }
+  return result
+}
+
+function applyThemeFromParam(raw: string | null) {
+  if (raw !== 'dark' && raw !== 'light') return
+  document.documentElement.classList.toggle('dark', raw === 'dark')
 }
 
 export function PdfPreviewPage() {
@@ -36,6 +58,9 @@ export function PdfPreviewPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
   const cardOrder = parseCardOrder(searchParams.get('cardOrder'))
+
+  // Sync theme before first paint so chart colors and card backgrounds match the app.
+  applyThemeFromParam(searchParams.get('theme'))
 
   const [project, setProject] = useState<ProjectResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +83,7 @@ export function PdfPreviewPage() {
 
   useEffect(() => {
     if (!project) return
-    // Wait for Recharts entry animations (~1.5s default) + Konva paint + final layout settlement.
+    // Wait for Recharts entry animations (~1.5s default) + final layout settlement.
     const timer = setTimeout(() => {
       window.__PDF_READY__ = true
     }, 2000)

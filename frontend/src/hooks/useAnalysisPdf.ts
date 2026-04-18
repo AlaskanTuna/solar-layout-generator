@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { requestPdfExportToken } from '@/api/projects'
 import { notify } from '@/components/ui/toastConfig'
+import { useTheme } from '@/hooks/useTheme'
 
 const CARD_ORDER_STORAGE_KEY = 'slg-analysis-card-order'
 
@@ -40,6 +41,7 @@ function triggerDownload(blob: Blob, filename: string) {
 
 export function useAnalysisPdf() {
   const [isExporting, setIsExporting] = useState(false)
+  const { resolved: resolvedTheme } = useTheme()
 
   async function handleExportPdf(projectId: string, projectName: string) {
     const exportUrl = import.meta.env.VITE_PDF_EXPORT_URL
@@ -54,6 +56,7 @@ export function useAnalysisPdf() {
       const cardOrder = readCardOrder()
       const previewUrl = new URL(`/project/${projectId}/pdf-preview`, window.location.origin)
       previewUrl.searchParams.set('token', token)
+      previewUrl.searchParams.set('theme', resolvedTheme)
       if (cardOrder.length > 0) previewUrl.searchParams.set('cardOrder', cardOrder.join(','))
       if (import.meta.env.DEV) console.info('[PDF] previewUrl:', previewUrl.toString())
 
@@ -72,6 +75,7 @@ export function useAnalysisPdf() {
 
       const blob = await response.blob()
       triggerDownload(blob, filename)
+      notify.success(`PDF exported: ${filename}`)
     } catch (error) {
       notify.error(error instanceof Error ? error.message : 'Failed to export the PDF report')
     } finally {

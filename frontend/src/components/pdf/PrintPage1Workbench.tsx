@@ -39,14 +39,14 @@ export function PrintPage1Workbench({ project }: Props) {
 
   return (
     <section className="pdf-page pdf-page-break">
-      <header className="mb-8 border-b border-border pb-6">
+      <header className="mb-4 border-b border-border pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">S</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+            <span className="text-base font-bold text-primary-foreground">S</span>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Solar Installation Report</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl font-bold text-foreground">Solar Installation Report</h1>
+            <p className="text-xs text-muted-foreground">
               {project.name} &middot; Generated {generatedAt}
             </p>
           </div>
@@ -54,46 +54,48 @@ export function PrintPage1Workbench({ project }: Props) {
       </header>
 
       <div>
-        <h2 className="text-lg font-semibold text-foreground">Installation Overview</h2>
-        <p className="text-sm text-muted-foreground">Panel layout and hardware selection from the Workbench.</p>
+        <h2 className="text-base font-semibold text-foreground">Installation Overview</h2>
+        <p className="text-xs text-muted-foreground">Panel layout and hardware selection from the Workbench.</p>
 
         {project.rgbSignedUrl && (
-          <div className="relative mt-6 overflow-hidden rounded-lg border border-border">
-            <img
-              src={project.rgbSignedUrl}
-              alt="Rooftop satellite view with panel layout"
-              className="block h-auto w-full"
-              onLoad={(e) => {
-                const img = e.currentTarget
-                setImgSize({ w: img.naturalWidth, h: img.naturalHeight })
-              }}
-            />
-            {imgSize && overlays.length > 0 && (
-              <svg
-                className="absolute inset-0 h-full w-full"
-                viewBox={`0 0 ${imgSize.w} ${imgSize.h}`}
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                {overlays.map((o, i) => (
-                  <rect
-                    key={i}
-                    x={o.cx - o.wPx / 2}
-                    y={o.cy - o.hPx / 2}
-                    width={o.wPx}
-                    height={o.hPx}
-                    transform={`rotate(${o.rotationDeg}, ${o.cx}, ${o.cy})`}
-                    fill="#60a5fa"
-                    stroke="#1e3a8a"
-                    strokeWidth={1.2}
-                  />
-                ))}
-              </svg>
-            )}
+          <div className="mt-3 flex justify-center">
+            <div className="relative inline-flex overflow-hidden rounded-lg border border-border">
+              <img
+                src={project.rgbSignedUrl}
+                alt="Rooftop satellite view with panel layout"
+                className="block h-[110mm] w-auto"
+                onLoad={(e) => {
+                  const img = e.currentTarget
+                  setImgSize({ w: img.naturalWidth, h: img.naturalHeight })
+                }}
+              />
+              {imgSize && overlays.length > 0 && (
+                <svg
+                  className="absolute inset-0 h-full w-full"
+                  viewBox={`0 0 ${imgSize.w} ${imgSize.h}`}
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  {overlays.map((o, i) => (
+                    <rect
+                      key={i}
+                      x={o.cx - o.wPx / 2}
+                      y={o.cy - o.hPx / 2}
+                      width={o.wPx}
+                      height={o.hPx}
+                      transform={`rotate(${o.rotationDeg}, ${o.cx}, ${o.cy})`}
+                      fill="#60a5fa"
+                      stroke="#1e3a8a"
+                      strokeWidth={1.2}
+                    />
+                  ))}
+                </svg>
+              )}
+            </div>
           </div>
         )}
 
-        <div className="mt-6 grid grid-cols-2 gap-6">
+        <div className="mt-4 grid grid-cols-4 gap-3">
           <StatTile label="Active panels" value={String(activePanels.length)} suffix="panels" />
           <StatTile label="System size" value={systemKwp.toString()} suffix="kWp" />
           <StatTile label="Panel model" value={panelModel?.name ?? '—'} suffix={panelModel ? `${panelCapacityWp} Wp` : ''} />
@@ -106,10 +108,10 @@ export function PrintPage1Workbench({ project }: Props) {
 
 function StatTile({ label, value, suffix }: { label: string; value: string; suffix: string }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
-      {suffix && <p className="text-xs text-muted-foreground">{suffix}</p>}
+    <div className="rounded-lg border border-border bg-card p-3">
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-foreground">{value}</p>
+      {suffix && <p className="text-[10px] text-muted-foreground">{suffix}</p>}
     </div>
   )
 }
