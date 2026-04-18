@@ -30,8 +30,6 @@ import { SystemAssumptions } from '@/components/analysis/SystemAssumptions'
 import { SystemCostCard } from '@/components/analysis/SystemCostCard'
 import { SolarVerdict } from '@/components/analysis/SolarVerdict'
 import { SortableCardContainer } from '@/components/analysis/SortableCardContainer'
-import SimplePdfReport from '@/components/analysis/SimplePdfReport'
-import AdvancedPdfReport from '@/components/analysis/AdvancedPdfReport'
 import { AnalysisSidebar } from '@/components/analysis/AnalysisSidebar'
 import { useAnalysisForm, type AnalysisFormState } from '@/hooks/useAnalysisForm'
 import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
@@ -118,7 +116,7 @@ export function AnalysisPage() {
     panelCostPerWp
   } = useAnalysisForm(projectId)
 
-  const { reportRef, simpleReportRef, isExporting, handleExportPdf } = useAnalysisPdf()
+  const { isExporting, handleExportPdf } = useAnalysisPdf()
 
   useEffect(() => {
     if (projectQuery.data?.status === 'draft' && projectId) {
@@ -208,7 +206,7 @@ export function AnalysisPage() {
           viewMode={viewMode}
           isExporting={isExporting}
           isSaving={saveMutation.isPending}
-          onExportPdf={() => void handleExportPdf(viewMode, projectQuery.data.name)}
+          onExportPdf={() => void handleExportPdf(projectId!, projectQuery.data.name)}
           onSaveAnalysis={() => void handleSaveAnalysis()}
         />
 
@@ -393,29 +391,6 @@ export function AnalysisPage() {
           />
         </section>
       </PageContainer>
-
-      <SimplePdfReport
-        ref={simpleReportRef}
-        projectName={projectQuery.data.name}
-        analysisResults={analysisResults}
-        simulation={simulation}
-        activePanelCount={activePanels.length}
-        systemKwp={systemKwp}
-        systemCostRm={formState.systemCostRm}
-      />
-
-      <AdvancedPdfReport
-        ref={reportRef}
-        projectName={projectQuery.data.name}
-        analysisResults={analysisResults}
-        simulation={simulation}
-        chartData={chartData}
-        activePanelCount={activePanels.length}
-        systemKwp={systemKwp}
-        selectedPanelModel={selectedPanelModel}
-        formState={formState}
-        location={projectQuery.data.location}
-      />
     </AppLayout>
   )
 }

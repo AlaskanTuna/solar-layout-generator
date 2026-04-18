@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react'
-import html2pdf from 'html2pdf.js'
+import { useState } from 'react'
+import { requestPdfExportToken } from '@/api/projects'
 import { notify } from '@/components/ui/toastConfig'
+
+const CARD_ORDER_STORAGE_KEY = 'slg-analysis-card-order'
 
 function sanitizeFileName(value: string) {
   return value
@@ -14,27 +16,60 @@ function buildPdfFileName(projectName: string) {
   return `Solar_Analysis_${sanitizeFileName(projectName) || 'Project'}_${date}.pdf`
 }
 
+function readCardOrder(): string[] {
+  try {
+    const raw = localStorage.getItem(CARD_ORDER_STORAGE_KEY)
+    if (!raw) return []
+    const parsed: unknown = JSON.parse(raw)
+    return Array.isArray(parsed) && parsed.every((x) => typeof x === 'string') ? (parsed as string[]) : []
+  } catch {
+    return []
+  }
+}
+
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 export function useAnalysisPdf() {
-  const reportRef = useRef<HTMLDivElement>(null)
-  const simpleReportRef = useRef<HTMLDivElement>(null)
   const [isExporting, setIsExporting] = useState(false)
 
-  async function handleExportPdf(viewMode: 'simple' | 'advanced', projectName: string) {
-    const element = viewMode === 'simple' ? simpleReportRef.current : reportRef.current
-    if (!element) return
+  async function handleExportPdf(projectId: string, projectName: string) {
+    const exportUrl = import.meta.env.PDF_EXPORT_URL
+    if (!exportUrl) {
+      notify.error('PDF export service is not configured')
+      return
+    }
 
     setIsExporting(true)
     try {
-      await html2pdf()
-        .set({
-          margin: [10, 10, 10, 10],
-          filename: buildPdfFileName(projectName),
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        })
-        .from(element)
-        .save()
+      const { token } = await requestPdfExportToken(projectId)
+      const cardOrder = readCardOrder()
+      const previewUrl = new URL(`/project/${projectId}/pdf-preview`, window.location.origin)
+      previewUrl.searchParams.set('token', token)
+      if (cardOrder.length > 0) previewUrl.searchParams.set('cardOrder', cardOrder.join(','))
+
+      const filename = buildPdfFileName(projectName)
+      const response = await fetch(`${exportUrl}/api/pdf-export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ previewUrl: previewUrl.toString(), filename })
+      })
+
+      if (!response.ok) {
+        const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
+        throw new Error(body.error ?? body.message ?? `PDF export failed (${response.status})`)
+      }
+
+      const blob = await response.blob()
+      triggerDownload(blob, filename)
     } catch (error) {
       notify.error(error instanceof Error ? error.message : 'Failed to export the PDF report')
     } finally {
@@ -42,10 +77,5 @@ export function useAnalysisPdf() {
     }
   }
 
-  return {
-    reportRef,
-    simpleReportRef,
-    isExporting,
-    handleExportPdf
-  }
+  return { isExporting, handleExportPdf }
 }
