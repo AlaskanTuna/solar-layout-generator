@@ -12,7 +12,9 @@ const NAV_TIMEOUT_MS = 30_000
 const READY_TIMEOUT_MS = 30_000
 // A4 landscape CSS viewport ~ 1123 x 794 px at 96 DPI. Add height headroom so multi-page content renders.
 const VIEWPORT = { width: 1280, height: 1800, deviceScaleFactor: 2 }
-const PAGE_MARGIN = { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+// Zero margin so the CSS-driven full-bleed background + fixed header/footer render edge-to-edge.
+// Content padding is handled by .pdf-page CSS inside the HTML.
+const PAGE_MARGIN = { top: '0', right: '0', bottom: '0', left: '0' }
 
 function parseAllowedOrigins(raw: string | undefined): string[] {
   if (!raw) return []

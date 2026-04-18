@@ -422,10 +422,13 @@ body {
   border-top: 1px solid var(--border);
 }
 
-/* Each .pdf-page occupies one A4 landscape sheet between the reserved header/footer strips. */
+/* Each .pdf-page is a full A4 landscape sheet. Top padding (18mm) clears the 14mm
+   fixed header plus a 4mm content gap; bottom padding (14mm) clears the 10mm footer
+   plus a 4mm gap. Side padding is the usual content margin. */
 .pdf-page {
-  padding: 4mm 12mm;
+  padding: 18mm 12mm 14mm 12mm;
   box-sizing: border-box;
+  min-height: 210mm;
 }
 
 .pdf-page-break {
@@ -438,15 +441,22 @@ body {
   page-break-inside: avoid;
 }
 
+/* Clip chart/card overflow (e.g. rightmost Recharts X-axis tick label) at the card
+   boundary so they never bleed past the page padding. */
+.pdf-document .pdf-card-break > * {
+  overflow: hidden;
+}
+
 /* Inside the PDF document, hide interactive affordances that only make sense on
    screen — info-tooltip triggers, dropdown controls, collapse toggles. */
 .pdf-document .pdf-hide {
   display: none !important;
 }
 
+/* Full-bleed: no @page margin so the document background fills paper edge-to-edge. */
 @page {
   size: A4 landscape;
-  margin: 14mm 0 10mm 0;
+  margin: 0;
 }
 
 @media screen {
@@ -454,11 +464,8 @@ body {
   .pdf-document {
     width: 297mm;
     margin: 0 auto;
-    padding-top: 14mm;
-    padding-bottom: 10mm;
   }
   .pdf-page {
-    min-height: 186mm;
     border: 1px dashed rgba(0, 0, 0, 0.15);
   }
 }
@@ -469,9 +476,6 @@ body {
     margin: 0;
     padding: 0;
     background: var(--background);
-  }
-  .pdf-page {
-    min-height: 186mm;
   }
   /* Let Recharts SVG render without animation artifacts in print capture */
   * {
