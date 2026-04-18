@@ -14,20 +14,34 @@ const READY_TIMEOUT_MS = 30_000
 const VIEWPORT = { width: 1280, height: 1800, deviceScaleFactor: 2 }
 const PAGE_MARGIN = { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
 
-function setCorsHeaders(res: VercelResponse, allowedOrigin: string) {
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+function parseAllowedOrigins(raw: string | undefined): string[] {
+  if (!raw) return []
+  return raw
+    .split(',')
+    .map((s) => s.trim().replace(/\/$/, ''))
+    .filter(Boolean)
+}
+
+function pickCorsOrigin(requestOrigin: string | undefined, allowedOrigins: string[]): string {
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) return requestOrigin
+  return allowedOrigins[0] ?? ''
+}
+
+function setCorsHeaders(res: VercelResponse, origin: string) {
+  if (origin) res.setHeader('Access-Control-Allow-Origin', origin)
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   res.setHeader('Vary', 'Origin')
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const allowedOrigin = process.env.ALLOWED_FRONTEND_ORIGIN
-  if (!allowedOrigin) {
+  const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_FRONTEND_ORIGIN)
+  if (allowedOrigins.length === 0) {
     return res.status(500).json({ error: 'Server misconfigured: ALLOWED_FRONTEND_ORIGIN unset' })
   }
 
-  setCorsHeaders(res, allowedOrigin)
+  const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : undefined
+  setCorsHeaders(res, pickCorsOrigin(requestOrigin, allowedOrigins))
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
@@ -51,10 +65,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'previewUrl is not a valid URL' })
   }
 
-  if (previewOrigin !== allowedOrigin) {
+  if (!allowedOrigins.includes(previewOrigin)) {
     return res.status(403).json({
       error: 'previewUrl origin not allowed',
-      expected: allowedOrigin,
+      expected: allowedOrigins,
       got: previewOrigin
     })
   }
