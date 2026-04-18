@@ -9,6 +9,7 @@ export type CardId =
   | 'system-cost'
   | 'financial-roadmap'
   | 'net-benefit'
+  | 'month-table'
   | 'system-assumptions'
 
 type PrintReportProps = {

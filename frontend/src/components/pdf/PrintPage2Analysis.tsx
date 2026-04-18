@@ -14,6 +14,7 @@ import { SystemCostCard } from '@/components/analysis/SystemCostCard'
 import { FinancialRoadmap } from '@/components/analysis/FinancialRoadmap'
 import { NetBenefitChart } from '@/components/analysis/NetBenefitChart'
 import { SystemAssumptions } from '@/components/analysis/SystemAssumptions'
+import { MonthTable } from '@/components/analysis/MonthTable'
 import { ChartTooltipContent } from '@/components/analysis/ChartTooltipContent'
 import type { CardId } from './PrintReport'
 
@@ -103,6 +104,17 @@ export function PrintPage2Analysis({ project, cardOrder }: Props) {
     : null
   const roofSegmentStats = buildingInsights?.solarPotential.roofSegmentStats ?? []
 
+  // MonthTable expects AnnualSimulationResult; we reconstruct it from saved analysisResults.
+  const simulation = {
+    months: analysisResults.monthlyBreakdown,
+    totalConsumptionKwh: analysisResults.annualTotals.totalConsumptionKwh,
+    totalGenerationKwh: analysisResults.annualTotals.totalGenerationKwh,
+    totalBaselineRm: analysisResults.annualTotals.totalBaselineRm,
+    totalNemRm: analysisResults.annualTotals.totalNemRm,
+    totalSavingsRm: analysisResults.annualTotals.totalSavingsRm,
+    totalCreditsForfeited: analysisResults.annualTotals.totalCreditsForfeitedKwh
+  }
+
   const chartData = buildChartData(analysisResults.monthlyBreakdown)
   const costBreakdown =
     activePanels.length > 0 && panelCapacityWp > 0
@@ -145,8 +157,14 @@ export function PrintPage2Analysis({ project, cardOrder }: Props) {
       />
     ),
     'net-benefit': (
-      <NetBenefitChart year1Savings={year1Savings} degradationRate={degradationRate} systemCostRm={systemCostRm} />
+      <NetBenefitChart
+        year1Savings={year1Savings}
+        degradationRate={degradationRate}
+        systemCostRm={systemCostRm}
+        defaultYearRange={25}
+      />
     ),
+    'month-table': <MonthTable simulation={simulation} isOpen={true} onToggle={() => {}} />,
     'system-assumptions': (
       <SystemAssumptions
         performanceRatio={performanceRatio}

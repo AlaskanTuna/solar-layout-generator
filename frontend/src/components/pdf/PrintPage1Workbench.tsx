@@ -1,10 +1,69 @@
+import { useState } from 'react'
 import type { ProjectResponse } from '@/api/projects'
 import { getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
-import { parsePanelEdits } from '@/lib/buildingInsights'
+import { parseBuildingInsights, parsePanelEdits, type BoundingBox } from '@/lib/buildingInsights'
+import type { PanelEdit } from '@shared/types'
 
 type Props = { project: ProjectResponse }
 
 const ROOF_LABEL = { tile: 'Tile', metal: 'Metal', flat: 'Flat' } as const
+
+function metersPerDegreeLat(): number {
+  return 110574 // WGS84 meridian arc length per 1 deg lat, good-enough constant for our scale
+}
+
+function metersPerDegreeLng(latDeg: number): number {
+  return 111320 * Math.cos((latDeg * Math.PI) / 180)
+}
+
+/** Lat/lng → pixel coords within the image viewBox. Bounds map like an equirectangular projection
+ *  over the tiny bbox (<100m span) so cos(lat) is effectively constant. */
+function latLngToImagePx(
+  lat: number,
+  lng: number,
+  bbox: BoundingBox,
+  imgW: number,
+  imgH: number
+): { x: number; y: number } {
+  const { sw, ne } = bbox
+  const xPct = (lng - sw.longitude) / (ne.longitude - sw.longitude)
+  const yPct = (ne.latitude - lat) / (ne.latitude - sw.latitude) // flipped: image y grows downward
+  return { x: xPct * imgW, y: yPct * imgH }
+}
+
+type Overlay = {
+  cx: number
+  cy: number
+  wPx: number
+  hPx: number
+  rotationDeg: number
+}
+
+function computeOverlays(
+  panels: PanelEdit[],
+  bbox: BoundingBox,
+  panelWidthMeters: number,
+  panelHeightMeters: number,
+  imgW: number,
+  imgH: number
+): Overlay[] {
+  const centerLat = (bbox.sw.latitude + bbox.ne.latitude) / 2
+  const bboxWidthMeters = (bbox.ne.longitude - bbox.sw.longitude) * metersPerDegreeLng(centerLat)
+  const bboxHeightMeters = (bbox.ne.latitude - bbox.sw.latitude) * metersPerDegreeLat()
+  const pxPerMeterX = imgW / bboxWidthMeters
+  const pxPerMeterY = imgH / bboxHeightMeters
+
+  return panels.map((panel) => {
+    const { x, y } = latLngToImagePx(panel.center.lat, panel.center.lng, bbox, imgW, imgH)
+    return {
+      cx: x,
+      cy: y,
+      wPx: panelWidthMeters * pxPerMeterX,
+      hPx: panelHeightMeters * pxPerMeterY,
+      rotationDeg: panel.rotation
+    }
+  })
+}
 
 export function PrintPage1Workbench({ project }: Props) {
   const activePanels = parsePanelEdits(project.editedLayout).filter((p) => p.status !== 'deleted')
@@ -17,6 +76,18 @@ export function PrintPage1Workbench({ project }: Props) {
     month: 'short',
     year: 'numeric'
   })
+
+  const buildingInsights = project.location?.buildingInsightsJson
+    ? parseBuildingInsights(project.location.buildingInsightsJson)
+    : null
+  const panelWidthMeters = panelModel?.widthM ?? buildingInsights?.solarPotential.panelWidthMeters ?? 0
+  const panelHeightMeters = panelModel?.heightM ?? buildingInsights?.solarPotential.panelHeightMeters ?? 0
+
+  const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null)
+  const overlays =
+    buildingInsights && imgSize && panelWidthMeters > 0 && panelHeightMeters > 0
+      ? computeOverlays(activePanels, buildingInsights.boundingBox, panelWidthMeters, panelHeightMeters, imgSize.w, imgSize.h)
+      : []
 
   return (
     <section className="pdf-page pdf-page-break">
@@ -39,12 +110,38 @@ export function PrintPage1Workbench({ project }: Props) {
         <p className="text-sm text-muted-foreground">Panel layout and hardware selection from the Workbench.</p>
 
         {project.rgbSignedUrl && (
-          <div className="mt-6 overflow-hidden rounded-lg border border-border">
+          <div className="relative mt-6 overflow-hidden rounded-lg border border-border">
             <img
               src={project.rgbSignedUrl}
-              alt="Rooftop satellite view"
-              className="block h-auto w-full object-contain"
+              alt="Rooftop satellite view with panel layout"
+              className="block h-auto w-full"
+              onLoad={(e) => {
+                const img = e.currentTarget
+                setImgSize({ w: img.naturalWidth, h: img.naturalHeight })
+              }}
             />
+            {imgSize && overlays.length > 0 && (
+              <svg
+                className="absolute inset-0 h-full w-full"
+                viewBox={`0 0 ${imgSize.w} ${imgSize.h}`}
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                {overlays.map((o, i) => (
+                  <rect
+                    key={i}
+                    x={o.cx - o.wPx / 2}
+                    y={o.cy - o.hPx / 2}
+                    width={o.wPx}
+                    height={o.hPx}
+                    transform={`rotate(${o.rotationDeg}, ${o.cx}, ${o.cy})`}
+                    fill="rgba(59, 130, 246, 0.35)"
+                    stroke="#1d4ed8"
+                    strokeWidth={1.2}
+                  />
+                ))}
+              </svg>
+            )}
           </div>
         )}
 

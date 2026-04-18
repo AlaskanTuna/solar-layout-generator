@@ -17,6 +17,7 @@ const VALID_CARD_IDS: CardId[] = [
   'system-cost',
   'financial-roadmap',
   'net-benefit',
+  'month-table',
   'system-assumptions'
 ]
 const DEFAULT_CARD_ORDER: CardId[] = ['solar-verdict', 'bill-comparison', 'system-cost', 'financial-roadmap']
