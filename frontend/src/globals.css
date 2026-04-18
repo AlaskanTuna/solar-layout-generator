@@ -386,3 +386,47 @@ body {
 .pac-container {
   z-index: 10000 !important;
 }
+
+/* PDF PRINT VIEW — rendered by Puppeteer via /project/:id/pdf-preview. See docs/TRD.md §14. */
+.pdf-document {
+  width: 210mm;
+  margin: 0 auto;
+  padding: 12mm;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+.pdf-page {
+  padding: 4mm 0;
+}
+
+.pdf-page-break {
+  break-after: page;
+  page-break-after: always;
+}
+
+.pdf-card-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+@media print {
+  html,
+  body {
+    background: var(--background);
+  }
+  .pdf-document {
+    padding: 0;
+  }
+  /* Let Recharts SVG render without animation artifacts in print capture */
+  * {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
