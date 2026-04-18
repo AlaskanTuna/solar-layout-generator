@@ -83,8 +83,8 @@ export function PrintPage1Workbench({ project }: Props) {
                     width={o.wPx}
                     height={o.hPx}
                     transform={`rotate(${o.rotationDeg}, ${o.cx}, ${o.cy})`}
-                    fill="rgba(59, 130, 246, 0.35)"
-                    stroke="#1d4ed8"
+                    fill="#60a5fa"
+                    stroke="#1e3a8a"
                     strokeWidth={1.2}
                   />
                 ))}
