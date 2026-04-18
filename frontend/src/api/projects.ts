@@ -24,6 +24,8 @@ export type ProjectResponse = {
     buildingInsightsJson?: Record<string, unknown>
     rgbImageUrl?: string | null
   }
+  /** Populated only by `/pdf-data` — a short-lived signed URL for the RGB satellite image. */
+  rgbSignedUrl?: string | null
 }
 
 export function createProject(req: CreateProjectRequest) {

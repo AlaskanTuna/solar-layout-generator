@@ -10,7 +10,15 @@ declare global {
   }
 }
 
-const VALID_CARD_IDS: CardId[] = ['solar-verdict', 'bill-comparison', 'system-cost', 'financial-roadmap', 'net-benefit']
+const VALID_CARD_IDS: CardId[] = [
+  'solar-verdict',
+  'bill-comparison',
+  'cumulative-savings',
+  'system-cost',
+  'financial-roadmap',
+  'net-benefit',
+  'system-assumptions'
+]
 const DEFAULT_CARD_ORDER: CardId[] = ['solar-verdict', 'bill-comparison', 'system-cost', 'financial-roadmap']
 
 function parseCardOrder(raw: string | null): CardId[] {

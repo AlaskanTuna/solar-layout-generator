@@ -38,6 +38,16 @@ export function PrintPage1Workbench({ project }: Props) {
         <h2 className="text-lg font-semibold text-foreground">Installation Overview</h2>
         <p className="text-sm text-muted-foreground">Panel layout and hardware selection from the Workbench.</p>
 
+        {project.rgbSignedUrl && (
+          <div className="mt-6 overflow-hidden rounded-lg border border-border">
+            <img
+              src={project.rgbSignedUrl}
+              alt="Rooftop satellite view"
+              className="block h-auto w-full object-contain"
+            />
+          </div>
+        )}
+
         <div className="mt-6 grid grid-cols-2 gap-6">
           <StatTile label="Active panels" value={String(activePanels.length)} suffix="panels" />
           <StatTile label="System size" value={systemKwp.toString()} suffix="kWp" />

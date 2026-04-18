@@ -8,6 +8,7 @@ import { asyncHandler } from '../middleware/asyncHandler.js'
 import { createProjectSchema, saveLayoutSchema, saveAnalysisSchema } from '../validators/projects.js'
 import * as projectService from '../services/projectService.js'
 import { signPdfToken } from '../services/pdfTokenService.js'
+import { getSignedUrl } from '../services/storageService.js'
 import { NotFoundError } from '../errors.js'
 
 export const projectsRouter: ExpressRouter = Router()
@@ -140,6 +141,9 @@ projectsRouter.get(
       console.warn(`[PdfData] project not found user=${userId} project=${projectId}`)
       throw new NotFoundError('Project not found')
     }
-    res.json(project)
+    // Supabase Storage paths need a signed URL to render in the print view.
+    const rgbPath = project.location?.rgbImageUrl
+    const rgbSignedUrl = rgbPath ? await getSignedUrl(rgbPath) : null
+    res.json({ ...project, rgbSignedUrl })
   })
 )

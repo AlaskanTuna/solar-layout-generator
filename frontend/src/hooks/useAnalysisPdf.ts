@@ -55,6 +55,7 @@ export function useAnalysisPdf() {
       const previewUrl = new URL(`/project/${projectId}/pdf-preview`, window.location.origin)
       previewUrl.searchParams.set('token', token)
       if (cardOrder.length > 0) previewUrl.searchParams.set('cardOrder', cardOrder.join(','))
+      if (import.meta.env.DEV) console.info('[PDF] previewUrl:', previewUrl.toString())
 
       const filename = buildPdfFileName(projectName)
       const response = await fetch(`${exportUrl}/api/pdf-export`, {
@@ -65,7 +66,8 @@ export function useAnalysisPdf() {
 
       if (!response.ok) {
         const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
-        throw new Error(body.error ?? body.message ?? `PDF export failed (${response.status})`)
+        const header = body.error ?? `PDF export failed (${response.status})`
+        throw new Error(body.message ? `${header}: ${body.message}` : header)
       }
 
       const blob = await response.blob()

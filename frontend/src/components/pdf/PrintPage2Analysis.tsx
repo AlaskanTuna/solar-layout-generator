@@ -1,16 +1,23 @@
 import type { ReactNode } from 'react'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { ProjectResponse } from '@/api/projects'
 import type { AnalysisResultsRecord } from '@/lib/analysis'
 import { ANALYSIS_DISCLAIMERS, MONTH_LABELS } from '@/lib/analysis'
-import { parsePanelEdits } from '@/lib/buildingInsights'
+import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
-
-type ChartDataPoint = { month: string; baselineBill: number; nemBill: number; cumulativeSavings: number }
+import { useTheme } from '@/hooks/useTheme'
+import { getChartTooltipStyle } from '@/lib/constants'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SolarVerdict } from '@/components/analysis/SolarVerdict'
 import { BillComparisonChart } from '@/components/analysis/BillComparisonChart'
 import { SystemCostCard } from '@/components/analysis/SystemCostCard'
 import { FinancialRoadmap } from '@/components/analysis/FinancialRoadmap'
+import { NetBenefitChart } from '@/components/analysis/NetBenefitChart'
+import { SystemAssumptions } from '@/components/analysis/SystemAssumptions'
+import { ChartTooltipContent } from '@/components/analysis/ChartTooltipContent'
 import type { CardId } from './PrintReport'
+
+type ChartDataPoint = { month: string; baselineBill: number; nemBill: number; cumulativeSavings: number }
 
 type Props = {
   project: ProjectResponse
@@ -28,6 +35,42 @@ function buildChartData(monthlyBreakdown: AnalysisResultsRecord['monthlyBreakdow
       cumulativeSavings: Math.round(cumulativeSavings * 100) / 100
     }
   })
+}
+
+function CumulativeSavingsCard({ chartData }: { chartData: ChartDataPoint[] }) {
+  const { resolved } = useTheme()
+  const tooltipStyle = getChartTooltipStyle(resolved)
+  return (
+    <Card className="border-border bg-card/90 shadow-sm">
+      <CardHeader>
+        <CardTitle>Cumulative Savings</CardTitle>
+        <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
+      </CardHeader>
+      <CardContent className="h-[340px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData} margin={{ left: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="month" />
+            <YAxis width={70} tickFormatter={(v) => `RM${v}`} />
+            <Tooltip
+              cursor={tooltipStyle.cursor}
+              contentStyle={tooltipStyle.contentStyle}
+              labelStyle={tooltipStyle.labelStyle}
+              content={<ChartTooltipContent />}
+            />
+            <Line
+              type="monotone"
+              dataKey="cumulativeSavings"
+              name="Cumulative Savings"
+              stroke="#ca8a04"
+              strokeWidth={3}
+              dot={{ r: 3 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  )
 }
 
 export function PrintPage2Analysis({ project, cardOrder }: Props) {
@@ -51,7 +94,14 @@ export function PrintPage2Analysis({ project, cardOrder }: Props) {
   const roofType = project.analysisConfig?.roofType ?? 'tile'
   const connectionPhase = project.analysisConfig?.connectionPhase ?? 'single'
   const degradationRate = project.analysisConfig?.degradationRate ?? 0.005
+  const performanceRatio = project.analysisConfig?.performanceRatio ?? 0.8
+  const assumedLosses = project.analysisConfig?.assumedLosses ?? 0.2
+  const dcAcRatio = project.analysisConfig?.dcAcRatio ?? 1.2
   const systemCostRm = project.analysisConfig?.systemCostRm ?? 0
+  const buildingInsights = project.location?.buildingInsightsJson
+    ? parseBuildingInsights(project.location.buildingInsightsJson)
+    : null
+  const roofSegmentStats = buildingInsights?.solarPotential.roofSegmentStats ?? []
 
   const chartData = buildChartData(analysisResults.monthlyBreakdown)
   const costBreakdown =
@@ -75,6 +125,7 @@ export function PrintPage2Analysis({ project, cardOrder }: Props) {
       />
     ),
     'bill-comparison': <BillComparisonChart chartData={chartData} />,
+    'cumulative-savings': <CumulativeSavingsCard chartData={chartData} />,
     'system-cost': (
       <SystemCostCard
         costBreakdown={costBreakdown}
@@ -91,6 +142,19 @@ export function PrintPage2Analysis({ project, cardOrder }: Props) {
         year1Savings={year1Savings}
         degradationRate={degradationRate}
         systemKwp={systemKwp}
+      />
+    ),
+    'net-benefit': (
+      <NetBenefitChart year1Savings={year1Savings} degradationRate={degradationRate} systemCostRm={systemCostRm} />
+    ),
+    'system-assumptions': (
+      <SystemAssumptions
+        performanceRatio={performanceRatio}
+        assumedLosses={assumedLosses}
+        degradationRate={degradationRate}
+        dcAcRatio={dcAcRatio}
+        panelLifetimeYears={null}
+        roofSegmentStats={roofSegmentStats}
       />
     )
   }
