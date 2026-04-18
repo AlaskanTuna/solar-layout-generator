@@ -387,8 +387,13 @@ body {
   z-index: 10000 !important;
 }
 
-/* PDF PRINT VIEW — rendered by Puppeteer via /project/:id/pdf-preview. See docs/TRD.md §14. */
+/* PDF PRINT VIEW — rendered by Puppeteer via /project/:id/pdf-preview. See docs/TRD.md §14.
+   Width must be set in BOTH screen and print so Recharts' ResponsiveContainer measures the
+   actual paper width (297mm) not Puppeteer's viewport (1280px). Without this, charts render
+   at viewport width and get cropped at the right edge by the smaller paper size. */
 .pdf-document {
+  width: 297mm;
+  margin: 0 auto;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
@@ -460,11 +465,7 @@ body {
 }
 
 @media screen {
-  /* Web preview: simulate landscape paper sheets so the preview matches the PDF. */
-  .pdf-document {
-    width: 297mm;
-    margin: 0 auto;
-  }
+  /* Web preview: dashed borders help you see where each printed page boundary will land. */
   .pdf-page {
     border: 1px dashed rgba(0, 0, 0, 0.15);
   }
