@@ -60,3 +60,19 @@ export function saveAnalysis(id: string, req: SaveAnalysisRequest) {
     body: JSON.stringify(req)
   })
 }
+
+export type PdfExportToken = { token: string; expiresAt: string }
+
+export function requestPdfExportToken(id: string) {
+  return apiFetch<PdfExportToken>(`/projects/${id}/pdf-token`, { method: 'POST' })
+}
+
+/** Token-auth'd (no session cookie); used by the PDF preview route the Vercel function navigates to. */
+export async function getProjectForPdf(id: string, token: string): Promise<ProjectResponse> {
+  const response = await fetch(`/api/projects/${id}/pdf-data?token=${encodeURIComponent(token)}`)
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error ?? `Failed to load PDF data (${response.status})`)
+  }
+  return response.json() as Promise<ProjectResponse>
+}

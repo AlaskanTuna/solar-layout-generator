@@ -21,6 +21,9 @@ const AnalysisPage = lazy(() =>
 const AnalyticsPage = lazy(() =>
   import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage }))
 )
+const PdfPreviewPage = lazy(() =>
+  import('./pages/PdfPreviewPage').then((m) => ({ default: m.PdfPreviewPage }))
+)
 
 const PAGE_LOADING_HINTS = ['Loading page...']
 
@@ -30,6 +33,14 @@ export function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/sign-in" element={<SignInPage />} />
       <Route path="/sign-up" element={<SignUpPage />} />
+      <Route
+        path="/project/:projectId/pdf-preview"
+        element={
+          <Suspense fallback={<LoadingOverlay hints={PAGE_LOADING_HINTS} />}>
+            <PdfPreviewPage />
+          </Suspense>
+        }
+      />
       <Route element={<ProtectedRoute />}>
         {/* Dashboard routes — share sidebar with INSIGHTS nav */}
         <Route path="/dashboard" element={<DashboardLayout />}>
