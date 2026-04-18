@@ -171,7 +171,7 @@ export function PrintPage2Analysis({ project, cardOrder }: Props) {
         assumedLosses={assumedLosses}
         degradationRate={degradationRate}
         dcAcRatio={dcAcRatio}
-        panelLifetimeYears={null}
+        panelLifetimeYears={buildingInsights?.solarPotential.panelLifetimeYears ?? null}
         roofSegmentStats={roofSegmentStats}
       />
     )

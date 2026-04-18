@@ -71,21 +71,20 @@ pnpm install
 cp .env.example .env
 ```
 
-Fill in all values in `.env`:
+Fill in all values in `.env`. Every `VITE_`-prefixed variant uses `${VAR}` interpolation from a canonical (non-prefixed) name, so each secret is written once.
 
-| Variable                    | Description                                   |
-| --------------------------- | --------------------------------------------- |
-| `GOOGLE_SOLAR_API_KEY`      | Google Cloud API key with Solar API enabled   |
-| `GOOGLE_MAPS_API_KEY`       | Google Cloud API key with Maps JS API enabled |
-| `SUPABASE_PROJECT_URL`      | Your Supabase project URL                     |
-| `SUPABASE_ANON_KEY`         | Supabase anonymous/public key                 |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (backend only)      |
-| `SUPABASE_DATABASE_URL`     | Direct PostgreSQL connection string           |
-| `VITE_SUPABASE_URL`         | Same as `SUPABASE_PROJECT_URL` (frontend)     |
-| `VITE_SUPABASE_ANON_KEY`    | Same as `SUPABASE_ANON_KEY` (frontend)        |
-| `VITE_GOOGLE_MAPS_API_KEY`  | Same as `GOOGLE_MAPS_API_KEY` (frontend)      |
-| `GOOGLE_OAUTH_CLIENT_ID`    | Google OAuth 2.0 client ID (for SSO)          |
-| `GOOGLE_OAUTH_SECRET`       | Google OAuth 2.0 client secret (for SSOs)     |
+| Variable                    | Description                                                          |
+| --------------------------- | -------------------------------------------------------------------- |
+| `GOOGLE_API_KEY`            | Google Cloud API key with Solar + Maps JS APIs enabled               |
+| `GOOGLE_OAUTH_CLIENT_ID`    | Google OAuth 2.0 client ID (for SSO)                                 |
+| `GOOGLE_OAUTH_SECRET`       | Google OAuth 2.0 client secret                                       |
+| `SUPABASE_URL`              | Your Supabase project URL                                            |
+| `SUPABASE_ANON_KEY`         | Supabase anonymous/public key                                        |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (backend only)                             |
+| `SUPABASE_DATABASE_URL`     | Direct PostgreSQL connection string                                  |
+| `FRONTEND_URL`              | Allowed origin for CORS (default `http://localhost:5173`)            |
+| `PDF_TOKEN_SECRET`          | 32+ char hex secret for signing PDF export tokens (backend only)     |
+| `PDF_EXPORT_URL`            | URL of the deployed Vercel PDF function (see "PDF Export" below)     |
 
 ### 3. Set up the database
 
@@ -211,6 +210,40 @@ With the workflow configured, you should not need `git push heroku main` for nor
 The `heroku-postbuild` script still builds all workspaces on Heroku. The `Procfile` now starts the app with `pnpm start` and the Express server serves the frontend static files in production.
 
 > **Note:** This project uses Express 5 with `path-to-regexp` v8+, which requires named catch-all parameters (e.g. `'{*path}'` instead of `'*'`).
+
+---
+
+## PDF Export Service
+
+The analysis report PDF is rendered by a **dedicated Vercel serverless function** (`services/pdf-service/`) that runs headless Chromium via Puppeteer. The Heroku backend never runs Chrome — it only issues short-lived signed tokens that grant the PDF function read-only access to one project.
+
+**Flow:** click Export PDF → frontend asks backend for a 60 s signed token → frontend POSTs `{ previewUrl: "<frontend>/project/:id/pdf-preview?token=..." }` to the Vercel function → Vercel Chromium navigates to the print route, waits for charts to settle, captures A4 landscape PDF → frontend downloads the blob.
+
+### Deploying the PDF service
+
+```bash
+cd services/pdf-service
+vercel                                       # interactive first-time link
+vercel env add ALLOWED_FRONTEND_ORIGIN       # paste the frontend origin (e.g. Heroku URL)
+vercel --prod                                # production deploy; prints the function URL
+```
+
+Then set `PDF_EXPORT_URL` (backend + frontend build) and `ALLOWED_FRONTEND_ORIGIN` (Vercel) to the corresponding values:
+
+| Where                        | Variable                  | Value                                   |
+| ---------------------------- | ------------------------- | --------------------------------------- |
+| Root `.env` (local + Heroku) | `PDF_EXPORT_URL`          | e.g. `https://pdf-service-teal.vercel.app` |
+| Root `.env` (local + Heroku) | `PDF_TOKEN_SECRET`        | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| Vercel function config       | `ALLOWED_FRONTEND_ORIGIN` | Production frontend URL (SSRF guard)    |
+
+### Redeploying
+
+```bash
+cd services/pdf-service
+vercel --prod
+```
+
+No GitHub Actions workflow is required — Vercel's CLI handles the release. The service runs on the Hobby tier and costs $0 for typical demo usage.
 
 ---
 
