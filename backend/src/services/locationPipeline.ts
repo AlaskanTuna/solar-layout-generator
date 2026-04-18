@@ -63,7 +63,7 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
 
       // Append API key to GeoTIFF download URL
       const downloadUrl = new URL(url)
-      downloadUrl.searchParams.set('key', env.GOOGLE_SOLAR_API_KEY)
+      downloadUrl.searchParams.set('key', env.GOOGLE_API_KEY)
       const response = await fetch(downloadUrl.toString())
       if (!response.ok) throw new Error(`Failed to download ${field}`)
       const buffer = Buffer.from(await response.arrayBuffer())

@@ -7,7 +7,7 @@ export async function fetchBuildingInsights(lat: number, lng: number) {
     'location.latitude': lat.toString(),
     'location.longitude': lng.toString(),
     requiredQuality: 'HIGH',
-    key: env.GOOGLE_SOLAR_API_KEY
+    key: env.GOOGLE_API_KEY
   })
 
   const response = await fetch(`${BASE_URL}/buildingInsights:findClosest?${params}`)
@@ -24,7 +24,7 @@ export async function fetchDataLayers(lat: number, lng: number, radiusMeters: nu
     radiusMeters: radiusMeters.toString(),
     view: 'FULL_LAYERS',
     requiredQuality: 'HIGH',
-    key: env.GOOGLE_SOLAR_API_KEY
+    key: env.GOOGLE_API_KEY
   })
 
   const response = await fetch(`${BASE_URL}/dataLayers:get?${params}`)

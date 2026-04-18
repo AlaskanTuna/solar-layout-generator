@@ -15,10 +15,8 @@ const envSchema = z.object({
     z.enum(['development', 'production', 'test']).default('development')
   ),
   SUPABASE_DATABASE_URL: z.string().min(1),
-  GOOGLE_SOLAR_API_KEY: z.string().min(1),
-  GOOGLE_MAPS_API_KEY: z.string().min(1),
-  SUPABASE_PROJECT_URL: z.string().url(),
-  SUPABASE_ANON_KEY: z.string().min(1),
+  GOOGLE_API_KEY: z.string().min(1),
+  SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   FRONTEND_URL: z.string().url().optional().default('http://localhost:5173'),
   PDF_TOKEN_SECRET: z.string().min(32)
