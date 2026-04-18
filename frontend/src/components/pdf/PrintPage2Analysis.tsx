@@ -30,13 +30,11 @@ import { MonthTable } from '@/components/analysis/MonthTable'
 import { ChartTooltipContent } from '@/components/analysis/ChartTooltipContent'
 import { formatCurrency } from '@/components/analysis/formatters'
 import { PdfPageShell } from './PdfPageShell'
-import type { CardId } from './PrintReport'
 
 type ChartDataPoint = { month: string; baselineBill: number; nemBill: number; cumulativeSavings: number }
 
 type Props = {
   project: ProjectResponse
-  cardOrder: CardId[]
 }
 
 const ROOF_LABEL: Record<RoofType, string> = { tile: 'Tile', metal: 'Metal', flat: 'Flat' }

@@ -10,7 +10,7 @@ export function PdfFixedHeader({ projectName, generatedAt }: HeaderProps) {
     <header className="pdf-doc-header">
       <div className="flex items-center gap-2">
         <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-          <span className="text-[10px] font-bold text-primary-foreground">S</span>
+          <Sun className="h-3 w-3 text-white" />
         </div>
         <div>
           <p className="text-[10px] font-bold leading-tight text-foreground">Solar Installation Report</p>

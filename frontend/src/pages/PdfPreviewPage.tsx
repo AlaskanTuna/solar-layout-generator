@@ -1,51 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { getProjectForPdf, type ProjectResponse } from '@/api/projects'
-import { PrintReport, type CardId } from '@/components/pdf/PrintReport'
+import { PrintReport } from '@/components/pdf/PrintReport'
 
 declare global {
   interface Window {
     __PDF_READY__?: boolean
     __PDF_ERROR__?: string
   }
-}
-
-// Canonical full list of cards to include in a PDF export, in default order.
-// Matches the order used on AnalysisPage (advanced view), minus bill-breakdown which is skipped.
-const CANONICAL_CARD_ORDER: CardId[] = [
-  'solar-verdict',
-  'bill-comparison',
-  'month-table',
-  'cumulative-savings',
-  'system-cost',
-  'system-assumptions',
-  'net-benefit',
-  'financial-roadmap'
-]
-
-function parseCardOrder(raw: string | null): CardId[] {
-  if (!raw) return CANONICAL_CARD_ORDER
-  const validSet = new Set<CardId>(CANONICAL_CARD_ORDER)
-  const parts = raw
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s): s is CardId => validSet.has(s as CardId))
-  // Merge provided order with canonical: respect user ordering, append any missing so all cards render.
-  const result: CardId[] = []
-  const seen = new Set<CardId>()
-  for (const id of parts) {
-    if (!seen.has(id)) {
-      result.push(id)
-      seen.add(id)
-    }
-  }
-  for (const id of CANONICAL_CARD_ORDER) {
-    if (!seen.has(id)) {
-      result.push(id)
-      seen.add(id)
-    }
-  }
-  return result
 }
 
 function applyThemeFromParam(raw: string | null) {
@@ -57,7 +19,6 @@ export function PdfPreviewPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
-  const cardOrder = parseCardOrder(searchParams.get('cardOrder'))
 
   // Sync theme before first paint so chart colors and card backgrounds match the app.
   applyThemeFromParam(searchParams.get('theme'))
@@ -107,5 +68,5 @@ export function PdfPreviewPage() {
     )
   }
 
-  return <PrintReport project={project} cardOrder={cardOrder} />
+  return <PrintReport project={project} />
 }

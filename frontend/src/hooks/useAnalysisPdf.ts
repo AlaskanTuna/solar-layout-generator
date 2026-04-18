@@ -3,8 +3,6 @@ import { requestPdfExportToken } from '@/api/projects'
 import { notify } from '@/components/ui/toastConfig'
 import { useTheme } from '@/hooks/useTheme'
 
-const CARD_ORDER_STORAGE_KEY = 'slg-analysis-card-order'
-
 function sanitizeFileName(value: string) {
   return value
     .replace(/[^a-z0-9-_]+/gi, '_')
@@ -15,17 +13,6 @@ function sanitizeFileName(value: string) {
 function buildPdfFileName(projectName: string) {
   const date = new Date().toISOString().slice(0, 10)
   return `Solar_Analysis_${sanitizeFileName(projectName) || 'Project'}_${date}.pdf`
-}
-
-function readCardOrder(): string[] {
-  try {
-    const raw = localStorage.getItem(CARD_ORDER_STORAGE_KEY)
-    if (!raw) return []
-    const parsed: unknown = JSON.parse(raw)
-    return Array.isArray(parsed) && parsed.every((x) => typeof x === 'string') ? (parsed as string[]) : []
-  } catch {
-    return []
-  }
 }
 
 function triggerDownload(blob: Blob, filename: string) {
@@ -53,11 +40,9 @@ export function useAnalysisPdf() {
     setIsExporting(true)
     try {
       const { token } = await requestPdfExportToken(projectId)
-      const cardOrder = readCardOrder()
       const previewUrl = new URL(`/project/${projectId}/pdf-preview`, window.location.origin)
       previewUrl.searchParams.set('token', token)
       previewUrl.searchParams.set('theme', resolvedTheme)
-      if (cardOrder.length > 0) previewUrl.searchParams.set('cardOrder', cardOrder.join(','))
       if (import.meta.env.DEV) console.info('[PDF] previewUrl:', previewUrl.toString())
 
       const filename = buildPdfFileName(projectName)
