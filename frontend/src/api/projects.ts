@@ -1,6 +1,7 @@
 import { apiFetch } from './client'
 import type { CreateProjectRequest, SaveLayoutRequest, SaveAnalysisRequest } from '@shared/types'
 import type { AnalysisConfig, AnalysisResultsRecord } from '@/lib/analysis'
+import type { LocationImageGeoTransform } from './locations'
 
 /** Partial after layout save (only selectedPanelModelId), full after analysis save */
 export type ProjectAnalysisConfig = Partial<AnalysisConfig> & { selectedPanelModelId?: string }
@@ -26,6 +27,8 @@ export type ProjectResponse = {
   }
   /** Populated only by `/pdf-data` — a short-lived signed URL for the RGB satellite image. */
   rgbSignedUrl?: string | null
+  /** Populated only by `/pdf-data` — proj4-based transform so the print view can place panels. */
+  imageGeoTransform?: LocationImageGeoTransform | null
 }
 
 export function createProject(req: CreateProjectRequest) {

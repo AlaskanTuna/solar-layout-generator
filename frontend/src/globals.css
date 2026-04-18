@@ -389,7 +389,7 @@ body {
 
 /* PDF PRINT VIEW — rendered by Puppeteer via /project/:id/pdf-preview. See docs/TRD.md §14. */
 .pdf-document {
-  width: 210mm;
+  width: 297mm;
   margin: 0 auto;
   padding: 12mm;
   background: var(--background);
@@ -412,7 +412,7 @@ body {
 }
 
 @page {
-  size: A4 portrait;
+  size: A4 landscape;
   margin: 10mm;
 }
 

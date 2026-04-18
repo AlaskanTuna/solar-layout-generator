@@ -10,6 +10,7 @@ const BodySchema = z.object({
 
 const NAV_TIMEOUT_MS = 30_000
 const READY_TIMEOUT_MS = 30_000
+// A4 landscape CSS viewport ~ 1123 x 794 px at 96 DPI. Add height headroom so multi-page content renders.
 const VIEWPORT = { width: 1280, height: 1800, deviceScaleFactor: 2 }
 const PAGE_MARGIN = { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
 
@@ -74,6 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const pdf = await page.pdf({
       format: 'A4',
+      landscape: true,
       printBackground: true,
       margin: PAGE_MARGIN,
       preferCSSPageSize: true

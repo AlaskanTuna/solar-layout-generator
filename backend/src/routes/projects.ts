@@ -9,6 +9,7 @@ import { createProjectSchema, saveLayoutSchema, saveAnalysisSchema } from '../va
 import * as projectService from '../services/projectService.js'
 import { signPdfToken } from '../services/pdfTokenService.js'
 import { getSignedUrl } from '../services/storageService.js'
+import { loadReferenceGeoTransform } from '../services/geoTiffService.js'
 import { NotFoundError } from '../errors.js'
 
 export const projectsRouter: ExpressRouter = Router()
@@ -144,6 +145,14 @@ projectsRouter.get(
     // Supabase Storage paths need a signed URL to render in the print view.
     const rgbPath = project.location?.rgbImageUrl
     const rgbSignedUrl = rgbPath ? await getSignedUrl(rgbPath) : null
-    res.json({ ...project, rgbSignedUrl })
+    // Include imageGeoTransform so the print view can place panels with the same
+    // proj4 math WorkbenchPage uses (matches sizes exactly).
+    const imageGeoTransform = project.location
+      ? await loadReferenceGeoTransform({
+          id: project.location.id,
+          dsmPath: project.location.dsmPath ?? null
+        }).catch(() => null)
+      : null
+    res.json({ ...project, rgbSignedUrl, imageGeoTransform })
   })
 )
