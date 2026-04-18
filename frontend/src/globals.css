@@ -394,8 +394,12 @@ body {
   font-family: var(--font-body);
 }
 
+/* Each .pdf-page renders as one full A4 landscape sheet. The 12mm inner padding
+   creates a content margin without relying on @page margin (which would render
+   as an unfilled paper-white border). */
 .pdf-page {
-  padding: 0;
+  padding: 12mm;
+  box-sizing: border-box;
 }
 
 .pdf-page-break {
@@ -403,25 +407,37 @@ body {
   page-break-after: always;
 }
 
+.pdf-card-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
 @page {
   size: A4 landscape;
-  margin: 12mm;
+  margin: 0;
 }
 
 @media screen {
-  /* Web preview only: simulate A4 landscape page width + padding so the preview
-     resembles the final PDF before Puppeteer prints it. */
+  /* Web preview: simulate landscape paper sheets so the preview matches the PDF. */
   .pdf-document {
     width: 297mm;
     margin: 0 auto;
-    padding: 12mm;
+  }
+  .pdf-page {
+    min-height: 210mm;
+    border: 1px dashed rgba(0, 0, 0, 0.15);
   }
 }
 
 @media print {
   html,
   body {
+    margin: 0;
+    padding: 0;
     background: var(--background);
+  }
+  .pdf-page {
+    min-height: 210mm;
   }
   /* Let Recharts SVG render without animation artifacts in print capture */
   * {

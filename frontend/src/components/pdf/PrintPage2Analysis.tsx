@@ -180,28 +180,23 @@ export function PrintPage2Analysis({ project, cardOrder }: Props) {
   const rendered = cardOrder.map((id) => ({ id, node: cards[id] })).filter((entry) => entry.node !== undefined)
 
   return (
-    <section className="pdf-page space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold text-foreground">Analysis Details</h2>
-        <p className="text-sm text-muted-foreground">
-          Projected savings, cost breakdown, and financial roadmap based on the saved configuration.
-        </p>
-      </div>
-
+    <>
       {rendered.map(({ id, node }) => (
-        <div key={id} className="pdf-card-break">
-          {node}
-        </div>
+        <section key={id} className="pdf-page pdf-page-break">
+          <div className="pdf-card-break">{node}</div>
+        </section>
       ))}
 
-      <footer className="pdf-card-break mt-8 rounded-lg border border-border bg-muted/40 p-4 text-[11px] leading-relaxed text-muted-foreground">
-        <p className="mb-2 font-semibold text-foreground">Assumptions &amp; Disclaimers</p>
-        <ul className="space-y-1.5">
-          {ANALYSIS_DISCLAIMERS.map((line, i) => (
-            <li key={i}>&middot; {line}</li>
-          ))}
-        </ul>
-      </footer>
-    </section>
+      <section className="pdf-page">
+        <footer className="rounded-lg border border-border bg-muted/40 p-5 text-xs leading-relaxed text-muted-foreground">
+          <p className="mb-3 text-sm font-semibold text-foreground">Assumptions &amp; Disclaimers</p>
+          <ul className="space-y-2">
+            {ANALYSIS_DISCLAIMERS.map((line, i) => (
+              <li key={i}>&middot; {line}</li>
+            ))}
+          </ul>
+        </footer>
+      </section>
+    </>
   )
 }
