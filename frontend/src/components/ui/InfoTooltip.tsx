@@ -18,7 +18,10 @@ export function InfoTooltip({
     <TooltipProvider delayDuration={200}>
       <Tooltip open={open}>
         <TooltipTrigger asChild>
-          <button type="button" className="ml-1 inline-flex align-middle text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            className="pdf-hide ml-1 inline-flex align-middle text-muted-foreground hover:text-foreground"
+          >
             <Info className="h-3.5 w-3.5" />
           </button>
         </TooltipTrigger>

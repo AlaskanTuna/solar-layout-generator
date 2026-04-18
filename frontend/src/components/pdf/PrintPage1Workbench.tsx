@@ -3,22 +3,21 @@ import type { ProjectResponse } from '@/api/projects'
 import { getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 import { parsePanelEdits } from '@/lib/buildingInsights'
 import { createCanvasGeo, latLngToPixel, panelMetersToPixels } from '@/lib/canvasTransforms'
+import { PdfPageShell } from './PdfPageShell'
 
-type Props = { project: ProjectResponse }
+type Props = {
+  project: ProjectResponse
+  generatedAt: string
+}
 
 const ROOF_LABEL = { tile: 'Tile', metal: 'Metal', flat: 'Flat' } as const
 
-export function PrintPage1Workbench({ project }: Props) {
+export function PrintPage1Workbench({ project, generatedAt }: Props) {
   const activePanels = parsePanelEdits(project.editedLayout).filter((p) => p.status !== 'deleted')
   const panelModel = getPanelModel(project.analysisConfig?.selectedPanelModelId ?? DEFAULT_PANEL_MODEL_ID)
   const panelCapacityWp = panelModel?.capacityWp ?? 0
   const systemKwp = Math.round(((activePanels.length * panelCapacityWp) / 1000) * 100) / 100
   const roofType = project.analysisConfig?.roofType ?? 'tile'
-  const generatedAt = new Date().toLocaleDateString('en-MY', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  })
 
   const imageGeoTransform = project.imageGeoTransform ?? null
   const panelWidthM = panelModel?.widthM ?? 0
@@ -38,32 +37,21 @@ export function PrintPage1Workbench({ project }: Props) {
       : []
 
   return (
-    <section className="pdf-page pdf-page-break">
-      <header className="mb-4 border-b border-border pb-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-base font-bold text-primary-foreground">S</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Solar Installation Report</h1>
-            <p className="text-xs text-muted-foreground">
-              {project.name} &middot; Generated {generatedAt}
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <div>
-        <h2 className="text-base font-semibold text-foreground">Installation Overview</h2>
-        <p className="text-xs text-muted-foreground">Panel layout and hardware selection from the Workbench.</p>
-
-        {project.rgbSignedUrl && (
-          <div className="mt-3 flex justify-center">
-            <div className="relative inline-flex overflow-hidden rounded-lg border border-border">
+    <PdfPageShell
+      projectName={project.name}
+      generatedAt={generatedAt}
+      sectionLabel="Installation Overview"
+      context="Panel layout and hardware selection from your Workbench configuration. Blue rectangles indicate active panels over the satellite imagery."
+    >
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="flex min-h-0 flex-1 justify-center">
+          {project.rgbSignedUrl && (
+            <div className="relative inline-flex max-h-full overflow-hidden rounded-lg border border-border">
               <img
                 src={project.rgbSignedUrl}
                 alt="Rooftop satellite view with panel layout"
-                className="block h-[110mm] w-auto"
+                className="block max-h-full w-auto"
+                style={{ maxHeight: '150mm' }}
                 onLoad={(e) => {
                   const img = e.currentTarget
                   setImgSize({ w: img.naturalWidth, h: img.naturalHeight })
@@ -92,26 +80,26 @@ export function PrintPage1Workbench({ project }: Props) {
                 </svg>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        <div className="mt-4 grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-2">
           <StatTile label="Active panels" value={String(activePanels.length)} suffix="panels" />
           <StatTile label="System size" value={systemKwp.toString()} suffix="kWp" />
           <StatTile label="Panel model" value={panelModel?.name ?? '—'} suffix={panelModel ? `${panelCapacityWp} Wp` : ''} />
           <StatTile label="Roof type" value={ROOF_LABEL[roofType] ?? '—'} suffix="" />
         </div>
       </div>
-    </section>
+    </PdfPageShell>
   )
 }
 
 function StatTile({ label, value, suffix }: { label: string; value: string; suffix: string }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-3">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-foreground">{value}</p>
-      {suffix && <p className="text-[10px] text-muted-foreground">{suffix}</p>}
+    <div className="rounded-lg border border-border bg-card p-2.5">
+      <p className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-0.5 text-base font-semibold text-foreground">{value}</p>
+      {suffix && <p className="text-[9px] text-muted-foreground">{suffix}</p>}
     </div>
   )
 }

@@ -62,26 +62,28 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm, d
               How much you gain/lose after subtracting the cost of installing your solar system yearly.
             </CardDescription>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                {yearRange}-Year
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuRadioGroup
-                value={String(yearRange)}
-                onValueChange={(v) => setYearRange(Number(v) as YearRange)}
-              >
-                {YEAR_RANGES.map((range) => (
-                  <DropdownMenuRadioItem key={range} value={String(range)}>
-                    {range}-Year
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="pdf-hide">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  {yearRange}-Year
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup
+                  value={String(yearRange)}
+                  onValueChange={(v) => setYearRange(Number(v) as YearRange)}
+                >
+                  {YEAR_RANGES.map((range) => (
+                    <DropdownMenuRadioItem key={range} value={String(range)}>
+                      {range}-Year
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

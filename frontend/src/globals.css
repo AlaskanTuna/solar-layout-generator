@@ -412,6 +412,12 @@ body {
   page-break-inside: avoid;
 }
 
+/* Inside the PDF document, hide interactive affordances that only make sense on
+   screen — info-tooltip triggers, dropdown controls, collapse toggles. */
+.pdf-document .pdf-hide {
+  display: none !important;
+}
+
 @page {
   size: A4 landscape;
   margin: 0;

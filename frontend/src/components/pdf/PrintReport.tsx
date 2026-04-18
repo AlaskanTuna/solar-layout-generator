@@ -18,10 +18,16 @@ type PrintReportProps = {
 }
 
 export function PrintReport({ project, cardOrder }: PrintReportProps) {
+  const generatedAt = new Date().toLocaleDateString('en-MY', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
+
   return (
     <div className="pdf-document">
-      <PrintPage1Workbench project={project} />
-      <PrintPage2Analysis project={project} cardOrder={cardOrder} />
+      <PrintPage1Workbench project={project} generatedAt={generatedAt} />
+      <PrintPage2Analysis project={project} cardOrder={cardOrder} generatedAt={generatedAt} />
     </div>
   )
 }

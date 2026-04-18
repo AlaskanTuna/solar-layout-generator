@@ -24,7 +24,7 @@ export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
       <CardContent className="space-y-4">
         <button
           type="button"
-          className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-foreground"
+          className="pdf-hide flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-foreground"
           onClick={onToggle}
         >
           {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
