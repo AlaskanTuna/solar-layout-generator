@@ -24,14 +24,14 @@ source <(sed -e 's/\r$//' "$ENV_FILE")
 set +a
 cd "$PROJECT_ROOT"
 
-SUPABASE_BASE_URL="${SUPABASE_PROJECT_URL:-${SUPABASE_URL:-}}"
+SUPABASE_BASE_URL="${SUPABASE_URL:-}"
 SUPABASE_BASE_URL="${SUPABASE_BASE_URL%/}"
 SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-}"
 SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY:-}"
 BACKEND_PORT="${BACKEND_PORT:-3001}"
 BACKEND_URL="${BACKEND_URL:-}"
 
-[[ -n "$SUPABASE_BASE_URL" ]] || { echo "Missing SUPABASE_PROJECT_URL (or SUPABASE_URL) in .env"; exit 1; }
+[[ -n "$SUPABASE_BASE_URL" ]] || { echo "Missing SUPABASE_URL in .env"; exit 1; }
 [[ -n "$SUPABASE_ANON_KEY" ]] || { echo "Missing SUPABASE_ANON_KEY in .env"; exit 1; }
 [[ -n "$SUPABASE_SERVICE_ROLE_KEY" ]] || { echo "Missing SUPABASE_SERVICE_ROLE_KEY in .env"; exit 1; }
 

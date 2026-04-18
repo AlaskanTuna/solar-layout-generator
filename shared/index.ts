@@ -128,10 +128,10 @@ export interface PanelModel {
   tagline?: string // short distinguishing factor shown in the model picker
 }
 
-export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelModels'
+export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelModels.ts'
 
-export { computeSystemCost, MOUNTING_PER_PANEL } from './costModel'
-export type { CostBreakdown, CostInputs, RoofType, SupplyPhase } from './costModel'
+export { computeSystemCost, MOUNTING_PER_PANEL } from './costModel.ts'
+export type { CostBreakdown, CostInputs, RoofType, SupplyPhase } from './costModel.ts'
 
-export { TIER_DAILY_LIMITS, WARNING_THRESHOLD } from './quota'
-export type { UserTier, QuotaSummary } from './quota'
+export { TIER_DAILY_LIMITS, WARNING_THRESHOLD } from './quota.ts'
+export type { UserTier, QuotaSummary } from './quota.ts'
