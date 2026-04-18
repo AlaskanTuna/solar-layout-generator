@@ -42,7 +42,7 @@ export function useAnalysisPdf() {
   const [isExporting, setIsExporting] = useState(false)
 
   async function handleExportPdf(projectId: string, projectName: string) {
-    const exportUrl = import.meta.env.PDF_EXPORT_URL
+    const exportUrl = import.meta.env.VITE_PDF_EXPORT_URL
     if (!exportUrl) {
       notify.error('PDF export service is not configured')
       return

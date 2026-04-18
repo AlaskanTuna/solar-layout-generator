@@ -6,7 +6,7 @@ let loadError: string | null = null
 let loadPromise: Promise<void> | null = null
 
 const loader = new Loader({
-  apiKey: import.meta.env.GOOGLE_API_KEY ?? ''
+  apiKey: import.meta.env.VITE_GOOGLE_API_KEY ?? ''
 })
 
 function ensureLoaded(): Promise<void> {
