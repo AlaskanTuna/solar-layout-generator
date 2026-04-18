@@ -1,4 +1,5 @@
 import type { ProjectResponse } from '@/api/projects'
+import { PdfFixedFooter, PdfFixedHeader } from './PdfFixedChrome'
 import { PrintPage1Workbench } from './PrintPage1Workbench'
 import { PrintPage2Analysis } from './PrintPage2Analysis'
 
@@ -26,8 +27,10 @@ export function PrintReport({ project, cardOrder }: PrintReportProps) {
 
   return (
     <div className="pdf-document">
-      <PrintPage1Workbench project={project} generatedAt={generatedAt} />
-      <PrintPage2Analysis project={project} cardOrder={cardOrder} generatedAt={generatedAt} />
+      <PdfFixedHeader projectName={project.name} generatedAt={generatedAt} />
+      <PdfFixedFooter />
+      <PrintPage1Workbench project={project} />
+      <PrintPage2Analysis project={project} cardOrder={cardOrder} />
     </div>
   )
 }

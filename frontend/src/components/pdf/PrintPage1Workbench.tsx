@@ -7,12 +7,11 @@ import { PdfPageShell } from './PdfPageShell'
 
 type Props = {
   project: ProjectResponse
-  generatedAt: string
 }
 
 const ROOF_LABEL = { tile: 'Tile', metal: 'Metal', flat: 'Flat' } as const
 
-export function PrintPage1Workbench({ project, generatedAt }: Props) {
+export function PrintPage1Workbench({ project }: Props) {
   const activePanels = parsePanelEdits(project.editedLayout).filter((p) => p.status !== 'deleted')
   const panelModel = getPanelModel(project.analysisConfig?.selectedPanelModelId ?? DEFAULT_PANEL_MODEL_ID)
   const panelCapacityWp = panelModel?.capacityWp ?? 0
@@ -38,8 +37,6 @@ export function PrintPage1Workbench({ project, generatedAt }: Props) {
 
   return (
     <PdfPageShell
-      projectName={project.name}
-      generatedAt={generatedAt}
       sectionLabel="Installation Overview"
       context="Panel layout and hardware selection from your Workbench configuration. Blue rectangles indicate active panels over the satellite imagery."
     >
@@ -51,7 +48,7 @@ export function PrintPage1Workbench({ project, generatedAt }: Props) {
                 src={project.rgbSignedUrl}
                 alt="Rooftop satellite view with panel layout"
                 className="block max-h-full w-auto"
-                style={{ maxHeight: '150mm' }}
+                style={{ maxHeight: '140mm' }}
                 onLoad={(e) => {
                   const img = e.currentTarget
                   setImgSize({ w: img.naturalWidth, h: img.naturalHeight })

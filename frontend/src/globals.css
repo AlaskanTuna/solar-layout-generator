@@ -394,11 +394,37 @@ body {
   font-family: var(--font-body);
 }
 
-/* Each .pdf-page renders as one full A4 landscape sheet. The 12mm inner padding
-   creates a content margin without relying on @page margin (which would render
-   as an unfilled paper-white border). */
+/* Fixed header/footer repeat on every printed page via CSS position: fixed.
+   @page margin reserves strips at paper top/bottom for them to occupy. */
+.pdf-doc-header,
+.pdf-doc-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  padding: 0 12mm;
+  box-sizing: border-box;
+  z-index: 10;
+}
+.pdf-doc-header {
+  top: 0;
+  height: 14mm;
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--border);
+}
+.pdf-doc-footer {
+  bottom: 0;
+  height: 10mm;
+  justify-content: flex-end;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+}
+
+/* Each .pdf-page occupies one A4 landscape sheet between the reserved header/footer strips. */
 .pdf-page {
-  padding: 12mm;
+  padding: 4mm 12mm;
   box-sizing: border-box;
 }
 
@@ -420,7 +446,7 @@ body {
 
 @page {
   size: A4 landscape;
-  margin: 0;
+  margin: 14mm 0 10mm 0;
 }
 
 @media screen {
@@ -428,9 +454,11 @@ body {
   .pdf-document {
     width: 297mm;
     margin: 0 auto;
+    padding-top: 14mm;
+    padding-bottom: 10mm;
   }
   .pdf-page {
-    min-height: 210mm;
+    min-height: 186mm;
     border: 1px dashed rgba(0, 0, 0, 0.15);
   }
 }
@@ -443,7 +471,7 @@ body {
     background: var(--background);
   }
   .pdf-page {
-    min-height: 210mm;
+    min-height: 186mm;
   }
   /* Let Recharts SVG render without animation artifacts in print capture */
   * {
