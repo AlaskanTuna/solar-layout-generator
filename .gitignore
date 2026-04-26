@@ -72,6 +72,10 @@ Temporary Items
 # =============================================
 docs/
 
+# Local smoke tests / investigation reports (not part of source submission)
+# =========================================================================
+tests/
+
 # TypeScript build output (tsc -b emits alongside source files)
 # ==========================================================
 *.d.ts
