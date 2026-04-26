@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
-import { Sun, ChevronLeft, LayoutDashboard, Gauge, FolderKanban, PieChart } from 'lucide-react'
+import { ChevronLeft, LayoutDashboard, Gauge, FolderKanban, PieChart } from 'lucide-react'
+import { Logo } from '@/components/ui/Logo'
 
 interface NavItem {
   to: string
@@ -89,9 +90,7 @@ export function AppSidebar() {
         {/* Logo */}
         <div className="sidebar-logo-divider flex h-14 shrink-0 items-center gap-3 px-[18px]">
           <Link to="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-              <Sun className="h-3.5 w-3.5 text-white" />
-            </div>
+            <Logo className="h-7 w-7" />
           </Link>
           <span className="whitespace-nowrap font-heading text-sm font-semibold tracking-tight opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100">
             SolarSim

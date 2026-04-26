@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
-import { Sun, Loader2, Mail } from 'lucide-react'
+import { Loader2, Mail } from 'lucide-react'
+import { Logo } from '@/components/ui/Logo'
 
 export function SignUpPage() {
   const { session, loading, signUp } = useAuth()
@@ -45,9 +46,7 @@ export function SignUpPage() {
 
         <div className="relative">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-foreground/20 backdrop-blur-sm">
-              <Sun className="h-4.5 w-4.5 text-primary-foreground" />
-            </div>
+            <Logo className="h-8 w-8" />
             <span className="font-heading text-lg font-semibold text-primary-foreground">SolarSim</span>
           </Link>
         </div>
@@ -68,9 +67,7 @@ export function SignUpPage() {
       <div className="flex flex-1 flex-col">
         <div className="flex items-center justify-between p-6">
           <Link to="/" className="flex items-center gap-2 lg:hidden">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-              <Sun className="h-3.5 w-3.5 text-white" />
-            </div>
+            <Logo className="h-7 w-7" />
             <span className="font-heading text-base font-semibold">SolarSim</span>
           </Link>
           <div className="ml-auto">

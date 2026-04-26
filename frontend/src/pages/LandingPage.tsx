@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/ui/Logo'
 import {
-  Sun,
   MapPin,
   SlidersHorizontal,
   FileBarChart,
@@ -33,9 +33,7 @@ export function LandingPage() {
       <nav className="glass-nav fixed inset-x-0 top-0 z-50">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Sun className="h-4.5 w-4.5 text-white" />
-            </div>
+            <Logo className="h-8 w-8" />
             <span className="font-heading text-lg font-semibold tracking-tight">SolarSim</span>
           </Link>
           <div className="flex items-center gap-2">
@@ -329,9 +327,7 @@ export function LandingPage() {
           <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col items-center gap-3 sm:items-start">
               <Link to="/" className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-                  <Sun className="h-3.5 w-3.5 text-white" />
-                </div>
+                <Logo className="h-7 w-7" />
                 <span className="font-heading text-base font-semibold tracking-tight">SolarSim</span>
               </Link>
               <p className="max-w-xs text-center text-sm text-muted-foreground sm:text-left">

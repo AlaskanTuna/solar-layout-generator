@@ -1,4 +1,5 @@
-import { Sun, Leaf } from 'lucide-react'
+import { Leaf } from 'lucide-react'
+import { Logo } from '@/components/ui/Logo'
 import type { ImageryQuality } from '@shared/types'
 
 type HeaderProps = {
@@ -10,9 +11,7 @@ export function PdfFixedHeader({ projectName, generatedAt }: HeaderProps) {
   return (
     <header className="pdf-doc-header">
       <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-          <Sun className="h-3 w-3 text-white" />
-        </div>
+        <Logo className="h-6 w-6" />
         <div>
           <p className="text-[10px] font-bold leading-tight text-foreground">Solar Installation Report</p>
           <p className="text-[8px] leading-tight text-muted-foreground">
@@ -45,9 +44,7 @@ export function PdfFixedFooter({ imageryQuality }: FooterProps = {}) {
       )}
       <div className="h-2 w-px bg-border" />
       <div className="flex items-center gap-1">
-        <div className="flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-primary">
-          <Sun className="h-2 w-2 text-white" />
-        </div>
+        <Logo className="h-3.5 w-3.5" />
         <span className="font-heading text-[8px] font-semibold tracking-tight">SolarSim</span>
         <span className="text-[8px] text-muted-foreground">&middot; 2026</span>
       </div>
