@@ -122,6 +122,7 @@ export function useAnalysisForm(projectId: string | undefined) {
       afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault,
       degradationRate: savedConfig?.degradationRate ?? 0.005,
       tariffEscalationRate: savedConfig?.tariffEscalationRate ?? 0,
+      tariffRatesOverride: savedConfig?.tariffRatesOverride,
       consumptionProfile: savedConfig?.consumptionProfile ?? 'flat',
       performanceRatio: savedConfig?.performanceRatio ?? 0.8,
       assumedLosses: savedConfig?.assumedLosses ?? 0.2,
@@ -157,7 +158,8 @@ export function useAnalysisForm(projectId: string | undefined) {
   const billingConfig = useMemo(() => {
     if (!tariffQuery.data || !formState) return null
     return {
-      rates: tariffQuery.data.rates,
+      // Merge per-project tariff-rate overrides on top of TNB RP4 defaults.
+      rates: { ...tariffQuery.data.rates, ...(formState.tariffRatesOverride ?? {}) },
       thresholds: tariffQuery.data.thresholds,
       eeiTable: tariffQuery.data.eeiTable,
       afaRate: formState.afaRateSenPerKwh

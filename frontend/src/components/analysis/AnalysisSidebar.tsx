@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Sliders } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -17,9 +17,10 @@ import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
 import { ImagePopup } from '@/components/ui/ImagePopup'
 import { formatNumber } from '@/components/analysis/formatters'
+import { TariffParameterModal } from '@/components/analysis/TariffParameterModal'
 import type { AnalysisFormState } from '@/hooks/useAnalysisForm'
 import type { ParsedBuildingInsights } from '@/lib/buildingInsights'
-import type { PanelModel, RoofType } from '@shared/types'
+import type { PanelModel, RoofType, TariffRates } from '@shared/types'
 
 const CONNECTION_PHASE_LABELS: Record<ConnectionPhase, string> = {
   single: 'Single Phase',
@@ -90,6 +91,8 @@ type AnalysisSidebarProps = {
   isSaving: boolean
   onExportPdf: () => void
   onSaveAnalysis: () => void
+  /** Default TNB RP4 tariff rates from the global tariff config — passed through to the override modal. */
+  tariffRatesDefaults: TariffRates
 }
 
 export function AnalysisSidebar({
@@ -107,10 +110,13 @@ export function AnalysisSidebar({
   isExporting,
   isSaving,
   onExportPdf,
-  onSaveAnalysis
+  onSaveAnalysis,
+  tariffRatesDefaults
 }: AnalysisSidebarProps) {
   const [billImageOpen, setBillImageOpen] = useState(false)
+  const [tariffModalOpen, setTariffModalOpen] = useState(false)
   const handleBillImageOpenChange = useCallback((open: boolean) => setBillImageOpen(open), [])
+  const tariffOverrideCount = formState.tariffRatesOverride ? Object.keys(formState.tariffRatesOverride).length : 0
 
   return (
     <aside className="xl:overflow-y-auto xl:w-[24rem] xl:min-w-[24rem]">
@@ -419,6 +425,43 @@ export function AnalysisSidebar({
                   onChange={(rate) => setFormState((c) => (c ? { ...c, tariffEscalationRate: rate } : c))}
                 />
               </div>
+
+              <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
+                <div className="space-y-1">
+                  <Label>
+                    Tariff Parameters
+                    <InfoTooltip text="Override individual TNB RP4 tariff rate fields for this project (energy/capacity/network charges, retail charge, SST, RE Fund, minimum charge). Saved with the analysis — does not modify the global tariff config." />
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Per-project overrides for TNB RP4 base rates. Defaults are the published values.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-between gap-2"
+                  onClick={() => setTariffModalOpen(true)}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Sliders className="h-3.5 w-3.5" />
+                    Configure tariff parameters
+                  </span>
+                  {tariffOverrideCount > 0 && (
+                    <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                      {tariffOverrideCount} modified
+                    </span>
+                  )}
+                </Button>
+              </div>
+
+              <TariffParameterModal
+                open={tariffModalOpen}
+                onOpenChange={setTariffModalOpen}
+                defaults={tariffRatesDefaults}
+                override={formState.tariffRatesOverride}
+                onSave={(next) => setFormState((c) => (c ? { ...c, tariffRatesOverride: next } : c))}
+              />
 
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <Label className="text-sm font-semibold text-foreground">

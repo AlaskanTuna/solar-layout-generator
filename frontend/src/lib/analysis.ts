@@ -1,4 +1,4 @@
-import type { PanelEdit, RoofType, TariffThresholds } from '@shared/types'
+import type { PanelEdit, RoofType, TariffRates, TariffThresholds } from '@shared/types'
 import type { AnnualSimulationResult, NemMonthResult } from './billingEngine'
 
 export type ConnectionPhase = 'single' | 'three'
@@ -16,6 +16,8 @@ export type AnalysisConfig = {
   performanceRatio: number // e.g. 0.80 = 80%
   assumedLosses: number // e.g. 0.20 = 20%
   dcAcRatio: number // e.g. 1.2
+  /** Per-project overrides for individual TNB RP4 tariff rate fields. Sparse — only stores diffs from defaults. */
+  tariffRatesOverride?: Partial<TariffRates>
 }
 
 export type AnalysisResultsRecord = {
@@ -128,6 +130,29 @@ function getConsumptionProfile(value: unknown): ConsumptionProfile | null {
   return value === 'flat' || value === 'seasonal' ? value : null
 }
 
+const TARIFF_RATE_KEYS: ReadonlyArray<keyof TariffRates> = [
+  'energyLow',
+  'energyHigh',
+  'capacity',
+  'network',
+  'retailChargeRm',
+  'sstRate',
+  'reFundRate',
+  'minChargeRm'
+]
+
+function getTariffRatesOverride(value: unknown): Partial<TariffRates> | null {
+  if (!isRecord(value)) return null
+  const result: Partial<TariffRates> = {}
+  for (const key of TARIFF_RATE_KEYS) {
+    const raw = value[key]
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+      result[key] = raw
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null
+}
+
 export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> | null {
   if (!isRecord(raw)) {
     return null
@@ -141,6 +166,7 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   const systemKwp = getNumber(raw.systemKwp)
   const degradationRate = getNumber(raw.degradationRate)
   const tariffEscalationRate = getNumber(raw.tariffEscalationRate)
+  const tariffRatesOverride = getTariffRatesOverride(raw.tariffRatesOverride)
   const consumptionProfile = getConsumptionProfile(raw.consumptionProfile)
   const performanceRatio = getNumber(raw.performanceRatio)
   const assumedLosses = getNumber(raw.assumedLosses)
@@ -155,6 +181,7 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
     ...(systemKwp !== null ? { systemKwp } : {}),
     ...(degradationRate !== null ? { degradationRate } : {}),
     ...(tariffEscalationRate !== null ? { tariffEscalationRate } : {}),
+    ...(tariffRatesOverride ? { tariffRatesOverride } : {}),
     ...(consumptionProfile ? { consumptionProfile } : {}),
     ...(performanceRatio !== null ? { performanceRatio } : {}),
     ...(assumedLosses !== null ? { assumedLosses } : {}),

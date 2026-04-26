@@ -160,7 +160,8 @@ export function AnalysisPage() {
     locationQuery.error ||
     !simulation ||
     !analysisResults ||
-    !projectQuery.data
+    !projectQuery.data ||
+    !tariffQuery.data
   ) {
     const error =
       projectQuery.error ??
@@ -208,6 +209,7 @@ export function AnalysisPage() {
           isSaving={saveMutation.isPending}
           onExportPdf={() => void handleExportPdf(projectId!, projectQuery.data.name)}
           onSaveAnalysis={() => void handleSaveAnalysis()}
+          tariffRatesDefaults={tariffQuery.data.rates}
         />
 
         {/* Main Content */}
