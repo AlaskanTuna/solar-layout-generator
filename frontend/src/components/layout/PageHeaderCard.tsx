@@ -4,9 +4,11 @@ import { cn } from '@/lib/utils'
 type PageHeaderCardProps = {
   children: ReactNode
   className?: string
+  artSrc?: string
+  artAlt?: string
 }
 
-export function PageHeaderCard({ children, className }: PageHeaderCardProps) {
+export function PageHeaderCard({ children, className, artSrc, artAlt = '' }: PageHeaderCardProps) {
   return (
     <div
       className={cn(
@@ -16,7 +18,15 @@ export function PageHeaderCard({ children, className }: PageHeaderCardProps) {
     >
       <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-solar-400/10 blur-3xl" />
-      <div className="relative">{children}</div>
+      {artSrc && (
+        <img
+          src={artSrc}
+          alt={artAlt}
+          aria-hidden={artAlt ? undefined : true}
+          className="pointer-events-none absolute -right-6 top-1/2 hidden h-[155%] max-h-64 w-auto -translate-y-1/2 object-contain opacity-75 dark:opacity-65 sm:block"
+        />
+      )}
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }

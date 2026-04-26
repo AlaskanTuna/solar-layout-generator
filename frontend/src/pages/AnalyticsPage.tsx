@@ -17,7 +17,7 @@ export function AnalyticsPage() {
   if (completedProjects === 0) {
     return (
       <PageContainer>
-        <PageHeaderCard>
+        <PageHeaderCard artSrc="/dashboard/analytics.webp">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <PieChart className="h-5 w-5" />
@@ -51,7 +51,7 @@ export function AnalyticsPage() {
 
   return (
     <PageContainer>
-      <PageHeaderCard>
+      <PageHeaderCard artSrc="/dashboard/analytics.webp">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <PieChart className="h-5 w-5" />

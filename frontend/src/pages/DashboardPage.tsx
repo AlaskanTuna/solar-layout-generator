@@ -1,11 +1,16 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { listProjects } from '@/api/projects'
 import { useAuth } from '@/hooks/useAuth'
 import { useQuota } from '@/hooks/useQuota'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { writeNewProjectDraft } from '@/lib/projectDraftStorage'
+import { getProjectLastVisitedAt } from '@/lib/recentProjectActivity'
+import { formatRelativeDate, projectRoute } from '@/components/dashboard/helpers'
+import { getProjectStatusConfig } from '@/lib/projectStatus'
 import {
   Dialog,
   DialogContent,
@@ -15,7 +20,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Gauge, FolderKanban, PieChart, MapPin, LayoutDashboard } from 'lucide-react'
+import { Activity, ArrowRight, Clock, Gauge, FolderKanban, PieChart, MapPin, LayoutDashboard } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
@@ -32,15 +37,34 @@ function formatResetTime(resetsAt: string): string {
 }
 
 const QUICK_ACTIONS = [
-  { to: '/dashboard/summary', icon: Gauge, label: 'Summary', desc: 'Portfolio overview and stats' },
-  { to: '/dashboard/projects', icon: FolderKanban, label: 'Projects', desc: 'Manage your solar projects' },
-  { to: '/dashboard/analytics', icon: PieChart, label: 'Analytics', desc: 'Performance insights' }
+  {
+    to: '/dashboard/summary',
+    icon: Gauge,
+    label: 'Summary',
+    desc: 'Review portfolio totals and project status at a glance.',
+    art: '/dashboard/summary.webp'
+  },
+  {
+    to: '/dashboard/projects',
+    icon: FolderKanban,
+    label: 'Projects',
+    desc: 'Open saved layouts, continue drafts, and manage project history.',
+    art: '/dashboard/projects.webp'
+  },
+  {
+    to: '/dashboard/analytics',
+    icon: PieChart,
+    label: 'Analytics',
+    desc: 'Compare performance signals and savings across your solar work.',
+    art: '/dashboard/analytics.webp'
+  }
 ]
 
 export function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const quotaQuery = useQuota()
+  const projectsQuery = useQuery({ queryKey: ['projects'], queryFn: listProjects })
   const [dialogOpen, setDialogOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
   const [greeting, setGreeting] = useState('Welcome back')
@@ -63,18 +87,45 @@ export function DashboardPage() {
   }
 
   const userName = user?.email?.split('@')[0] ?? ''
+  const recentProject = [...(projectsQuery.data ?? [])].sort((a, b) => {
+    const aVisited = getProjectLastVisitedAt(a.id)
+    const bVisited = getProjectLastVisitedAt(b.id)
+    const aTime = new Date(aVisited ?? a.updatedAt).getTime()
+    const bTime = new Date(bVisited ?? b.updatedAt).getTime()
+    return bTime - aTime
+  })[0]
+  const recentVisitedAt = recentProject ? getProjectLastVisitedAt(recentProject.id) : null
+  const recentStatus = recentProject ? getProjectStatusConfig(recentProject.status) : null
+
+  const actionCardClass =
+    'glass-card group relative flex min-h-[168px] w-full flex-col items-start justify-between overflow-hidden p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:min-h-[176px]'
+
+  const cardArtClass =
+    'pointer-events-none absolute -right-2 top-1/2 h-[118%] max-h-60 w-auto -translate-y-1/2 object-contain opacity-80 transition-all duration-300 [mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.14)_24%,black_58%)] group-hover:scale-105 group-hover:opacity-95 dark:opacity-70'
 
   const newProjectTile = (
     <button
+      type="button"
       onClick={() => !quotaReached && setDialogOpen(true)}
       disabled={quotaReached}
       aria-disabled={quotaReached}
-      className={`glass-card flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-all duration-200 ${
-        quotaReached ? 'cursor-not-allowed opacity-60' : 'hover:border-primary/50 hover:text-primary hover:shadow-lg'
+      className={`${actionCardClass} ${
+        quotaReached ? 'cursor-not-allowed opacity-60' : 'text-foreground hover:text-foreground'
       }`}
     >
-      <MapPin className="h-8 w-8" />
-      <span className="text-sm font-medium">New Project</span>
+      <img src="/dashboard/new-project.webp" alt="" aria-hidden="true" className={cardArtClass} />
+      <div className="relative z-10 flex w-full items-start justify-between gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <MapPin className="h-5 w-5" />
+        </div>
+        <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary" />
+      </div>
+      <div className="relative z-10">
+        <h2 className="font-heading text-xl font-semibold tracking-tight">New Project</h2>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+          Search for a building, generate a rooftop layout, and start a new solar assessment.
+        </p>
+      </div>
     </button>
   )
 
@@ -96,29 +147,87 @@ export function DashboardPage() {
           </div>
         </PageHeaderCard>
 
-        {/* Quick Action Cards — flex-1 fills remaining viewport height */}
-        <div className="mt-6 grid flex-1 gap-4 sm:grid-cols-2 animate-fade-in-up">
-          {QUICK_ACTIONS.map((action) => (
-            <Link
-              key={action.to}
-              to={action.to}
-              className="glass-card flex flex-col items-center justify-center gap-3 rounded-xl text-muted-foreground transition-all duration-200 hover:border-primary/30 hover:text-foreground hover:shadow-lg"
-            >
-              <action.icon className="h-8 w-8" />
-              <span className="text-sm font-medium">{action.label}</span>
-            </Link>
-          ))}
+        <div className="mt-6 grid flex-1 gap-4 animate-fade-in-up xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {quotaReached && quota ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="block">{newProjectTile}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>Daily limit reached - resets at {formatResetTime(quota.resetsAt)}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              newProjectTile
+            )}
 
-          {quotaReached && quota ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>{newProjectTile}</TooltipTrigger>
-                <TooltipContent>Daily limit reached — resets at {formatResetTime(quota.resetsAt)}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            newProjectTile
-          )}
+            {QUICK_ACTIONS.map((action) => (
+              <Link key={action.to} to={action.to} className={actionCardClass}>
+                <img src={action.art} alt="" aria-hidden="true" className={cardArtClass} />
+                <div className="relative z-10 flex w-full items-start justify-between gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                    <action.icon className="h-5 w-5" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary" />
+                </div>
+                <div className="relative z-10">
+                  <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">{action.label}</h2>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{action.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <aside className="glass-card group relative flex min-h-[168px] flex-col overflow-hidden p-5 sm:min-h-[176px] xl:min-h-0">
+            <img
+              src="/dashboard/recents.webp"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-3 -right-3 h-48 w-auto object-contain opacity-75 transition-all duration-300 [mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.16)_22%,black_60%)] group-hover:scale-105 group-hover:opacity-90 dark:opacity-65 xl:h-56"
+            />
+            <div className="relative z-10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Activity className="h-4 w-4" />
+              </div>
+              <h2 className="mt-5 font-heading text-lg font-semibold tracking-tight">Continue Where You Left Off</h2>
+              <p className="mt-1 truncate text-sm text-muted-foreground">Resume your latest saved project.</p>
+            </div>
+
+            <div className="flex flex-1 flex-col">
+              {projectsQuery.isLoading ? (
+                <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">Loading...</div>
+              ) : recentProject && recentStatus ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(projectRoute(recentProject))}
+                  className="group relative z-10 mt-5 w-full rounded-xl border border-border bg-muted/30 p-4 text-left transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-heading text-sm font-semibold">{recentProject.name}</p>
+                      <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {formatRelativeDate(recentVisitedAt ?? recentProject.updatedAt)}
+                      </p>
+                    </div>
+                    <recentStatus.icon className="h-4 w-4 shrink-0 text-primary" />
+                  </div>
+                  <div className="mt-4 flex items-center justify-between gap-3 text-xs font-medium">
+                    <span className="text-muted-foreground">{recentStatus.label}</span>
+                    <span className="flex items-center gap-1 text-primary">
+                      Continue
+                      <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
+                </button>
+              ) : (
+                <div className="relative z-10 flex flex-1 items-center justify-center text-sm font-medium text-muted-foreground">
+                  None
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
       </PageContainer>
 

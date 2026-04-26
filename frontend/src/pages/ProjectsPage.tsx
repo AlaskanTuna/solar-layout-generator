@@ -84,39 +84,43 @@ export function ProjectsPage() {
   return (
     <>
       <PageContainer>
-        <PageHeaderCard>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <FolderKanban className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="font-heading text-3xl font-bold tracking-tight">Projects</h1>
-                <p className="mt-1 max-w-lg text-muted-foreground">Manage all your solar assessment projects</p>
-                {quotaLabel && (
-                  <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
-                )}
-              </div>
+        <PageHeaderCard artSrc="/dashboard/projects.webp">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <FolderKanban className="h-5 w-5" />
             </div>
-            <Button className="gap-2 shadow-sm" onClick={() => setDialogOpen(true)} disabled={quotaReached}>
-              <Plus className="h-4 w-4" />
-              New Project
-            </Button>
+            <div>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">Projects</h1>
+              <p className="mt-1 max-w-lg text-muted-foreground">Manage all your solar assessment projects</p>
+              {quotaLabel && (
+                <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
+              )}
+            </div>
           </div>
         </PageHeaderCard>
 
-        <div className="mt-6 flex gap-1 rounded-lg bg-muted/50 p-1 w-fit">
-          {(['all', 'completed', 'in-progress'] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                filter === f ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {f === 'all' ? `All (${(projects ?? []).length})` : f === 'completed' ? 'Completed' : 'In Progress'}
-            </button>
-          ))}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex w-fit gap-1 rounded-lg bg-muted/50 p-1">
+            {(['all', 'completed', 'in-progress'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                  filter === f ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {f === 'all' ? `All (${(projects ?? []).length})` : f === 'completed' ? 'Completed' : 'In Progress'}
+              </button>
+            ))}
+          </div>
+          <Button
+            className="w-full gap-2 shadow-sm sm:w-auto"
+            onClick={() => setDialogOpen(true)}
+            disabled={quotaReached}
+          >
+            <Plus className="h-4 w-4" />
+            New Project
+          </Button>
         </div>
 
         <div className="mt-6">

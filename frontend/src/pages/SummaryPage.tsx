@@ -16,7 +16,18 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { Plus, Sun, FolderOpen, Clock, BarChart3, Lightbulb, MapPin, SlidersHorizontal, FileBarChart, Gauge } from 'lucide-react'
+import {
+  Plus,
+  Sun,
+  FolderOpen,
+  Clock,
+  BarChart3,
+  Lightbulb,
+  MapPin,
+  SlidersHorizontal,
+  FileBarChart,
+  Gauge
+} from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 import { notify } from '@/components/ui/toastConfig'
@@ -24,9 +35,24 @@ import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { projectRoute } from '@/components/dashboard/helpers'
 
 const WORKFLOW_STEPS = [
-  { step: 1, icon: <MapPin className="h-4 w-4" />, title: 'Search Location', desc: 'Find your building on the satellite map' },
-  { step: 2, icon: <SlidersHorizontal className="h-4 w-4" />, title: 'Generate & Adjust Layout', desc: 'Drag, rotate, add or remove panels' },
-  { step: 3, icon: <FileBarChart className="h-4 w-4" />, title: 'Analyze Savings', desc: 'View projections and export PDF' },
+  {
+    step: 1,
+    icon: <MapPin className="h-4 w-4" />,
+    title: 'Search Location',
+    desc: 'Find your building on the satellite map'
+  },
+  {
+    step: 2,
+    icon: <SlidersHorizontal className="h-4 w-4" />,
+    title: 'Generate & Adjust Layout',
+    desc: 'Drag, rotate, add or remove panels'
+  },
+  {
+    step: 3,
+    icon: <FileBarChart className="h-4 w-4" />,
+    title: 'Analyze Savings',
+    desc: 'View projections and export PDF'
+  }
 ]
 
 export function SummaryPage() {
@@ -71,7 +97,7 @@ export function SummaryPage() {
   return (
     <>
       <PageContainer flex>
-        <PageHeaderCard>
+        <PageHeaderCard artSrc="/dashboard/summary.webp">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Gauge className="h-5 w-5" />
@@ -104,7 +130,9 @@ export function SummaryPage() {
                 </div>
                 <div>
                   <p className="text-[11px] text-muted-foreground">Completed</p>
-                  <p className="font-heading text-lg font-bold text-green-600 dark:text-green-400">{completedProjects}</p>
+                  <p className="font-heading text-lg font-bold text-green-600 dark:text-green-400">
+                    {completedProjects}
+                  </p>
                 </div>
               </div>
               <div className="glass-card flex items-center gap-3 p-4">
@@ -123,7 +151,9 @@ export function SummaryPage() {
               <div className="flex items-center justify-between">
                 <h2 className="font-heading text-lg font-semibold">
                   Recent Projects
-                  {totalProjects > 0 && <span className="ml-2 text-sm font-normal text-muted-foreground">({totalProjects})</span>}
+                  {totalProjects > 0 && (
+                    <span className="ml-2 text-sm font-normal text-muted-foreground">({totalProjects})</span>
+                  )}
                 </h2>
                 <Button variant="ghost" size="sm" className="gap-1 text-xs" onClick={() => setDialogOpen(true)}>
                   <Plus className="h-3.5 w-3.5" />
@@ -191,7 +221,9 @@ export function SummaryPage() {
               <div className="flex flex-col divide-y divide-border">
                 {WORKFLOW_STEPS.map((s) => (
                   <div key={s.step} className="p-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">{s.icon}</div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      {s.icon}
+                    </div>
                     <p className="mt-2 text-sm font-semibold">{s.title}</p>
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
                   </div>
@@ -208,14 +240,25 @@ export function SummaryPage() {
           <form onSubmit={handleCreateProject}>
             <DialogHeader>
               <DialogTitle>Create New Project</DialogTitle>
-              <DialogDescription>Give your solar assessment project a name, then search for your building.</DialogDescription>
+              <DialogDescription>
+                Give your solar assessment project a name, then search for your building.
+              </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-2">
               <Label htmlFor="project-name">Project Name</Label>
-              <Input id="project-name" placeholder="e.g. My Home Solar" value={projectName} onChange={(e) => setProjectName(e.target.value)} required autoFocus />
+              <Input
+                id="project-name"
+                placeholder="e.g. My Home Solar"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                required
+                autoFocus
+              />
             </div>
             <DialogFooter className="mt-6">
-              <Button type="submit" disabled={!projectName.trim()}>Continue</Button>
+              <Button type="submit" disabled={!projectName.trim()}>
+                Continue
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -226,11 +269,17 @@ export function SummaryPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Project</DialogTitle>
-            <DialogDescription>Are you sure you want to delete &ldquo;{deleteTarget?.name}&rdquo;? This action cannot be undone.</DialogDescription>
+            <DialogDescription>
+              Are you sure you want to delete &ldquo;{deleteTarget?.name}&rdquo;? This action cannot be undone.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>{isDeleting ? 'Deleting...' : 'Delete'}</Button>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -31,6 +31,7 @@ import { WorkbenchSidebar } from '@/components/workbench/WorkbenchSidebar'
 import { LayoutPresetModal } from '@/components/workbench/LayoutPresetModal'
 import { saveLayoutPreferences } from '@/api/projects'
 import { describeLayoutPreset, inferVisibleCount } from '@/lib/layoutPreset'
+import { markProjectVisited } from '@/lib/recentProjectActivity'
 import type { LayoutPreferences } from '@shared/types'
 import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
 
@@ -66,6 +67,12 @@ export function WorkbenchPage() {
   } = useWorkbenchData(projectId)
 
   useEffect(() => {
+    if (project?.id) {
+      markProjectVisited(project.id)
+    }
+  }, [project?.id])
+
+  useEffect(() => {
     if (!projectId) {
       hydratedPanelModelProjectIdRef.current = null
       return
@@ -90,8 +97,7 @@ export function WorkbenchPage() {
   const layoutPreferences: LayoutPreferences | null = project?.layoutPreferences ?? null
 
   const layoutPrefsMutation = useMutation({
-    mutationFn: (next: Partial<LayoutPreferences>) =>
-      saveLayoutPreferences(projectId!, { layoutPreferences: next }),
+    mutationFn: (next: Partial<LayoutPreferences>) => saveLayoutPreferences(projectId!, { layoutPreferences: next }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['project', projectId] })
   })
 

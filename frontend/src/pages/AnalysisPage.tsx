@@ -34,6 +34,7 @@ import { AnalysisSidebar } from '@/components/analysis/AnalysisSidebar'
 import { useAnalysisForm, type AnalysisFormState } from '@/hooks/useAnalysisForm'
 import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
 import { summarizeLayoutOrientation } from '@/lib/analysis'
+import { markProjectVisited } from '@/lib/recentProjectActivity'
 
 const ANALYSIS_TOUR_STEPS: TourStep[] = [
   {
@@ -140,6 +141,12 @@ export function AnalysisPage() {
       navigate(`/project/${projectId}/workbench`, { replace: true })
     }
   }, [navigate, projectId, projectQuery.data?.status])
+
+  useEffect(() => {
+    if (projectQuery.data?.id && projectQuery.data.status !== 'draft') {
+      markProjectVisited(projectQuery.data.id)
+    }
+  }, [projectQuery.data?.id, projectQuery.data?.status])
 
   const saveMutation = useMutation({
     mutationFn: (payload: ReturnType<typeof buildSavePayload>) => saveAnalysis(projectId!, payload),
@@ -300,7 +307,7 @@ export function AnalysisPage() {
                           <CardHeader>
                             <CardTitle>
                               Cumulative Savings
-                              <InfoTooltip text="Shows your running total of savings throughout the year. The steeper the line, the faster you're saving money from solar." />
+                              <InfoTooltip text="Your running total of savings as the year progresses. A steeper line means you are saving money faster." />
                             </CardTitle>
                             <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
                           </CardHeader>

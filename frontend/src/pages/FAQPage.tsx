@@ -264,7 +264,9 @@ function FaqCard({ item }: { item: FaqItem }) {
   return (
     <article className="glass-card relative overflow-hidden p-5 transition-all duration-200 hover:border-primary/25">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="max-w-3xl font-heading text-base font-semibold tracking-tight text-foreground">{item.question}</h2>
+        <h2 className="max-w-3xl font-heading text-base font-semibold tracking-tight text-foreground">
+          {item.question}
+        </h2>
         <span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
           {CATEGORY_LABELS[item.category]}
         </span>
@@ -336,7 +338,7 @@ export function FAQPage() {
 
   return (
     <PageContainer>
-      <PageHeaderCard>
+      <PageHeaderCard artSrc="/dashboard/faq.webp">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-3">
@@ -391,7 +393,9 @@ export function FAQPage() {
         ) : (
           <div className="glass-card p-8 text-center">
             <p className="font-heading text-lg font-semibold">No matching answers</p>
-            <p className="mt-2 text-sm text-muted-foreground">Try a different search term or switch the filter to All.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Try a different search term or switch the filter to All.
+            </p>
           </div>
         )}
       </div>

@@ -11,6 +11,7 @@ import { notify } from '@/components/ui/toastConfig'
 import { Button } from '@/components/ui/button'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
+import { markProjectVisited } from '@/lib/recentProjectActivity'
 import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/ui/GuidedTour'
@@ -97,6 +98,12 @@ export function MapPage() {
     queryFn: () => getProject(projectId!),
     enabled: !isNewProject && !!projectId
   })
+
+  useEffect(() => {
+    if (!isNewProject && existingProject?.id) {
+      markProjectVisited(existingProject.id)
+    }
+  }, [existingProject?.id, isNewProject])
 
   useEffect(() => {
     if (!isReadonly && existingProject?.location?.status === 'ready') {
