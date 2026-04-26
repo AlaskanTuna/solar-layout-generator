@@ -4,24 +4,22 @@ type LogoProps = {
   className?: string
 }
 
-// Renders the SolarSim brand mark, picking the light- or dark-theme variant
-// from /public via Tailwind's `dark:` class. Both PNGs are square 1:1.
+// SolarSim brand mark. Uses CSS background-image so the browser only fetches
+// the variant matching the current theme (vs. dual-<img> with display:none,
+// which can still trigger both downloads). Tailwind's `dark:` variant swaps
+// the URL when the `.dark` class is on the html element.
+//
+// `role="img"` + `aria-label` keep this accessible without a DOM-level <img>.
 export function Logo({ className }: LogoProps) {
   return (
-    <span className={cn('relative inline-block shrink-0', className)}>
-      <img
-        src="/logo-light.png"
-        alt="SolarSim"
-        className="block h-full w-full object-contain dark:hidden"
-        draggable={false}
-      />
-      <img
-        src="/logo-dark.png"
-        alt=""
-        aria-hidden="true"
-        className="hidden h-full w-full object-contain dark:block"
-        draggable={false}
-      />
-    </span>
+    <span
+      role="img"
+      aria-label="SolarSim"
+      className={cn(
+        'inline-block shrink-0 bg-contain bg-center bg-no-repeat',
+        "bg-[url('/logo-light.png')] dark:bg-[url('/logo-dark.png')]",
+        className
+      )}
+    />
   )
 }
