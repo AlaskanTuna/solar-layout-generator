@@ -56,6 +56,22 @@ export async function deleteProject(userId: string, projectId: string) {
   return project
 }
 
+export async function updateLayoutPreferences(
+  userId: string,
+  projectId: string,
+  partial: Record<string, unknown>
+) {
+  const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
+  if (!project) return null
+  const existing = (project.layoutPreferences as Record<string, unknown>) ?? {}
+  const next = { ...existing, ...partial }
+  return prisma.project.update({
+    where: { id: projectId },
+    data: { layoutPreferences: next as Prisma.InputJsonValue },
+    include: { location: true }
+  })
+}
+
 export async function saveAnalysis(
   userId: string,
   projectId: string,

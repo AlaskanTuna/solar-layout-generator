@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { PanelEdit } from '@shared/types'
+import type { PanelEdit, RoofDirection } from '@shared/types'
 import { recomputeFluxBatch } from '@/api/locations'
 import {
   annualEnergyFromMonthly,
@@ -10,6 +10,32 @@ import {
   type SolarPanel
 } from '@/lib/buildingInsights'
 import { useUndoRedo } from './useUndoRedo'
+
+// Compass-bearing windows for roof-direction sort priority. Matches
+// frontend/src/lib/layoutPreset.ts so the modal preview and runtime layout
+// agree on what counts as "south", "east", etc.
+function panelMatchesDirection(
+  segmentIndex: number,
+  segments: RoofSegment[],
+  direction: RoofDirection | undefined
+): boolean {
+  if (!direction || direction === 'any') return true
+  const seg = segments[segmentIndex]
+  if (!seg) return false
+  const a = seg.azimuthDegrees
+  switch (direction) {
+    case 'south':
+      return a >= 135 && a <= 225
+    case 'east':
+      return a >= 45 && a < 135
+    case 'west':
+      return a > 225 && a <= 315
+    case 'north':
+      return a < 45 || a > 315
+    default:
+      return true
+  }
+}
 
 type UndoRedoSnapshot = {
   panels: WorkbenchPanelState[]
@@ -40,6 +66,7 @@ type UsePanelStateArgs = {
   panelWidthM?: number
   panelHeightM?: number
   panelCapacityWp?: number
+  roofDirection?: RoofDirection
   onBatchRecomputeStatusChange?: (status: BatchRecomputeStatus) => void
 }
 
@@ -63,6 +90,7 @@ export function usePanelState({
   panelWidthM,
   panelHeightM,
   panelCapacityWp,
+  roofDirection,
   onBatchRecomputeStatusChange
 }: UsePanelStateArgs) {
   const [panels, setPanels] = useState<WorkbenchPanelState[]>([])
@@ -124,7 +152,19 @@ export function usePanelState({
 
     setPanels(nextPanels)
 
-    const sorted = [...nextPanels].sort((a, b) => getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a))
+    // Stable order sorts panels by (direction-match desc, yield desc). Direction
+    // priority puts matching-aspect panels first so the visibleCount slice picks
+    // them before fallbacks. When user picks "south", south-facing panels rank
+    // ahead of east/west/north regardless of yield, but within each match group
+    // we still rank by yield so visibleCount keeps semantic "top-N highest yield".
+    const sorted = [...nextPanels].sort((a, b) => {
+      const aPanel = solarPanels.find((p) => p.id === a.id)
+      const bPanel = solarPanels.find((p) => p.id === b.id)
+      const aMatch = aPanel ? panelMatchesDirection(aPanel.segmentIndex, roofSegments, roofDirection) : false
+      const bMatch = bPanel ? panelMatchesDirection(bPanel.segmentIndex, roofSegments, roofDirection) : false
+      if (aMatch !== bMatch) return aMatch ? -1 : 1
+      return getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a)
+    })
     stableOrderRef.current = sorted.map((p) => p.id)
 
     const savedActiveCount =
@@ -134,7 +174,29 @@ export function usePanelState({
 
     // Push initial state so first edit can be undone
     undoRedo.push({ panels: nextPanels, visibleCount: nextVisibleCount })
-  }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount, undoRedo])
+  }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount, undoRedo, roofDirection])
+
+  // Re-sort stable order when the user changes roof direction mid-session.
+  // Init effect above is gated by initializedProjectIdRef so it skips after
+  // first run, but direction changes still need to reshuffle the visible pool.
+  const lastSortedDirectionRef = useRef<RoofDirection | undefined>(undefined)
+  useEffect(() => {
+    if (!projectId || initializedProjectIdRef.current !== projectId) return
+    if (lastSortedDirectionRef.current === roofDirection) return
+    lastSortedDirectionRef.current = roofDirection
+    if (panelsRef.current.length === 0) return
+    const sorted = [...panelsRef.current].sort((a, b) => {
+      const aPanel = solarPanels.find((p) => p.id === a.id)
+      const bPanel = solarPanels.find((p) => p.id === b.id)
+      const aMatch = aPanel ? panelMatchesDirection(aPanel.segmentIndex, roofSegments, roofDirection) : false
+      const bMatch = bPanel ? panelMatchesDirection(bPanel.segmentIndex, roofSegments, roofDirection) : false
+      if (aMatch !== bMatch) return aMatch ? -1 : 1
+      return getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a)
+    })
+    stableOrderRef.current = sorted.map((p) => p.id)
+    // Force re-render by replacing panels array reference (panels themselves unchanged)
+    setPanels((prev) => [...prev])
+  }, [projectId, roofDirection, solarPanels, roofSegments])
 
   // Auto-recompute monthly energy for panels that only have yearly data
   useEffect(() => {
@@ -281,6 +343,20 @@ export function usePanelState({
     setVisibleCountState(Math.max(minVisibleCount, Math.min(effectiveMaxVisibleCount, count)))
   }
 
+  // Layout Preset apply: reset every panel's `deleted` flag to false AND set
+  // visibleCount in one render, atomically. Without resetting first, the
+  // effectiveMaxVisibleCount cap (= maxVisibleCount − deletedCount) clamps the
+  // requested target down to whatever count the user previously saved with.
+  // serializeLayout marks every panel outside activePanelIds as 'deleted' when
+  // saving, so reopening a saved project loads with N "deleted" panels and
+  // higher-than-N preset targets become silently no-ops. This method bypasses
+  // the cap by computing against maxVisibleCount directly.
+  function resetDeletionsAndApplyVisibleCount(count: number) {
+    pushSnapshot()
+    setPanels((current) => current.map((p) => (p.deleted ? { ...p, deleted: false } : p)))
+    setVisibleCountState(Math.max(minVisibleCount, Math.min(maxVisibleCount, count)))
+  }
+
   const undo = useCallback(() => {
     const snapshot = undoRedo.undo()
     if (snapshot) {
@@ -340,6 +416,7 @@ export function usePanelState({
     bulkUpdatePanels,
     pushSnapshot,
     setVisibleCount,
+    resetDeletionsAndApplyVisibleCount,
     serializeLayout,
     undo,
     redo,

@@ -5,7 +5,12 @@ import { pdfTokenRateLimit } from '../middleware/pdfTokenRateLimit.js'
 import { checkQuota } from '../middleware/checkQuota.js'
 import { validate } from '../middleware/validate.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
-import { createProjectSchema, saveLayoutSchema, saveAnalysisSchema } from '../validators/projects.js'
+import {
+  createProjectSchema,
+  saveLayoutSchema,
+  saveAnalysisSchema,
+  updateLayoutPreferencesSchema
+} from '../validators/projects.js'
 import * as projectService from '../services/projectService.js'
 import { signPdfToken } from '../services/pdfTokenService.js'
 import { getSignedUrl } from '../services/storageService.js'
@@ -86,6 +91,26 @@ projectsRouter.patch(
     )
     if (!updated) {
       console.warn(`[ProjectSaveLayout] not found user=${req.user!.id} project=${req.params.id as string}`)
+      throw new NotFoundError('Project not found')
+    }
+    res.json(updated)
+  })
+)
+
+// PATCH /api/projects/:id/layout-preferences — sparse merge of layout preset state
+projectsRouter.patch(
+  '/:id/layout-preferences',
+  requireAuth,
+  validate(updateLayoutPreferencesSchema),
+  asyncHandler(async (req, res) => {
+    console.info(`[ProjectSavePrefs] user=${req.user!.id} project=${req.params.id as string}`)
+    const updated = await projectService.updateLayoutPreferences(
+      req.user!.id,
+      req.params.id as string,
+      req.body.layoutPreferences
+    )
+    if (!updated) {
+      console.warn(`[ProjectSavePrefs] not found user=${req.user!.id} project=${req.params.id as string}`)
       throw new NotFoundError('Project not found')
     }
     res.json(updated)

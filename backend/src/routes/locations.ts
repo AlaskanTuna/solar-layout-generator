@@ -2,8 +2,14 @@ import { Router, type Router as ExpressRouter } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
-import { resolveLocationSchema, fluxRecomputeSchema, fluxRecomputeBatchSchema } from '../validators/locations.js'
+import {
+  resolveLocationSchema,
+  probeLocationSchema,
+  fluxRecomputeSchema,
+  fluxRecomputeBatchSchema
+} from '../validators/locations.js'
 import * as locationService from '../services/locationService.js'
+import { findBestQualityForLocation } from '../services/solarApiService.js'
 import { getSignedUrl } from '../services/storageService.js'
 import { loadReferenceGeoTransform, loadRoofMask } from '../services/geoTiffService.js'
 import { resolveTifPath, getOrGenerateOverlay } from '../services/overlayService.js'
@@ -14,6 +20,7 @@ import type {
   ResolveLocationResponse,
   LocationStatusResponse,
   LocationDataResponse,
+  ProbeLocationResponse,
   FluxRecomputeBatchResponse
 } from '@shared/types'
 import type { ImageGeoTransform, RoofMaskResult } from '../services/geoTiffService.js'
@@ -31,9 +38,32 @@ locationsRouter.post(
   requireAuth,
   validate(resolveLocationSchema),
   asyncHandler(async (req, res) => {
-    const { lat, lng, projectId } = req.body
-    const result = await locationService.resolveLocation(req.user!.id, lat, lng, projectId)
+    const { lat, lng, projectId, requiredQuality, expandedCoverage } = req.body
+    const result = await locationService.resolveLocation(
+      req.user!.id,
+      lat,
+      lng,
+      projectId,
+      requiredQuality,
+      expandedCoverage
+    )
     const response: ResolveLocationResponse = { locationId: result.locationId, status: result.status }
+    res.json(response)
+  })
+)
+
+// GET /api/locations/probe?lat=X&lng=Y
+locationsRouter.get(
+  '/probe',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const parsed = probeLocationSchema.safeParse(req.query)
+    if (!parsed.success) {
+      throw new BadRequestError('Invalid lat/lng query parameters')
+    }
+    const { lat, lng } = parsed.data
+    const result = await findBestQualityForLocation(lat, lng)
+    const response: ProbeLocationResponse = result
     res.json(response)
   })
 )
@@ -71,6 +101,7 @@ locationsRouter.get(
     const response: LocationDataRouteResponse = {
       buildingInsights: location.buildingInsightsJson as Record<string, unknown>,
       rgbImageUrl,
+      imageryQuality: location.imageryQuality,
       imageGeoTransform,
       roofMask
     }

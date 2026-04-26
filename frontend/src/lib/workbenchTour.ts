@@ -8,6 +8,12 @@ export const WORKBENCH_TOUR_STEPS: TourStep[] = [
     placement: 'center' as const
   },
   {
+    target: '[data-tour="layout-preset"]',
+    title: 'Layout Preset',
+    description:
+      "Tell us your monthly bill and savings goal — we'll right-size the layout for you. You can re-open this anytime, or skip to keep the maximum-coverage default."
+  },
+  {
     target: '[data-tour="panel-model"]',
     title: 'Shape the Layout',
     description:

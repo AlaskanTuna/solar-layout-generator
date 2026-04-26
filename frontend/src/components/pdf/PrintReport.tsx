@@ -17,7 +17,7 @@ export function PrintReport({ project }: PrintReportProps) {
   return (
     <div className="pdf-document">
       <PdfFixedHeader projectName={project.name} generatedAt={generatedAt} />
-      <PdfFixedFooter />
+      <PdfFixedFooter imageryQuality={project.location?.imageryQuality ?? null} />
       <PrintPage1Workbench project={project} />
       <PrintPage2Analysis project={project} />
     </div>

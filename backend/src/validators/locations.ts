@@ -3,7 +3,14 @@ import { z } from 'zod'
 export const resolveLocationSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
-  projectId: z.string().uuid().optional()
+  projectId: z.string().uuid().optional(),
+  requiredQuality: z.enum(['HIGH', 'BASE']).optional(),
+  expandedCoverage: z.boolean().optional()
+})
+
+export const probeLocationSchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180)
 })
 
 export const fluxRecomputeSchema = z.object({

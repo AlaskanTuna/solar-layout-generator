@@ -1,4 +1,5 @@
 import { Sun, Leaf } from 'lucide-react'
+import type { ImageryQuality } from '@shared/types'
 
 type HeaderProps = {
   projectName: string
@@ -23,13 +24,25 @@ export function PdfFixedHeader({ projectName, generatedAt }: HeaderProps) {
   )
 }
 
-export function PdfFixedFooter() {
+type FooterProps = {
+  imageryQuality?: ImageryQuality | null
+}
+
+export function PdfFixedFooter({ imageryQuality }: FooterProps = {}) {
   return (
     <footer className="pdf-doc-footer">
       <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
         <Leaf className="h-2 w-2 text-green-600 dark:text-green-400" />
         UN SDG 7: Affordable and Clean Energy
       </div>
+      {imageryQuality === 'BASE' && (
+        <>
+          <div className="h-2 w-px bg-border" />
+          <span className="text-[8px] font-medium text-amber-700 dark:text-amber-400">
+            Imagery: BASE (lower-resolution)
+          </span>
+        </>
+      )}
       <div className="h-2 w-px bg-border" />
       <div className="flex items-center gap-1">
         <div className="flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-primary">

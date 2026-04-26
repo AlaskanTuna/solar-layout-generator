@@ -83,3 +83,14 @@ export const saveAnalysisSchema = z.object({
   analysisConfig: analysisConfigSchema,
   analysisResults: analysisResultsSchema
 })
+
+const layoutPreferencesPartialSchema = z.object({
+  billRange: z.enum(['<100', '100-200', '200-400', '400-600', '600+', 'unknown']).optional(),
+  sizingGoal: z.enum(['conservative', 'balanced', 'maximum', 'custom']).optional(),
+  roofDirection: z.enum(['any', 'south', 'east', 'west', 'north']).optional(),
+  dismissedAt: z.string().datetime().optional()
+})
+
+export const updateLayoutPreferencesSchema = z.object({
+  layoutPreferences: layoutPreferencesPartialSchema
+})

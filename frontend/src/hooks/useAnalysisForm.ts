@@ -14,7 +14,12 @@ import {
 } from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation, type AnnualSimulationResult } from '@/lib/billingEngine'
-import { computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
+import {
+  BILL_RANGE_TO_KWH_PER_MONTH,
+  computeSystemCost,
+  getPanelModel,
+  DEFAULT_PANEL_MODEL_ID
+} from '@shared/types'
 export type AnalysisFormState = Omit<AnalysisConfig, 'systemKwp'>
 
 export type ChartDataPoint = {
@@ -114,8 +119,17 @@ export function useAnalysisForm(projectId: string | undefined) {
 
     const resolvedSystemCostRm = savedConfig?.systemCostRm ?? defaultSystemCostRm
 
+    // Seed monthly consumption from the Layout Preset bill range when the user
+    // hasn't already overridden it. Falls back to 600 kWh (the historic default
+    // and the BILL_RANGE_TO_KWH_PER_MONTH 'unknown' bucket value) when no
+    // preference is set.
+    const billRangeDefaultKwh =
+      projectQuery.data.layoutPreferences?.billRange != null
+        ? BILL_RANGE_TO_KWH_PER_MONTH[projectQuery.data.layoutPreferences.billRange]
+        : 600
+
     setFormState({
-      monthlyConsumptionKwh: savedConfig?.monthlyConsumptionKwh ?? 600,
+      monthlyConsumptionKwh: savedConfig?.monthlyConsumptionKwh ?? billRangeDefaultKwh,
       connectionPhase,
       roofType,
       systemCostRm: resolvedSystemCostRm,

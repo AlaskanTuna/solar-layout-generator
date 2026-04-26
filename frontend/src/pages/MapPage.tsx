@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
-import { resolveLocation, getLocationStatus } from '@/api/locations'
+import { resolveLocation, getLocationStatus, probeLocation } from '@/api/locations'
+import { LowerResolutionConsentModal } from '@/components/map/LowerResolutionConsentModal'
+import type { ImageryQuality } from '@shared/types'
 import { createProject, getProject } from '@/api/projects'
 import { ApiError } from '@/api/client'
 import { notify } from '@/components/ui/toastConfig'
@@ -69,6 +71,8 @@ export function MapPage() {
   const [manualLat, setManualLat] = useState('')
   const [manualLng, setManualLng] = useState('')
   const [manualError, setManualError] = useState('')
+  const [pendingBaseConsent, setPendingBaseConsent] = useState(false)
+  const [probeInFlight, setProbeInFlight] = useState(false)
 
   const searchParams = new URLSearchParams(window.location.search)
   const isReadonly = searchParams.get('view') === 'readonly'
@@ -223,7 +227,36 @@ export function MapPage() {
     initMap()
   }, [isLoaded, initMap])
 
+  const [pendingExpanded, setPendingExpanded] = useState(false)
+
   async function handleConfirm() {
+    if (!selectedPlace || probeInFlight) return
+    setProbeInFlight(true)
+    setErrorMessage('')
+    try {
+      const probe = await probeLocation(selectedPlace.lat, selectedPlace.lng)
+      if (!probe.bestQuality) {
+        setErrorMessage('No solar imagery is available for this location. Try a nearby address.')
+        setPhase('failed')
+        return
+      }
+      if (probe.bestQuality === 'BASE') {
+        // Pause here — user must opt in to BASE-tier imagery via the consent modal.
+        // Remember whether expansion was needed so resolve replays the same combo.
+        setPendingExpanded(probe.expandedCoverage)
+        setPendingBaseConsent(true)
+        return
+      }
+      await runResolveLocation('HIGH', false)
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to check imagery availability')
+      setPhase('failed')
+    } finally {
+      setProbeInFlight(false)
+    }
+  }
+
+  async function runResolveLocation(requiredQuality: ImageryQuality, expandedCoverage: boolean) {
     if (!selectedPlace) return
     setPhase('processing')
     setErrorMessage('')
@@ -231,6 +264,8 @@ export function MapPage() {
       const result = await resolveLocation({
         lat: selectedPlace.lat,
         lng: selectedPlace.lng,
+        requiredQuality,
+        expandedCoverage,
         ...(isNewProject ? {} : { projectId: projectId })
       })
       setLocationId(result.locationId)
@@ -415,8 +450,19 @@ export function MapPage() {
                 <p className="text-sm font-medium">Is this your building?</p>
                 <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
                 <div className="mt-3 flex gap-2">
-                  <Button onClick={handleConfirm} className="flex-1">
-                    Confirm Location
+                  <Button
+                    onClick={handleConfirm}
+                    className="flex-1 disabled:cursor-not-allowed"
+                    disabled={probeInFlight || pendingBaseConsent}
+                  >
+                    {probeInFlight ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Checking imagery...
+                      </>
+                    ) : (
+                      'Confirm Location'
+                    )}
                   </Button>
                   <Button variant="outline" onClick={handleRetry} className="flex-1">
                     Search Again
@@ -449,16 +495,10 @@ export function MapPage() {
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                   <p className="text-sm text-destructive">{errorMessage}</p>
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <Button variant="outline" onClick={handleRetry} className="flex-1">
+                <div className="mt-3 flex justify-center">
+                  <Button variant="outline" onClick={handleRetry}>
                     <MapPin className="mr-2 h-4 w-4" />
                     Try Another Location
-                  </Button>
-                  <Button variant="outline" asChild className="flex-1">
-                    <Link to="/dashboard">
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Link>
                   </Button>
                 </div>
               </div>
@@ -466,6 +506,15 @@ export function MapPage() {
           )}
         </div>
       </div>
+
+      <LowerResolutionConsentModal
+        open={pendingBaseConsent}
+        onAccept={() => {
+          setPendingBaseConsent(false)
+          void runResolveLocation('BASE', pendingExpanded)
+        }}
+        onCancel={() => setPendingBaseConsent(false)}
+      />
     </AppLayout>
   )
 }

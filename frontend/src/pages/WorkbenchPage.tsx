@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
 import { MONTHLY_AZIMUTH, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
@@ -27,6 +28,10 @@ import { GuidedTour } from '@/components/ui/GuidedTour'
 import { CanvasControls } from '@/components/workbench/CanvasControls'
 import { CanvasLegends } from '@/components/workbench/CanvasLegends'
 import { WorkbenchSidebar } from '@/components/workbench/WorkbenchSidebar'
+import { LayoutPresetModal } from '@/components/workbench/LayoutPresetModal'
+import { saveLayoutPreferences } from '@/api/projects'
+import { describeLayoutPreset, inferVisibleCount } from '@/lib/layoutPreset'
+import type { LayoutPreferences } from '@shared/types'
 import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
 
 function getPanelAnnualEnergy(monthlyEnergyDcKwh: number[], yearlyEnergyDcKwh: number): number {
@@ -74,6 +79,31 @@ export function WorkbenchPage() {
     }
   }, [projectId, project])
 
+  // ─── Layout Preset (W-1) ───────────────────────────────────────────────
+  // Auto-shows on first Workbench entry per project. Manual slider moves
+  // flip sizingGoal to 'custom' so the sidebar badge reflects reality.
+  const queryClient = useQueryClient()
+  const [layoutPresetOpen, setLayoutPresetOpen] = useState(false)
+  const layoutPresetAutoShownRef = useRef<string | null>(null)
+  const applyingPresetRef = useRef(false)
+
+  const layoutPreferences: LayoutPreferences | null = project?.layoutPreferences ?? null
+
+  const layoutPrefsMutation = useMutation({
+    mutationFn: (next: Partial<LayoutPreferences>) =>
+      saveLayoutPreferences(projectId!, { layoutPreferences: next }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['project', projectId] })
+  })
+
+  useEffect(() => {
+    if (!projectId || !project) return
+    if (layoutPresetAutoShownRef.current === projectId) return
+    layoutPresetAutoShownRef.current = projectId
+    if (layoutPreferences === null) {
+      setLayoutPresetOpen(true)
+    }
+  }, [projectId, project, layoutPreferences])
+
   const { backgroundImage, displayImage, imageError, isOverlayLoading } = useOverlayImages(
     rgbImageUrl,
     project?.locationId,
@@ -90,7 +120,6 @@ export function WorkbenchPage() {
     maxVisibleCount,
     totalAnnualYield,
     totalCarbonOffsetKg,
-    allPanelsEnergyRange,
     getPanel,
     movePanel,
     rotatePanel,
@@ -99,6 +128,7 @@ export function WorkbenchPage() {
     bulkUpdatePanels,
     pushSnapshot,
     setVisibleCount,
+    resetDeletionsAndApplyVisibleCount,
     serializeLayout,
     undo,
     redo,
@@ -115,8 +145,50 @@ export function WorkbenchPage() {
     panelWidthM: selectedPanelModel.widthM,
     panelHeightM: selectedPanelModel.heightM,
     panelCapacityWp: selectedPanelModel.capacityWp,
+    roofDirection: project?.layoutPreferences?.roofDirection,
     onBatchRecomputeStatusChange: setInitialBatchStatus
   })
+
+  // ─── Layout Preset (W-1) handlers ─────────────────────────────────────
+  // Wraps setVisibleCount so a manual slider move flips sizingGoal to 'custom'.
+  // Preset Save / Skip use the raw setter via applyingPresetRef.
+  const handleVisibleCountChange = useCallback(
+    (count: number) => {
+      setVisibleCount(count)
+      if (applyingPresetRef.current) return
+      if (!projectId) return
+      if (layoutPreferences && layoutPreferences.sizingGoal === 'custom') return
+      layoutPrefsMutation.mutate({ sizingGoal: 'custom' })
+    },
+    [setVisibleCount, projectId, layoutPreferences, layoutPrefsMutation]
+  )
+
+  const handleLayoutPresetSave = useCallback(
+    (next: LayoutPreferences) => {
+      const panels = buildingInsights?.solarPotential.solarPanels ?? []
+      const segments = buildingInsights?.solarPotential.roofSegmentStats ?? []
+      const targetCount = inferVisibleCount(panels, next, segments)
+      const clamped = Math.max(minVisibleCount, Math.min(maxVisibleCount, targetCount))
+      applyingPresetRef.current = true
+      try {
+        // Reset all deletions before applying — on a reopened project,
+        // setVisibleCount alone is capped by effectiveMaxVisibleCount (= max − deleted),
+        // which silently floors larger preset targets to the saved active count.
+        resetDeletionsAndApplyVisibleCount(clamped)
+      } finally {
+        // Release on next tick so React's batched commit has settled before slider listener fires.
+        setTimeout(() => {
+          applyingPresetRef.current = false
+        }, 0)
+      }
+      layoutPrefsMutation.mutate(next)
+    },
+    [buildingInsights, minVisibleCount, maxVisibleCount, resetDeletionsAndApplyVisibleCount, layoutPrefsMutation]
+  )
+
+  const handleLayoutPresetSkip = useCallback(() => {
+    layoutPrefsMutation.mutate({ sizingGoal: 'maximum', dismissedAt: new Date().toISOString() })
+  }, [layoutPrefsMutation])
 
   const interactions = useCanvasInteractions({
     locationId: project?.locationId,
@@ -200,6 +272,7 @@ export function WorkbenchPage() {
       <PageContainer variant="mvp">
         <WorkbenchSidebar
           projectName={project.name}
+          imageryQuality={project.location?.imageryQuality ?? null}
           totalAnnualYield={totalAnnualYield}
           totalCarbonOffsetKg={totalCarbonOffsetKg}
           carbonOffsetFactorKgPerMwh={buildingInsights.solarPotential.carbonOffsetFactorKgPerMwh}
@@ -217,7 +290,9 @@ export function WorkbenchPage() {
           visibleCount={visibleCount}
           minVisibleCount={minVisibleCount}
           maxVisibleCount={maxVisibleCount}
-          onVisibleCountChange={setVisibleCount}
+          onVisibleCountChange={handleVisibleCountChange}
+          layoutPresetLabel={describeLayoutPreset(layoutPreferences)}
+          onOpenLayoutPreset={() => setLayoutPresetOpen(true)}
           selectedPanelIds={interactions.selectedPanelIds}
           selectedPanel={interactions.selectedPanel}
           selectedAnnualEnergy={selectedAnnualEnergy}
@@ -329,8 +404,6 @@ export function WorkbenchPage() {
                         stageWidth={stageSize.width}
                         stageHeight={stageSize.height}
                         disabledPanelId={interactions.pendingPanelId}
-                        energyMin={allPanelsEnergyRange.min}
-                        energyMax={allPanelsEnergyRange.max}
                         snapEnabled={interactions.snapEnabled}
                         onSnapDragMove={interactions.handleSnapDragMove}
                         onSelect={interactions.handlePanelSelect}
@@ -461,6 +534,14 @@ export function WorkbenchPage() {
           </Card>
         </section>
       </PageContainer>
+
+      <LayoutPresetModal
+        open={layoutPresetOpen}
+        onOpenChange={setLayoutPresetOpen}
+        prefs={layoutPreferences}
+        onSave={handleLayoutPresetSave}
+        onSkip={handleLayoutPresetSkip}
+      />
     </AppLayout>
   )
 }

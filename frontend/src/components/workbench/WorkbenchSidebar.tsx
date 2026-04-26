@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { Sliders } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -8,7 +9,7 @@ import { PanelModelDrawer } from '@/components/workbench/PanelModelDrawer'
 import { formatNumber } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import type { BatchRecomputeStatus } from '@/hooks/usePanelState'
-import type { PanelModel } from '@shared/types'
+import type { PanelModel, ImageryQuality } from '@shared/types'
 
 type UiMessage = {
   tone: 'error' | 'info'
@@ -23,6 +24,7 @@ type SelectedPanelData = {
 
 type WorkbenchSidebarProps = {
   projectName: string
+  imageryQuality: ImageryQuality | null
   totalAnnualYield: number
   totalCarbonOffsetKg: number
   carbonOffsetFactorKgPerMwh: number
@@ -46,10 +48,13 @@ type WorkbenchSidebarProps = {
   selectedAnnualEnergy: number | null
   pendingPanelId: string | null
   onSave: () => void
+  layoutPresetLabel: string
+  onOpenLayoutPreset: () => void
 }
 
 export function WorkbenchSidebar({
   projectName,
+  imageryQuality,
   totalAnnualYield,
   totalCarbonOffsetKg,
   carbonOffsetFactorKgPerMwh,
@@ -72,7 +77,9 @@ export function WorkbenchSidebar({
   selectedPanel,
   selectedAnnualEnergy,
   pendingPanelId,
-  onSave
+  onSave,
+  layoutPresetLabel,
+  onOpenLayoutPreset
 }: WorkbenchSidebarProps) {
   const { projectId } = useParams<{ projectId: string }>()
 
@@ -85,7 +92,30 @@ export function WorkbenchSidebar({
               <CardTitle className="text-xl">{projectName}</CardTitle>
               <CardDescription>Adjust the suggested layout before moving to financial analysis.</CardDescription>
             </div>
+            {imageryQuality === 'BASE' && (
+              <span className="inline-flex shrink-0 items-center rounded-md border border-amber-300/60 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+                Imagery: BASE
+                <InfoTooltip text="High-resolution satellite imagery was unavailable for this address. Panel positions and flux estimates are approximate." />
+              </span>
+            )}
           </div>
+          <button
+            type="button"
+            onClick={onOpenLayoutPreset}
+            data-tour="layout-preset"
+            className="group flex w-full items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-left transition-colors hover:border-foreground/30 hover:bg-muted"
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <Sliders className="h-3.5 w-3.5" />
+              </span>
+              <div>
+                <p className="text-xs font-medium">Layout Preset</p>
+                <p className="text-xs text-muted-foreground">{layoutPresetLabel}</p>
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground transition-transform group-hover:translate-x-0.5">→</span>
+          </button>
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-lg bg-muted p-3">
               <p className="text-muted-foreground">

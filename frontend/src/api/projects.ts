@@ -1,5 +1,12 @@
 import { apiFetch } from './client'
-import type { CreateProjectRequest, SaveLayoutRequest, SaveAnalysisRequest } from '@shared/types'
+import type {
+  CreateProjectRequest,
+  SaveLayoutRequest,
+  SaveAnalysisRequest,
+  UpdateLayoutPreferencesRequest,
+  LayoutPreferences,
+  ImageryQuality
+} from '@shared/types'
 import type { AnalysisConfig, AnalysisResultsRecord } from '@/lib/analysis'
 import type { LocationImageGeoTransform } from './locations'
 
@@ -15,6 +22,7 @@ export type ProjectResponse = {
   editedLayout: unknown[] | null
   analysisConfig: ProjectAnalysisConfig | null
   analysisResults: AnalysisResultsRecord | null
+  layoutPreferences: LayoutPreferences | null
   createdAt: string
   updatedAt: string
   location?: {
@@ -22,6 +30,7 @@ export type ProjectResponse = {
     lat: number
     lng: number
     status: 'processing' | 'ready' | 'failed'
+    imageryQuality: ImageryQuality | null
     buildingInsightsJson?: Record<string, unknown>
     rgbImageUrl?: string | null
   }
@@ -61,6 +70,13 @@ export function saveLayout(id: string, req: SaveLayoutRequest) {
 
 export function saveAnalysis(id: string, req: SaveAnalysisRequest) {
   return apiFetch<ProjectResponse>(`/projects/${id}/analysis`, {
+    method: 'PATCH',
+    body: JSON.stringify(req)
+  })
+}
+
+export function saveLayoutPreferences(id: string, req: UpdateLayoutPreferencesRequest) {
+  return apiFetch<ProjectResponse>(`/projects/${id}/layout-preferences`, {
     method: 'PATCH',
     body: JSON.stringify(req)
   })

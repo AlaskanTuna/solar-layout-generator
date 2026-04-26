@@ -2,9 +2,39 @@
 
 export type LocationStatus = 'processing' | 'ready' | 'failed'
 
+export type ImageryQuality = 'HIGH' | 'BASE'
+
 /* PROJECT */
 
 export type ProjectStatus = 'draft' | 'layout_saved' | 'analysis_saved'
+
+/* LAYOUT PRESET (W-1) */
+
+export type BillRange = '<100' | '100-200' | '200-400' | '400-600' | '600+' | 'unknown'
+
+export type SizingGoal = 'conservative' | 'balanced' | 'maximum' | 'custom'
+
+export type RoofDirection = 'any' | 'south' | 'east' | 'west' | 'north'
+
+export type LayoutPreferences = {
+  billRange?: BillRange
+  sizingGoal: SizingGoal
+  roofDirection?: RoofDirection
+  dismissedAt?: string
+}
+
+// Estimated monthly kWh consumption by bill bucket — derived from average TNB blended
+// residential tariff (~RM 0.35/kWh after capacity, network, retail, AFA, and SST).
+// Midpoints chosen to err slightly conservative so balanced/conservative presets do
+// not over-size systems.
+export const BILL_RANGE_TO_KWH_PER_MONTH: Record<BillRange, number> = {
+  '<100': 250,
+  '100-200': 450,
+  '200-400': 800,
+  '400-600': 1300,
+  '600+': 1800,
+  unknown: 600
+}
 
 /* PANEL EDIT */
 
@@ -22,6 +52,8 @@ export type ResolveLocationRequest = {
   lat: number
   lng: number
   projectId?: string
+  requiredQuality?: ImageryQuality
+  expandedCoverage?: boolean
 }
 
 export type ResolveLocationResponse = {
@@ -36,6 +68,13 @@ export type LocationStatusResponse = {
 export type LocationDataResponse = {
   buildingInsights: Record<string, unknown>
   rgbImageUrl: string
+  imageryQuality: ImageryQuality | null
+}
+
+export type ProbeLocationResponse = {
+  availableQualities: ImageryQuality[]
+  bestQuality: ImageryQuality | null
+  expandedCoverage: boolean
 }
 
 export type FluxRecomputeRequest = {
@@ -68,6 +107,10 @@ export type CreateProjectRequest = {
 export type SaveLayoutRequest = {
   editedLayout: PanelEdit[]
   selectedPanelModelId?: string
+}
+
+export type UpdateLayoutPreferencesRequest = {
+  layoutPreferences: Partial<LayoutPreferences>
 }
 
 export type SaveAnalysisRequest = {

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Layer } from 'react-konva'
 import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
 import type { WorkbenchPanelState } from '@/hooks/usePanelState'
@@ -19,8 +20,6 @@ type PanelLayerProps = {
   stageWidth: number
   stageHeight: number
   disabledPanelId?: string | null
-  energyMin: number
-  energyMax: number
   snapEnabled?: boolean
   onSnapDragMove?: (panelId: string, position: { x: number; y: number }) => { x: number; y: number }
   onSelect: (panelId: string, shiftKey: boolean) => void
@@ -40,18 +39,16 @@ function panelAnnualEnergy(panel: WorkbenchPanelState): number {
     : panel.yearlyEnergyDcKwh
 }
 
-function getPanelColor(value: number, min: number, max: number): string {
-  if (min === max) {
-    return 'rgba(120, 170, 250, 0.82)'
-  }
-
-  const raw = (value - min) / (max - min)
-  const ratio = Math.max(0, Math.min(1, raw))
-
-  const red = Math.round(29 + ratio * (147 - 29))
-  const green = Math.round(78 + ratio * (197 - 78))
-  const blue = Math.round(216 + ratio * (253 - 216))
-
+// Rank-based color: instead of mapping raw kWh to a 0..1 ratio (which collapses
+// when yields cluster — e.g. 66% of BASE-tier panels share the top yield decile),
+// each panel's color comes from its rank within the visible set. Lowest yield = 0,
+// highest = 1, evenly distributed regardless of value spread. Guarantees every
+// panel gets a visually distinguishable shade even on tight-spread API responses.
+function getPanelColorByRatio(ratio: number): string {
+  const r = Math.max(0, Math.min(1, ratio))
+  const red = Math.round(29 + r * (147 - 29))
+  const green = Math.round(78 + r * (197 - 78))
+  const blue = Math.round(216 + r * (253 - 216))
   return `rgba(${red}, ${green}, ${blue}, 0.82)`
 }
 
@@ -63,8 +60,6 @@ export function PanelLayer({
   stageWidth,
   stageHeight,
   disabledPanelId,
-  energyMin,
-  energyMax,
   snapEnabled = false,
   onSnapDragMove,
   onSelect,
@@ -77,6 +72,22 @@ export function PanelLayer({
   onGroupRotateEnd,
   freeRotate
 }: PanelLayerProps) {
+  // Compute each panel's rank by yield (ascending). Ties resolve by id so the
+  // mapping is stable across re-renders. Result: panel id → rank-normalized
+  // ratio in [0, 1] used directly as color input.
+  const yieldRatios = useMemo(() => {
+    const sorted = [...panels].sort((a, b) => {
+      const dy = panelAnnualEnergy(a.panel) - panelAnnualEnergy(b.panel)
+      return dy !== 0 ? dy : a.panel.id.localeCompare(b.panel.id)
+    })
+    const map = new Map<string, number>()
+    const denom = Math.max(1, sorted.length - 1)
+    for (let i = 0; i < sorted.length; i++) {
+      map.set(sorted[i]!.panel.id, i / denom)
+    }
+    return map
+  }, [panels])
+
   return (
     <Layer>
       {/* Panel rects */}
@@ -89,7 +100,7 @@ export function PanelLayer({
           width={panelWidth}
           height={panelHeight}
           rotation={panel.rotation}
-          fill={getPanelColor(panelAnnualEnergy(panel), energyMin, energyMax)}
+          fill={getPanelColorByRatio(yieldRatios.get(panel.id) ?? 0.5)}
           selected={selectedPanelIds.has(panel.id)}
           multiSelected={selectedPanelIds.size > 1 && selectedPanelIds.has(panel.id)}
           stageWidth={stageWidth}

@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js'
 import { runLocationPipeline } from './locationPipeline.js'
 import { NotFoundError } from '../errors.js'
+import type { ImageryQuality } from './solarApiService.js'
 
 const COORDINATE_TOLERANCE = 0.0001
 
@@ -21,7 +22,9 @@ export async function resolveLocation(
   userId: string,
   lat: number,
   lng: number,
-  projectId?: string
+  projectId?: string,
+  requiredQuality: ImageryQuality = 'HIGH',
+  expandedCoverage = false
 ): Promise<ResolveLocationResult> {
   // Check for existing location within coordinate tolerance
   const existing = await prisma.location.findFirst({
@@ -59,7 +62,7 @@ export async function resolveLocation(
   }
 
   // Run pipeline asynchronously (don't block HTTP response)
-  runLocationPipeline(location.id, lat, lng).catch((err) => {
+  runLocationPipeline(location.id, lat, lng, requiredQuality, expandedCoverage).catch((err) => {
     console.error(`Pipeline error for location ${location.id}:`, err)
   })
 

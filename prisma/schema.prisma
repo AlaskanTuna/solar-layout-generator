@@ -19,35 +19,42 @@ enum ProjectStatus {
   analysis_saved
 }
 
+enum ImageryQuality {
+  HIGH
+  BASE
+}
+
 model Location {
-  id                    String         @id @default(uuid())
+  id                    String          @id @default(uuid())
   lat                   Float
   lng                   Float
-  status                LocationStatus @default(processing)
+  status                LocationStatus  @default(processing)
+  imageryQuality        ImageryQuality?
   buildingInsightsJson  Json?
   rgbImageUrl           String?
   monthlyFluxPath       String?
   maskPath              String?
   annualFluxPath        String?
   dsmPath               String?
-  createdAt             DateTime       @default(now())
+  createdAt             DateTime        @default(now())
 
   projects              Project[]
 }
 
 model Project {
-  id              String        @id @default(uuid())
-  userId          String
-  locationId      String
-  name            String
-  status          ProjectStatus @default(draft)
-  editedLayout    Json?
-  analysisConfig  Json?
-  analysisResults Json?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                 String        @id @default(uuid())
+  userId             String
+  locationId         String
+  name               String
+  status             ProjectStatus @default(draft)
+  editedLayout       Json?
+  analysisConfig     Json?
+  analysisResults    Json?
+  layoutPreferences  Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
-  location        Location      @relation(fields: [locationId], references: [id])
+  location           Location      @relation(fields: [locationId], references: [id])
 }
 
 model TariffConfig {

@@ -4,6 +4,7 @@ import type {
   ResolveLocationResponse,
   LocationStatusResponse,
   LocationDataResponse,
+  ProbeLocationResponse,
   FluxRecomputeRequest,
   FluxRecomputeResponse,
   FluxRecomputeBatchRequest,
@@ -34,6 +35,11 @@ export function resolveLocation(req: ResolveLocationRequest) {
     method: 'POST',
     body: JSON.stringify(req)
   })
+}
+
+export function probeLocation(lat: number, lng: number) {
+  const params = new URLSearchParams({ lat: lat.toString(), lng: lng.toString() })
+  return apiFetch<ProbeLocationResponse>(`/locations/probe?${params}`)
 }
 
 export function getLocationStatus(id: string) {

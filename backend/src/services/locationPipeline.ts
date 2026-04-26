@@ -41,18 +41,28 @@ async function convertRgbToPng(rgbTifBuffer: ArrayBuffer | Buffer): Promise<Buff
     .toBuffer()
 }
 
-export async function runLocationPipeline(locationId: string, lat: number, lng: number): Promise<void> {
+export async function runLocationPipeline(
+  locationId: string,
+  lat: number,
+  lng: number,
+  requiredQuality: 'HIGH' | 'BASE' = 'HIGH',
+  expandedCoverage = false
+): Promise<void> {
   try {
-    console.info(`[Pipeline] start location=${locationId} lat=${lat.toFixed(6)} lng=${lng.toFixed(6)}`)
+    console.info(
+      `[Pipeline] start location=${locationId} lat=${lat.toFixed(6)} lng=${lng.toFixed(6)} quality=${requiredQuality} expanded=${expandedCoverage}`
+    )
+
+    const opts = { requiredQuality, expandedCoverage }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawInsights = (await fetchBuildingInsights(lat, lng)) as any
+    const rawInsights = (await fetchBuildingInsights(lat, lng, opts)) as any
     const buildingInsightsJson = enrichBuildingInsights(rawInsights)
 
     const bbox = rawInsights.boundingBox
     const radius = calculateRadius(bbox)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dataLayers = (await fetchDataLayers(lat, lng, radius)) as Record<string, any>
+    const dataLayers = (await fetchDataLayers(lat, lng, radius, opts)) as Record<string, any>
 
     const storagePaths: Record<string, string> = {}
     let rgbBuffer: Buffer | null = null
@@ -89,6 +99,7 @@ export async function runLocationPipeline(locationId: string, lat: number, lng: 
       where: { id: locationId },
       data: {
         status: 'ready',
+        imageryQuality: requiredQuality,
         buildingInsightsJson,
         rgbImageUrl,
         monthlyFluxPath: storagePaths['monthlyFluxUrl'] ?? null,
