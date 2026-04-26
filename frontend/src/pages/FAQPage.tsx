@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, CircleHelp, Search } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
@@ -31,6 +31,7 @@ const CATEGORY_LABELS: Record<FaqCategory | 'all', string> = {
 }
 
 const LONG_ANSWER_WORD_LIMIT = 44
+const ITEMS_PER_PAGE = 10
 
 const FAQ_ITEMS: FaqItem[] = [
   {
@@ -299,6 +300,7 @@ function FaqCard({ item }: { item: FaqItem }) {
 export function FAQPage() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<FaqCategory | 'all'>('all')
+  const [currentPage, setCurrentPage] = useState(1)
 
   const filteredItems = useMemo(() => {
     const normalized = query.trim().toLowerCase()
@@ -312,6 +314,25 @@ export function FAQPage() {
       return matchesCategory && matchesSearch
     })
   }, [category, query])
+
+  const pageCount = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE))
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredItems.slice(start, start + ITEMS_PER_PAGE)
+  }, [currentPage, filteredItems])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [category, query])
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, pageCount))
+  }, [pageCount])
+
+  function handlePageChange(page: number) {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <PageContainer>
@@ -366,7 +387,7 @@ export function FAQPage() {
 
       <div className="mt-6 grid gap-4 animate-fade-in">
         {filteredItems.length > 0 ? (
-          filteredItems.map((item) => <FaqCard key={item.id} item={item} />)
+          paginatedItems.map((item) => <FaqCard key={item.id} item={item} />)
         ) : (
           <div className="glass-card p-8 text-center">
             <p className="font-heading text-lg font-semibold">No matching answers</p>
@@ -374,6 +395,32 @@ export function FAQPage() {
           </div>
         )}
       </div>
+
+      {filteredItems.length > ITEMS_PER_PAGE && (
+        <div className="mt-6 flex justify-end">
+          <nav className="inline-flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-sm" aria-label="FAQ pagination">
+            {Array.from({ length: pageCount }, (_, index) => {
+              const page = index + 1
+              const active = currentPage === page
+              return (
+                <button
+                  key={page}
+                  type="button"
+                  aria-current={active ? 'page' : undefined}
+                  className={`h-9 min-w-9 rounded-md px-3 text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              )
+            })}
+          </nav>
+        </div>
+      )}
     </PageContainer>
   )
 }
