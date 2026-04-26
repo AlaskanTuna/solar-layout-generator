@@ -108,7 +108,9 @@ export function TariffParameterModal({ open, onOpenChange, defaults, override, o
                 <Label className="flex items-center gap-1.5 text-xs font-medium">
                   <span className="inline-flex items-center">
                     {field.label}
-                    <InfoTooltip text={field.description} />
+                    <InfoTooltip
+                      text={`${field.description} Default: ${formatDisplay(defaults[field.key], field.unit)} ${field.unit}.`}
+                    />
                   </span>
                   {isOverridden && (
                     <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
@@ -128,9 +130,6 @@ export function TariffParameterModal({ open, onOpenChange, defaults, override, o
                     {field.unit}
                   </span>
                 </div>
-                <p className="text-[10px] leading-snug text-muted-foreground">
-                  Default: {formatDisplay(defaults[field.key], field.unit)} {field.unit}
-                </p>
               </div>
             )
           })}

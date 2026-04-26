@@ -37,6 +37,17 @@ export function useAnalysisPdf() {
       return
     }
 
+    // The Vercel-hosted Puppeteer renderer can't reach localhost / 127.0.0.1, so PDF export
+    // only works when the frontend is served from a publicly reachable host (e.g. Heroku).
+    // Bail early with a clear message instead of a confusing connection-refused error.
+    const host = window.location.hostname
+    if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local')) {
+      notify.error(
+        'PDF export requires the deployed app — the cloud renderer cannot reach your local dev server. Test from the Heroku URL.'
+      )
+      return
+    }
+
     setIsExporting(true)
     try {
       const { token } = await requestPdfExportToken(projectId)
