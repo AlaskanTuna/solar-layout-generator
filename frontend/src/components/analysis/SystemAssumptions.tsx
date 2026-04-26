@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
-
-type RoofSegmentStat = { azimuthDegrees: number; pitchDegrees: number }
+import { azimuthToCompass, type LayoutOrientationSummary } from '@/lib/analysis'
 
 type SystemAssumptionsProps = {
   performanceRatio: number
@@ -9,12 +8,7 @@ type SystemAssumptionsProps = {
   degradationRate: number
   dcAcRatio: number
   panelLifetimeYears: number | null | undefined
-  roofSegmentStats: RoofSegmentStat[]
-}
-
-function azimuthToCompass(deg: number): string {
-  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-  return directions[Math.round((((deg % 360) + 360) % 360) / 45) % 8]
+  layoutOrientation: LayoutOrientationSummary | null
 }
 
 export function SystemAssumptions({
@@ -23,7 +17,7 @@ export function SystemAssumptions({
   degradationRate,
   dcAcRatio,
   panelLifetimeYears,
-  roofSegmentStats
+  layoutOrientation
 }: SystemAssumptionsProps) {
   return (
     <Card className="border-border bg-card/90 shadow-sm">
@@ -71,18 +65,21 @@ export function SystemAssumptions({
               <p className="text-xs text-muted-foreground">From Google Solar API estimate</p>
             </div>
           )}
-          {roofSegmentStats.length > 0 && (
+          {layoutOrientation && (
             <div className="rounded-lg bg-muted p-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Roof Azimuth / Pitch
-                <InfoTooltip text="Azimuth is the compass direction your roof faces. Pitch is how steep your roof is." />
+                Azimuth / Pitch
+                <InfoTooltip text="Count-weighted azimuth and pitch across the roof segments your active panels occupy. Updates as you add, remove, or move panels in the Workbench." />
               </p>
               <p className="mt-1 text-lg font-semibold">
-                {Math.round(roofSegmentStats[0].azimuthDegrees)}° (
-                {azimuthToCompass(roofSegmentStats[0].azimuthDegrees)}) / {Math.round(roofSegmentStats[0].pitchDegrees)}
-                °
+                {Math.round(layoutOrientation.azimuthDegrees)}° ({azimuthToCompass(layoutOrientation.azimuthDegrees)}) /{' '}
+                {Math.round(layoutOrientation.pitchDegrees)}°
               </p>
-              <p className="text-xs text-muted-foreground">Primary roof segment (from Solar API)</p>
+              <p className="text-xs text-muted-foreground">
+                {layoutOrientation.segmentCount > 1
+                  ? `${layoutOrientation.panelCount} panels across ${layoutOrientation.segmentCount} roof segments`
+                  : `${layoutOrientation.panelCount} panels on one roof segment`}
+              </p>
             </div>
           )}
           <div className="rounded-lg bg-muted p-3">

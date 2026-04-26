@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { getProjectForPdf, type ProjectResponse } from '@/api/projects'
+import { getTariffConfig } from '@/api/tariff'
 import { PrintReport } from '@/components/pdf/PrintReport'
+import type { TariffConfigResponse } from '@shared/types'
 
 declare global {
   interface Window {
@@ -24,6 +26,7 @@ export function PdfPreviewPage() {
   applyThemeFromParam(searchParams.get('theme'))
 
   const [project, setProject] = useState<ProjectResponse | null>(null)
+  const [tariff, setTariff] = useState<TariffConfigResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -39,6 +42,14 @@ export function PdfPreviewPage() {
         const msg = err.message ?? 'Failed to load project data'
         setError(msg)
         window.__PDF_ERROR__ = msg
+      })
+    // Tariff config endpoint is public — fetch independently so the PDF can
+    // surface freshness metadata (AFA effective date) alongside the assumption tile.
+    getTariffConfig()
+      .then(setTariff)
+      .catch((err: Error) => {
+        // Non-fatal: PDF still renders without the date if tariff fetch fails.
+        console.warn('[PdfPreview] tariff config fetch failed:', err.message)
       })
   }, [projectId, token])
 
@@ -68,5 +79,5 @@ export function PdfPreviewPage() {
     )
   }
 
-  return <PrintReport project={project} />
+  return <PrintReport project={project} tariffEffectiveDate={tariff?.effectiveDate ?? null} />
 }

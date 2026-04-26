@@ -151,6 +151,10 @@ export type TariffConfigResponse = {
   eeiTable: [number, number][]
   afaRateDefault: number
   defaults: TariffDefaults
+  /** When the seeded rates/AFA were last verified against TNB sources. ISO-8601 string when present. */
+  effectiveDate: string | null
+  /** Short human-readable note about the source publication or revision cycle. */
+  sourceNote: string | null
 }
 
 export type HealthResponse = {

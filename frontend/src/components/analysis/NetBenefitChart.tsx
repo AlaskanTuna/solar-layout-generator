@@ -25,6 +25,11 @@ type NetBenefitChartProps = {
   tariffEscalationRate?: number
   /** Override the default active year range (e.g. 25 for PDF exports). */
   defaultYearRange?: YearRange
+  /** When 'lifecycle', subtracts maintenance + inverter replacement at the right years. Defaults to 'simple'. */
+  analysisMode?: 'simple' | 'lifecycle'
+  annualMaintenanceRm?: number
+  inverterReplacementCostRm?: number
+  inverterReplacementYear?: number
 }
 
 const YEAR_RANGES = [5, 10, 15, 20, 25] as const
@@ -37,7 +42,11 @@ export function NetBenefitChart({
   degradationRate,
   systemCostRm,
   tariffEscalationRate = 0,
-  defaultYearRange = 10
+  defaultYearRange = 10,
+  analysisMode = 'simple',
+  annualMaintenanceRm = 0,
+  inverterReplacementCostRm = 0,
+  inverterReplacementYear = 12
 }: NetBenefitChartProps) {
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
@@ -45,13 +54,28 @@ export function NetBenefitChart({
 
   const netBenefitData = useMemo(
     () =>
-      Array.from({ length: yearRange }, (_, i) => ({
-        year: `Yr ${i + 1}`,
-        value: round2(
-          computeDegradedSavings(year1Savings, degradationRate, i + 1, tariffEscalationRate) - systemCostRm
-        )
-      })),
-    [year1Savings, degradationRate, systemCostRm, tariffEscalationRate, yearRange]
+      Array.from({ length: yearRange }, (_, i) => {
+        const yr = i + 1
+        const grossSavings = computeDegradedSavings(year1Savings, degradationRate, yr, tariffEscalationRate)
+        const maintenanceCost = analysisMode === 'lifecycle' ? annualMaintenanceRm * yr : 0
+        const inverterCost =
+          analysisMode === 'lifecycle' && yr >= inverterReplacementYear ? inverterReplacementCostRm : 0
+        return {
+          year: `Yr ${yr}`,
+          value: round2(grossSavings - systemCostRm - maintenanceCost - inverterCost)
+        }
+      }),
+    [
+      year1Savings,
+      degradationRate,
+      systemCostRm,
+      tariffEscalationRate,
+      yearRange,
+      analysisMode,
+      annualMaintenanceRm,
+      inverterReplacementCostRm,
+      inverterReplacementYear
+    ]
   )
 
   const finalYearBenefit = netBenefitData[netBenefitData.length - 1].value

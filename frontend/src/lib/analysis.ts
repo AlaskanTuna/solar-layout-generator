@@ -1,7 +1,10 @@
 import type { PanelEdit, RoofType, TariffRates, TariffThresholds } from '@shared/types'
 import type { AnnualSimulationResult, NemMonthResult } from './billingEngine'
+import type { RoofSegment, SolarPanel } from './buildingInsights'
 
 export type ConnectionPhase = 'single' | 'three'
+
+export type AnalysisMode = 'simple' | 'lifecycle'
 
 export type AnalysisConfig = {
   monthlyConsumptionKwh: number
@@ -18,6 +21,11 @@ export type AnalysisConfig = {
   dcAcRatio: number // e.g. 1.2
   /** Per-project overrides for individual TNB RP4 tariff rate fields. Sparse — only stores diffs from defaults. */
   tariffRatesOverride?: Partial<TariffRates>
+  /** 'simple' (default) = upfront cost only; 'lifecycle' = include maintenance + inverter replacement. */
+  analysisMode?: AnalysisMode
+  annualMaintenanceRm?: number // RM/year, e.g. 500 for typical Malaysian residential
+  inverterReplacementCostRm?: number // RM, e.g. 4500 for a string inverter mid-range
+  inverterReplacementYear?: number // year of replacement, e.g. 12 (typical 10-15)
 }
 
 export type AnalysisResultsRecord = {
@@ -32,9 +40,20 @@ export type AnalysisResultsRecord = {
   }
   averageMonthlySavingsRm: number
   averageMonthlySavingsPct: number
+  /** Active-mode payback (simple or lifecycle, depending on `analysisMode`). */
   paybackYears: number | null
   tenYearNetBenefitRm: number
   tenYearRoiPercent: number | null
+  /** Active-mode 25-year net benefit. */
+  twentyFiveYearNetBenefitRm: number
+  /** Always exposed for direct comparison. Simple = upfront cost only. */
+  simplePaybackYears: number | null
+  simpleTwentyFiveYearNetBenefitRm: number
+  /** Always exposed. Lifecycle = upfront + 25 yrs of maintenance + 1× inverter replacement. */
+  lifecyclePaybackYears: number | null
+  lifecycleTwentyFiveYearNetBenefitRm: number
+  /** Echoes which mode produced `paybackYears` / `twentyFiveYearNetBenefitRm`. */
+  analysisMode: AnalysisMode
   carbonOffsetKg: number
   activePanelCount: number
 }
@@ -126,6 +145,149 @@ export function aggregateMonthlyGeneration(activePanels: PanelEdit[]): number[] 
   return totals.map((value) => round2(value))
 }
 
+export type LayoutOrientationSummary = {
+  azimuthDegrees: number
+  pitchDegrees: number
+  dominantSegmentIndex: number
+  segmentCount: number
+  panelCount: number
+}
+
+const COMPASS_8 = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const
+
+export function azimuthToCompass(deg: number): string {
+  return COMPASS_8[Math.round((((deg % 360) + 360) % 360) / 45) % 8]
+}
+
+// Summarise the orientation of the user's active panel layout. Counts panels
+// per source roof segment via `panel.id → SolarPanel.segmentIndex`, then
+// returns a count-weighted circular mean azimuth and weighted mean pitch.
+// `dominantSegmentIndex` is the segment hosting the most active panels.
+// Returns null when there are no active panels.
+//
+// Rationale: showing `roofSegmentStats[0]` was misleading once the user moved
+// or deleted panels — that segment may no longer host any active panel. This
+// helper grounds the displayed azimuth/pitch in the actual layout. We do not
+// fold panel rotation deltas into azimuth here because the existing rotation
+// math (see `getInitialPanelRotation`) bakes in an image-space convention that
+// is not a clean compass offset; segment-level orientation is the honest
+// summary of "which roof faces are panels actually on".
+export function summarizeLayoutOrientation(
+  activePanels: PanelEdit[],
+  solarPanels: SolarPanel[],
+  roofSegments: RoofSegment[]
+): LayoutOrientationSummary | null {
+  if (activePanels.length === 0 || roofSegments.length === 0) return null
+
+  const segmentByPanelId = new Map<string, number>()
+  for (const sp of solarPanels) {
+    segmentByPanelId.set(sp.id, sp.segmentIndex)
+  }
+
+  const countBySegment = new Map<number, number>()
+  for (const ep of activePanels) {
+    const segIdx = segmentByPanelId.get(ep.id)
+    if (segIdx === undefined) continue
+    if (segIdx < 0 || segIdx >= roofSegments.length) continue
+    countBySegment.set(segIdx, (countBySegment.get(segIdx) ?? 0) + 1)
+  }
+
+  if (countBySegment.size === 0) return null
+
+  let dominantSegmentIndex = -1
+  let dominantCount = -1
+  for (const [segIdx, count] of countBySegment) {
+    if (count > dominantCount) {
+      dominantCount = count
+      dominantSegmentIndex = segIdx
+    }
+  }
+
+  // Circular mean azimuth weighted by panel count (handles 350°/10° wraparound)
+  let sumSin = 0
+  let sumCos = 0
+  let sumPitchWeighted = 0
+  let totalWeight = 0
+  for (const [segIdx, count] of countBySegment) {
+    const seg = roofSegments[segIdx]
+    const az = (seg.azimuthDegrees * Math.PI) / 180
+    sumSin += Math.sin(az) * count
+    sumCos += Math.cos(az) * count
+    sumPitchWeighted += seg.pitchDegrees * count
+    totalWeight += count
+  }
+  const meanAzRad = Math.atan2(sumSin, sumCos)
+  const azimuthDegrees = ((meanAzRad * 180) / Math.PI + 360) % 360
+  const pitchDegrees = sumPitchWeighted / totalWeight
+
+  return {
+    azimuthDegrees: round2(azimuthDegrees),
+    pitchDegrees: round2(pitchDegrees),
+    dominantSegmentIndex,
+    segmentCount: countBySegment.size,
+    panelCount: totalWeight
+  }
+}
+
+// NEM Fit classifies how well-sized a layout is for the user's consumption
+// under NEM Rakyat 3.0 netting. Inputs are annual totals from the simulation.
+//
+// Rationale: with monthly netting + year-end credit forfeiture, a system that
+// generates more than the household consumes builds up credits that may go
+// unused (forfeited each December). This produces diminishing payback returns
+// even though the layout looks bigger on paper. Conversely a small system that
+// covers <90% of consumption uses every kWh productively.
+//
+// Thresholds (initial — calibrate against test projects later):
+//   Good      — generation ratio ≤ 0.9 AND forfeiture rate ≤ 5%
+//   Moderate  — generation ratio ≤ 1.1 AND forfeiture rate ≤ 15%
+//   Oversized — anything else (ratio > 1.1 or forfeiture > 15%)
+export type NemFit = 'good' | 'moderate' | 'oversized'
+
+export type NemFitClassification = {
+  fit: NemFit
+  detail: string
+  generationRatio: number
+  forfeitureRate: number
+}
+
+export function classifyNemFit(input: {
+  totalConsumptionKwh: number
+  totalGenerationKwh: number
+  totalCreditsForfeitedKwh: number
+}): NemFitClassification {
+  const { totalConsumptionKwh, totalGenerationKwh, totalCreditsForfeitedKwh } = input
+
+  const generationRatio = totalConsumptionKwh > 0 ? totalGenerationKwh / totalConsumptionKwh : 0
+  const forfeitureRate = totalGenerationKwh > 0 ? totalCreditsForfeitedKwh / totalGenerationKwh : 0
+
+  let fit: NemFit
+  let detail: string
+  if (generationRatio <= 0.9 && forfeitureRate <= 0.05) {
+    fit = 'good'
+    detail = 'Low unused credits'
+  } else if (generationRatio <= 1.1 && forfeitureRate <= 0.15) {
+    fit = 'moderate'
+    detail = 'Some credit buildup'
+  } else {
+    fit = 'oversized'
+    detail = 'Excess credits likely'
+  }
+
+  return { fit, detail, generationRatio, forfeitureRate }
+}
+
+// Derate raw DC monthly generation by the system's Performance Ratio.
+// PR captures real-world losses (soiling, wiring, inverter conversion, heat,
+// mismatch) as a single coefficient — typical for Malaysian residential is 0.80.
+// In the sidebar UI, PR and `assumedLosses` are coupled (losses = 1 − PR), so
+// they are alternative views of the same derate. We apply only PR here to
+// avoid double-counting. Panel-level `monthlyEnergyDcKwh` is preserved as the
+// raw flux source so this can be re-derived if the assumption changes later.
+export function applyPerformanceRatio(monthlyKwh: number[], performanceRatio: number): number[] {
+  return monthlyKwh.map((kwh) => round2(kwh * performanceRatio))
+}
+
 function getConsumptionProfile(value: unknown): ConsumptionProfile | null {
   return value === 'flat' || value === 'seasonal' ? value : null
 }
@@ -171,6 +333,11 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   const performanceRatio = getNumber(raw.performanceRatio)
   const assumedLosses = getNumber(raw.assumedLosses)
   const dcAcRatio = getNumber(raw.dcAcRatio)
+  const analysisMode: AnalysisMode | null =
+    raw.analysisMode === 'simple' || raw.analysisMode === 'lifecycle' ? raw.analysisMode : null
+  const annualMaintenanceRm = getNumber(raw.annualMaintenanceRm)
+  const inverterReplacementCostRm = getNumber(raw.inverterReplacementCostRm)
+  const inverterReplacementYear = getNumber(raw.inverterReplacementYear)
 
   return {
     ...(monthlyConsumptionKwh !== null ? { monthlyConsumptionKwh } : {}),
@@ -185,7 +352,11 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
     ...(consumptionProfile ? { consumptionProfile } : {}),
     ...(performanceRatio !== null ? { performanceRatio } : {}),
     ...(assumedLosses !== null ? { assumedLosses } : {}),
-    ...(dcAcRatio !== null ? { dcAcRatio } : {})
+    ...(dcAcRatio !== null ? { dcAcRatio } : {}),
+    ...(analysisMode ? { analysisMode } : {}),
+    ...(annualMaintenanceRm !== null ? { annualMaintenanceRm } : {}),
+    ...(inverterReplacementCostRm !== null ? { inverterReplacementCostRm } : {}),
+    ...(inverterReplacementYear !== null ? { inverterReplacementYear } : {})
   }
 }
 
@@ -195,7 +366,11 @@ export function buildAnalysisResults({
   carbonOffsetFactorKgPerMwh,
   activePanelCount,
   degradationRate = 0.005,
-  tariffEscalationRate = 0
+  tariffEscalationRate = 0,
+  analysisMode = 'simple',
+  annualMaintenanceRm = 0,
+  inverterReplacementCostRm = 0,
+  inverterReplacementYear = 12
 }: {
   simulation: AnnualSimulationResult
   systemCostRm: number
@@ -203,14 +378,18 @@ export function buildAnalysisResults({
   activePanelCount: number
   degradationRate?: number
   tariffEscalationRate?: number
+  analysisMode?: AnalysisMode
+  annualMaintenanceRm?: number
+  inverterReplacementCostRm?: number
+  inverterReplacementYear?: number
 }): AnalysisResultsRecord {
   const year1Savings = simulation.totalSavingsRm
   const averageMonthlySavingsRm = round2(year1Savings / 12)
   const averageMonthlySavingsPct =
     simulation.totalBaselineRm > 0 ? round2((year1Savings / simulation.totalBaselineRm) * 100) : 0
 
-  // Degradation- and escalation-aware payback. Each year's savings = year1 * (1-deg)^(y-1) * (1+esc)^(y-1).
-  let paybackYears: number | null = null
+  // Simple payback (upfront cost only). Each year's savings = year1 * (1-deg)^(y-1) * (1+esc)^(y-1).
+  let simplePaybackYears: number | null = null
   if (year1Savings > 0) {
     let cumulative = 0
     for (let yr = 1; yr <= 50; yr++) {
@@ -218,17 +397,51 @@ export function buildAnalysisResults({
         year1Savings * Math.pow(1 - degradationRate, yr - 1) * Math.pow(1 + tariffEscalationRate, yr - 1)
       cumulative += yearSavings
       if (cumulative >= systemCostRm) {
-        paybackYears = round2(yr - 1 + (systemCostRm - (cumulative - yearSavings)) / yearSavings)
+        simplePaybackYears = round2(yr - 1 + (systemCostRm - (cumulative - yearSavings)) / yearSavings)
         break
       }
     }
   }
 
-  // 10-year totals with degradation + escalation
-  const tenYearSavings = computeDegradedSavings(year1Savings, degradationRate, 10, tariffEscalationRate)
+  // Lifecycle payback (subtracts annual maintenance, includes inverter replacement
+  // as a one-shot cost added to the cumulative-cost target in `inverterReplacementYear`).
+  // Iterates year-by-year so the inverter cost lands at the correct cumulative point.
+  let lifecyclePaybackYears: number | null = null
+  if (year1Savings > 0 && (annualMaintenanceRm > 0 || inverterReplacementCostRm > 0)) {
+    let cumulative = 0
+    for (let yr = 1; yr <= 50; yr++) {
+      const yearSavings =
+        year1Savings * Math.pow(1 - degradationRate, yr - 1) * Math.pow(1 + tariffEscalationRate, yr - 1)
+      const yearNet = yearSavings - annualMaintenanceRm
+      cumulative += yearNet
+      const totalCost = systemCostRm + (yr >= inverterReplacementYear ? inverterReplacementCostRm : 0)
+      if (cumulative >= totalCost) {
+        lifecyclePaybackYears = round2(yr - 1 + (totalCost - (cumulative - yearNet)) / yearNet)
+        break
+      }
+    }
+  } else {
+    // No lifecycle deltas configured → lifecycle == simple
+    lifecyclePaybackYears = simplePaybackYears
+  }
 
+  // 10-year totals with degradation + escalation (kept simple-only for backward compat)
+  const tenYearSavings = computeDegradedSavings(year1Savings, degradationRate, 10, tariffEscalationRate)
   const tenYearNetBenefitRm = round2(tenYearSavings - systemCostRm)
   const tenYearRoiPercent = systemCostRm > 0 ? round2(((tenYearSavings - systemCostRm) / systemCostRm) * 100) : null
+
+  // 25-year net benefit (simple and lifecycle).
+  const twentyFiveYearGrossSavings = computeDegradedSavings(year1Savings, degradationRate, 25, tariffEscalationRate)
+  const simpleTwentyFiveYearNetBenefitRm = round2(twentyFiveYearGrossSavings - systemCostRm)
+  const lifecycleTwentyFiveYearNetBenefitRm = round2(
+    twentyFiveYearGrossSavings - systemCostRm - 25 * annualMaintenanceRm - inverterReplacementCostRm
+  )
+
+  // Active-mode aliases drive the existing UI / PDF without forcing every call site to know about both modes.
+  const paybackYears = analysisMode === 'lifecycle' ? lifecyclePaybackYears : simplePaybackYears
+  const twentyFiveYearNetBenefitRm =
+    analysisMode === 'lifecycle' ? lifecycleTwentyFiveYearNetBenefitRm : simpleTwentyFiveYearNetBenefitRm
+
   const carbonOffsetKg = round2((simulation.totalGenerationKwh / 1000) * carbonOffsetFactorKgPerMwh)
 
   return {
@@ -246,6 +459,12 @@ export function buildAnalysisResults({
     paybackYears,
     tenYearNetBenefitRm,
     tenYearRoiPercent,
+    twentyFiveYearNetBenefitRm,
+    simplePaybackYears,
+    simpleTwentyFiveYearNetBenefitRm,
+    lifecyclePaybackYears,
+    lifecycleTwentyFiveYearNetBenefitRm,
+    analysisMode,
     carbonOffsetKg,
     activePanelCount
   }

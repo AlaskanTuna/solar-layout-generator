@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -33,6 +33,7 @@ import { SortableCardContainer } from '@/components/analysis/SortableCardContain
 import { AnalysisSidebar } from '@/components/analysis/AnalysisSidebar'
 import { useAnalysisForm, type AnalysisFormState } from '@/hooks/useAnalysisForm'
 import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
+import { summarizeLayoutOrientation } from '@/lib/analysis'
 
 const ANALYSIS_TOUR_STEPS: TourStep[] = [
   {
@@ -117,6 +118,22 @@ export function AnalysisPage() {
   } = useAnalysisForm(projectId)
 
   const { isExporting, handleExportPdf } = useAnalysisPdf()
+
+  // Layout-derived azimuth/pitch summary, computed from active panels' source
+  // segments (via panel id → SolarPanel.segmentIndex). Replaces the old
+  // `roofSegmentStats[0]` view so the displayed orientation reflects the
+  // user's edited Workbench layout, not the raw API.
+  const layoutOrientation = useMemo(
+    () =>
+      buildingInsights
+        ? summarizeLayoutOrientation(
+            activePanels,
+            buildingInsights.solarPotential.solarPanels,
+            buildingInsights.solarPotential.roofSegmentStats
+          )
+        : null,
+    [activePanels, buildingInsights]
+  )
 
   useEffect(() => {
     if (projectQuery.data?.status === 'draft' && projectId) {
@@ -210,6 +227,7 @@ export function AnalysisPage() {
           onExportPdf={() => void handleExportPdf(projectId!, projectQuery.data.name)}
           onSaveAnalysis={() => void handleSaveAnalysis()}
           tariffRatesDefaults={tariffQuery.data.rates}
+          tariffEffectiveDate={tariffQuery.data.effectiveDate}
         />
 
         {/* Main Content */}
@@ -345,7 +363,7 @@ export function AnalysisPage() {
                           degradationRate={formState.degradationRate}
                           dcAcRatio={formState.dcAcRatio}
                           panelLifetimeYears={buildingInsights.solarPotential.panelLifetimeYears}
-                          roofSegmentStats={buildingInsights.solarPotential.roofSegmentStats}
+                          layoutOrientation={layoutOrientation}
                         />
                       )
                     }
@@ -359,6 +377,10 @@ export function AnalysisPage() {
                     degradationRate={formState.degradationRate}
                     systemCostRm={formState.systemCostRm}
                     tariffEscalationRate={formState.tariffEscalationRate}
+                    analysisMode={formState.analysisMode ?? 'simple'}
+                    annualMaintenanceRm={formState.annualMaintenanceRm ?? 0}
+                    inverterReplacementCostRm={formState.inverterReplacementCostRm ?? 0}
+                    inverterReplacementYear={formState.inverterReplacementYear ?? 12}
                   />
                 )
               },
@@ -372,6 +394,10 @@ export function AnalysisPage() {
                     degradationRate={formState.degradationRate}
                     systemKwp={systemKwp}
                     tariffEscalationRate={formState.tariffEscalationRate}
+                    analysisMode={formState.analysisMode ?? 'simple'}
+                    annualMaintenanceRm={formState.annualMaintenanceRm ?? 0}
+                    inverterReplacementCostRm={formState.inverterReplacementCostRm ?? 0}
+                    inverterReplacementYear={formState.inverterReplacementYear ?? 12}
                   />
                 )
               },

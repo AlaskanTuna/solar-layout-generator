@@ -5,9 +5,11 @@ import { PrintPage2Analysis } from './PrintPage2Analysis'
 
 type PrintReportProps = {
   project: ProjectResponse
+  /** ISO date string for when the seeded AFA / tariff was last verified. Null when not seeded. */
+  tariffEffectiveDate?: string | null
 }
 
-export function PrintReport({ project }: PrintReportProps) {
+export function PrintReport({ project, tariffEffectiveDate = null }: PrintReportProps) {
   const generatedAt = new Date().toLocaleDateString('en-MY', {
     day: '2-digit',
     month: 'short',
@@ -19,7 +21,7 @@ export function PrintReport({ project }: PrintReportProps) {
       <PdfFixedHeader projectName={project.name} generatedAt={generatedAt} />
       <PdfFixedFooter imageryQuality={project.location?.imageryQuality ?? null} />
       <PrintPage1Workbench project={project} />
-      <PrintPage2Analysis project={project} />
+      <PrintPage2Analysis project={project} tariffEffectiveDate={tariffEffectiveDate} />
     </div>
   )
 }

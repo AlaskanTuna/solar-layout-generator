@@ -10,6 +10,12 @@ const prisma = new PrismaClient()
 
 async function main() {
   // Upsert RP4 tariff config — idempotent
+  // Effective date: tariff RP4-2025 + the AFA value below were verified against
+  // TNB's published rates as of this seed timestamp. Update the date when the
+  // rates are re-verified or revised.
+  const TARIFF_EFFECTIVE_DATE = new Date('2026-04-01T00:00:00.000Z')
+  const TARIFF_SOURCE_NOTE = 'TNB RP4 (2025–2027); AFA published monthly by Energy Commission'
+
   await prisma.tariffConfig.upsert({
     where: { tariffVersion: 'RP4-2025' },
     update: {
@@ -17,7 +23,9 @@ async function main() {
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
       afaRateDefault: -2.15,
-      defaults: DEFAULTS
+      defaults: DEFAULTS,
+      effectiveDate: TARIFF_EFFECTIVE_DATE,
+      sourceNote: TARIFF_SOURCE_NOTE
     },
     create: {
       tariffVersion: 'RP4-2025',
@@ -25,7 +33,9 @@ async function main() {
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
       afaRateDefault: -2.15,
-      defaults: DEFAULTS
+      defaults: DEFAULTS,
+      effectiveDate: TARIFF_EFFECTIVE_DATE,
+      sourceNote: TARIFF_SOURCE_NOTE
     }
   })
 

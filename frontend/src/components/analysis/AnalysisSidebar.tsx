@@ -93,6 +93,8 @@ type AnalysisSidebarProps = {
   onSaveAnalysis: () => void
   /** Default TNB RP4 tariff rates from the global tariff config — passed through to the override modal. */
   tariffRatesDefaults: TariffRates
+  /** ISO date string indicating when the seeded AFA / tariff rates were last verified. Null when not seeded. */
+  tariffEffectiveDate?: string | null
 }
 
 export function AnalysisSidebar({
@@ -111,7 +113,8 @@ export function AnalysisSidebar({
   isSaving,
   onExportPdf,
   onSaveAnalysis,
-  tariffRatesDefaults
+  tariffRatesDefaults,
+  tariffEffectiveDate
 }: AnalysisSidebarProps) {
   const [billImageOpen, setBillImageOpen] = useState(false)
   const [tariffModalOpen, setTariffModalOpen] = useState(false)
@@ -353,6 +356,19 @@ export function AnalysisSidebar({
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
+                    {tariffEffectiveDate && (
+                      <>
+                        {' '}
+                        <span className="text-muted-foreground/80">
+                          Seeded value verified{' '}
+                          {new Date(tariffEffectiveDate).toLocaleDateString('en-MY', {
+                            year: 'numeric',
+                            month: 'short'
+                          })}
+                          .
+                        </span>
+                      </>
+                    )}
                   </p>
                 </div>
                 <Input
@@ -492,6 +508,82 @@ export function AnalysisSidebar({
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-3 rounded-xl border border-border bg-card/90 p-4">
+                <Label className="text-sm font-semibold text-foreground">
+                  Financial Mode
+                  <InfoTooltip text="Simple = upfront cost only (cleanest payback figure). Lifecycle = also subtracts annual maintenance and a one-off inverter replacement around year 10–15. Switching to Lifecycle gives a more realistic 25-year picture but a longer payback." />
+                </Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormState((c) => (c ? { ...c, analysisMode: 'simple' } : c))}
+                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                      (formState.analysisMode ?? 'simple') === 'simple'
+                        ? 'border-primary bg-primary/5 text-foreground'
+                        : 'border-border bg-background text-muted-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    Simple
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormState((c) => (c ? { ...c, analysisMode: 'lifecycle' } : c))}
+                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                      formState.analysisMode === 'lifecycle'
+                        ? 'border-primary bg-primary/5 text-foreground'
+                        : 'border-border bg-background text-muted-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    Lifecycle
+                  </button>
+                </div>
+                {formState.analysisMode === 'lifecycle' && (
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Maint. (RM/yr)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={50}
+                        value={formState.annualMaintenanceRm ?? 0}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (v >= 0) setFormState((c) => (c ? { ...c, annualMaintenanceRm: v } : c))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Inverter (RM)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={500}
+                        value={formState.inverterReplacementCostRm ?? 0}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (v >= 0) setFormState((c) => (c ? { ...c, inverterReplacementCostRm: v } : c))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">At year</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={25}
+                        step={1}
+                        value={formState.inverterReplacementYear ?? 12}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (v >= 1 && v <= 25)
+                            setFormState((c) => (c ? { ...c, inverterReplacementYear: v } : c))
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}

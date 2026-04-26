@@ -10,6 +10,11 @@ type FinancialRoadmapProps = {
   systemKwp: number
   /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year. Defaults to 0. */
   tariffEscalationRate?: number
+  /** Active financial mode (drives whether the inverter milestone copy says "included" vs "excluded" from payback). */
+  analysisMode?: 'simple' | 'lifecycle'
+  inverterReplacementCostRm?: number
+  inverterReplacementYear?: number
+  annualMaintenanceRm?: number
 }
 
 type Milestone = {
@@ -24,13 +29,20 @@ export function FinancialRoadmap({
   year1Savings,
   degradationRate,
   systemKwp,
-  tariffEscalationRate = 0
+  tariffEscalationRate = 0,
+  analysisMode = 'simple',
+  inverterReplacementCostRm,
+  inverterReplacementYear,
+  annualMaintenanceRm
 }: FinancialRoadmapProps) {
   const outputAtYear25 = Math.round((1 - degradationRate) ** 24 * 100)
   // Midpoint of the RM 3,000–6,000 residential string inverter replacement range
   // Documented in MVP-PAGE-3-SOLAR-COST-MODEL.md §7. Flat figure since replacement
   // SKUs don't scale linearly with kWp for residential sizes.
-  const estimatedInverterCost = 4500
+  const estimatedInverterCost = inverterReplacementCostRm && inverterReplacementCostRm > 0 ? inverterReplacementCostRm : 4500
+  const inverterYearLabel = inverterReplacementYear && inverterReplacementYear > 0 ? inverterReplacementYear : null
+  const lifecycleActive = analysisMode === 'lifecycle'
+  const maintenancePerYear = annualMaintenanceRm && annualMaintenanceRm > 0 ? annualMaintenanceRm : 500
 
   const milestones: Milestone[] = [
     {
@@ -55,8 +67,10 @@ export function FinancialRoadmap({
   }
 
   milestones.push({
-    label: 'Year 10–15',
-    description: `String inverters typically need replacement in this window (~${formatCurrency(estimatedInverterCost)} based on your system size). This is not included in the payback calculation above.`,
+    label: lifecycleActive && inverterYearLabel ? `Year ${inverterYearLabel}` : 'Year 10–15',
+    description: lifecycleActive
+      ? `Inverter replacement (~${formatCurrency(estimatedInverterCost)}) is included in the payback calculation above under Lifecycle mode.`
+      : `String inverters typically need replacement in this window (~${formatCurrency(estimatedInverterCost)} based on your system size). This is not included in the payback calculation above.`,
     accent: 'bg-amber-100 border-amber-300 dark:bg-amber-950 dark:border-amber-800'
   })
 
@@ -84,9 +98,15 @@ export function FinancialRoadmap({
         ))}
 
         <p className="mt-4 text-xs text-muted-foreground">
-          {tariffEscalationRate > 0
-            ? `Projection includes ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation. Excludes annual maintenance (~RM 500/yr) and inflation.`
-            : 'Excludes tariff escalation (would shorten payback), annual maintenance (~RM 500/yr) and inflation. Malaysian tariffs have historically risen, so real-world savings may grow faster than projected.'}
+          {lifecycleActive
+            ? `Lifecycle mode: includes ~${formatCurrency(maintenancePerYear)}/yr maintenance and a ~${formatCurrency(estimatedInverterCost)} inverter replacement${
+                tariffEscalationRate > 0
+                  ? ` plus ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation.`
+                  : '. Excludes tariff escalation and inflation.'
+              }`
+            : tariffEscalationRate > 0
+              ? `Projection includes ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation. Excludes annual maintenance (~RM 500/yr) and inflation.`
+              : 'Excludes tariff escalation (would shorten payback), annual maintenance (~RM 500/yr) and inflation. Malaysian tariffs have historically risen, so real-world savings may grow faster than projected.'}
         </p>
       </CardContent>
     </Card>

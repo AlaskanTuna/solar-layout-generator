@@ -58,11 +58,16 @@ model Project {
 }
 
 model TariffConfig {
-  id              String @id @default(uuid())
-  tariffVersion   String @unique
+  id              String    @id @default(uuid())
+  tariffVersion   String    @unique
   rates           Json
   thresholds      Json
   eeiTable        Json
   afaRateDefault  Float
   defaults        Json?
+  // Freshness metadata so the UI/PDF can show when the seeded AFA + tariff
+  // figures were last verified against TNB sources. Nullable for back-compat
+  // with existing seeded rows; populated via seed/migration.
+  effectiveDate   DateTime?
+  sourceNote      String?
 }

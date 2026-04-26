@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
   aggregateMonthlyGeneration,
+  applyPerformanceRatio,
   buildAnalysisResults,
   buildThresholdWarnings,
+  classifyNemFit,
   computeDegradedSavings,
-  parseSavedAnalysisConfig
+  parseSavedAnalysisConfig,
+  summarizeLayoutOrientation
 } from '../analysis'
 import type { AnnualSimulationResult, NemMonthResult } from '../billingEngine'
+import type { RoofSegment, SolarPanel } from '../buildingInsights'
+import type { PanelEdit } from '@shared/types'
 
 const monthResult: NemMonthResult = {
   month: 3,
@@ -68,6 +73,220 @@ describe('aggregateMonthlyGeneration', () => {
     expect(totals[1]).toBe(22.22)
     expect(totals[2]).toBe(33.33)
     expect(totals.slice(3)).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0])
+  })
+})
+
+describe('applyPerformanceRatio', () => {
+  it('multiplies each month by the given PR and rounds to 2 decimals', () => {
+    const result = applyPerformanceRatio([100, 200, 300], 0.8)
+    expect(result).toEqual([80, 160, 240])
+  })
+
+  it('returns the input unchanged at PR=1.0', () => {
+    const raw = [123.45, 50, 0, 999.99]
+    expect(applyPerformanceRatio(raw, 1.0)).toEqual(raw)
+  })
+
+  it('zeroes generation at PR=0', () => {
+    expect(applyPerformanceRatio([100, 200, 300], 0)).toEqual([0, 0, 0])
+  })
+
+  it('changing PR from 0.8 to 0.7 reduces every month by 12.5%', () => {
+    const baseline = applyPerformanceRatio([1000, 800, 600], 0.8)
+    const reduced = applyPerformanceRatio([1000, 800, 600], 0.7)
+    baseline.forEach((b, i) => {
+      // 0.7 / 0.8 = 0.875 → reduced is 87.5% of baseline (12.5% drop)
+      expect(reduced[i]).toBeCloseTo(b * 0.875, 1)
+    })
+  })
+
+  it('preserves the 12-month length', () => {
+    const raw = Array.from({ length: 12 }, (_, i) => (i + 1) * 100)
+    const adjusted = applyPerformanceRatio(raw, 0.8)
+    expect(adjusted).toHaveLength(12)
+  })
+})
+
+describe('classifyNemFit', () => {
+  it('returns Good when generation ratio ≤ 0.9 and forfeiture rate ≤ 5%', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 10000,
+      totalGenerationKwh: 8000, // ratio = 0.8
+      totalCreditsForfeitedKwh: 200 // forfeiture = 2.5%
+    })
+    expect(result.fit).toBe('good')
+    expect(result.detail).toBe('Low unused credits')
+    expect(result.generationRatio).toBeCloseTo(0.8, 4)
+    expect(result.forfeitureRate).toBeCloseTo(0.025, 4)
+  })
+
+  it('returns Moderate when ratio is 0.9-1.1 and forfeiture is moderate', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 10000,
+      totalGenerationKwh: 10500, // ratio = 1.05
+      totalCreditsForfeitedKwh: 1000 // forfeiture ≈ 9.5%
+    })
+    expect(result.fit).toBe('moderate')
+    expect(result.detail).toBe('Some credit buildup')
+  })
+
+  it('returns Oversized when generation ratio > 1.1', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 10000,
+      totalGenerationKwh: 12000, // ratio = 1.2
+      totalCreditsForfeitedKwh: 0
+    })
+    expect(result.fit).toBe('oversized')
+    expect(result.detail).toBe('Excess credits likely')
+  })
+
+  it('returns Oversized when forfeiture rate > 15%, even at low ratio', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 10000,
+      totalGenerationKwh: 8000,
+      totalCreditsForfeitedKwh: 1500 // 18.75%
+    })
+    expect(result.fit).toBe('oversized')
+  })
+
+  it('boundary: ratio exactly 0.9 + forfeiture 5% classifies Good', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 10000,
+      totalGenerationKwh: 9000,
+      totalCreditsForfeitedKwh: 450
+    })
+    expect(result.fit).toBe('good')
+  })
+
+  it('boundary: ratio exactly 1.1 + forfeiture 15% classifies Moderate', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 10000,
+      totalGenerationKwh: 11000,
+      totalCreditsForfeitedKwh: 1650
+    })
+    expect(result.fit).toBe('moderate')
+  })
+
+  it('handles zero consumption gracefully (ratio=0)', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 0,
+      totalGenerationKwh: 5000,
+      totalCreditsForfeitedKwh: 0
+    })
+    expect(result.generationRatio).toBe(0)
+    expect(result.fit).toBe('good')
+  })
+
+  it('handles zero generation gracefully (forfeiture=0)', () => {
+    const result = classifyNemFit({
+      totalConsumptionKwh: 10000,
+      totalGenerationKwh: 0,
+      totalCreditsForfeitedKwh: 0
+    })
+    expect(result.forfeitureRate).toBe(0)
+    expect(result.generationRatio).toBe(0)
+    expect(result.fit).toBe('good')
+  })
+})
+
+describe('summarizeLayoutOrientation', () => {
+  // Three roof segments: south, east, north
+  const segments: RoofSegment[] = [
+    { azimuthDegrees: 180, pitchDegrees: 22 },
+    { azimuthDegrees: 90, pitchDegrees: 18 },
+    { azimuthDegrees: 0, pitchDegrees: 30 }
+  ]
+
+  // Five source panels: 3 on south, 1 on east, 1 on north
+  const solarPanels: SolarPanel[] = [
+    { id: 'p0', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 400, segmentIndex: 0 },
+    { id: 'p1', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 400, segmentIndex: 0 },
+    { id: 'p2', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 400, segmentIndex: 0 },
+    { id: 'p3', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 350, segmentIndex: 1 },
+    { id: 'p4', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 200, segmentIndex: 2 }
+  ]
+
+  const editFor = (id: string): PanelEdit => ({
+    id,
+    status: 'kept',
+    center: { lat: 0, lng: 0 },
+    rotation: 0,
+    monthlyEnergyDcKwh: Array(12).fill(30)
+  })
+
+  it('returns null when there are no active panels', () => {
+    expect(summarizeLayoutOrientation([], solarPanels, segments)).toBeNull()
+  })
+
+  it('returns null when there are no roof segments', () => {
+    expect(summarizeLayoutOrientation([editFor('p0')], solarPanels, [])).toBeNull()
+  })
+
+  it('returns the segment azimuth/pitch for a single-segment layout', () => {
+    const result = summarizeLayoutOrientation(
+      [editFor('p0'), editFor('p1'), editFor('p2')],
+      solarPanels,
+      segments
+    )
+    expect(result).not.toBeNull()
+    expect(result!.azimuthDegrees).toBeCloseTo(180, 0)
+    expect(result!.pitchDegrees).toBeCloseTo(22, 1)
+    expect(result!.dominantSegmentIndex).toBe(0)
+    expect(result!.segmentCount).toBe(1)
+    expect(result!.panelCount).toBe(3)
+  })
+
+  it('weights azimuth and pitch by panel count across segments', () => {
+    const result = summarizeLayoutOrientation(
+      [editFor('p0'), editFor('p1'), editFor('p2'), editFor('p3')],
+      solarPanels,
+      segments
+    )
+    expect(result).not.toBeNull()
+    expect(result!.dominantSegmentIndex).toBe(0)
+    expect(result!.segmentCount).toBe(2)
+    expect(result!.panelCount).toBe(4)
+    // Pitch: weighted = (3*22 + 1*18) / 4 = 21
+    expect(result!.pitchDegrees).toBeCloseTo(21, 1)
+    // Azimuth: circular mean of 3×180° + 1×90° leans heavily toward south
+    expect(result!.azimuthDegrees).toBeGreaterThan(135)
+    expect(result!.azimuthDegrees).toBeLessThan(180)
+  })
+
+  it('handles azimuths near 0/360 boundary via circular mean (no naïve average)', () => {
+    const wrapSegs: RoofSegment[] = [
+      { azimuthDegrees: 350, pitchDegrees: 20 },
+      { azimuthDegrees: 10, pitchDegrees: 20 }
+    ]
+    const wrapPanels: SolarPanel[] = [
+      { id: 'a', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 1, segmentIndex: 0 },
+      { id: 'b', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 1, segmentIndex: 1 }
+    ]
+    const result = summarizeLayoutOrientation([editFor('a'), editFor('b')], wrapPanels, wrapSegs)
+    // Naïve average would give 180°. Circular mean correctly returns ~0°/360°.
+    const az = result!.azimuthDegrees
+    expect(az < 5 || az > 355).toBe(true)
+  })
+
+  it('skips panel ids that are not in solarPanels', () => {
+    const result = summarizeLayoutOrientation(
+      [editFor('p0'), editFor('does-not-exist')],
+      solarPanels,
+      segments
+    )
+    expect(result).not.toBeNull()
+    expect(result!.panelCount).toBe(1)
+    expect(result!.dominantSegmentIndex).toBe(0)
+  })
+
+  it('skips panels whose segmentIndex is out of bounds', () => {
+    const oobPanels: SolarPanel[] = [
+      ...solarPanels,
+      { id: 'oob', center: { lat: 0, lng: 0 }, orientation: 'PORTRAIT', yearlyEnergyDcKwh: 1, segmentIndex: 99 }
+    ]
+    const result = summarizeLayoutOrientation([editFor('p0'), editFor('oob')], oobPanels, segments)
+    expect(result!.panelCount).toBe(1)
+    expect(result!.segmentCount).toBe(1)
   })
 })
 
@@ -202,6 +421,112 @@ describe('buildAnalysisResults with tariff escalation', () => {
     })
     expect(omitted.paybackYears).toEqual(explicitZero.paybackYears)
     expect(omitted.tenYearNetBenefitRm).toEqual(explicitZero.tenYearNetBenefitRm)
+  })
+})
+
+describe('buildAnalysisResults with lifecycle mode', () => {
+  it('returns simple payback equal to lifecycle payback when no maintenance/inverter cost is set', () => {
+    const result = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0
+    })
+    expect(result.simplePaybackYears).not.toBeNull()
+    expect(result.lifecyclePaybackYears).toEqual(result.simplePaybackYears)
+  })
+
+  it('lifecycle payback is longer than simple payback when maintenance is set', () => {
+    const result = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0,
+      annualMaintenanceRm: 500
+    })
+    expect(result.simplePaybackYears).not.toBeNull()
+    expect(result.lifecyclePaybackYears).not.toBeNull()
+    expect(result.lifecyclePaybackYears!).toBeGreaterThan(result.simplePaybackYears!)
+  })
+
+  it('lifecycle 25-year net benefit is exactly 25×maintenance + inverter less than simple', () => {
+    const annualMaintenanceRm = 500
+    const inverterReplacementCostRm = 4500
+    const result = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0,
+      annualMaintenanceRm,
+      inverterReplacementCostRm
+    })
+    const expectedDelta = 25 * annualMaintenanceRm + inverterReplacementCostRm
+    expect(result.simpleTwentyFiveYearNetBenefitRm - result.lifecycleTwentyFiveYearNetBenefitRm).toBeCloseTo(
+      expectedDelta,
+      1
+    )
+  })
+
+  it('paybackYears reflects simple mode when analysisMode is "simple"', () => {
+    const result = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0,
+      analysisMode: 'simple',
+      annualMaintenanceRm: 500,
+      inverterReplacementCostRm: 4500
+    })
+    expect(result.paybackYears).toEqual(result.simplePaybackYears)
+    expect(result.twentyFiveYearNetBenefitRm).toEqual(result.simpleTwentyFiveYearNetBenefitRm)
+    expect(result.analysisMode).toBe('simple')
+  })
+
+  it('paybackYears reflects lifecycle mode when analysisMode is "lifecycle"', () => {
+    const result = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0,
+      analysisMode: 'lifecycle',
+      annualMaintenanceRm: 500,
+      inverterReplacementCostRm: 4500
+    })
+    expect(result.paybackYears).toEqual(result.lifecyclePaybackYears)
+    expect(result.twentyFiveYearNetBenefitRm).toEqual(result.lifecycleTwentyFiveYearNetBenefitRm)
+    expect(result.analysisMode).toBe('lifecycle')
+  })
+
+  it('inverter replacement is timed correctly via inverterReplacementYear', () => {
+    // With 0% degradation/escalation, year1Savings flat at 2400/yr.
+    // Annual maintenance 500 → net 1900/yr. Upfront 30000.
+    // Without inverter: payback = 30000/1900 = 15.79 years.
+    // Inverter cost 6000 added at year 12: cumulative target jumps to 36000 → payback ~18.95 years.
+    const result = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0,
+      tariffEscalationRate: 0,
+      analysisMode: 'lifecycle',
+      annualMaintenanceRm: 500,
+      inverterReplacementCostRm: 6000,
+      inverterReplacementYear: 12
+    })
+    expect(result.lifecyclePaybackYears).not.toBeNull()
+    expect(result.lifecyclePaybackYears!).toBeGreaterThan(15)
+    expect(result.lifecyclePaybackYears!).toBeLessThan(20)
   })
 })
 

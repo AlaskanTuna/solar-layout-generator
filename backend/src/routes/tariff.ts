@@ -27,7 +27,9 @@ tariffRouter.get(
         nemCapThreePhaseKw: 12.5,
         systemCostPerKwp: 4500,
         annualYieldPerKwp: 1200
-      }) as TariffConfigResponse['defaults']
+      }) as TariffConfigResponse['defaults'],
+      effectiveDate: config.effectiveDate ? config.effectiveDate.toISOString() : null,
+      sourceNote: config.sourceNote ?? null
     }
     res.json(response)
   })

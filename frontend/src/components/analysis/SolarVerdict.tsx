@@ -1,9 +1,15 @@
-import { Calendar, Clock, Leaf, Star, Wallet } from 'lucide-react'
+import { Calendar, Clock, Gauge, Star, Wallet } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { formatCurrency, formatNumber } from './formatters'
 import { getRoiCondition } from './roiVerdict'
-import type { AnalysisResultsRecord } from '@/lib/analysis'
+import { classifyNemFit, type AnalysisResultsRecord } from '@/lib/analysis'
+
+const NEM_FIT_LABELS = {
+  good: 'Good',
+  moderate: 'Moderate',
+  oversized: 'Oversized'
+} as const
 
 type SolarVerdictProps = {
   analysisResults: AnalysisResultsRecord
@@ -38,8 +44,13 @@ function StarRating({ count, color, label }: { count: number; color: string; lab
 export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictProps) {
   const condition = getRoiCondition(analysisResults.paybackYears)
   const headline = buildHeadline(analysisResults)
-  const { averageMonthlySavingsRm, averageMonthlySavingsPct, annualTotals, paybackYears, carbonOffsetKg } =
-    analysisResults
+  const { averageMonthlySavingsRm, averageMonthlySavingsPct, annualTotals, paybackYears } = analysisResults
+  const nemFit = classifyNemFit({
+    totalConsumptionKwh: annualTotals.totalConsumptionKwh,
+    totalGenerationKwh: annualTotals.totalGenerationKwh,
+    totalCreditsForfeitedKwh: annualTotals.totalCreditsForfeitedKwh
+  })
+  const generationRatioPct = Math.round(nemFit.generationRatio * 100)
 
   return (
     <Card className="border-border bg-card/90 shadow-sm">
@@ -95,14 +106,16 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <Leaf className="h-3.5 w-3.5" />
+              <Gauge className="h-3.5 w-3.5" />
               <span>
-                CO2 Offset
-                <InfoTooltip text="The amount of carbon dioxide emissions avoided by generating clean solar energy instead of using grid power." />
+                NEM Fit
+                <InfoTooltip
+                  text={`Whether this layout is well-sized for your usage. A good fit means most generation offsets your own bill. Oversized systems may build up credits that are not cash and can be forfeited at year-end.\n\nGeneration vs. consumption: ${generationRatioPct}%\nForfeited credits: ${Math.round(nemFit.forfeitureRate * 100)}% of generation`}
+                />
               </span>
             </div>
-            <p className="text-xl font-semibold tabular-nums">{formatNumber(carbonOffsetKg, 'kg/year')}</p>
-            <p className="text-xs text-muted-foreground">{formatNumber(annualTotals.totalGenerationKwh, 'kWh/year')}</p>
+            <p className="text-xl font-semibold">{NEM_FIT_LABELS[nemFit.fit]}</p>
+            <p className="text-xs text-muted-foreground">{nemFit.detail}</p>
           </div>
         </div>
       </CardContent>

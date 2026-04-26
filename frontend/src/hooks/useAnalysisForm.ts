@@ -6,6 +6,7 @@ import { getTariffConfig } from '@/api/tariff'
 import {
   MONTH_LABELS,
   aggregateMonthlyGeneration,
+  applyPerformanceRatio,
   applySeasonalProfile,
   buildAnalysisResults,
   buildThresholdWarnings,
@@ -81,7 +82,18 @@ export function useAnalysisForm(projectId: string | undefined) {
     () => activePanels.filter((panel) => panel.monthlyEnergyDcKwh.length !== 12),
     [activePanels]
   )
-  const monthlyGeneration = useMemo(() => aggregateMonthlyGeneration(activePanels), [activePanels])
+  // Raw DC generation aggregated from panel-level flux. Preserved for any
+  // downstream consumer that wants the source-of-truth flux (e.g. future PR
+  // sensitivity analysis or recompute on a different assumption).
+  const monthlyGenerationRaw = useMemo(() => aggregateMonthlyGeneration(activePanels), [activePanels])
+  // Performance Ratio derate is applied here so the billing simulation reflects
+  // the displayed assumption. PR (default 0.80) and `assumedLosses` are coupled
+  // (sidebar slider sets `losses = 1 − PR`), so they're alternative views of
+  // the same multiplier. We multiply by PR only.
+  const monthlyGeneration = useMemo(
+    () => applyPerformanceRatio(monthlyGenerationRaw, formState?.performanceRatio ?? 0.8),
+    [monthlyGenerationRaw, formState?.performanceRatio]
+  )
   const savedPanelModelId = useMemo(() => {
     const cfg = projectQuery.data?.analysisConfig
     if (cfg?.selectedPanelModelId) return cfg.selectedPanelModelId
@@ -140,7 +152,15 @@ export function useAnalysisForm(projectId: string | undefined) {
       consumptionProfile: savedConfig?.consumptionProfile ?? 'flat',
       performanceRatio: savedConfig?.performanceRatio ?? 0.8,
       assumedLosses: savedConfig?.assumedLosses ?? 0.2,
-      dcAcRatio: savedConfig?.dcAcRatio ?? 1.2
+      dcAcRatio: savedConfig?.dcAcRatio ?? 1.2,
+      // Lifecycle financial mode (Task 6). Default 'simple' preserves the
+      // original simple-payback behaviour. Maintenance and inverter cost
+      // default to 0; switching to 'lifecycle' without setting these is a
+      // no-op (lifecycle == simple).
+      analysisMode: savedConfig?.analysisMode ?? 'simple',
+      annualMaintenanceRm: savedConfig?.annualMaintenanceRm ?? 0,
+      inverterReplacementCostRm: savedConfig?.inverterReplacementCostRm ?? 0,
+      inverterReplacementYear: savedConfig?.inverterReplacementYear ?? 12
     })
     initializedProjectIdRef.current = projectId
   }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights, selectedPanelModel])
@@ -200,7 +220,11 @@ export function useAnalysisForm(projectId: string | undefined) {
       carbonOffsetFactorKgPerMwh,
       activePanelCount: activePanels.length,
       degradationRate: formState.degradationRate,
-      tariffEscalationRate: formState.tariffEscalationRate
+      tariffEscalationRate: formState.tariffEscalationRate,
+      analysisMode: formState.analysisMode ?? 'simple',
+      annualMaintenanceRm: formState.annualMaintenanceRm ?? 0,
+      inverterReplacementCostRm: formState.inverterReplacementCostRm ?? 0,
+      inverterReplacementYear: formState.inverterReplacementYear ?? 12
     })
   }, [activePanels.length, carbonOffsetFactorKgPerMwh, formState, simulation])
 
@@ -225,6 +249,7 @@ export function useAnalysisForm(projectId: string | undefined) {
     buildingInsights,
     activePanels,
     panelsMissingMonthlyEnergy,
+    monthlyGenerationRaw,
     monthlyGeneration,
     selectedPanelModel,
     panelCapacityWatts,

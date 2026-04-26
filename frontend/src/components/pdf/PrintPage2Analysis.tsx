@@ -16,7 +16,7 @@ import {
 } from 'recharts'
 import type { ProjectResponse } from '@/api/projects'
 import type { AnalysisResultsRecord } from '@/lib/analysis'
-import { ANALYSIS_DISCLAIMERS, MONTH_LABELS, computeDegradedSavings } from '@/lib/analysis'
+import { ANALYSIS_DISCLAIMERS, MONTH_LABELS, computeDegradedSavings, summarizeLayoutOrientation } from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 import type { CostBreakdown, RoofType } from '@shared/types'
@@ -35,6 +35,8 @@ type ChartDataPoint = { month: string; baselineBill: number; nemBill: number; cu
 
 type Props = {
   project: ProjectResponse
+  /** ISO date string for when the seeded AFA / tariff was last verified. Null when not seeded. */
+  tariffEffectiveDate?: string | null
 }
 
 const ROOF_LABEL: Record<RoofType, string> = { tile: 'Tile', metal: 'Metal', flat: 'Flat' }
@@ -305,7 +307,7 @@ function CompactSystemCostWithAssumptions({
   )
 }
 
-export function PrintPage2Analysis({ project }: Props) {
+export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Props) {
   const { resolved } = useTheme()
   const tooltipStyle = getChartTooltipStyle(resolved)
   const analysisResults = project.analysisResults
@@ -334,11 +336,21 @@ export function PrintPage2Analysis({ project }: Props) {
   const assumedLosses = project.analysisConfig?.assumedLosses ?? 0.2
   const dcAcRatio = project.analysisConfig?.dcAcRatio ?? 1.2
   const systemCostRm = project.analysisConfig?.systemCostRm ?? 0
+  const analysisMode = project.analysisConfig?.analysisMode === 'lifecycle' ? 'lifecycle' : 'simple'
+  const annualMaintenanceRm = project.analysisConfig?.annualMaintenanceRm ?? 0
+  const inverterReplacementCostRm = project.analysisConfig?.inverterReplacementCostRm ?? 0
+  const inverterReplacementYear = project.analysisConfig?.inverterReplacementYear ?? 12
   const buildingInsights = project.location?.buildingInsightsJson
     ? parseBuildingInsights(project.location.buildingInsightsJson)
     : null
-  const roofSegmentStats = buildingInsights?.solarPotential.roofSegmentStats ?? []
   const panelLifetimeYears = buildingInsights?.solarPotential.panelLifetimeYears ?? null
+  const layoutOrientation = buildingInsights
+    ? summarizeLayoutOrientation(
+        activePanels,
+        buildingInsights.solarPotential.solarPanels,
+        buildingInsights.solarPotential.roofSegmentStats
+      )
+    : null
 
   const simulation = {
     months: analysisResults.monthlyBreakdown,
@@ -387,11 +399,21 @@ export function PrintPage2Analysis({ project }: Props) {
       : null,
     { label: 'DC/AC ratio', value: String(dcAcRatio), detail: 'inverter sizing' },
     panelLifetimeYears != null ? { label: 'Panel lifetime', value: `${panelLifetimeYears} yrs`, detail: 'Solar API' } : null,
-    roofSegmentStats.length > 0
+    layoutOrientation
       ? {
           label: 'Azimuth/pitch',
-          value: `${Math.round(roofSegmentStats[0].azimuthDegrees)}° / ${Math.round(roofSegmentStats[0].pitchDegrees)}°`,
-          detail: azimuthToCompass(roofSegmentStats[0].azimuthDegrees)
+          value: `${Math.round(layoutOrientation.azimuthDegrees)}° / ${Math.round(layoutOrientation.pitchDegrees)}°`,
+          detail:
+            layoutOrientation.segmentCount > 1
+              ? `${azimuthToCompass(layoutOrientation.azimuthDegrees)} · ${layoutOrientation.segmentCount} segments`
+              : `${azimuthToCompass(layoutOrientation.azimuthDegrees)} · ${layoutOrientation.panelCount} panels`
+        }
+      : null,
+    tariffEffectiveDate
+      ? {
+          label: 'Tariff verified',
+          value: new Date(tariffEffectiveDate).toLocaleDateString('en-MY', { year: 'numeric', month: 'short' }),
+          detail: 'TNB RP4 + AFA'
         }
       : null
   ].filter((t) => t !== null) as { label: string; value: string; detail?: string }[]
@@ -487,6 +509,10 @@ export function PrintPage2Analysis({ project }: Props) {
               systemCostRm={systemCostRm}
               tariffEscalationRate={tariffEscalationRate}
               defaultYearRange={25}
+              analysisMode={analysisMode}
+              annualMaintenanceRm={annualMaintenanceRm}
+              inverterReplacementCostRm={inverterReplacementCostRm}
+              inverterReplacementYear={inverterReplacementYear}
             />
           </div>
           <div className="pdf-card-break">
@@ -527,6 +553,10 @@ export function PrintPage2Analysis({ project }: Props) {
             degradationRate={degradationRate}
             systemKwp={systemKwp}
             tariffEscalationRate={tariffEscalationRate}
+            analysisMode={analysisMode}
+            annualMaintenanceRm={annualMaintenanceRm}
+            inverterReplacementCostRm={inverterReplacementCostRm}
+            inverterReplacementYear={inverterReplacementYear}
           />
         </div>
       </PdfPageShell>
