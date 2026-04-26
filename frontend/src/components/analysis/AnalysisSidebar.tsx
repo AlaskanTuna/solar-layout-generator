@@ -285,18 +285,12 @@ export function AnalysisSidebar({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-10 w-full justify-between px-3 font-normal text-foreground"
-                >
+                <Button variant="outline" className="h-10 w-full justify-between px-3 font-normal text-foreground">
                   {CONNECTION_PHASE_LABELS[formState.connectionPhase]}
                   <ChevronDown className="h-4 w-4 opacity-60" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-[var(--radix-dropdown-menu-trigger-width)]"
-              >
+              <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
                 <DropdownMenuRadioGroup
                   value={formState.connectionPhase}
                   onValueChange={(v) =>
@@ -326,24 +320,16 @@ export function AnalysisSidebar({
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="h-10 w-full justify-between px-3 font-normal text-foreground"
-                  >
+                  <Button variant="outline" className="h-10 w-full justify-between px-3 font-normal text-foreground">
                     {ROOF_TYPE_LABELS[formState.roofType]}
                     <ChevronDown className="h-4 w-4 opacity-60" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                >
+                <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
                   <DropdownMenuRadioGroup
                     value={formState.roofType}
                     onValueChange={(v) =>
-                      setFormState((current) =>
-                        current ? { ...current, roofType: v as RoofType } : current
-                      )
+                      setFormState((current) => (current ? { ...current, roofType: v as RoofType } : current))
                     }
                   >
                     {(Object.keys(ROOF_TYPE_LABELS) as RoofType[]).map((roof) => (
@@ -416,9 +402,7 @@ export function AnalysisSidebar({
                     Tariff Escalation
                     <InfoTooltip text="Annual compounding rate at which TNB tariffs are expected to rise. A higher rate shortens payback and grows long-term savings. Malaysian RP4 revisions historically trend around 3–5%/year. Default 0% assumes flat tariffs." />
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    %/year — compounds savings across projection horizon
-                  </p>
+                  <p className="text-xs text-muted-foreground">%/year — compounds savings across projection horizon</p>
                 </div>
                 <DegradationInput
                   value={formState.tariffEscalationRate}
@@ -445,7 +429,7 @@ export function AnalysisSidebar({
                 >
                   <span className="inline-flex items-center gap-2">
                     <Sliders className="h-3.5 w-3.5" />
-                    Configure tariff parameters
+                    Configure Tariff Parameters
                   </span>
                   {tariffOverrideCount > 0 && (
                     <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
