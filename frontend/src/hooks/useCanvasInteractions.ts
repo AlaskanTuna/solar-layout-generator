@@ -341,6 +341,7 @@ export function useCanvasInteractions({
       let candidatePixel = { x: position.x, y: position.y }
       const rawCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
       let placementError = getPlacementError(panelId, rawCenter, panel.rotation)
+      const enteredViaOverlap = placementError === 'overlap'
 
       // Auto-correct overlap against same-rotation neighbors by snapping edge-to-edge.
       // Iteratively resolves: each pass pushes the dragged panel out of its most-overlapping
@@ -420,7 +421,11 @@ export function useCanvasInteractions({
             .filter(({ panel: p }) => p.id !== panelId)
             .map(({ x, y, panel: p }) => ({ x, y, rotation: p.rotation })),
           panelDimensions.width,
-          panelDimensions.height
+          panelDimensions.height,
+          {
+            stageWidth: stageSize.width,
+            stageHeight: stageSize.height
+          }
         )
         candidatePixel = { x: escaped.x, y: escaped.y }
         placementError = getPlacementError(panelId, pixelToLatLng(candidatePixel.x, candidatePixel.y, geo), panel.rotation)
@@ -429,7 +434,7 @@ export function useCanvasInteractions({
       // Overlap is no longer a rejection — SAT push-out always converges so any residual
       // 'overlap' is best-effort accepted. Bounds/mask are real boundary violations and
       // still revert.
-      if (placementError && placementError !== 'overlap') {
+      if (placementError && (!enteredViaOverlap || (placementError !== 'overlap' && placementError !== 'bounds'))) {
         resetPosition()
         notify.error(getPlacementErrorMessage(placementError))
         return
@@ -465,6 +470,7 @@ export function useCanvasInteractions({
         return { panel: p, origPx }
       })
       .filter((x): x is NonNullable<typeof x> => x != null)
+    let enteredViaOverlap = false
 
     // Iteratively resolve group-vs-outside overlaps by shifting the shared delta.
     // Preserves intra-group geometry; the whole group translates as one unit.
@@ -497,6 +503,7 @@ export function useCanvasInteractions({
             if (!overlap) continue
             if (!worst || overlap.penetration > worst.penetration) {
               worst = { axis: overlap.axis, penetration: overlap.penetration }
+              enteredViaOverlap = true
             }
           }
         }
@@ -516,7 +523,11 @@ export function useCanvasInteractions({
         outsidePanels.map(({ panel: rp, x, y }) => ({ x, y, rotation: rp.rotation })),
         { x: deltaX, y: deltaY },
         panelDimensions.width,
-        panelDimensions.height
+        panelDimensions.height,
+        {
+          stageWidth: stageSize.width,
+          stageHeight: stageSize.height
+        }
       )
       deltaX = escaped.x
       deltaY = escaped.y
@@ -532,7 +543,7 @@ export function useCanvasInteractions({
 
       const placementError = getPlacementError(sp.id, nextCenter, sp.rotation, selectedPanelIds)
       // Best-effort accept residual overlap (SAT push converges); only revert on bounds/mask.
-      if (placementError && placementError !== 'overlap') {
+      if (placementError && (!enteredViaOverlap || (placementError !== 'overlap' && placementError !== 'bounds'))) {
         bulkUpdatePanels(
           selectedPanelsWithOrigin.map(({ panel: p, origPx: px }) => ({
             id: p.id,

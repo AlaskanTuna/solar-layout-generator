@@ -1,4 +1,10 @@
-import { getRotatedRectPoints, obbsOverlap, obbsOverlapWithMinSeparation } from './canvasTransforms'
+import {
+  getRectAabb,
+  getRotatedRectPoints,
+  isAabbInsideStage,
+  obbsOverlap,
+  obbsOverlapWithMinSeparation
+} from './canvasTransforms'
 
 export type SnapGuide = {
   orientation: 'horizontal' | 'vertical'
@@ -168,6 +174,70 @@ function getPosePolygon(pose: Pose, translation: Translation, panelWidth: number
   return getRotatedRectPoints(pose.x + translation.x, pose.y + translation.y, panelWidth, panelHeight, pose.rotation)
 }
 
+function clampValue(value: number, min: number, max: number) {
+  if (min > max) return value
+  return Math.min(max, Math.max(min, value))
+}
+
+function clampTranslationToStage(
+  movingPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  stageWidth: number,
+  stageHeight: number
+): Translation {
+  const minX = Math.max(...movingPanels.map((panel) => panelWidth / 2 - panel.x))
+  const maxX = Math.min(...movingPanels.map((panel) => stageWidth - panelWidth / 2 - panel.x))
+  const minY = Math.max(...movingPanels.map((panel) => panelHeight / 2 - panel.y))
+  const maxY = Math.min(...movingPanels.map((panel) => stageHeight - panelHeight / 2 - panel.y))
+
+  return {
+    x: clampValue(translation.x, minX, maxX),
+    y: clampValue(translation.y, minY, maxY)
+  }
+}
+
+function needsStageClamp(
+  movingPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  stageWidth: number,
+  stageHeight: number
+) {
+  return movingPanels.some((panel) => {
+    const aabb = getRectAabb(getPosePolygon(panel, translation, panelWidth, panelHeight))
+    return !isAabbInsideStage(aabb, stageWidth, stageHeight)
+  })
+}
+
+function hasOverlapAt(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number
+) {
+  for (const movingPanel of movingPanels) {
+    const movingPoly = getPosePolygon(movingPanel, translation, panelWidth, panelHeight)
+    for (const staticPanel of staticPanels) {
+      const staticPoly = getRotatedRectPoints(
+        staticPanel.x,
+        staticPanel.y,
+        panelWidth,
+        panelHeight,
+        staticPanel.rotation
+      )
+      if (obbsOverlap(movingPoly, staticPoly)) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
 function computeOverlapEscapeVector(
   movingPanels: Pose[],
   staticPanels: Pose[],
@@ -286,29 +356,14 @@ function resolveOverlapTranslation(
   panelHeight: number,
   maxIterations = OVERLAP_ESCAPE_MAX_ITERATIONS,
   stepSize = panelWidth / OVERLAP_ESCAPE_STEP_RATIO,
-  strategy: 'sum' | 'worst' = 'sum'
+  strategy: 'sum' | 'worst' = 'sum',
+  stageWidth = Infinity,
+  stageHeight = Infinity
 ): OverlapEscapeResult {
   let current = { ...translation }
 
   for (let iter = 0; iter < maxIterations; iter += 1) {
-    let hasOverlap = false
-    for (const movingPanel of movingPanels) {
-      const movingPoly = getPosePolygon(movingPanel, current, panelWidth, panelHeight)
-      for (const staticPanel of staticPanels) {
-        const staticPoly = getRotatedRectPoints(
-          staticPanel.x,
-          staticPanel.y,
-          panelWidth,
-          panelHeight,
-          staticPanel.rotation
-        )
-        if (obbsOverlap(movingPoly, staticPoly)) {
-          hasOverlap = true
-          break
-        }
-      }
-      if (hasOverlap) break
-    }
+    const hasOverlap = hasOverlapAt(movingPanels, staticPanels, current, panelWidth, panelHeight)
 
     if (!hasOverlap) {
       return { x: current.x, y: current.y, iterations: iter, resolved: true }
@@ -317,30 +372,31 @@ function resolveOverlapTranslation(
     const escape = computeOverlapEscapeVector(movingPanels, staticPanels, current, panelWidth, panelHeight, strategy)
     if (!escape) break
 
-    current = {
+    const proposed = {
       x: current.x + escape.x * stepSize,
       y: current.y + escape.y * stepSize
     }
-  }
 
-  let resolved = true
-  for (const movingPanel of movingPanels) {
-    const movingPoly = getPosePolygon(movingPanel, current, panelWidth, panelHeight)
-    for (const staticPanel of staticPanels) {
-      const staticPoly = getRotatedRectPoints(
-        staticPanel.x,
-        staticPanel.y,
+    const clamped =
+      Number.isFinite(stageWidth) && Number.isFinite(stageHeight) && needsStageClamp(
+        movingPanels,
+        proposed,
         panelWidth,
         panelHeight,
-        staticPanel.rotation
+        stageWidth,
+        stageHeight
       )
-      if (obbsOverlap(movingPoly, staticPoly)) {
-        resolved = false
-        break
-      }
+        ? clampTranslationToStage(movingPanels, proposed, panelWidth, panelHeight, stageWidth, stageHeight)
+        : proposed
+    const wasClamped = clamped.x !== proposed.x || clamped.y !== proposed.y
+    current = clamped
+
+    if (wasClamped && hasOverlapAt(movingPanels, staticPanels, current, panelWidth, panelHeight)) {
+      break
     }
-    if (!resolved) break
   }
+
+  const resolved = !hasOverlapAt(movingPanels, staticPanels, current, panelWidth, panelHeight)
 
   return { x: current.x, y: current.y, iterations: maxIterations, resolved }
 }
@@ -350,9 +406,9 @@ export function resolveOverlapEscape(
   neighbors: Pose[],
   panelWidth: number,
   panelHeight: number,
-  options?: { maxIterations?: number; stepSize?: number }
+  options?: { maxIterations?: number; stepSize?: number; stageWidth?: number; stageHeight?: number }
 ): OverlapEscapeResult {
-  return resolveOverlapTranslation(
+  const result = resolveOverlapTranslation(
     [dragged],
     neighbors,
     { x: 0, y: 0 },
@@ -360,8 +416,11 @@ export function resolveOverlapEscape(
     panelHeight,
     options?.maxIterations,
     options?.stepSize,
-    'sum'
+    'sum',
+    options?.stageWidth ?? Infinity,
+    options?.stageHeight ?? Infinity
   )
+  return { ...result, x: dragged.x + result.x, y: dragged.y + result.y }
 }
 
 export function resolveGroupOverlapEscape(
@@ -370,7 +429,7 @@ export function resolveGroupOverlapEscape(
   translation: Translation,
   panelWidth: number,
   panelHeight: number,
-  options?: { maxIterations?: number; stepSize?: number }
+  options?: { maxIterations?: number; stepSize?: number; stageWidth?: number; stageHeight?: number }
 ): OverlapEscapeResult {
   return resolveOverlapTranslation(
     movingPanels,
@@ -380,6 +439,8 @@ export function resolveGroupOverlapEscape(
     panelHeight,
     options?.maxIterations,
     options?.stepSize,
-    'worst'
+    'worst',
+    options?.stageWidth ?? Infinity,
+    options?.stageHeight ?? Infinity
   )
 }

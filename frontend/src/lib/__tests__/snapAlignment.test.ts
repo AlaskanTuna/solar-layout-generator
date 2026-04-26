@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { computeSnap, computeOverlapSnap, resolveGroupOverlapEscape, resolveOverlapEscape } from '../snapAlignment'
-import { getRotatedRectPoints, obbsOverlap } from '../canvasTransforms'
+import { getRectAabb, getRotatedRectPoints, isAabbInsideStage, obbsOverlap } from '../canvasTransforms'
 
 const W = 40
 const H = 20
@@ -215,6 +215,37 @@ describe('computeOverlapSnap', () => {
 })
 
 describe('resolveOverlapEscape', () => {
+  it('clamps a blocked edge escape to the stage and can preserve residual overlap', () => {
+    const result = resolveOverlapEscape(
+      { x: 20, y: 50, rotation: 0 },
+      [{ x: 45, y: 50, rotation: 0 }],
+      W,
+      H,
+      { stageWidth: 100, stageHeight: 100 }
+    )
+
+    expect(result.x).toBeCloseTo(W / 2, 5)
+    expect(result.y).toBeCloseTo(50, 5)
+
+    const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+    const neighborPoly = getRotatedRectPoints(45, 50, W, H, 0)
+    expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(true)
+    expect(result.resolved).toBe(false)
+  })
+
+  it('keeps the dragged center inside the left stage boundary when the escape vector points left', () => {
+    const result = resolveOverlapEscape(
+      { x: 22, y: 50, rotation: 0 },
+      [{ x: 50, y: 50, rotation: 0 }],
+      W,
+      H,
+      { stageWidth: 100, stageHeight: 100 }
+    )
+
+    expect(result.x).toBeGreaterThanOrEqual(W / 2)
+    expect(result.x).toBeLessThanOrEqual(100 - W / 2)
+  })
+
   it('clears same-rotation overlap after repeated centroid-based escapes', () => {
     const result = resolveOverlapEscape(
       { x: 135, y: 100, rotation: 0 },
@@ -293,6 +324,20 @@ describe('resolveOverlapEscape', () => {
 
     expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
   })
+
+  it('still resolves overlap when stage bounds are omitted', () => {
+    const result = resolveOverlapEscape(
+      { x: 135, y: 100, rotation: 0 },
+      [{ x: 100, y: 100, rotation: 0 }],
+      W,
+      H
+    )
+
+    const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+    const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
+
+    expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+  })
 })
 
 describe('resolveGroupOverlapEscape', () => {
@@ -319,6 +364,33 @@ describe('resolveGroupOverlapEscape', () => {
       const movingPoly = getRotatedRectPoints(moving.x, moving.y, W, H, moving.rotation)
       const neighborPoly = getRotatedRectPoints(72, 100, W, H, 0)
       expect(obbsOverlap(movingPoly, neighborPoly)).toBe(false)
+    }
+  })
+
+  it('clamps a rigid group in-bounds when an escape step would leave the canvas', () => {
+    const movingPanels = [
+      { x: 20, y: 10, rotation: 0 },
+      { x: 60, y: 10, rotation: 0 }
+    ]
+
+    const result = resolveGroupOverlapEscape(
+      movingPanels,
+      [{ x: 35, y: 20, rotation: 0 }],
+      { x: 0, y: 0 },
+      W,
+      H,
+      { stageWidth: 100, stageHeight: 100 }
+    )
+
+    const translatedPanels = movingPanels.map((panel) => ({
+      x: panel.x + result.x,
+      y: panel.y + result.y,
+      rotation: panel.rotation
+    }))
+
+    for (const moving of translatedPanels) {
+      const movingPoly = getRotatedRectPoints(moving.x, moving.y, W, H, moving.rotation)
+      expect(isAabbInsideStage(getRectAabb(movingPoly), 100, 100)).toBe(true)
     }
   })
 })
