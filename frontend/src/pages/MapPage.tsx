@@ -65,6 +65,10 @@ export function MapPage() {
   const [selectedPlace, setSelectedPlace] = useState<{ lat: number; lng: number; address: string } | null>(null)
   const [locationId, setLocationId] = useState<string | null>(initialDraft?.locationId ?? null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualLat, setManualLat] = useState('')
+  const [manualLng, setManualLng] = useState('')
+  const [manualError, setManualError] = useState('')
 
   const searchParams = new URLSearchParams(window.location.search)
   const isReadonly = searchParams.get('view') === 'readonly'
@@ -250,6 +254,24 @@ export function MapPage() {
     }
   }
 
+  function handleManualSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setManualError('')
+    const lat = parseFloat(manualLat)
+    const lng = parseFloat(manualLng)
+    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+      setManualError('Enter valid latitude and longitude')
+      return
+    }
+    // Malaysia bounds (approximate, includes Sabah/Sarawak)
+    if (lat < 0.85 || lat > 7.4 || lng < 99.6 || lng > 119.3) {
+      setManualError('Coordinates must be within Malaysia (lat 0.85–7.4, lng 99.6–119.3)')
+      return
+    }
+    handleSelectedPlace(lat, lng, `${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+    setManualOpen(false)
+  }
+
   function handleRetry() {
     isCreatingProjectRef.current = false
     setPhase('search')
@@ -312,6 +334,51 @@ export function MapPage() {
                     </Link>{' '}
                     in dashboard for new location.
                   </p>
+                </div>
+              )}
+              {!isReadonly && phase !== 'processing' && (
+                <div className="mt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setManualOpen((v) => !v)
+                      setManualError('')
+                    }}
+                    className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {manualOpen ? 'Hide manual entry' : 'Or enter coordinates manually'}
+                  </button>
+                  {manualOpen && (
+                    <form
+                      onSubmit={handleManualSubmit}
+                      className="mt-2 space-y-2 rounded-xl border border-border bg-card/95 p-3 shadow-md backdrop-blur-sm"
+                    >
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          autoFocus
+                          placeholder="Latitude"
+                          value={manualLat}
+                          onChange={(e) => setManualLat(e.target.value)}
+                          className="h-9 rounded-md border border-input bg-background px-2 text-center text-sm outline-none focus:ring-2 focus:ring-ring"
+                        />
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="Longitude"
+                          value={manualLng}
+                          onChange={(e) => setManualLng(e.target.value)}
+                          className="h-9 rounded-md border border-input bg-background px-2 text-center text-sm outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                      {manualError && <p className="text-xs text-destructive">{manualError}</p>}
+                      <Button type="submit" size="sm" className="w-full gap-2">
+                        <MapPin className="h-3.5 w-3.5" />
+                        Use these coordinates
+                      </Button>
+                    </form>
+                  )}
                 </div>
               )}
             </div>
