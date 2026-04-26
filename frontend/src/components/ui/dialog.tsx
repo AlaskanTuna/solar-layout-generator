@@ -19,7 +19,11 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      // z-[70] sits above AppSidebar (z-[60]) and AppNav (z-50) so modals dim everything.
+      // backdrop-blur-md applies the glass blur to the actual page behind the overlay.
+      // bg-foreground/30 keeps overlay translucent so the blurred page is visible (light theme),
+      // dark theme uses a darker tint via bg-foreground/30 (foreground is light grey on dark bg).
+      'fixed inset-0 z-[70] bg-foreground/20 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -36,7 +40,10 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'glass-card fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-300 [animation-timing-function:cubic-bezier(0.4,0,0.2,1)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-8 data-[state=open]:slide-in-from-bottom-8',
+        // z-[71] above the overlay. Solid card background plus subtle backdrop blur for the
+        // glass feel. glass-card alone is too transparent against an overlay — use bg-card/95
+        // so light-theme content stays readable while keeping a faint blur for depth.
+        'fixed left-[50%] top-[50%] z-[71] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-border bg-card/95 p-6 shadow-2xl backdrop-blur-md duration-300 [animation-timing-function:cubic-bezier(0.4,0,0.2,1)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-8 data-[state=open]:slide-in-from-bottom-8',
         className
       )}
       {...props}

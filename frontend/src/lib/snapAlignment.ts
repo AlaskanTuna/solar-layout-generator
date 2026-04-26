@@ -1,4 +1,10 @@
-import { getRotatedRectPoints, obbsOverlapWithMinSeparation } from './canvasTransforms'
+import {
+  getRectAabb,
+  getRotatedRectPoints,
+  isAabbInsideStage,
+  obbsOverlap,
+  obbsOverlapWithMinSeparation
+} from './canvasTransforms'
 
 export type SnapGuide = {
   orientation: 'horizontal' | 'vertical'
@@ -15,6 +21,24 @@ export type SnapResult = {
 
 export type OverlapSnapResult = { snapped: true; x: number; y: number } | { snapped: false }
 
+type Pose = {
+  x: number
+  y: number
+  rotation: number
+}
+
+type Translation = {
+  x: number
+  y: number
+}
+
+export type OverlapEscapeResult = {
+  x: number
+  y: number
+  iterations: number
+  resolved: boolean
+}
+
 type PanelInfo = {
   id: string
   x: number
@@ -25,8 +49,9 @@ type PanelInfo = {
 const SNAP_THRESHOLD = 14
 /** Rotation difference (degrees) within which two panels are treated as same-orientation. */
 const ROTATION_TOLERANCE = 5
-/** Tighter rotation tolerance for overlap-snap: only snap when user clearly intended same-axis placement. */
-const OVERLAP_SNAP_ROTATION_TOLERANCE = 3
+const OVERLAP_ESCAPE_MAX_ITERATIONS = 30
+const OVERLAP_ESCAPE_STEP_RATIO = 4
+const OVERLAP_ESCAPE_EPSILON = 1e-6
 
 /** Compute snapped position and guide lines for a dragged panel using local-axis projection */
 export function computeSnap(
@@ -106,17 +131,16 @@ export function computeSnap(
 /**
  * Overlap-as-snap-intent correction.
  *
- * Called at drag-end when the naive placement already overlaps a neighbor.
- * When rotations match within OVERLAP_SNAP_ROTATION_TOLERANCE the dragged panel is
- * auto-corrected along the SAT minimum-separation axis so it sits edge-to-edge
- * (zero gap, not overlapping) — regardless of how deep the overlap is.
+ * Called at drag-end when the naive placement already overlaps a neighbor. The dragged
+ * panel is auto-corrected along the SAT minimum-separation axis so it sits with zero
+ * overlap — regardless of how deep the overlap is or whether the rotations match.
  *
- * Same-rotation (within tolerance) is required because the SAT push-out direction is only
- * an unambiguous "snap to the right edge" interpretation when the panels share an axis;
- * for mismatched rotations the push direction would be arbitrary.
+ * For same-rotation panels the SAT axis lands the dragged panel edge-to-edge; for
+ * mismatched rotations it lands at the closest valid non-overlapping position along
+ * the smallest separation axis. Either way overlap is eliminated, never rejected.
  *
- * Returns { snapped: true, x, y } on success, or { snapped: false } when rotations are
- * mismatched or the shapes aren't actually overlapping.
+ * Returns { snapped: true, x, y } when a separation push was applied, or { snapped: false }
+ * when the shapes aren't actually overlapping (caller's convergence signal).
  */
 export function computeOverlapSnap(
   dragged: { x: number; y: number; rotation: number },
@@ -124,9 +148,6 @@ export function computeOverlapSnap(
   panelWidth: number,
   panelHeight: number
 ): OverlapSnapResult {
-  const rotDiff = Math.abs(((dragged.rotation - neighbor.rotation + 180) % 360) - 180)
-  if (rotDiff > OVERLAP_SNAP_ROTATION_TOLERANCE) return { snapped: false }
-
   const draggedPoly = getRotatedRectPoints(dragged.x, dragged.y, panelWidth, panelHeight, dragged.rotation)
   const neighborPoly = getRotatedRectPoints(neighbor.x, neighbor.y, panelWidth, panelHeight, neighbor.rotation)
 
@@ -141,4 +162,285 @@ export function computeOverlapSnap(
     x: dragged.x + result.axis.x * pushDistance,
     y: dragged.y + result.axis.y * pushDistance
   }
+}
+
+function normalizeVector(x: number, y: number): Translation | null {
+  const length = Math.hypot(x, y)
+  if (length <= OVERLAP_ESCAPE_EPSILON) return null
+  return { x: x / length, y: y / length }
+}
+
+function getPosePolygon(pose: Pose, translation: Translation, panelWidth: number, panelHeight: number) {
+  return getRotatedRectPoints(pose.x + translation.x, pose.y + translation.y, panelWidth, panelHeight, pose.rotation)
+}
+
+function clampValue(value: number, min: number, max: number) {
+  if (min > max) return value
+  return Math.min(max, Math.max(min, value))
+}
+
+function clampTranslationToStage(
+  movingPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  stageWidth: number,
+  stageHeight: number
+): Translation {
+  const minX = Math.max(...movingPanels.map((panel) => panelWidth / 2 - panel.x))
+  const maxX = Math.min(...movingPanels.map((panel) => stageWidth - panelWidth / 2 - panel.x))
+  const minY = Math.max(...movingPanels.map((panel) => panelHeight / 2 - panel.y))
+  const maxY = Math.min(...movingPanels.map((panel) => stageHeight - panelHeight / 2 - panel.y))
+
+  return {
+    x: clampValue(translation.x, minX, maxX),
+    y: clampValue(translation.y, minY, maxY)
+  }
+}
+
+function needsStageClamp(
+  movingPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  stageWidth: number,
+  stageHeight: number
+) {
+  return movingPanels.some((panel) => {
+    const aabb = getRectAabb(getPosePolygon(panel, translation, panelWidth, panelHeight))
+    return !isAabbInsideStage(aabb, stageWidth, stageHeight)
+  })
+}
+
+function hasOverlapAt(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number
+) {
+  for (const movingPanel of movingPanels) {
+    const movingPoly = getPosePolygon(movingPanel, translation, panelWidth, panelHeight)
+    for (const staticPanel of staticPanels) {
+      const staticPoly = getRotatedRectPoints(
+        staticPanel.x,
+        staticPanel.y,
+        panelWidth,
+        panelHeight,
+        staticPanel.rotation
+      )
+      if (obbsOverlap(movingPoly, staticPoly)) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+function computeOverlapEscapeVector(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  strategy: 'sum' | 'worst' = 'sum'
+): Translation | null {
+  if (strategy === 'worst') {
+    const candidates: Array<{
+      vector: Translation
+      penetration: number
+    }> = []
+
+    for (const movingPanel of movingPanels) {
+      const movingCenter = {
+        x: movingPanel.x + translation.x,
+        y: movingPanel.y + translation.y
+      }
+      const movingPoly = getPosePolygon(movingPanel, translation, panelWidth, panelHeight)
+
+      for (const staticPanel of staticPanels) {
+        const staticPoly = getRotatedRectPoints(
+          staticPanel.x,
+          staticPanel.y,
+          panelWidth,
+          panelHeight,
+          staticPanel.rotation
+        )
+        if (!obbsOverlap(movingPoly, staticPoly)) continue
+
+        const overlap = obbsOverlapWithMinSeparation(movingPoly, staticPoly)
+        if (!overlap) continue
+
+        const away =
+          normalizeVector(movingCenter.x - staticPanel.x, movingCenter.y - staticPanel.y) ??
+          normalizeVector(overlap.axis.x, overlap.axis.y)
+        if (!away) continue
+
+        candidates.push({
+          vector: away,
+          penetration: overlap.penetration
+        })
+      }
+    }
+
+    if (candidates.length === 0) return null
+
+    candidates.sort((a, b) => b.penetration - a.penetration)
+    const primary = candidates[0]!
+    const secondary = candidates.find((candidate, index) => {
+      if (index === 0) return false
+      const dot = primary.vector.x * candidate.vector.x + primary.vector.y * candidate.vector.y
+      return dot > -0.5
+    })
+
+    if (!secondary) return primary.vector
+
+    return (
+      normalizeVector(
+        primary.vector.x * primary.penetration + secondary.vector.x * secondary.penetration,
+        primary.vector.y * primary.penetration + secondary.vector.y * secondary.penetration
+      ) ?? primary.vector
+    )
+  }
+
+  let sumX = 0
+  let sumY = 0
+  let fallback: { axis: Translation; penetration: number } | null = null
+
+  for (const movingPanel of movingPanels) {
+    const movingCenter = {
+      x: movingPanel.x + translation.x,
+      y: movingPanel.y + translation.y
+    }
+    const movingPoly = getPosePolygon(movingPanel, translation, panelWidth, panelHeight)
+
+    for (const staticPanel of staticPanels) {
+      const staticPoly = getRotatedRectPoints(
+        staticPanel.x,
+        staticPanel.y,
+        panelWidth,
+        panelHeight,
+        staticPanel.rotation
+      )
+      if (!obbsOverlap(movingPoly, staticPoly)) continue
+
+      const overlap = obbsOverlapWithMinSeparation(movingPoly, staticPoly)
+      if (!overlap) continue
+
+      const awayX = movingCenter.x - staticPanel.x
+      const awayY = movingCenter.y - staticPanel.y
+      const away = normalizeVector(awayX, awayY) ?? normalizeVector(overlap.axis.x, overlap.axis.y)
+      if (!away) continue
+
+      const weight = Math.max(overlap.penetration, 1)
+      sumX += away.x * weight
+      sumY += away.y * weight
+
+      if (!fallback || overlap.penetration > fallback.penetration) {
+        fallback = { axis: overlap.axis, penetration: overlap.penetration }
+      }
+    }
+  }
+
+  const summed = normalizeVector(sumX, sumY)
+  if (summed) return summed
+  return fallback ? normalizeVector(fallback.axis.x, fallback.axis.y) : null
+}
+
+function resolveOverlapTranslation(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  maxIterations = OVERLAP_ESCAPE_MAX_ITERATIONS,
+  stepSize = panelWidth / OVERLAP_ESCAPE_STEP_RATIO,
+  strategy: 'sum' | 'worst' = 'sum',
+  stageWidth = Infinity,
+  stageHeight = Infinity
+): OverlapEscapeResult {
+  let current = { ...translation }
+
+  for (let iter = 0; iter < maxIterations; iter += 1) {
+    const hasOverlap = hasOverlapAt(movingPanels, staticPanels, current, panelWidth, panelHeight)
+
+    if (!hasOverlap) {
+      return { x: current.x, y: current.y, iterations: iter, resolved: true }
+    }
+
+    const escape = computeOverlapEscapeVector(movingPanels, staticPanels, current, panelWidth, panelHeight, strategy)
+    if (!escape) break
+
+    const proposed = {
+      x: current.x + escape.x * stepSize,
+      y: current.y + escape.y * stepSize
+    }
+
+    const clamped =
+      Number.isFinite(stageWidth) && Number.isFinite(stageHeight) && needsStageClamp(
+        movingPanels,
+        proposed,
+        panelWidth,
+        panelHeight,
+        stageWidth,
+        stageHeight
+      )
+        ? clampTranslationToStage(movingPanels, proposed, panelWidth, panelHeight, stageWidth, stageHeight)
+        : proposed
+    const wasClamped = clamped.x !== proposed.x || clamped.y !== proposed.y
+    current = clamped
+
+    if (wasClamped && hasOverlapAt(movingPanels, staticPanels, current, panelWidth, panelHeight)) {
+      break
+    }
+  }
+
+  const resolved = !hasOverlapAt(movingPanels, staticPanels, current, panelWidth, panelHeight)
+
+  return { x: current.x, y: current.y, iterations: maxIterations, resolved }
+}
+
+export function resolveOverlapEscape(
+  dragged: Pose,
+  neighbors: Pose[],
+  panelWidth: number,
+  panelHeight: number,
+  options?: { maxIterations?: number; stepSize?: number; stageWidth?: number; stageHeight?: number }
+): OverlapEscapeResult {
+  const result = resolveOverlapTranslation(
+    [dragged],
+    neighbors,
+    { x: 0, y: 0 },
+    panelWidth,
+    panelHeight,
+    options?.maxIterations,
+    options?.stepSize,
+    'sum',
+    options?.stageWidth ?? Infinity,
+    options?.stageHeight ?? Infinity
+  )
+  return { ...result, x: dragged.x + result.x, y: dragged.y + result.y }
+}
+
+export function resolveGroupOverlapEscape(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  options?: { maxIterations?: number; stepSize?: number; stageWidth?: number; stageHeight?: number }
+): OverlapEscapeResult {
+  return resolveOverlapTranslation(
+    movingPanels,
+    staticPanels,
+    translation,
+    panelWidth,
+    panelHeight,
+    options?.maxIterations,
+    options?.stepSize,
+    'worst',
+    options?.stageWidth ?? Infinity,
+    options?.stageHeight ?? Infinity
+  )
 }

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateMonthlyGeneration, buildThresholdWarnings } from '../analysis'
-import type { NemMonthResult } from '../billingEngine'
+import {
+  aggregateMonthlyGeneration,
+  buildAnalysisResults,
+  buildThresholdWarnings,
+  computeDegradedSavings,
+  parseSavedAnalysisConfig
+} from '../analysis'
+import type { AnnualSimulationResult, NemMonthResult } from '../billingEngine'
 
 const monthResult: NemMonthResult = {
   month: 3,
@@ -94,5 +100,125 @@ describe('buildThresholdWarnings', () => {
     expect(warnings).toContain('This month drops below 700 kWh after NEM offset, so the retail charge is waived.')
     expect(warnings).toContain('This month drops below 650 kWh after NEM offset, so AFA is waived.')
     expect(warnings).toContain('This month drops below 600 kWh after NEM offset, so SST is waived.')
+  })
+})
+
+describe('computeDegradedSavings with tariff escalation', () => {
+  it('reproduces legacy degradation-only result when escalation is 0 (default)', () => {
+    const legacy = computeDegradedSavings(2400, 0.005, 10)
+    const explicit = computeDegradedSavings(2400, 0.005, 10, 0)
+    expect(explicit).toBe(legacy)
+  })
+
+  it('grows total when escalation is positive', () => {
+    const flat = computeDegradedSavings(2400, 0.005, 25, 0)
+    const escalated = computeDegradedSavings(2400, 0.005, 25, 0.04)
+    expect(escalated).toBeGreaterThan(flat)
+  })
+
+  it('compounds escalation on top of degradation per year', () => {
+    const year1 = computeDegradedSavings(1000, 0, 1, 0.05)
+    const year2 = computeDegradedSavings(1000, 0, 2, 0.05)
+    expect(year1).toBeCloseTo(1000, 5) // year 1 = 1000 * 1 * 1
+    expect(year2).toBeCloseTo(1000 + 1050, 5) // year 2 = 1000 + 1000*1.05
+  })
+
+  it('treats negative degradation*escalation interaction correctly per-year', () => {
+    // year1 = year1Savings; year2 = year1 * (1-0.005) * (1+0.04)
+    const result = computeDegradedSavings(1000, 0.005, 2, 0.04)
+    const expected = 1000 + 1000 * 0.995 * 1.04
+    expect(result).toBeCloseTo(expected, 5)
+  })
+})
+
+const baselineSimulation: AnnualSimulationResult = {
+  months: [],
+  totalConsumptionKwh: 7200,
+  totalGenerationKwh: 6000,
+  totalBaselineRm: 3600,
+  totalNemRm: 1200,
+  totalSavingsRm: 2400,
+  totalCreditsForfeited: 0
+}
+
+describe('buildAnalysisResults with tariff escalation', () => {
+  it('shortens payback when tariff escalation is positive', () => {
+    const flat = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0
+    })
+    const escalated = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0.04
+    })
+    expect(flat.paybackYears).not.toBeNull()
+    expect(escalated.paybackYears).not.toBeNull()
+    expect(escalated.paybackYears!).toBeLessThan(flat.paybackYears!)
+  })
+
+  it('grows 10-year net benefit when tariff escalation is positive', () => {
+    const flat = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0
+    })
+    const escalated = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0.04
+    })
+    expect(escalated.tenYearNetBenefitRm).toBeGreaterThan(flat.tenYearNetBenefitRm)
+  })
+
+  it('defaults tariffEscalationRate to 0 — backward-compatible signature', () => {
+    const explicitZero = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005,
+      tariffEscalationRate: 0
+    })
+    const omitted = buildAnalysisResults({
+      simulation: baselineSimulation,
+      systemCostRm: 30000,
+      carbonOffsetFactorKgPerMwh: 720,
+      activePanelCount: 12,
+      degradationRate: 0.005
+    })
+    expect(omitted.paybackYears).toEqual(explicitZero.paybackYears)
+    expect(omitted.tenYearNetBenefitRm).toEqual(explicitZero.tenYearNetBenefitRm)
+  })
+})
+
+describe('parseSavedAnalysisConfig (tariff escalation field)', () => {
+  it('parses tariffEscalationRate when present', () => {
+    const result = parseSavedAnalysisConfig({ tariffEscalationRate: 0.04 })
+    expect(result?.tariffEscalationRate).toBe(0.04)
+  })
+
+  it('omits tariffEscalationRate when missing', () => {
+    const result = parseSavedAnalysisConfig({ degradationRate: 0.005 })
+    expect(result).toBeDefined()
+    expect((result as Record<string, unknown>).tariffEscalationRate).toBeUndefined()
+  })
+
+  it('omits tariffEscalationRate when value is non-numeric', () => {
+    const result = parseSavedAnalysisConfig({ tariffEscalationRate: '4%' })
+    expect((result as Record<string, unknown>).tariffEscalationRate).toBeUndefined()
   })
 })

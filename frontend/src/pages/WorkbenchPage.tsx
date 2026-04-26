@@ -227,7 +227,9 @@ export function WorkbenchPage() {
 
         <section
           className={
-            canvasExpanded ? 'fixed inset-0 z-[70] flex flex-col bg-background p-4' : 'flex min-w-0 flex-1 flex-col'
+            canvasExpanded
+              ? 'fixed inset-0 z-[70] flex flex-col bg-background p-4'
+              : 'flex min-h-[60vh] min-w-0 flex-1 flex-col xl:min-h-0'
           }
         >
           <Card data-tour="canvas" className="flex flex-1 flex-col overflow-hidden border-border bg-card/90 shadow-sm">

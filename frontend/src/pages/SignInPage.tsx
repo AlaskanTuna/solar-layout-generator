@@ -8,13 +8,17 @@ import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { Sun, Loader2 } from 'lucide-react'
 
+const REMEMBER_EMAIL_KEY = 'slg-remember-email'
+
 export function SignInPage() {
   const { session, loading, signIn } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const rememberedEmail = typeof window !== 'undefined' ? (window.localStorage.getItem(REMEMBER_EMAIL_KEY) ?? '') : ''
+  const [email, setEmail] = useState(rememberedEmail)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [rememberMe, setRememberMe] = useState(rememberedEmail.length > 0)
 
   if (loading) return null
   if (session) return <Navigate to="/dashboard" replace />
@@ -29,6 +33,11 @@ export function SignInPage() {
       setError(error.message)
       setSubmitting(false)
     } else {
+      if (rememberMe) {
+        window.localStorage.setItem(REMEMBER_EMAIL_KEY, email)
+      } else {
+        window.localStorage.removeItem(REMEMBER_EMAIL_KEY)
+      }
       navigate('/dashboard')
     }
   }
@@ -116,6 +125,33 @@ export function SignInPage() {
                   required
                 />
               </div>
+
+              <label className="group flex cursor-pointer items-center gap-2.5 text-sm text-muted-foreground select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="peer sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className="flex h-4 w-4 items-center justify-center rounded border border-input bg-background shadow-sm transition-colors peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background group-hover:border-foreground/40"
+                >
+                  <svg
+                    className="h-3 w-3 text-primary-foreground opacity-0 transition-opacity peer-checked:opacity-100"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ opacity: rememberMe ? 1 : 0 }}
+                  >
+                    <path d="M3 8.5l3.5 3.5L13 5" />
+                  </svg>
+                </span>
+                Remember my email
+              </label>
 
               {error && (
                 <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">

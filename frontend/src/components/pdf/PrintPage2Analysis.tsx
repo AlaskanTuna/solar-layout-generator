@@ -329,6 +329,7 @@ export function PrintPage2Analysis({ project }: Props) {
   const roofType = project.analysisConfig?.roofType ?? 'tile'
   const connectionPhase = project.analysisConfig?.connectionPhase ?? 'single'
   const degradationRate = project.analysisConfig?.degradationRate ?? 0.005
+  const tariffEscalationRate = project.analysisConfig?.tariffEscalationRate ?? 0
   const performanceRatio = project.analysisConfig?.performanceRatio ?? 0.8
   const assumedLosses = project.analysisConfig?.assumedLosses ?? 0.2
   const dcAcRatio = project.analysisConfig?.dcAcRatio ?? 1.2
@@ -371,7 +372,9 @@ export function PrintPage2Analysis({ project }: Props) {
 
   // Net benefit summary (25-year)
   const year25DegradedCumulative =
-    Array.from({ length: 25 }, (_, i) => computeDegradedSavings(year1Savings, degradationRate, i + 1)).pop() ?? 0
+    Array.from({ length: 25 }, (_, i) =>
+      computeDegradedSavings(year1Savings, degradationRate, i + 1, tariffEscalationRate)
+    ).pop() ?? 0
   const year25NetBenefit = year25DegradedCumulative - systemCostRm
   const breakEvenYear = analysisResults.paybackYears
 
@@ -379,6 +382,9 @@ export function PrintPage2Analysis({ project }: Props) {
     { label: 'Perf. ratio', value: `${Math.round(performanceRatio * 100)}%`, detail: 'MY residential' },
     { label: 'Losses', value: `${Math.round(assumedLosses * 100)}%`, detail: 'soiling/wiring' },
     { label: 'Degradation', value: `${(degradationRate * 100).toFixed(1)}%/yr`, detail: 'annual' },
+    tariffEscalationRate > 0
+      ? { label: 'Tariff escalation', value: `${(tariffEscalationRate * 100).toFixed(1)}%/yr`, detail: 'compounding' }
+      : null,
     { label: 'DC/AC ratio', value: String(dcAcRatio), detail: 'inverter sizing' },
     panelLifetimeYears != null ? { label: 'Panel lifetime', value: `${panelLifetimeYears} yrs`, detail: 'Solar API' } : null,
     roofSegmentStats.length > 0
@@ -479,6 +485,7 @@ export function PrintPage2Analysis({ project }: Props) {
               year1Savings={year1Savings}
               degradationRate={degradationRate}
               systemCostRm={systemCostRm}
+              tariffEscalationRate={tariffEscalationRate}
               defaultYearRange={25}
             />
           </div>
@@ -519,6 +526,7 @@ export function PrintPage2Analysis({ project }: Props) {
             year1Savings={year1Savings}
             degradationRate={degradationRate}
             systemKwp={systemKwp}
+            tariffEscalationRate={tariffEscalationRate}
           />
         </div>
       </PdfPageShell>

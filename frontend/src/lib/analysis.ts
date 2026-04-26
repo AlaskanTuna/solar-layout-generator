@@ -1,4 +1,4 @@
-import type { PanelEdit, RoofType, TariffThresholds } from '@shared/types'
+import type { PanelEdit, RoofType, TariffRates, TariffThresholds } from '@shared/types'
 import type { AnnualSimulationResult, NemMonthResult } from './billingEngine'
 
 export type ConnectionPhase = 'single' | 'three'
@@ -11,10 +11,13 @@ export type AnalysisConfig = {
   afaRateSenPerKwh: number
   systemKwp: number
   degradationRate: number // e.g. 0.005 = 0.5%/year
+  tariffEscalationRate: number // e.g. 0.04 = 4%/year compounding tariff revision
   consumptionProfile: ConsumptionProfile
   performanceRatio: number // e.g. 0.80 = 80%
   assumedLosses: number // e.g. 0.20 = 20%
   dcAcRatio: number // e.g. 1.2
+  /** Per-project overrides for individual TNB RP4 tariff rate fields. Sparse — only stores diffs from defaults. */
+  tariffRatesOverride?: Partial<TariffRates>
 }
 
 export type AnalysisResultsRecord = {
@@ -68,18 +71,29 @@ export const ANALYSIS_DISCLAIMERS = [
   'Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling and equipment condition.',
   'Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits.',
   'System cost is estimated bottom-up: distributor panel pricing + inverter SKU lookup + roof-type-dependent mounting + electrical BOS + permits + labour markup + installer margin. Assumes mid-tier installer pricing and single-storey installation. Typical Malaysian turnkey quotes land within ±10% of this figure. Always confirm with a licensed SEDA-registered installer.',
-  'Payback and savings projections do not account for annual maintenance (~RM 500/yr), inverter replacement (typically needed at year 10–15, costing ~RM 3,000–6,000), electricity tariff escalation or inflation. Actual long-term returns may differ.'
+  'Payback and savings projections do not account for annual maintenance (~RM 500/yr) or inverter replacement (typically needed at year 10–15, costing ~RM 3,000–6,000). Tariff escalation can be configured in Advanced view (default 0%); typical Malaysian RP4 revisions trend around 3–5%/year. Actual long-term returns may differ.'
 ]
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100
 }
 
-/** Sum year1Savings degraded by (1 - rate)^(yr-1) for yr = 1..years */
-export function computeDegradedSavings(year1Savings: number, degradationRate: number, years: number): number {
+/**
+ * Sum year1Savings degraded by (1 - degradationRate)^(yr-1) and inflated by
+ * (1 + tariffEscalationRate)^(yr-1) for yr = 1..years.
+ *
+ * Tariff escalation defaults to 0 for backward compatibility — a 0% escalation reproduces
+ * the legacy degradation-only projection.
+ */
+export function computeDegradedSavings(
+  year1Savings: number,
+  degradationRate: number,
+  years: number,
+  tariffEscalationRate = 0
+): number {
   let total = 0
   for (let yr = 1; yr <= years; yr++) {
-    total += year1Savings * Math.pow(1 - degradationRate, yr - 1)
+    total += year1Savings * Math.pow(1 - degradationRate, yr - 1) * Math.pow(1 + tariffEscalationRate, yr - 1)
   }
   return round2(total)
 }
@@ -116,6 +130,29 @@ function getConsumptionProfile(value: unknown): ConsumptionProfile | null {
   return value === 'flat' || value === 'seasonal' ? value : null
 }
 
+const TARIFF_RATE_KEYS: ReadonlyArray<keyof TariffRates> = [
+  'energyLow',
+  'energyHigh',
+  'capacity',
+  'network',
+  'retailChargeRm',
+  'sstRate',
+  'reFundRate',
+  'minChargeRm'
+]
+
+function getTariffRatesOverride(value: unknown): Partial<TariffRates> | null {
+  if (!isRecord(value)) return null
+  const result: Partial<TariffRates> = {}
+  for (const key of TARIFF_RATE_KEYS) {
+    const raw = value[key]
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+      result[key] = raw
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null
+}
+
 export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> | null {
   if (!isRecord(raw)) {
     return null
@@ -128,6 +165,8 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   const afaRateSenPerKwh = getNumber(raw.afaRateSenPerKwh)
   const systemKwp = getNumber(raw.systemKwp)
   const degradationRate = getNumber(raw.degradationRate)
+  const tariffEscalationRate = getNumber(raw.tariffEscalationRate)
+  const tariffRatesOverride = getTariffRatesOverride(raw.tariffRatesOverride)
   const consumptionProfile = getConsumptionProfile(raw.consumptionProfile)
   const performanceRatio = getNumber(raw.performanceRatio)
   const assumedLosses = getNumber(raw.assumedLosses)
@@ -141,6 +180,8 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
     ...(afaRateSenPerKwh !== null ? { afaRateSenPerKwh } : {}),
     ...(systemKwp !== null ? { systemKwp } : {}),
     ...(degradationRate !== null ? { degradationRate } : {}),
+    ...(tariffEscalationRate !== null ? { tariffEscalationRate } : {}),
+    ...(tariffRatesOverride ? { tariffRatesOverride } : {}),
     ...(consumptionProfile ? { consumptionProfile } : {}),
     ...(performanceRatio !== null ? { performanceRatio } : {}),
     ...(assumedLosses !== null ? { assumedLosses } : {}),
@@ -153,39 +194,38 @@ export function buildAnalysisResults({
   systemCostRm,
   carbonOffsetFactorKgPerMwh,
   activePanelCount,
-  degradationRate = 0.005
+  degradationRate = 0.005,
+  tariffEscalationRate = 0
 }: {
   simulation: AnnualSimulationResult
   systemCostRm: number
   carbonOffsetFactorKgPerMwh: number
   activePanelCount: number
   degradationRate?: number
+  tariffEscalationRate?: number
 }): AnalysisResultsRecord {
   const year1Savings = simulation.totalSavingsRm
   const averageMonthlySavingsRm = round2(year1Savings / 12)
   const averageMonthlySavingsPct =
     simulation.totalBaselineRm > 0 ? round2((year1Savings / simulation.totalBaselineRm) * 100) : 0
 
-  // Degradation-aware payback
+  // Degradation- and escalation-aware payback. Each year's savings = year1 * (1-deg)^(y-1) * (1+esc)^(y-1).
   let paybackYears: number | null = null
   if (year1Savings > 0) {
     let cumulative = 0
     for (let yr = 1; yr <= 50; yr++) {
-      cumulative += year1Savings * Math.pow(1 - degradationRate, yr - 1)
+      const yearSavings =
+        year1Savings * Math.pow(1 - degradationRate, yr - 1) * Math.pow(1 + tariffEscalationRate, yr - 1)
+      cumulative += yearSavings
       if (cumulative >= systemCostRm) {
-        paybackYears = round2(
-          yr -
-            1 +
-            (systemCostRm - (cumulative - year1Savings * Math.pow(1 - degradationRate, yr - 1))) /
-              (year1Savings * Math.pow(1 - degradationRate, yr - 1))
-        )
+        paybackYears = round2(yr - 1 + (systemCostRm - (cumulative - yearSavings)) / yearSavings)
         break
       }
     }
   }
 
-  // 10-year totals with degradation
-  const tenYearSavings = computeDegradedSavings(year1Savings, degradationRate, 10)
+  // 10-year totals with degradation + escalation
+  const tenYearSavings = computeDegradedSavings(year1Savings, degradationRate, 10, tariffEscalationRate)
 
   const tenYearNetBenefitRm = round2(tenYearSavings - systemCostRm)
   const tenYearRoiPercent = systemCostRm > 0 ? round2(((tenYearSavings - systemCostRm) / systemCostRm) * 100) : null

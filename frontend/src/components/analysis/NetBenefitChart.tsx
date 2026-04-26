@@ -21,6 +21,8 @@ type NetBenefitChartProps = {
   year1Savings: number
   degradationRate: number
   systemCostRm: number
+  /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year. Defaults to 0 (no escalation). */
+  tariffEscalationRate?: number
   /** Override the default active year range (e.g. 25 for PDF exports). */
   defaultYearRange?: YearRange
 }
@@ -30,7 +32,13 @@ type YearRange = (typeof YEAR_RANGES)[number]
 
 const round2 = (v: number) => Math.round(v * 100) / 100
 
-export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm, defaultYearRange = 10 }: NetBenefitChartProps) {
+export function NetBenefitChart({
+  year1Savings,
+  degradationRate,
+  systemCostRm,
+  tariffEscalationRate = 0,
+  defaultYearRange = 10
+}: NetBenefitChartProps) {
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
   const [yearRange, setYearRange] = useState<YearRange>(defaultYearRange)
@@ -39,9 +47,11 @@ export function NetBenefitChart({ year1Savings, degradationRate, systemCostRm, d
     () =>
       Array.from({ length: yearRange }, (_, i) => ({
         year: `Yr ${i + 1}`,
-        value: round2(computeDegradedSavings(year1Savings, degradationRate, i + 1) - systemCostRm)
+        value: round2(
+          computeDegradedSavings(year1Savings, degradationRate, i + 1, tariffEscalationRate) - systemCostRm
+        )
       })),
-    [year1Savings, degradationRate, systemCostRm, yearRange]
+    [year1Savings, degradationRate, systemCostRm, tariffEscalationRate, yearRange]
   )
 
   const finalYearBenefit = netBenefitData[netBenefitData.length - 1].value
