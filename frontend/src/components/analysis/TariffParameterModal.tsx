@@ -3,6 +3,7 @@ import type { TariffRates } from '@shared/types'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { Label } from '@/components/ui/label'
 
 type TariffField = {
@@ -105,7 +106,10 @@ export function TariffParameterModal({ open, onOpenChange, defaults, override, o
             return (
               <div key={field.key} className="space-y-1">
                 <Label className="flex items-center gap-1.5 text-xs font-medium">
-                  {field.label}
+                  <span className="inline-flex items-center">
+                    {field.label}
+                    <InfoTooltip text={field.description} />
+                  </span>
                   {isOverridden && (
                     <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
                       Modified
@@ -125,7 +129,7 @@ export function TariffParameterModal({ open, onOpenChange, defaults, override, o
                   </span>
                 </div>
                 <p className="text-[10px] leading-snug text-muted-foreground">
-                  Default: {formatDisplay(defaults[field.key], field.unit)} {field.unit}. {field.description}
+                  Default: {formatDisplay(defaults[field.key], field.unit)} {field.unit}
                 </p>
               </div>
             )
