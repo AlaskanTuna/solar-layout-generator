@@ -337,17 +337,19 @@ export function MapPage() {
                 </div>
               )}
               {!isReadonly && phase !== 'processing' && (
-                <div className="mt-2 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setManualOpen((v) => !v)
-                      setManualError('')
-                    }}
-                    className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {manualOpen ? 'Hide manual entry' : 'Or enter coordinates manually'}
-                  </button>
+                <>
+                  <div className="mt-2 rounded-lg border border-border bg-card/95 px-3 py-1.5 text-center shadow-md backdrop-blur-sm">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setManualOpen((v) => !v)
+                        setManualError('')
+                      }}
+                      className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {manualOpen ? 'Hide manual entry' : 'Or enter coordinates manually'}
+                    </button>
+                  </div>
                   {manualOpen && (
                     <form
                       onSubmit={handleManualSubmit}
@@ -379,7 +381,7 @@ export function MapPage() {
                       </Button>
                     </form>
                   )}
-                </div>
+                </>
               )}
             </div>
           </div>

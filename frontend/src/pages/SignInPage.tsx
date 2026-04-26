@@ -126,13 +126,30 @@ export function SignInPage() {
                 />
               </div>
 
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground select-none">
+              <label className="group flex cursor-pointer items-center gap-2.5 text-sm text-muted-foreground select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-input text-primary focus:ring-2 focus:ring-ring"
+                  className="peer sr-only"
                 />
+                <span
+                  aria-hidden="true"
+                  className="flex h-4 w-4 items-center justify-center rounded border border-input bg-background shadow-sm transition-colors peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background group-hover:border-foreground/40"
+                >
+                  <svg
+                    className="h-3 w-3 text-primary-foreground opacity-0 transition-opacity peer-checked:opacity-100"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ opacity: rememberMe ? 1 : 0 }}
+                  >
+                    <path d="M3 8.5l3.5 3.5L13 5" />
+                  </svg>
+                </span>
                 Remember my email
               </label>
 
