@@ -356,6 +356,7 @@ export function AnalysisPage() {
                     year1Savings={simulation.totalSavingsRm}
                     degradationRate={formState.degradationRate}
                     systemCostRm={formState.systemCostRm}
+                    tariffEscalationRate={formState.tariffEscalationRate}
                   />
                 )
               },
@@ -368,6 +369,7 @@ export function AnalysisPage() {
                     year1Savings={simulation.totalSavingsRm}
                     degradationRate={formState.degradationRate}
                     systemKwp={systemKwp}
+                    tariffEscalationRate={formState.tariffEscalationRate}
                   />
                 )
               },

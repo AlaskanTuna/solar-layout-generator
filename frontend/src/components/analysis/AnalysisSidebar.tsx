@@ -405,6 +405,22 @@ export function AnalysisSidebar({
               </div>
 
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
+                <div className="space-y-1">
+                  <Label>
+                    Tariff Escalation
+                    <InfoTooltip text="Annual compounding rate at which TNB tariffs are expected to rise. A higher rate shortens payback and grows long-term savings. Malaysian RP4 revisions historically trend around 3–5%/year. Default 0% assumes flat tariffs." />
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    %/year — compounds savings across projection horizon
+                  </p>
+                </div>
+                <DegradationInput
+                  value={formState.tariffEscalationRate}
+                  onChange={(rate) => setFormState((c) => (c ? { ...c, tariffEscalationRate: rate } : c))}
+                />
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <Label className="text-sm font-semibold text-foreground">
                   System Assumptions
                   <InfoTooltip text="These values affect how the system's real-world output is estimated. Most homeowners can leave these at their defaults." />

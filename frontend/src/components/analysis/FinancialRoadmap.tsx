@@ -8,6 +8,8 @@ type FinancialRoadmapProps = {
   year1Savings: number
   degradationRate: number
   systemKwp: number
+  /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year. Defaults to 0. */
+  tariffEscalationRate?: number
 }
 
 type Milestone = {
@@ -21,7 +23,8 @@ export function FinancialRoadmap({
   paybackYears,
   year1Savings,
   degradationRate,
-  systemKwp
+  systemKwp,
+  tariffEscalationRate = 0
 }: FinancialRoadmapProps) {
   const outputAtYear25 = Math.round((1 - degradationRate) ** 24 * 100)
   // Midpoint of the RM 3,000–6,000 residential string inverter replacement range
@@ -81,8 +84,9 @@ export function FinancialRoadmap({
         ))}
 
         <p className="mt-4 text-xs text-muted-foreground">
-          Excludes tariff escalation (would shorten payback), annual maintenance (~RM 500/yr) and inflation. Malaysian
-          tariffs have historically risen, so real-world savings may grow faster than projected.
+          {tariffEscalationRate > 0
+            ? `Projection includes ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation. Excludes annual maintenance (~RM 500/yr) and inflation.`
+            : 'Excludes tariff escalation (would shorten payback), annual maintenance (~RM 500/yr) and inflation. Malaysian tariffs have historically risen, so real-world savings may grow faster than projected.'}
         </p>
       </CardContent>
     </Card>

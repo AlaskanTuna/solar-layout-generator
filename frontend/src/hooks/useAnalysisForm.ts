@@ -121,6 +121,7 @@ export function useAnalysisForm(projectId: string | undefined) {
       systemCostRm: resolvedSystemCostRm,
       afaRateSenPerKwh: savedConfig?.afaRateSenPerKwh ?? tariffQuery.data.afaRateDefault,
       degradationRate: savedConfig?.degradationRate ?? 0.005,
+      tariffEscalationRate: savedConfig?.tariffEscalationRate ?? 0,
       consumptionProfile: savedConfig?.consumptionProfile ?? 'flat',
       performanceRatio: savedConfig?.performanceRatio ?? 0.8,
       assumedLosses: savedConfig?.assumedLosses ?? 0.2,
@@ -182,7 +183,8 @@ export function useAnalysisForm(projectId: string | undefined) {
       systemCostRm: formState.systemCostRm,
       carbonOffsetFactorKgPerMwh,
       activePanelCount: activePanels.length,
-      degradationRate: formState.degradationRate
+      degradationRate: formState.degradationRate,
+      tariffEscalationRate: formState.tariffEscalationRate
     })
   }, [activePanels.length, carbonOffsetFactorKgPerMwh, formState, simulation])
 
