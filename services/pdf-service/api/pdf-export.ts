@@ -24,9 +24,16 @@ function parseAllowedOrigins(raw: string | undefined): string[] {
     .filter(Boolean)
 }
 
-function pickCorsOrigin(requestOrigin: string | undefined, allowedOrigins: string[]): string {
-  if (requestOrigin && allowedOrigins.includes(requestOrigin)) return requestOrigin
-  return allowedOrigins[0] ?? ''
+function normalizeOrigin(origin: string): string {
+  return origin.trim().replace(/\/$/, '')
+}
+
+function resolveCorsOrigin(requestOrigin: string | undefined, allowedOrigins: string[]): string | null {
+  if (!requestOrigin) return null
+
+  const normalizedRequestOrigin = normalizeOrigin(requestOrigin)
+  const matchedOrigin = allowedOrigins.find((allowedOrigin) => allowedOrigin === normalizedRequestOrigin)
+  return matchedOrigin ?? null
 }
 
 function setCorsHeaders(res: VercelResponse, origin: string) {
@@ -43,7 +50,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : undefined
-  setCorsHeaders(res, pickCorsOrigin(requestOrigin, allowedOrigins))
+  const corsOrigin = resolveCorsOrigin(requestOrigin, allowedOrigins)
+
+  if (!corsOrigin) {
+    return res.status(403).json({
+      error: 'CORS rejected',
+      expected: allowedOrigins,
+      got: requestOrigin ?? null
+    })
+  }
+
+  setCorsHeaders(res, corsOrigin)
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
