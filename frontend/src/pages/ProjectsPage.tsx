@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { Plus, FolderOpen } from 'lucide-react'
+import { Plus, FolderOpen, FolderKanban } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 import { notify } from '@/components/ui/toastConfig'
@@ -86,12 +86,17 @@ export function ProjectsPage() {
       <PageContainer>
         <PageHeaderCard>
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="font-heading text-3xl font-bold tracking-tight">Projects</h1>
-              <p className="mt-1 max-w-lg text-muted-foreground">Manage all your solar assessment projects</p>
-              {quotaLabel && (
-                <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
-              )}
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <FolderKanban className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="font-heading text-3xl font-bold tracking-tight">Projects</h1>
+                <p className="mt-1 max-w-lg text-muted-foreground">Manage all your solar assessment projects</p>
+                {quotaLabel && (
+                  <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
+                )}
+              </div>
             </div>
             <Button className="gap-2 shadow-sm" onClick={() => setDialogOpen(true)} disabled={quotaReached}>
               <Plus className="h-4 w-4" />

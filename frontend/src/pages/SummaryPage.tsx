@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { Plus, Sun, FolderOpen, Clock, BarChart3, Lightbulb, MapPin, SlidersHorizontal, FileBarChart } from 'lucide-react'
+import { Plus, Sun, FolderOpen, Clock, BarChart3, Lightbulb, MapPin, SlidersHorizontal, FileBarChart, Gauge } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 import { notify } from '@/components/ui/toastConfig'
@@ -72,8 +72,15 @@ export function SummaryPage() {
     <>
       <PageContainer flex>
         <PageHeaderCard>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">Summary</h1>
-          <p className="mt-1 max-w-lg text-muted-foreground">Overview of your solar portfolio</p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Gauge className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">Summary</h1>
+              <p className="mt-1 max-w-lg text-muted-foreground">Overview of your solar portfolio</p>
+            </div>
+          </div>
         </PageHeaderCard>
 
         {/* Two-column: stats+projects on left, how-it-works on right — fills remaining height */}

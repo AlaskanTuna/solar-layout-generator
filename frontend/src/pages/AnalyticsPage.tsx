@@ -18,8 +18,15 @@ export function AnalyticsPage() {
     return (
       <PageContainer>
         <PageHeaderCard>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="mt-1 max-w-lg text-muted-foreground">Performance insights across all your projects</p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <PieChart className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
+              <p className="mt-1 max-w-lg text-muted-foreground">Performance insights across all your projects</p>
+            </div>
+          </div>
         </PageHeaderCard>
         <div className="mt-6 glass-card flex flex-col items-center py-16 text-center">
           <PieChart className="h-12 w-12 text-muted-foreground/30" />
@@ -45,10 +52,17 @@ export function AnalyticsPage() {
   return (
     <PageContainer>
       <PageHeaderCard>
-        <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="mt-1 max-w-lg text-muted-foreground">
-          Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <PieChart className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
+            <p className="mt-1 max-w-lg text-muted-foreground">
+              Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
       </PageHeaderCard>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">

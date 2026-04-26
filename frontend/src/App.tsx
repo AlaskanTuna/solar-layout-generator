@@ -9,6 +9,7 @@ import { SignUpPage } from './pages/SignUpPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { SummaryPage } from './pages/SummaryPage'
 import { ProjectsPage } from './pages/ProjectsPage'
+import { FAQPage } from './pages/FAQPage'
 import { MapPage } from './pages/MapPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -47,6 +48,7 @@ export function App() {
           <Route index element={<DashboardPage />} />
           <Route path="summary" element={<SummaryPage />} />
           <Route path="projects" element={<ProjectsPage />} />
+          <Route path="faq" element={<FAQPage />} />
           <Route
             path="analytics"
             element={

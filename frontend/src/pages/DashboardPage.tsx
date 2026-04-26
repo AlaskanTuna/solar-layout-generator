@@ -15,7 +15,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Gauge, FolderKanban, PieChart, MapPin } from 'lucide-react'
+import { Gauge, FolderKanban, PieChart, MapPin, LayoutDashboard } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
@@ -82,11 +82,18 @@ export function DashboardPage() {
     <>
       <PageContainer flex>
         <PageHeaderCard>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">
-            {greeting}
-            {userName ? `, ${userName}` : ''}
-          </h1>
-          <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <LayoutDashboard className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">
+                {greeting}
+                {userName ? `, ${userName}` : ''}
+              </h1>
+              <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
+            </div>
+          </div>
         </PageHeaderCard>
 
         {/* Quick Action Cards — flex-1 fills remaining viewport height */}
