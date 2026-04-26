@@ -8,13 +8,17 @@ import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { Sun, Loader2 } from 'lucide-react'
 
+const REMEMBER_EMAIL_KEY = 'slg-remember-email'
+
 export function SignInPage() {
   const { session, loading, signIn } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const rememberedEmail = typeof window !== 'undefined' ? (window.localStorage.getItem(REMEMBER_EMAIL_KEY) ?? '') : ''
+  const [email, setEmail] = useState(rememberedEmail)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [rememberMe, setRememberMe] = useState(rememberedEmail.length > 0)
 
   if (loading) return null
   if (session) return <Navigate to="/dashboard" replace />
@@ -29,6 +33,11 @@ export function SignInPage() {
       setError(error.message)
       setSubmitting(false)
     } else {
+      if (rememberMe) {
+        window.localStorage.setItem(REMEMBER_EMAIL_KEY, email)
+      } else {
+        window.localStorage.removeItem(REMEMBER_EMAIL_KEY)
+      }
       navigate('/dashboard')
     }
   }
@@ -116,6 +125,16 @@ export function SignInPage() {
                   required
                 />
               </div>
+
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-input text-primary focus:ring-2 focus:ring-ring"
+                />
+                Remember my email
+              </label>
 
               {error && (
                 <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
