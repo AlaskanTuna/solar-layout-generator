@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeSnap, computeOverlapSnap } from '../snapAlignment'
+import { computeSnap, computeOverlapSnap, resolveGroupOverlapEscape, resolveOverlapEscape } from '../snapAlignment'
 import { getRotatedRectPoints, obbsOverlap } from '../canvasTransforms'
 
 const W = 40
@@ -211,5 +211,114 @@ describe('computeOverlapSnap', () => {
       const neighborPoly = getRotatedRectPoints(200, 200, W, H, DEG)
       expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
     })
+  })
+})
+
+describe('resolveOverlapEscape', () => {
+  it('clears same-rotation overlap after repeated centroid-based escapes', () => {
+    const result = resolveOverlapEscape(
+      { x: 135, y: 100, rotation: 0 },
+      [{ x: 100, y: 100, rotation: 0 }],
+      W,
+      H
+    )
+
+    const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+    const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
+
+    expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+  })
+
+  it('clears overlap between 30° and 45° panels', () => {
+    const result = resolveOverlapEscape(
+      { x: 100, y: 100, rotation: 30 },
+      [{ x: 100, y: 100, rotation: 45 }],
+      W,
+      H
+    )
+
+    const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 30)
+    const neighborPoly = getRotatedRectPoints(100, 100, W, H, 45)
+
+    expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+  })
+
+  it('clears the centroid-coincident pathological case', () => {
+    const result = resolveOverlapEscape(
+      { x: 100, y: 100, rotation: 0 },
+      [{ x: 100, y: 100, rotation: 0 }],
+      W,
+      H
+    )
+
+    const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+    const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
+
+    expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+  })
+
+  it('escapes a sandwiched panel with three overlapping neighbors', () => {
+    const result = resolveOverlapEscape(
+      { x: 100, y: 100, rotation: 0 },
+      [
+        { x: 88, y: 100, rotation: 0 },
+        { x: 112, y: 100, rotation: 0 },
+        { x: 100, y: 88, rotation: 0 }
+      ],
+      W,
+      H
+    )
+
+    const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+    for (const neighbor of [
+      { x: 88, y: 100, rotation: 0 },
+      { x: 112, y: 100, rotation: 0 },
+      { x: 100, y: 88, rotation: 0 }
+    ]) {
+      const neighborPoly = getRotatedRectPoints(neighbor.x, neighbor.y, W, H, neighbor.rotation)
+      expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+    }
+  })
+
+  it('clears a tiny overlap smaller than one pixel', () => {
+    const result = resolveOverlapEscape(
+      { x: 139.6, y: 100, rotation: 0 },
+      [{ x: 100, y: 100, rotation: 0 }],
+      W,
+      H
+    )
+
+    const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+    const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
+
+    expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+  })
+})
+
+describe('resolveGroupOverlapEscape', () => {
+  it('moves a rigid group clear of a single overlapping neighbor', () => {
+    const result = resolveGroupOverlapEscape(
+      [
+        { x: 100, y: 100, rotation: 0 },
+        { x: 140, y: 100, rotation: 0 }
+      ],
+      [
+        { x: 72, y: 100, rotation: 0 }
+      ],
+      { x: 0, y: 0 },
+      W,
+      H
+    )
+
+    const movedPanels = [
+      { x: 100 + result.x, y: 100 + result.y, rotation: 0 },
+      { x: 140 + result.x, y: 100 + result.y, rotation: 0 }
+    ]
+
+    for (const moving of movedPanels) {
+      const movingPoly = getRotatedRectPoints(moving.x, moving.y, W, H, moving.rotation)
+      const neighborPoly = getRotatedRectPoints(72, 100, W, H, 0)
+      expect(obbsOverlap(movingPoly, neighborPoly)).toBe(false)
+    }
   })
 })

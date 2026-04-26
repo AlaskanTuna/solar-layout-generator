@@ -1,4 +1,4 @@
-import { getRotatedRectPoints, obbsOverlapWithMinSeparation } from './canvasTransforms'
+import { getRotatedRectPoints, obbsOverlap, obbsOverlapWithMinSeparation } from './canvasTransforms'
 
 export type SnapGuide = {
   orientation: 'horizontal' | 'vertical'
@@ -15,6 +15,24 @@ export type SnapResult = {
 
 export type OverlapSnapResult = { snapped: true; x: number; y: number } | { snapped: false }
 
+type Pose = {
+  x: number
+  y: number
+  rotation: number
+}
+
+type Translation = {
+  x: number
+  y: number
+}
+
+export type OverlapEscapeResult = {
+  x: number
+  y: number
+  iterations: number
+  resolved: boolean
+}
+
 type PanelInfo = {
   id: string
   x: number
@@ -25,6 +43,9 @@ type PanelInfo = {
 const SNAP_THRESHOLD = 14
 /** Rotation difference (degrees) within which two panels are treated as same-orientation. */
 const ROTATION_TOLERANCE = 5
+const OVERLAP_ESCAPE_MAX_ITERATIONS = 30
+const OVERLAP_ESCAPE_STEP_RATIO = 4
+const OVERLAP_ESCAPE_EPSILON = 1e-6
 
 /** Compute snapped position and guide lines for a dragged panel using local-axis projection */
 export function computeSnap(
@@ -135,4 +156,230 @@ export function computeOverlapSnap(
     x: dragged.x + result.axis.x * pushDistance,
     y: dragged.y + result.axis.y * pushDistance
   }
+}
+
+function normalizeVector(x: number, y: number): Translation | null {
+  const length = Math.hypot(x, y)
+  if (length <= OVERLAP_ESCAPE_EPSILON) return null
+  return { x: x / length, y: y / length }
+}
+
+function getPosePolygon(pose: Pose, translation: Translation, panelWidth: number, panelHeight: number) {
+  return getRotatedRectPoints(pose.x + translation.x, pose.y + translation.y, panelWidth, panelHeight, pose.rotation)
+}
+
+function computeOverlapEscapeVector(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  strategy: 'sum' | 'worst' = 'sum'
+): Translation | null {
+  if (strategy === 'worst') {
+    const candidates: Array<{
+      vector: Translation
+      penetration: number
+    }> = []
+
+    for (const movingPanel of movingPanels) {
+      const movingCenter = {
+        x: movingPanel.x + translation.x,
+        y: movingPanel.y + translation.y
+      }
+      const movingPoly = getPosePolygon(movingPanel, translation, panelWidth, panelHeight)
+
+      for (const staticPanel of staticPanels) {
+        const staticPoly = getRotatedRectPoints(
+          staticPanel.x,
+          staticPanel.y,
+          panelWidth,
+          panelHeight,
+          staticPanel.rotation
+        )
+        if (!obbsOverlap(movingPoly, staticPoly)) continue
+
+        const overlap = obbsOverlapWithMinSeparation(movingPoly, staticPoly)
+        if (!overlap) continue
+
+        const away =
+          normalizeVector(movingCenter.x - staticPanel.x, movingCenter.y - staticPanel.y) ??
+          normalizeVector(overlap.axis.x, overlap.axis.y)
+        if (!away) continue
+
+        candidates.push({
+          vector: away,
+          penetration: overlap.penetration
+        })
+      }
+    }
+
+    if (candidates.length === 0) return null
+
+    candidates.sort((a, b) => b.penetration - a.penetration)
+    const primary = candidates[0]!
+    const secondary = candidates.find((candidate, index) => {
+      if (index === 0) return false
+      const dot = primary.vector.x * candidate.vector.x + primary.vector.y * candidate.vector.y
+      return dot > -0.5
+    })
+
+    if (!secondary) return primary.vector
+
+    return (
+      normalizeVector(
+        primary.vector.x * primary.penetration + secondary.vector.x * secondary.penetration,
+        primary.vector.y * primary.penetration + secondary.vector.y * secondary.penetration
+      ) ?? primary.vector
+    )
+  }
+
+  let sumX = 0
+  let sumY = 0
+  let fallback: { axis: Translation; penetration: number } | null = null
+
+  for (const movingPanel of movingPanels) {
+    const movingCenter = {
+      x: movingPanel.x + translation.x,
+      y: movingPanel.y + translation.y
+    }
+    const movingPoly = getPosePolygon(movingPanel, translation, panelWidth, panelHeight)
+
+    for (const staticPanel of staticPanels) {
+      const staticPoly = getRotatedRectPoints(
+        staticPanel.x,
+        staticPanel.y,
+        panelWidth,
+        panelHeight,
+        staticPanel.rotation
+      )
+      if (!obbsOverlap(movingPoly, staticPoly)) continue
+
+      const overlap = obbsOverlapWithMinSeparation(movingPoly, staticPoly)
+      if (!overlap) continue
+
+      const awayX = movingCenter.x - staticPanel.x
+      const awayY = movingCenter.y - staticPanel.y
+      const away = normalizeVector(awayX, awayY) ?? normalizeVector(overlap.axis.x, overlap.axis.y)
+      if (!away) continue
+
+      const weight = Math.max(overlap.penetration, 1)
+      sumX += away.x * weight
+      sumY += away.y * weight
+
+      if (!fallback || overlap.penetration > fallback.penetration) {
+        fallback = { axis: overlap.axis, penetration: overlap.penetration }
+      }
+    }
+  }
+
+  const summed = normalizeVector(sumX, sumY)
+  if (summed) return summed
+  return fallback ? normalizeVector(fallback.axis.x, fallback.axis.y) : null
+}
+
+function resolveOverlapTranslation(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  maxIterations = OVERLAP_ESCAPE_MAX_ITERATIONS,
+  stepSize = panelWidth / OVERLAP_ESCAPE_STEP_RATIO,
+  strategy: 'sum' | 'worst' = 'sum'
+): OverlapEscapeResult {
+  let current = { ...translation }
+
+  for (let iter = 0; iter < maxIterations; iter += 1) {
+    let hasOverlap = false
+    for (const movingPanel of movingPanels) {
+      const movingPoly = getPosePolygon(movingPanel, current, panelWidth, panelHeight)
+      for (const staticPanel of staticPanels) {
+        const staticPoly = getRotatedRectPoints(
+          staticPanel.x,
+          staticPanel.y,
+          panelWidth,
+          panelHeight,
+          staticPanel.rotation
+        )
+        if (obbsOverlap(movingPoly, staticPoly)) {
+          hasOverlap = true
+          break
+        }
+      }
+      if (hasOverlap) break
+    }
+
+    if (!hasOverlap) {
+      return { x: current.x, y: current.y, iterations: iter, resolved: true }
+    }
+
+    const escape = computeOverlapEscapeVector(movingPanels, staticPanels, current, panelWidth, panelHeight, strategy)
+    if (!escape) break
+
+    current = {
+      x: current.x + escape.x * stepSize,
+      y: current.y + escape.y * stepSize
+    }
+  }
+
+  let resolved = true
+  for (const movingPanel of movingPanels) {
+    const movingPoly = getPosePolygon(movingPanel, current, panelWidth, panelHeight)
+    for (const staticPanel of staticPanels) {
+      const staticPoly = getRotatedRectPoints(
+        staticPanel.x,
+        staticPanel.y,
+        panelWidth,
+        panelHeight,
+        staticPanel.rotation
+      )
+      if (obbsOverlap(movingPoly, staticPoly)) {
+        resolved = false
+        break
+      }
+    }
+    if (!resolved) break
+  }
+
+  return { x: current.x, y: current.y, iterations: maxIterations, resolved }
+}
+
+export function resolveOverlapEscape(
+  dragged: Pose,
+  neighbors: Pose[],
+  panelWidth: number,
+  panelHeight: number,
+  options?: { maxIterations?: number; stepSize?: number }
+): OverlapEscapeResult {
+  return resolveOverlapTranslation(
+    [dragged],
+    neighbors,
+    { x: 0, y: 0 },
+    panelWidth,
+    panelHeight,
+    options?.maxIterations,
+    options?.stepSize,
+    'sum'
+  )
+}
+
+export function resolveGroupOverlapEscape(
+  movingPanels: Pose[],
+  staticPanels: Pose[],
+  translation: Translation,
+  panelWidth: number,
+  panelHeight: number,
+  options?: { maxIterations?: number; stepSize?: number }
+): OverlapEscapeResult {
+  return resolveOverlapTranslation(
+    movingPanels,
+    staticPanels,
+    translation,
+    panelWidth,
+    panelHeight,
+    options?.maxIterations,
+    options?.stepSize,
+    'worst'
+  )
 }

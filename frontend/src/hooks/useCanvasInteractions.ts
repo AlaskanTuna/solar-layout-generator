@@ -14,7 +14,13 @@ import {
   type CanvasGeo
 } from '@/lib/canvasTransforms'
 import { notify } from '@/components/ui/toastConfig'
-import { computeSnap, computeOverlapSnap, type SnapGuide } from '@/lib/snapAlignment'
+import {
+  computeSnap,
+  computeOverlapSnap,
+  resolveGroupOverlapEscape,
+  resolveOverlapEscape,
+  type SnapGuide
+} from '@/lib/snapAlignment'
 import type { LocationImageGeoTransform } from '@/api/locations'
 import type { DecodedRoofMask } from '@/hooks/useWorkbenchData'
 import type { WorkbenchPanelState } from '@/hooks/usePanelState'
@@ -407,6 +413,17 @@ export function useCanvasInteractions({
             candidatePixel = { x: aligned.x, y: aligned.y }
           }
         }
+
+        const escaped = resolveOverlapEscape(
+          { x: candidatePixel.x, y: candidatePixel.y, rotation: panel.rotation },
+          renderPanels
+            .filter(({ panel: p }) => p.id !== panelId)
+            .map(({ x, y, panel: p }) => ({ x, y, rotation: p.rotation })),
+          panelDimensions.width,
+          panelDimensions.height
+        )
+        candidatePixel = { x: escaped.x, y: escaped.y }
+        placementError = getPlacementError(panelId, pixelToLatLng(candidatePixel.x, candidatePixel.y, geo), panel.rotation)
       }
 
       // Overlap is no longer a rejection — SAT push-out always converges so any residual
@@ -489,6 +506,20 @@ export function useCanvasInteractions({
         deltaX += worst.axis.x * (worst.penetration + 0.01)
         deltaY += worst.axis.y * (worst.penetration + 0.01)
       }
+
+      const escaped = resolveGroupOverlapEscape(
+        selectedPanelsWithOrigin.map(({ panel: sp, origPx }) => ({
+          x: origPx.x,
+          y: origPx.y,
+          rotation: sp.rotation
+        })),
+        outsidePanels.map(({ panel: rp, x, y }) => ({ x, y, rotation: rp.rotation })),
+        { x: deltaX, y: deltaY },
+        panelDimensions.width,
+        panelDimensions.height
+      )
+      deltaX = escaped.x
+      deltaY = escaped.y
     }
 
     const moves: { id: string; prevCenter: { lat: number; lng: number }; nextCenter: { lat: number; lng: number } }[] =
