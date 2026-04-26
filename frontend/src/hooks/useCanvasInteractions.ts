@@ -409,7 +409,10 @@ export function useCanvasInteractions({
         }
       }
 
-      if (placementError) {
+      // Overlap is no longer a rejection — SAT push-out always converges so any residual
+      // 'overlap' is best-effort accepted. Bounds/mask are real boundary violations and
+      // still revert.
+      if (placementError && placementError !== 'overlap') {
         resetPosition()
         notify.error(getPlacementErrorMessage(placementError))
         return
@@ -448,12 +451,14 @@ export function useCanvasInteractions({
 
     // Iteratively resolve group-vs-outside overlaps by shifting the shared delta.
     // Preserves intra-group geometry; the whole group translates as one unit.
+    // SAT push-out runs regardless of rotation difference — any non-zero overlap is
+    // pushed apart along the minimum-separation axis until the group is clear.
     if (panelDimensions) {
       const outsidePanels = renderPanels.filter(({ panel: p }) => !selectedPanelIds.has(p.id))
       const maxIterations = Math.max(4, outsidePanels.length)
 
       for (let iter = 0; iter < maxIterations; iter++) {
-        let worst: { axis: { x: number; y: number }; penetration: number; rotDiff: number } | null = null
+        let worst: { axis: { x: number; y: number }; penetration: number } | null = null
 
         for (const { panel: sp, origPx } of selectedPanelsWithOrigin) {
           const draggedPoly = getRotatedRectPoints(
@@ -473,15 +478,13 @@ export function useCanvasInteractions({
             )
             const overlap = obbsOverlapWithMinSeparation(draggedPoly, neighborPoly)
             if (!overlap) continue
-            const rotDiff = Math.abs(((sp.rotation - rp.panel.rotation + 180) % 360) - 180)
             if (!worst || overlap.penetration > worst.penetration) {
-              worst = { axis: overlap.axis, penetration: overlap.penetration, rotDiff }
+              worst = { axis: overlap.axis, penetration: overlap.penetration }
             }
           }
         }
 
         if (!worst) break // no overlaps
-        if (worst.rotDiff > 3) break // rotation mismatch — cannot resolve
 
         deltaX += worst.axis.x * (worst.penetration + 0.01)
         deltaY += worst.axis.y * (worst.penetration + 0.01)
@@ -497,8 +500,8 @@ export function useCanvasInteractions({
       const prevCenter = pixelToLatLng(origPx.x, origPx.y, geo)
 
       const placementError = getPlacementError(sp.id, nextCenter, sp.rotation, selectedPanelIds)
-      if (placementError) {
-        // Restore all selected panels to pre-drag positions (non-grabbed ones have drifted).
+      // Best-effort accept residual overlap (SAT push converges); only revert on bounds/mask.
+      if (placementError && placementError !== 'overlap') {
         bulkUpdatePanels(
           selectedPanelsWithOrigin.map(({ panel: p, origPx: px }) => ({
             id: p.id,
@@ -573,6 +576,9 @@ export function useCanvasInteractions({
     }
 
     const placementError = getPlacementError(panel.id, panel.center, nextRotation)
+    // Overlap on rotation is silently blocked (matches group rotation behavior).
+    // Bounds/mask still toast since they're real boundary violations.
+    if (placementError === 'overlap') return
     if (placementError) {
       notify.error(getPlacementErrorMessage(placementError))
       return

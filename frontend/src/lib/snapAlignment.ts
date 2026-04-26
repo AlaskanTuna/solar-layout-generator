@@ -25,8 +25,6 @@ type PanelInfo = {
 const SNAP_THRESHOLD = 14
 /** Rotation difference (degrees) within which two panels are treated as same-orientation. */
 const ROTATION_TOLERANCE = 5
-/** Tighter rotation tolerance for overlap-snap: only snap when user clearly intended same-axis placement. */
-const OVERLAP_SNAP_ROTATION_TOLERANCE = 3
 
 /** Compute snapped position and guide lines for a dragged panel using local-axis projection */
 export function computeSnap(
@@ -106,17 +104,16 @@ export function computeSnap(
 /**
  * Overlap-as-snap-intent correction.
  *
- * Called at drag-end when the naive placement already overlaps a neighbor.
- * When rotations match within OVERLAP_SNAP_ROTATION_TOLERANCE the dragged panel is
- * auto-corrected along the SAT minimum-separation axis so it sits edge-to-edge
- * (zero gap, not overlapping) — regardless of how deep the overlap is.
+ * Called at drag-end when the naive placement already overlaps a neighbor. The dragged
+ * panel is auto-corrected along the SAT minimum-separation axis so it sits with zero
+ * overlap — regardless of how deep the overlap is or whether the rotations match.
  *
- * Same-rotation (within tolerance) is required because the SAT push-out direction is only
- * an unambiguous "snap to the right edge" interpretation when the panels share an axis;
- * for mismatched rotations the push direction would be arbitrary.
+ * For same-rotation panels the SAT axis lands the dragged panel edge-to-edge; for
+ * mismatched rotations it lands at the closest valid non-overlapping position along
+ * the smallest separation axis. Either way overlap is eliminated, never rejected.
  *
- * Returns { snapped: true, x, y } on success, or { snapped: false } when rotations are
- * mismatched or the shapes aren't actually overlapping.
+ * Returns { snapped: true, x, y } when a separation push was applied, or { snapped: false }
+ * when the shapes aren't actually overlapping (caller's convergence signal).
  */
 export function computeOverlapSnap(
   dragged: { x: number; y: number; rotation: number },
@@ -124,9 +121,6 @@ export function computeOverlapSnap(
   panelWidth: number,
   panelHeight: number
 ): OverlapSnapResult {
-  const rotDiff = Math.abs(((dragged.rotation - neighbor.rotation + 180) % 360) - 180)
-  if (rotDiff > OVERLAP_SNAP_ROTATION_TOLERANCE) return { snapped: false }
-
   const draggedPoly = getRotatedRectPoints(dragged.x, dragged.y, panelWidth, panelHeight, dragged.rotation)
   const neighborPoly = getRotatedRectPoints(neighbor.x, neighbor.y, panelWidth, panelHeight, neighbor.rotation)
 

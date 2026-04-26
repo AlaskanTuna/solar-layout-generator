@@ -158,17 +158,33 @@ describe('computeOverlapSnap', () => {
     })
   })
 
-  describe('rotation gating', () => {
-    it('returns snapped=false when rotation difference exceeds 3°', () => {
-      // 4° difference — beyond the 3° overlap-snap tolerance
-      const result = computeOverlapSnap({ x: 135, y: 100, rotation: 0 }, { x: 100, y: 100, rotation: 4 }, W, H)
-      expect(result.snapped).toBe(false)
+  describe('mismatched-rotation snap (no rotation gating)', () => {
+    it('still snaps when rotation difference is large — SAT push always converges', () => {
+      // 30° difference — push along SAT min-separation axis until shapes don't overlap.
+      const result = computeOverlapSnap({ x: 110, y: 100, rotation: 0 }, { x: 100, y: 100, rotation: 30 }, W, H)
+      expect(result.snapped).toBe(true)
+      if (!result.snapped) return
+      const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+      const neighborPoly = getRotatedRectPoints(100, 100, W, H, 30)
+      expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
     })
 
-    it('snaps when rotation difference is within 3°', () => {
-      // 2° difference — within tolerance
+    it('still snaps when rotation difference is small (was within old 3° tolerance)', () => {
       const result = computeOverlapSnap({ x: 135, y: 100, rotation: 0 }, { x: 100, y: 100, rotation: 2 }, W, H)
       expect(result.snapped).toBe(true)
+      if (!result.snapped) return
+      const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+      const neighborPoly = getRotatedRectPoints(100, 100, W, H, 2)
+      expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
+    })
+
+    it('clears overlap even at near-perpendicular rotations (45°)', () => {
+      const result = computeOverlapSnap({ x: 105, y: 100, rotation: 0 }, { x: 100, y: 100, rotation: 45 }, W, H)
+      expect(result.snapped).toBe(true)
+      if (!result.snapped) return
+      const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
+      const neighborPoly = getRotatedRectPoints(100, 100, W, H, 45)
+      expect(obbsOverlap(draggedPoly, neighborPoly)).toBe(false)
     })
   })
 
