@@ -20,6 +20,7 @@ export function InfoTooltip({
         <TooltipTrigger asChild>
           <button
             type="button"
+            tabIndex={-1}
             className="pdf-hide ml-1 inline-flex align-middle text-muted-foreground hover:text-foreground"
           >
             <Info className="h-3.5 w-3.5" />
