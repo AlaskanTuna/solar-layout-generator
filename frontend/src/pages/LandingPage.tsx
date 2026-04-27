@@ -34,6 +34,68 @@ export function LandingPage() {
     return () => document.documentElement.classList.remove('landing-snap')
   }, [])
 
+  // Cinematic JS-driven snap on wheel — slower than browser-native snap (~300ms) so the
+  // section transitions feel deliberate. Touch/keyboard still use the CSS proximity snap.
+  useEffect(() => {
+    const DURATION_MS = 1100
+    const COOLDOWN_MS = 1200
+    const NAV_OFFSET = 64
+    let isAnimating = false
+    let lastSnapTime = 0
+
+    function ease(t: number) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+    }
+
+    function snapTo(targetY: number) {
+      isAnimating = true
+      const startY = window.scrollY
+      const distance = targetY - startY
+      const t0 = performance.now()
+      function frame(t: number) {
+        const p = Math.min(1, (t - t0) / DURATION_MS)
+        window.scrollTo(0, startY + distance * ease(p))
+        if (p < 1) requestAnimationFrame(frame)
+        else isAnimating = false
+      }
+      requestAnimationFrame(frame)
+    }
+
+    function onWheel(e: WheelEvent) {
+      if (e.deltaY === 0) return
+      const now = performance.now()
+      if (isAnimating || now - lastSnapTime < COOLDOWN_MS) {
+        e.preventDefault()
+        return
+      }
+
+      const targets = Array.from(document.querySelectorAll<HTMLElement>('.snap-start'))
+      const direction = e.deltaY > 0 ? 1 : -1
+      const currentY = window.scrollY
+      let next: HTMLElement | undefined
+
+      if (direction > 0) {
+        next = targets.find((el) => el.offsetTop > currentY + 10)
+      } else {
+        for (let i = targets.length - 1; i >= 0; i--) {
+          if (targets[i].offsetTop < currentY - 10) {
+            next = targets[i]
+            break
+          }
+        }
+      }
+
+      if (next) {
+        e.preventDefault()
+        lastSnapTime = now
+        snapTo(Math.max(0, next.offsetTop - NAV_OFFSET))
+      }
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    return () => window.removeEventListener('wheel', onWheel)
+  }, [])
+
   if (loading) return null
   const isSignedIn = !!session
 
