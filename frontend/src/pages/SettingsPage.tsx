@@ -106,7 +106,7 @@ export function SettingsPage() {
             </div>
           </div>
           {statusMessage && (
-            <div className="inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-sm text-primary">
+            <div className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm">
               <CircleCheck className="h-4 w-4" />
               {statusMessage}
             </div>
