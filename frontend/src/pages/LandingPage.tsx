@@ -30,6 +30,11 @@ export function LandingPage() {
   const navScrolled = scrollY > 24
   const heroBlur = Math.min(14, scrollY / 40)
 
+  useEffect(() => {
+    document.documentElement.classList.add('landing-snap')
+    return () => document.documentElement.classList.remove('landing-snap')
+  }, [])
+
   if (loading) return null
   const isSignedIn = !!session
 
@@ -69,7 +74,7 @@ export function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative h-screen overflow-hidden">
+      <section className="relative h-screen snap-start overflow-hidden">
         {/* Background image — blurs progressively on scroll */}
         <div className="absolute inset-0">
           <img
@@ -251,7 +256,7 @@ export function LandingPage() {
       {/* Trust band — scrolling marquee */}
       <section
         aria-label="Trust signals"
-        className="overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
+        className="snap-start overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
       >
         <div className="flex w-max animate-marquee items-center gap-12 px-6 font-mono text-sm uppercase tracking-[0.18em] text-stone-400">
           <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
@@ -282,7 +287,7 @@ export function LandingPage() {
       <PipelineSection />
 
       {/* Features */}
-      <section id="features" className="px-6 py-24">
+      <section id="features" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ What's inside</div>
@@ -335,7 +340,7 @@ export function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="px-6 py-24">
+      <section id="pricing" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Pricing</div>
@@ -388,7 +393,7 @@ export function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="bg-card px-6 py-24">
+      <section id="faq" className="snap-start bg-card px-6 py-24">
         <div className="mx-auto max-w-3xl">
           <div className="mb-14 text-center">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Common questions</div>
@@ -432,7 +437,7 @@ export function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative overflow-hidden bg-stone-950 px-6 py-24 text-center text-white">
+      <section className="relative snap-start overflow-hidden bg-stone-950 px-6 py-24 text-center text-white">
         {/* Decorative radial sun */}
         <div
           className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full"
@@ -685,7 +690,7 @@ function PipelineSection() {
   }, [])
 
   return (
-    <section id="how" className="relative bg-stone-950 px-6 text-stone-50">
+    <section id="how" className="relative snap-start bg-stone-950 px-6 text-stone-50">
       <div className="mx-auto max-w-7xl pb-16 pt-24">
         <div className="max-w-2xl">
           <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-orange-400">★ The Pipeline</div>
@@ -709,7 +714,7 @@ function PipelineSection() {
                   ref={(el) => {
                     stepRefs.current[i] = el
                   }}
-                  className={`border-t py-10 transition-colors duration-300 ${
+                  className={`snap-start border-t py-10 transition-colors duration-300 ${
                     isActive ? 'border-orange-400/45' : 'border-white/10'
                   }`}
                 >
