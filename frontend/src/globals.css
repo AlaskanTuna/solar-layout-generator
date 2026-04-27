@@ -276,6 +276,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1,
+h2 {
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  letter-spacing: -0.015em;
+}
+
 /* DUAL-STOP FOCUS RING — premium B2C polish on interactive elements only.
    Solid 2px ring + soft 4px tangerine glow for Stripe/Linear-grade focus state. */
 button:focus-visible,
