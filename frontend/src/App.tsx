@@ -8,7 +8,6 @@ import { LandingPage } from './pages/LandingPage'
 import { SignInPage } from './pages/SignInPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { DashboardPage } from './pages/DashboardPage'
-import { SummaryPage } from './pages/SummaryPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { FAQPage } from './pages/FAQPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -48,7 +47,6 @@ export function App() {
         {/* Dashboard routes — share sidebar with INSIGHTS nav */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="summary" element={<SummaryPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="faq" element={<FAQPage />} />
           <Route

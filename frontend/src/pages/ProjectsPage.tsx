@@ -16,7 +16,17 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { Plus, FolderOpen, FolderKanban } from 'lucide-react'
+import {
+  Plus,
+  FolderOpen,
+  FolderKanban,
+  BarChart3,
+  Clock,
+  Lightbulb,
+  MapPin,
+  SlidersHorizontal,
+  FileBarChart
+} from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 import { notify } from '@/components/ui/toastConfig'
@@ -55,6 +65,31 @@ export function ProjectsPage() {
     if (filter === 'in-progress') return list.filter((p) => p.status !== 'analysis_saved')
     return list
   }, [projects, filter])
+
+  const totalProjects = projects?.length ?? 0
+  const completedProjects = projects?.filter((p) => p.status === 'analysis_saved').length ?? 0
+  const inProgress = totalProjects - completedProjects
+
+  const WORKFLOW_STEPS = [
+    {
+      step: 1,
+      icon: <MapPin className="h-4 w-4" />,
+      title: 'Search Location',
+      desc: 'Find your building on the satellite map'
+    },
+    {
+      step: 2,
+      icon: <SlidersHorizontal className="h-4 w-4" />,
+      title: 'Generate & Adjust Layout',
+      desc: 'Drag, rotate, add or remove panels'
+    },
+    {
+      step: 3,
+      icon: <FileBarChart className="h-4 w-4" />,
+      title: 'Analyze Savings',
+      desc: 'View projections and export PDF'
+    }
+  ]
 
   function handleCreateProject(e: FormEvent) {
     e.preventDefault()
@@ -99,68 +134,122 @@ export function ProjectsPage() {
           </div>
         </PageHeaderCard>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex w-fit gap-1 rounded-lg bg-muted/50 p-1">
-            {(['all', 'completed', 'in-progress'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                  filter === f ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {f === 'all' ? `All (${(projects ?? []).length})` : f === 'completed' ? 'Completed' : 'In Progress'}
-              </button>
-            ))}
-          </div>
-          <Button
-            className="w-full gap-2 shadow-sm sm:w-auto"
-            onClick={() => setDialogOpen(true)}
-            disabled={quotaReached}
-          >
-            <Plus className="h-4 w-4" />
-            New Project
-          </Button>
-        </div>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem]">
+          {/* Left: stats → filters → project grid */}
+          <div className="flex flex-col">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-4 animate-fade-in-up">
+              <div className="glass-card flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <FolderOpen className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground">Total Projects</p>
+                  <p className="font-heading text-lg font-bold">{totalProjects}</p>
+                </div>
+              </div>
+              <div className="glass-card flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <BarChart3 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground">Completed</p>
+                  <p className="font-heading text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                    {completedProjects}
+                  </p>
+                </div>
+              </div>
+              <div className="glass-card flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground">In Progress</p>
+                  <p className="font-heading text-lg font-bold text-amber-600 dark:text-amber-400">{inProgress}</p>
+                </div>
+              </div>
+            </div>
 
-        <div className="mt-6">
-          {isLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="glass-card space-y-3 p-5">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
+            {/* Filter chips */}
+            <div className="mt-6 flex w-fit gap-1 rounded-lg bg-muted/50 p-1">
+              {(['all', 'completed', 'in-progress'] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                    filter === f ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {f === 'all' ? `All (${(projects ?? []).length})` : f === 'completed' ? 'Completed' : 'In Progress'}
+                </button>
               ))}
             </div>
-          ) : !filtered.length ? (
-            <div className="glass-card flex flex-col items-center py-16 text-center animate-fade-in-up">
-              <FolderOpen className="h-12 w-12 text-muted-foreground/30" />
-              <p className="mt-4 text-sm text-muted-foreground">
-                {filter === 'all' ? 'No projects yet. Create one to get started.' : `No ${filter} projects.`}
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in">
-              {filtered.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onOpen={() => navigate(projectRoute(project))}
-                  onDelete={() => setDeleteTarget(project)}
-                />
-              ))}
-              <button
-                onClick={() => setDialogOpen(true)}
-                className="glass-card flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border p-8 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:shadow-lg"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                  <Plus className="h-6 w-6" />
+
+            {/* Project grid */}
+            <div className="mt-6">
+              {isLoading ? (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="glass-card space-y-3 p-5">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  ))}
                 </div>
-                <span className="text-sm font-medium">New Project</span>
-              </button>
+              ) : !filtered.length ? (
+                <div className="glass-card flex flex-col items-center py-16 text-center animate-fade-in-up">
+                  <FolderOpen className="h-12 w-12 text-muted-foreground/30" />
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    {filter === 'all' ? 'No projects yet. Create one to get started.' : `No ${filter} projects.`}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 animate-fade-in">
+                  {filtered.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onOpen={() => navigate(projectRoute(project))}
+                      onDelete={() => setDeleteTarget(project)}
+                    />
+                  ))}
+                  <button
+                    onClick={() => !quotaReached && setDialogOpen(true)}
+                    disabled={quotaReached}
+                    className="glass-card flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border p-8 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border disabled:hover:text-muted-foreground disabled:hover:shadow-none"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                      <Plus className="h-6 w-6" />
+                    </div>
+                    <span className="text-sm font-medium">New Project</span>
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Right: How it works */}
+          <aside className="hidden lg:block animate-fade-in">
+            <div className="glass-card flex flex-col overflow-hidden">
+              <div className="border-b border-border bg-muted/30 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                  <h3 className="font-heading text-sm font-semibold">How it works</h3>
+                </div>
+              </div>
+              <div className="flex flex-col divide-y divide-border">
+                {WORKFLOW_STEPS.map((s) => (
+                  <div key={s.step} className="p-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      {s.icon}
+                    </div>
+                    <p className="mt-2 text-sm font-semibold">{s.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
         </div>
       </PageContainer>
 

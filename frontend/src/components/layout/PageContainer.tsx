@@ -6,7 +6,7 @@ type PageContainerProps = {
   /**
    * 'dashboard' – standard padded content area for /dashboard/* pages.
    *               Use flex=true when the page needs flex-col + flex-1 inner expansion
-   *               (e.g. DashboardPage, SummaryPage).
+   *               (e.g. DashboardPage).
    * 'mvp'       – wide-max-width workspace layout for WorkbenchPage / AnalysisPage.
    * 'full-bleed'– edge-to-edge layout for MapPage (applies inline height separately).
    */

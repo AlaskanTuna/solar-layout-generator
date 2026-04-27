@@ -20,7 +20,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Activity, ArrowRight, Clock, Gauge, FolderKanban, PieChart, MapPin, LayoutDashboard } from 'lucide-react'
+import { Activity, ArrowRight, Clock, FolderKanban, PieChart, MapPin, LayoutDashboard } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
@@ -37,13 +37,6 @@ function formatResetTime(resetsAt: string): string {
 }
 
 const QUICK_ACTIONS = [
-  {
-    to: '/dashboard/summary',
-    icon: Gauge,
-    label: 'Summary',
-    desc: 'Review portfolio totals and project status at a glance.',
-    art: '/dashboard/summary.webp'
-  },
   {
     to: '/dashboard/projects',
     icon: FolderKanban,

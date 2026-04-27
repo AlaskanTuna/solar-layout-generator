@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
-import { ChevronLeft, LayoutDashboard, Gauge, FolderKanban, PieChart, CircleHelp } from 'lucide-react'
+import { ChevronLeft, LayoutDashboard, FolderKanban, PieChart, CircleHelp } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 
 interface NavItem {
@@ -61,7 +61,6 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Insights',
     items: [
-      { to: '/dashboard/summary', label: 'Summary', icon: Gauge },
       { to: '/dashboard/projects', label: 'Projects', icon: FolderKanban },
       { to: '/dashboard/analytics', label: 'Analytics', icon: PieChart },
     ],
