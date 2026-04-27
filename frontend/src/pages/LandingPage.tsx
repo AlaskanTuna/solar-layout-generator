@@ -16,7 +16,6 @@ import {
   Zap,
   Star,
   Leaf,
-  ChevronDown,
   ChevronUp,
   Clock,
   Sun,
@@ -96,8 +95,7 @@ export function LandingPage() {
           <div
             className="absolute inset-0 hidden dark:block"
             style={{
-              background:
-                'linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0) 60%)'
+              background: 'linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0) 60%)'
             }}
           />
         </div>
@@ -126,21 +124,6 @@ export function LandingPage() {
                   SolarSim drops real solar panels onto your actual rooftop using satellite data, then runs the numbers
                   under Malaysia's NEM Rakyat 3.0 — so you walk into installer quotes already knowing the answer.
                 </p>
-
-                <div className="mt-9 flex flex-wrap items-center gap-3">
-                  <Link to={isSignedIn ? '/dashboard' : '/sign-up'}>
-                    <Button size="lg" className="gap-2 rounded-full px-7 text-base">
-                      {isSignedIn ? 'Open Dashboard' : 'Get Started Free'}
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <a href="#how">
-                    <Button variant="outline" size="lg" className="gap-2 rounded-full text-base">
-                      How it works
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </a>
-                </div>
 
                 {/* Inline meta dots */}
                 <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 font-mono text-[11px] uppercase tracking-wider text-[#1a0a02]/60 dark:text-foreground/60">
@@ -184,7 +167,9 @@ export function LandingPage() {
 
                   <div className="space-y-4">
                     <div>
-                      <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/60">System size</div>
+                      <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/60">
+                        System size
+                      </div>
                       <div className="mt-0.5 font-heading text-3xl font-bold">
                         <span className="tabular-nums">{ticker.kwp.toFixed(1)}</span>{' '}
                         <span className="text-base font-normal text-amber-100/70">kWp</span>
@@ -193,7 +178,9 @@ export function LandingPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="rounded-xl border border-orange-300/25 bg-orange-400/15 p-3">
-                        <div className="font-mono text-[10px] uppercase tracking-wider text-orange-200">Yearly savings</div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-orange-200">
+                          Yearly savings
+                        </div>
                         <div className="mt-1 font-heading text-xl font-bold">
                           RM <span className="tabular-nums">{ticker.savings.toLocaleString()}</span>
                         </div>
@@ -250,7 +237,6 @@ export function LandingPage() {
             </div>
           </div>
         </div>
-
       </section>
 
       {/* Trust band — scrolling marquee */}
@@ -356,7 +342,12 @@ export function LandingPage() {
               tier="Free"
               price="RM 0"
               description="For homeowners exploring solar."
-              features={['5 projects per day', 'Auto-layout + manual edit', 'NEM bill simulation', 'Standard PDF export']}
+              features={[
+                '5 projects per day',
+                'Auto-layout + manual edit',
+                'NEM bill simulation',
+                'Standard PDF export'
+              ]}
               cta="Get started"
               ctaLink="/sign-up"
             />
@@ -413,7 +404,7 @@ export function LandingPage() {
             />
             <FaqItem
               question="How accurate are the savings projections?"
-              answer="Within ±8% of actual yield in our UAT cohort. Your real number depends on shading we can't see (overhanging trees, neighbor's new build), inverter losses, and how your usage shifts after install."
+              answer="Within ±8% of actual yield in development testing. Your real number depends on shading we can't see (overhanging trees, neighbor's new build), inverter losses, and how your usage shifts after install."
             />
             <FaqItem
               question="What if Google Solar API doesn't have my address?"
@@ -430,55 +421,9 @@ export function LandingPage() {
           </div>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
-            Results are preliminary estimates and do not replace a professional on-site assessment. Financial projections
-            use published RP4 + NEM Rakyat 3.0 rates as of 2025.
+            Results are preliminary estimates and do not replace a professional on-site assessment. Financial
+            projections use published RP4 + NEM Rakyat 3.0 rates as of 2025.
           </p>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="relative snap-start overflow-hidden bg-stone-950 px-6 py-24 text-center text-white">
-        {/* Decorative radial sun */}
-        <div
-          className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(251,146,60,0.4), transparent 60%)', filter: 'blur(40px)' }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 100% at 50% 0%, rgba(22,163,74,0.18), transparent 60%), radial-gradient(ellipse 60% 80% at 50% 100%, rgba(251,146,60,0.30), transparent 60%)'
-          }}
-        />
-        <div className="relative mx-auto max-w-3xl">
-          <div className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-orange-400">★ Ninety seconds</div>
-          <h2 className="font-heading text-5xl font-bold leading-[1.05] sm:text-6xl">
-            Your roof.
-            <br />
-            <span className="text-orange-400">A real number.</span>
-            <br />
-            Right now.
-          </h2>
-          <p className="mx-auto mt-6 max-w-md text-lg text-stone-300">
-            Free to start. No installer call. Walk away with a PDF in hand.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link to={isSignedIn ? '/dashboard' : '/sign-up'}>
-              <Button size="lg" className="gap-2 rounded-full px-8 text-base">
-                {isSignedIn ? 'Open Dashboard' : 'Get Started Free'}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <a href="#how">
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 rounded-full border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"
-              >
-                See how it works
-              </Button>
-            </a>
-          </div>
         </div>
       </section>
 
@@ -490,9 +435,7 @@ export function LandingPage() {
         aria-label="Scroll to top"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className={`fixed bottom-8 left-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-white/60 bg-white/40 text-foreground shadow-[0_8px_24px_rgba(234,88,12,0.18)] backdrop-blur-xl transition-all duration-300 hover:bg-white/60 dark:border-white/10 dark:bg-stone-900/55 dark:text-foreground dark:hover:bg-stone-900/75 ${
-          scrollY > 400
-            ? 'translate-y-0 opacity-100'
-            : 'pointer-events-none translate-y-4 opacity-0'
+          scrollY > 400 ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
         }`}
       >
         <ChevronUp className="h-5 w-5" />
@@ -654,7 +597,7 @@ const PIPELINE_STEPS: PipelineStep[] = [
     num: 'STEP 03',
     label: 'ANALYZE',
     title: 'See your bill, twelve months out.',
-    body: "We model your monthly bill against post-July 2025 RP4 tariffs, EEI rebates, AFA, SST and the RE Fund — month-by-month. Export the whole thing as a PDF to bring to your installer.",
+    body: 'We model your monthly bill against post-July 2025 RP4 tariffs, EEI rebates, AFA, SST and the RE Fund — month-by-month. Export the whole thing as a PDF to bring to your installer.',
     tags: [
       { label: 'RP4 tariff', tone: 'tangerine' },
       { label: 'PDF export', tone: 'tangerine' }
@@ -690,14 +633,14 @@ function PipelineSection() {
   }, [])
 
   return (
-    <section id="how" className="relative snap-start bg-stone-950 px-6 text-stone-50">
+    <section id="how" className="relative snap-start bg-card px-6 text-foreground">
       <div className="mx-auto max-w-7xl pb-16 pt-24">
         <div className="max-w-2xl">
-          <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-orange-400">★ The Pipeline</div>
+          <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ The Pipeline</div>
           <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
             From address to answer
             <br />
-            <span className="text-stone-500">in three steps.</span>
+            <span className="text-muted-foreground">in three steps.</span>
           </h2>
         </div>
       </div>
@@ -715,32 +658,32 @@ function PipelineSection() {
                     stepRefs.current[i] = el
                   }}
                   className={`snap-start border-t py-10 transition-colors duration-300 ${
-                    isActive ? 'border-orange-400/45' : 'border-white/10'
+                    isActive ? 'border-primary/45' : 'border-border'
                   }`}
                 >
                   <div
                     className={`mb-3 font-mono text-xs uppercase tracking-[0.18em] transition-colors duration-300 ${
-                      isActive ? 'text-orange-400' : 'text-stone-500'
+                      isActive ? 'text-primary' : 'text-muted-foreground'
                     }`}
                   >
                     {step.num} — {step.label}
                   </div>
                   <h3
                     className={`mb-4 font-heading text-3xl font-bold leading-tight transition-colors duration-300 sm:text-4xl ${
-                      isActive ? 'text-stone-50' : 'text-stone-400'
+                      isActive ? 'text-foreground' : 'text-muted-foreground'
                     }`}
                   >
                     {step.title}
                   </h3>
-                  <p className="max-w-md text-base leading-relaxed text-stone-400">{step.body}</p>
+                  <p className="max-w-md text-base leading-relaxed text-muted-foreground">{step.body}</p>
                   <div className="mt-5 flex flex-wrap gap-2">
                     {step.tags.map((t) => (
                       <span
                         key={t.label}
                         className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-wider ${
                           t.tone === 'leaf'
-                            ? 'border-emerald-400/25 bg-emerald-500/10 text-emerald-300'
-                            : 'border-orange-400/25 bg-orange-500/10 text-orange-300'
+                            ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/25 dark:text-emerald-300'
+                            : 'border-primary/25 bg-primary/10 text-primary dark:text-orange-300'
                         }`}
                       >
                         {t.label}
@@ -767,7 +710,7 @@ function PipelineSection() {
                   <span
                     key={i}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      i === active ? 'w-8 bg-orange-400' : 'w-5 bg-white/20'
+                      i === active ? 'w-8 bg-primary' : 'w-5 bg-muted-foreground/30'
                     }`}
                   />
                 ))}
@@ -847,9 +790,7 @@ function FeatureCard({
       : 'bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-200'
   return (
     <div className="group rounded-3xl border border-border bg-gradient-to-b from-card to-orange-50/40 p-7 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_20px_40px_-20px_rgba(234,88,12,0.25)] dark:from-card dark:to-stone-900/50">
-      <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${iconClass}`}>
-        {icon}
-      </div>
+      <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${iconClass}`}>{icon}</div>
       <h3 className="font-heading text-xl font-bold">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
     </div>
@@ -868,10 +809,7 @@ function FaqItem({
   first?: boolean
 }) {
   return (
-    <details
-      open={defaultOpen}
-      className={`group px-6 ${first ? '' : 'border-t border-border'}`}
-    >
+    <details open={defaultOpen} className={`group px-6 ${first ? '' : 'border-t border-border'}`}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-heading text-lg font-semibold marker:hidden">
         {question}
         <span className="text-2xl font-light text-primary transition-transform duration-200 group-open:rotate-45">
@@ -906,9 +844,7 @@ function PricingCard({
 }) {
   if (highlighted) {
     return (
-      <div
-        className="relative flex flex-col rounded-2xl bg-gradient-to-b from-stone-900 to-[#2a1505] p-8 text-white shadow-[0_30px_60px_-20px_rgba(234,88,12,0.4)]"
-      >
+      <div className="relative flex flex-col rounded-2xl bg-gradient-to-b from-stone-900 to-[#2a1505] p-8 text-white shadow-[0_30px_60px_-20px_rgba(234,88,12,0.4)]">
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-orange-400 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-stone-900">
           Most popular
         </span>
