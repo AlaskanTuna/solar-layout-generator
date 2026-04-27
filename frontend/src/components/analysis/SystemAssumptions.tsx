@@ -24,7 +24,7 @@ export function SystemAssumptions({
       <CardHeader>
         <CardTitle>
           System Assumptions
-          <InfoTooltip text="Technical parameters used by Google Solar API and industry standards. These include building orientation, tilt angles, panel characteristics and environmental factors specific to your location." />
+          <InfoTooltip text="The technical inputs feeding this analysis. Some come from Google Solar API for your roof, others are industry-standard defaults used across Malaysian residential systems." />
         </CardTitle>
         <CardDescription>
           Standard industry assumptions used in this analysis (not site-measured values).
@@ -35,7 +35,7 @@ export function SystemAssumptions({
           <div className="rounded-lg bg-muted p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Performance Ratio
-              <InfoTooltip text="The percentage of theoretical solar output your system actually delivers, accounting for real-world inefficiencies." />
+              <InfoTooltip text="How much of the panels' rated output actually reaches your meter after real-world losses. A higher number means better real-world performance." />
             </p>
             <p className="mt-1 text-lg font-semibold">{Math.round(performanceRatio * 100)}%</p>
             <p className="text-xs text-muted-foreground">Typical for Malaysian residential systems</p>
@@ -43,7 +43,7 @@ export function SystemAssumptions({
           <div className="rounded-lg bg-muted p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Assumed Losses
-              <InfoTooltip text="Energy lost to dust, wiring, inverter conversion and heat. This is automatically calculated as 100% minus the Performance Ratio." />
+              <InfoTooltip text="The share of generation lost to dust, wiring, heat, and inverter conversion. Calculated automatically as 100% minus the Performance Ratio." />
             </p>
             <p className="mt-1 text-lg font-semibold">{Math.round(assumedLosses * 100)}%</p>
             <p className="text-xs text-muted-foreground">Soiling, cable, inverter, temperature</p>
@@ -59,7 +59,7 @@ export function SystemAssumptions({
             <div className="rounded-lg bg-muted p-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Panel Lifetime
-                <InfoTooltip text="How long the panels are expected to generate electricity. Payback must happen within this period for the investment to be worthwhile." />
+                <InfoTooltip text="How long the panels are expected to keep generating. Your payback should land well within this window for the system to be worthwhile." />
               </p>
               <p className="mt-1 text-lg font-semibold">{panelLifetimeYears} years</p>
               <p className="text-xs text-muted-foreground">From Google Solar API estimate</p>
@@ -69,7 +69,7 @@ export function SystemAssumptions({
             <div className="rounded-lg bg-muted p-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Azimuth / Pitch
-                <InfoTooltip text="Count-weighted azimuth and pitch across the roof segments your active panels occupy. Updates as you add, remove, or move panels in the Workbench." />
+                <InfoTooltip text="The average direction (azimuth) and tilt (pitch) of your active panels, weighted by panel count across the roof segments they sit on. Updates as you add, remove, or move panels in the Workbench." />
               </p>
               <p className="mt-1 text-lg font-semibold">
                 {Math.round(layoutOrientation.azimuthDegrees)}° ({azimuthToCompass(layoutOrientation.azimuthDegrees)}) /{' '}
@@ -85,7 +85,7 @@ export function SystemAssumptions({
           <div className="rounded-lg bg-muted p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               DC/AC Ratio
-              <InfoTooltip text="The ratio of panel capacity to inverter capacity. A ratio of 1.2 means slightly more panel power than the inverter can handle at peak, which maximises output across the day." />
+              <InfoTooltip text="How much panel capacity is paired with each unit of inverter capacity. A value above 1.0 means slightly oversizing the panels, which lifts daily output without a bigger inverter." />
             </p>
             <p className="mt-1 text-lg font-semibold">{dcAcRatio}</p>
             <p className="text-xs text-muted-foreground">Standard residential inverter sizing</p>

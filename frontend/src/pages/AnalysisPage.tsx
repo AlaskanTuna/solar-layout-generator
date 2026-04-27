@@ -211,7 +211,27 @@ export function AnalysisPage() {
     )
   }
 
-  const paybackTooltip = `How many years until your savings cover the cost of installing the system.\n\nNet benefit projections:\n1-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 1) - formState.systemCostRm)}\n5-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 5) - formState.systemCostRm)}\n10-Year: ${formatCurrency(computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, 10) - formState.systemCostRm)}`
+  const paybackProjections: Array<{ years: number; netBenefit: number }> = [1, 5, 10].map((years) => ({
+    years,
+    netBenefit:
+      computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, years) - formState.systemCostRm
+  }))
+  const paybackTooltip = (
+    <div className="space-y-2">
+      <p>How many years until your savings cover the cost of installing the system.</p>
+      <div className="space-y-0.5 border-t border-primary-foreground/20 pt-2">
+        <p className="text-primary-foreground/80">Net benefit projection:</p>
+        {paybackProjections.map((p) => (
+          <div key={p.years} className="flex justify-between gap-4 tabular-nums">
+            <span className="text-primary-foreground/80">{p.years}-Year</span>
+            <span className={`font-semibold ${p.netBenefit >= 0 ? '' : 'text-amber-300'}`}>
+              {formatCurrency(p.netBenefit)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <AppLayout>
@@ -386,8 +406,7 @@ export function AnalysisPage() {
                     tariffEscalationRate={formState.tariffEscalationRate}
                     analysisMode={formState.analysisMode ?? 'simple'}
                     annualMaintenanceRm={formState.annualMaintenanceRm ?? 0}
-                    inverterReplacementCostRm={formState.inverterReplacementCostRm ?? 0}
-                    inverterReplacementYear={formState.inverterReplacementYear ?? 12}
+                    inverterReplacements={formState.inverterReplacements}
                   />
                 )
               },
@@ -403,8 +422,7 @@ export function AnalysisPage() {
                     tariffEscalationRate={formState.tariffEscalationRate}
                     analysisMode={formState.analysisMode ?? 'simple'}
                     annualMaintenanceRm={formState.annualMaintenanceRm ?? 0}
-                    inverterReplacementCostRm={formState.inverterReplacementCostRm ?? 0}
-                    inverterReplacementYear={formState.inverterReplacementYear ?? 12}
+                    inverterReplacements={formState.inverterReplacements}
                   />
                 )
               },

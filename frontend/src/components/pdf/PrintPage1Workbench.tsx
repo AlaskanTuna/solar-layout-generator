@@ -83,8 +83,8 @@ export function PrintPage1Workbench({ project }: Props) {
         <div className="grid grid-cols-4 gap-2">
           <StatTile label="Active panels" value={String(activePanels.length)} suffix="panels" />
           <StatTile label="System size" value={systemKwp.toString()} suffix="kWp" />
-          <StatTile label="Panel model" value={panelModel?.name ?? '—'} suffix={panelModel ? `${panelCapacityWp} Wp` : ''} />
-          <StatTile label="Roof type" value={ROOF_LABEL[roofType] ?? '—'} suffix="" />
+          <StatTile label="Panel model" value={panelModel?.name ?? 'N/A'} suffix={panelModel ? `${panelCapacityWp} Wp` : ''} />
+          <StatTile label="Roof type" value={ROOF_LABEL[roofType] ?? 'N/A'} suffix="" />
         </div>
       </div>
     </PdfPageShell>

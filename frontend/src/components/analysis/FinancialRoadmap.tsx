@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
+import { normalizeInverterReplacements, type InverterReplacement } from '@/lib/analysis'
 import { formatCurrency } from './formatters'
 
 type FinancialRoadmapProps = {
@@ -10,9 +11,13 @@ type FinancialRoadmapProps = {
   systemKwp: number
   /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year. Defaults to 0. */
   tariffEscalationRate?: number
-  /** Active financial mode (drives whether the inverter milestone copy says "included" vs "excluded" from payback). */
+  /** Active financial mode. Lifecycle adds the maintenance + inverter milestones and footer; Simple hides them. */
   analysisMode?: 'simple' | 'lifecycle'
+  /** Each entry is one planned inverter swap rendered as its own milestone in Lifecycle mode. */
+  inverterReplacements?: InverterReplacement[]
+  /** @deprecated Pass `inverterReplacements` instead. */
   inverterReplacementCostRm?: number
+  /** @deprecated Pass `inverterReplacements` instead. */
   inverterReplacementYear?: number
   annualMaintenanceRm?: number
 }
@@ -31,18 +36,21 @@ export function FinancialRoadmap({
   systemKwp,
   tariffEscalationRate = 0,
   analysisMode = 'simple',
+  inverterReplacements,
   inverterReplacementCostRm,
   inverterReplacementYear,
   annualMaintenanceRm
 }: FinancialRoadmapProps) {
   const outputAtYear25 = Math.round((1 - degradationRate) ** 24 * 100)
-  // Midpoint of the RM 3,000–6,000 residential string inverter replacement range
-  // Documented in MVP-PAGE-3-SOLAR-COST-MODEL.md §7. Flat figure since replacement
-  // SKUs don't scale linearly with kWp for residential sizes.
-  const estimatedInverterCost = inverterReplacementCostRm && inverterReplacementCostRm > 0 ? inverterReplacementCostRm : 4500
-  const inverterYearLabel = inverterReplacementYear && inverterReplacementYear > 0 ? inverterReplacementYear : null
   const lifecycleActive = analysisMode === 'lifecycle'
   const maintenancePerYear = annualMaintenanceRm && annualMaintenanceRm > 0 ? annualMaintenanceRm : 500
+  const replacements = normalizeInverterReplacements(
+    inverterReplacements,
+    inverterReplacementCostRm,
+    inverterReplacementYear
+  )
+  const replacementsWithin25 = replacements.filter((r) => r.year <= 25)
+  const replacementCostTotal = replacementsWithin25.reduce((sum, r) => sum + r.costRm, 0)
 
   const milestones: Milestone[] = [
     {
@@ -61,18 +69,21 @@ export function FinancialRoadmap({
     milestones.push({
       label: `Year ${paybackYears.toFixed(1)}`,
       description:
-        'Break-even point — cumulative electricity savings exceed your initial system cost. Every ringgit saved beyond this is net profit.',
+        'Break-even point. Your cumulative electricity savings have now covered the system cost. Every ringgit saved beyond this is net profit.',
       accent: 'bg-emerald-100 border-emerald-300 dark:bg-emerald-950 dark:border-emerald-800'
     })
   }
 
-  milestones.push({
-    label: lifecycleActive && inverterYearLabel ? `Year ${inverterYearLabel}` : 'Year 10–15',
-    description: lifecycleActive
-      ? `Inverter replacement (~${formatCurrency(estimatedInverterCost)}) is included in the payback calculation above under Lifecycle mode.`
-      : `String inverters typically need replacement in this window (~${formatCurrency(estimatedInverterCost)} based on your system size). This is not included in the payback calculation above.`,
-    accent: 'bg-amber-100 border-amber-300 dark:bg-amber-950 dark:border-amber-800'
-  })
+  if (lifecycleActive && replacementsWithin25.length > 0) {
+    replacementsWithin25.forEach((r, idx) => {
+      const ordinal = replacementsWithin25.length === 1 ? 'Inverter replacement' : `Inverter replacement #${idx + 1}`
+      milestones.push({
+        label: `Year ${r.year}`,
+        description: `${ordinal} of ~${formatCurrency(r.costRm)} subtracted from your cumulative savings. The payback figure above already reflects this cost.`,
+        accent: 'bg-amber-100 border-amber-300 dark:bg-amber-950 dark:border-amber-800'
+      })
+    })
+  }
 
   milestones.push({
     label: 'Year 25',
@@ -85,7 +96,7 @@ export function FinancialRoadmap({
       <CardHeader>
         <CardTitle>
           Financial Roadmap
-          <InfoTooltip text="A simplified timeline of key financial milestones for your solar investment. Actual results depend on tariff changes, maintenance, weather and equipment lifespan." />
+          <InfoTooltip text="A simplified timeline of key money milestones for your solar investment. Real-world results will shift based on tariff changes, maintenance, weather, and equipment lifespan." />
         </CardTitle>
         <CardDescription>Key milestones for your solar investment over its lifetime.</CardDescription>
       </CardHeader>
@@ -99,14 +110,18 @@ export function FinancialRoadmap({
 
         <p className="mt-4 text-xs text-muted-foreground">
           {lifecycleActive
-            ? `Lifecycle mode: includes ~${formatCurrency(maintenancePerYear)}/yr maintenance and a ~${formatCurrency(estimatedInverterCost)} inverter replacement${
+            ? `Lifecycle mode subtracts ~${formatCurrency(maintenancePerYear)}/yr maintenance${
+                replacementsWithin25.length > 0
+                  ? ` and ${replacementsWithin25.length} inverter replacement${replacementsWithin25.length === 1 ? '' : 's'} totalling ~${formatCurrency(replacementCostTotal)}`
+                  : ''
+              } from your cumulative savings.${
                 tariffEscalationRate > 0
-                  ? ` plus ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation.`
-                  : '. Excludes tariff escalation and inflation.'
+                  ? ` Projection also applies ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation.`
+                  : ''
               }`
             : tariffEscalationRate > 0
-              ? `Projection includes ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation. Excludes annual maintenance (~RM 500/yr) and inflation.`
-              : 'Excludes tariff escalation (would shorten payback), annual maintenance (~RM 500/yr) and inflation. Malaysian tariffs have historically risen, so real-world savings may grow faster than projected.'}
+              ? `Projection applies ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation. Switch Financial Mode to Lifecycle to also factor in maintenance and inverter replacements.`
+              : 'Switch Financial Mode to Lifecycle to factor in yearly maintenance and inverter replacements.'}
         </p>
       </CardContent>
     </Card>

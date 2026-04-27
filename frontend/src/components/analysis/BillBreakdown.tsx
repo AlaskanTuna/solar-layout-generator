@@ -40,11 +40,11 @@ export function BillBreakdown({
                   </p>
                   <div className="space-y-1">
                     <p>
-                      <span className="font-semibold">Retail charge:</span> a fixed TNB billing fee only applied above
+                      <span className="font-semibold">Retail charge:</span> A fixed TNB billing fee only applied above
                       600 kWh.
                     </p>
                     <p>
-                      <span className="font-semibold">AFA:</span> the Automatic Fuel Adjustment surcharge tied to fuel
+                      <span className="font-semibold">AFA:</span> The Automatic Fuel Adjustment surcharge tied to fuel
                       prices.
                     </p>
                     <p>

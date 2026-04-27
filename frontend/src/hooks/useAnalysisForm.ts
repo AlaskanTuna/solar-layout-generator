@@ -155,12 +155,11 @@ export function useAnalysisForm(projectId: string | undefined) {
       dcAcRatio: savedConfig?.dcAcRatio ?? 1.2,
       // Lifecycle financial mode (Task 6). Default 'simple' preserves the
       // original simple-payback behaviour. Maintenance and inverter cost
-      // default to 0; switching to 'lifecycle' without setting these is a
-      // no-op (lifecycle == simple).
+      // default to 0; the sidebar seeds Malaysian-typical defaults the moment
+      // the user flips to 'lifecycle'.
       analysisMode: savedConfig?.analysisMode ?? 'simple',
       annualMaintenanceRm: savedConfig?.annualMaintenanceRm ?? 0,
-      inverterReplacementCostRm: savedConfig?.inverterReplacementCostRm ?? 0,
-      inverterReplacementYear: savedConfig?.inverterReplacementYear ?? 12
+      inverterReplacements: savedConfig?.inverterReplacements ?? []
     })
     initializedProjectIdRef.current = projectId
   }, [projectId, projectQuery.data, tariffQuery.data, buildingInsights, selectedPanelModel])
@@ -223,8 +222,7 @@ export function useAnalysisForm(projectId: string | undefined) {
       tariffEscalationRate: formState.tariffEscalationRate,
       analysisMode: formState.analysisMode ?? 'simple',
       annualMaintenanceRm: formState.annualMaintenanceRm ?? 0,
-      inverterReplacementCostRm: formState.inverterReplacementCostRm ?? 0,
-      inverterReplacementYear: formState.inverterReplacementYear ?? 12
+      inverterReplacements: formState.inverterReplacements
     })
   }, [activePanels.length, carbonOffsetFactorKgPerMwh, formState, simulation])
 

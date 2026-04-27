@@ -18,7 +18,7 @@ export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
       <CardHeader>
         <CardTitle>
           Monthly Bill Comparison
-          <InfoTooltip text="Compares your estimated TNB bill with and without solar panels for each month. The orange bars show what you'd normally pay; the green bars show what you'd pay with NEM solar credits applied." />
+          <InfoTooltip text="Compares your estimated TNB bill with and without solar for each month. Orange bars show what you would normally pay. Green bars show what you would pay after NEM solar credits are applied." />
         </CardTitle>
         <CardDescription>
           Your estimated monthly bill without solar (baseline) versus with solar for each month.

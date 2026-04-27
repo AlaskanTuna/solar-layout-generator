@@ -6,6 +6,14 @@ export type ConnectionPhase = 'single' | 'three'
 
 export type AnalysisMode = 'simple' | 'lifecycle'
 
+export type InverterReplacement = {
+  year: number
+  costRm: number
+}
+
+export const DEFAULT_ANNUAL_MAINTENANCE_RM = 500
+export const DEFAULT_INVERTER_REPLACEMENT: InverterReplacement = { year: 12, costRm: 4500 }
+
 export type AnalysisConfig = {
   monthlyConsumptionKwh: number
   connectionPhase: ConnectionPhase
@@ -21,11 +29,15 @@ export type AnalysisConfig = {
   dcAcRatio: number // e.g. 1.2
   /** Per-project overrides for individual TNB RP4 tariff rate fields. Sparse — only stores diffs from defaults. */
   tariffRatesOverride?: Partial<TariffRates>
-  /** 'simple' (default) = upfront cost only; 'lifecycle' = include maintenance + inverter replacement. */
+  /** 'simple' (default) = upfront cost only; 'lifecycle' = include maintenance + inverter replacements. */
   analysisMode?: AnalysisMode
   annualMaintenanceRm?: number // RM/year, e.g. 500 for typical Malaysian residential
-  inverterReplacementCostRm?: number // RM, e.g. 4500 for a string inverter mid-range
-  inverterReplacementYear?: number // year of replacement, e.g. 12 (typical 10-15)
+  /** One entry per planned replacement. Empty array = no inverter swaps factored in. */
+  inverterReplacements?: InverterReplacement[]
+  /** @deprecated Legacy single-replacement field, retained for migrating saved projects. */
+  inverterReplacementCostRm?: number
+  /** @deprecated Legacy single-replacement field, retained for migrating saved projects. */
+  inverterReplacementYear?: number
 }
 
 export type AnalysisResultsRecord = {
@@ -90,7 +102,7 @@ export const ANALYSIS_DISCLAIMERS = [
   'Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling and equipment condition.',
   'Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits.',
   'System cost is estimated bottom-up: distributor panel pricing + inverter SKU lookup + roof-type-dependent mounting + electrical BOS + permits + labour markup + installer margin. Assumes mid-tier installer pricing and single-storey installation. Typical Malaysian turnkey quotes land within ±10% of this figure. Always confirm with a licensed SEDA-registered installer.',
-  'Payback and savings projections do not account for annual maintenance (~RM 500/yr) or inverter replacement (typically needed at year 10–15, costing ~RM 3,000–6,000). Tariff escalation can be configured in Advanced view (default 0%); typical Malaysian RP4 revisions trend around 3–5%/year. Actual long-term returns may differ.'
+  'Payback and savings projections do not account for annual maintenance (around RM 500/yr) or inverter replacement (typically needed at year 10 to 15, costing around RM 3,000 to 6,000). Tariff escalation can be configured in Advanced view (default 0%). RP4 revisions in Malaysia have historically trended around 3 to 5% per year. Actual long-term returns may differ.'
 ]
 
 function round2(value: number): number {
@@ -338,6 +350,11 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
   const annualMaintenanceRm = getNumber(raw.annualMaintenanceRm)
   const inverterReplacementCostRm = getNumber(raw.inverterReplacementCostRm)
   const inverterReplacementYear = getNumber(raw.inverterReplacementYear)
+  const inverterReplacements = parseInverterReplacements(
+    raw.inverterReplacements,
+    inverterReplacementCostRm,
+    inverterReplacementYear
+  )
 
   return {
     ...(monthlyConsumptionKwh !== null ? { monthlyConsumptionKwh } : {}),
@@ -355,9 +372,64 @@ export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> 
     ...(dcAcRatio !== null ? { dcAcRatio } : {}),
     ...(analysisMode ? { analysisMode } : {}),
     ...(annualMaintenanceRm !== null ? { annualMaintenanceRm } : {}),
-    ...(inverterReplacementCostRm !== null ? { inverterReplacementCostRm } : {}),
-    ...(inverterReplacementYear !== null ? { inverterReplacementYear } : {})
+    ...(inverterReplacements ? { inverterReplacements } : {})
   }
+}
+
+/**
+ * Coerce an `InverterReplacement[]` input into a sanitised, sorted array.
+ * Falls back to the legacy single-replacement scalar fields if the array
+ * is undefined/empty, so callers can keep passing the old shape during the
+ * deprecation window.
+ */
+export function normalizeInverterReplacements(
+  replacements: InverterReplacement[] | undefined,
+  legacyCostRm?: number,
+  legacyYear?: number
+): InverterReplacement[] {
+  if (replacements && replacements.length > 0) {
+    return replacements
+      .filter((r) => Number.isFinite(r.year) && Number.isFinite(r.costRm) && r.year >= 1 && r.costRm >= 0)
+      .map((r) => ({ year: Math.round(r.year), costRm: round2(r.costRm) }))
+      .sort((a, b) => a.year - b.year)
+  }
+  if (typeof legacyCostRm === 'number' && Number.isFinite(legacyCostRm) && legacyCostRm > 0) {
+    const year =
+      typeof legacyYear === 'number' && Number.isFinite(legacyYear) && legacyYear > 0
+        ? Math.round(legacyYear)
+        : DEFAULT_INVERTER_REPLACEMENT.year
+    return [{ year, costRm: round2(legacyCostRm) }]
+  }
+  return []
+}
+
+/**
+ * Parse the inverter-replacements array, falling back to legacy single-replacement
+ * fields when the array is missing. Always returns a sorted, sanitised array (or null
+ * when nothing was configured).
+ */
+function parseInverterReplacements(
+  raw: unknown,
+  legacyCostRm: number | null,
+  legacyYear: number | null
+): InverterReplacement[] | null {
+  if (Array.isArray(raw)) {
+    const items: InverterReplacement[] = []
+    for (const entry of raw) {
+      if (!isRecord(entry)) continue
+      const year = getNumber(entry.year)
+      const costRm = getNumber(entry.costRm)
+      if (year === null || costRm === null) continue
+      if (year < 1 || costRm < 0) continue
+      items.push({ year: Math.round(year), costRm: round2(costRm) })
+    }
+    if (items.length === 0) return null
+    return items.sort((a, b) => a.year - b.year)
+  }
+  if (legacyCostRm !== null && legacyCostRm > 0 && legacyYear !== null && legacyYear > 0) {
+    return [{ year: Math.round(legacyYear), costRm: round2(legacyCostRm) }]
+  }
+  return null
 }
 
 export function buildAnalysisResults({
@@ -369,8 +441,9 @@ export function buildAnalysisResults({
   tariffEscalationRate = 0,
   analysisMode = 'simple',
   annualMaintenanceRm = 0,
-  inverterReplacementCostRm = 0,
-  inverterReplacementYear = 12
+  inverterReplacements,
+  inverterReplacementCostRm,
+  inverterReplacementYear
 }: {
   simulation: AnnualSimulationResult
   systemCostRm: number
@@ -380,9 +453,18 @@ export function buildAnalysisResults({
   tariffEscalationRate?: number
   analysisMode?: AnalysisMode
   annualMaintenanceRm?: number
+  inverterReplacements?: InverterReplacement[]
+  /** @deprecated Pass `inverterReplacements` instead. */
   inverterReplacementCostRm?: number
+  /** @deprecated Pass `inverterReplacements` instead. */
   inverterReplacementYear?: number
 }): AnalysisResultsRecord {
+  const replacements = normalizeInverterReplacements(
+    inverterReplacements,
+    inverterReplacementCostRm,
+    inverterReplacementYear
+  )
+
   const year1Savings = simulation.totalSavingsRm
   const averageMonthlySavingsRm = round2(year1Savings / 12)
   const averageMonthlySavingsPct =
@@ -403,18 +485,21 @@ export function buildAnalysisResults({
     }
   }
 
-  // Lifecycle payback (subtracts annual maintenance, includes inverter replacement
-  // as a one-shot cost added to the cumulative-cost target in `inverterReplacementYear`).
-  // Iterates year-by-year so the inverter cost lands at the correct cumulative point.
+  // Lifecycle payback subtracts annual maintenance from each year's savings and
+  // adds each inverter replacement to the cumulative-cost target in the year it
+  // occurs. Iterates year-by-year so replacements land at the correct points.
   let lifecyclePaybackYears: number | null = null
-  if (year1Savings > 0 && (annualMaintenanceRm > 0 || inverterReplacementCostRm > 0)) {
+  if (year1Savings > 0 && (annualMaintenanceRm > 0 || replacements.length > 0)) {
     let cumulative = 0
     for (let yr = 1; yr <= 50; yr++) {
       const yearSavings =
         year1Savings * Math.pow(1 - degradationRate, yr - 1) * Math.pow(1 + tariffEscalationRate, yr - 1)
       const yearNet = yearSavings - annualMaintenanceRm
       cumulative += yearNet
-      const totalCost = systemCostRm + (yr >= inverterReplacementYear ? inverterReplacementCostRm : 0)
+      const replacementCostByThisYear = replacements
+        .filter((r) => r.year <= yr)
+        .reduce((sum, r) => sum + r.costRm, 0)
+      const totalCost = systemCostRm + replacementCostByThisYear
       if (cumulative >= totalCost) {
         lifecyclePaybackYears = round2(yr - 1 + (totalCost - (cumulative - yearNet)) / yearNet)
         break
@@ -430,11 +515,13 @@ export function buildAnalysisResults({
   const tenYearNetBenefitRm = round2(tenYearSavings - systemCostRm)
   const tenYearRoiPercent = systemCostRm > 0 ? round2(((tenYearSavings - systemCostRm) / systemCostRm) * 100) : null
 
-  // 25-year net benefit (simple and lifecycle).
+  // 25-year net benefit (simple and lifecycle). Lifecycle subtracts 25 × maintenance
+  // and the cost of every replacement scheduled to occur within the 25-year window.
   const twentyFiveYearGrossSavings = computeDegradedSavings(year1Savings, degradationRate, 25, tariffEscalationRate)
   const simpleTwentyFiveYearNetBenefitRm = round2(twentyFiveYearGrossSavings - systemCostRm)
+  const replacementsWithin25Yrs = replacements.filter((r) => r.year <= 25).reduce((sum, r) => sum + r.costRm, 0)
   const lifecycleTwentyFiveYearNetBenefitRm = round2(
-    twentyFiveYearGrossSavings - systemCostRm - 25 * annualMaintenanceRm - inverterReplacementCostRm
+    twentyFiveYearGrossSavings - systemCostRm - 25 * annualMaintenanceRm - replacementsWithin25Yrs
   )
 
   // Active-mode aliases drive the existing UI / PDF without forcing every call site to know about both modes.

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Calendar, Clock, Gauge, Star, Wallet } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
@@ -13,7 +14,7 @@ const NEM_FIT_LABELS = {
 
 type SolarVerdictProps = {
   analysisResults: AnalysisResultsRecord
-  paybackTooltip: string
+  paybackTooltip: ReactNode
 }
 
 function buildHeadline(analysisResults: AnalysisResultsRecord) {
@@ -59,7 +60,18 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
           <div>
             <CardTitle>
               Your Solar Verdict
-              <InfoTooltip text="A plain-language summary of your solar investment. The star rating reflects your simple payback period: 5 stars (under 6 years), 4 stars (6-12), 3 stars (12-25), 1 star (over 25)." />
+              <InfoTooltip>
+                <div className="space-y-2">
+                  <p>A plain-language summary of your solar investment.</p>
+                  <p>The star rating reflects how quickly the system pays back:</p>
+                  <ul className="list-disc space-y-0.5 pl-4">
+                    <li>5 stars: under 6 years</li>
+                    <li>4 stars: 6 to 12 years</li>
+                    <li>3 stars: 12 to 25 years</li>
+                    <li>1 star: more than 25 years</li>
+                  </ul>
+                </div>
+              </InfoTooltip>
             </CardTitle>
             <CardDescription>Headline recommendation and key numbers at a glance.</CardDescription>
           </div>
@@ -76,7 +88,14 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
               <Wallet className="h-3.5 w-3.5" />
               <span>
                 Monthly Savings
-                <InfoTooltip text="How much less you'd pay each month on average compared to not having solar." />
+                <InfoTooltip>
+                  <div className="space-y-1.5">
+                    <p>The average amount you save on each monthly bill compared to having no solar.</p>
+                    <p className="text-primary-foreground/80">
+                      Calculated as the average of your 12 monthly bill differences over the year.
+                    </p>
+                  </div>
+                </InfoTooltip>
               </span>
             </div>
             <p className="text-xl font-semibold tabular-nums">{formatCurrency(averageMonthlySavingsRm)}</p>
@@ -87,7 +106,14 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
               <Calendar className="h-3.5 w-3.5" />
               <span>
                 Annual Savings
-                <InfoTooltip text="Total savings across the full year. This is your bill without solar minus your bill with solar." />
+                <InfoTooltip>
+                  <div className="space-y-1.5">
+                    <p>Your total savings across all 12 months of the year.</p>
+                    <p className="text-primary-foreground/80">
+                      Calculated as your annual bill without solar minus your annual bill with solar.
+                    </p>
+                  </div>
+                </InfoTooltip>
               </span>
             </div>
             <p className="text-xl font-semibold tabular-nums">{formatCurrency(annualTotals.totalSavingsRm)}</p>
@@ -97,8 +123,8 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
               <span>
-                Simple Payback
-                <InfoTooltip text={paybackTooltip} />
+                {analysisResults.analysisMode === 'lifecycle' ? 'Lifecycle Payback' : 'Simple Payback'}
+                <InfoTooltip>{paybackTooltip}</InfoTooltip>
               </span>
             </div>
             <p className="text-xl font-semibold tabular-nums">{formatNumber(paybackYears, 'years')}</p>
@@ -109,9 +135,38 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
               <Gauge className="h-3.5 w-3.5" />
               <span>
                 NEM Fit
-                <InfoTooltip
-                  text={`Whether this layout is well-sized for your usage. A good fit means most generation offsets your own bill. Oversized systems may build up credits that are not cash and can be forfeited at year-end.\n\nGeneration vs. consumption: ${generationRatioPct}%\nForfeited credits: ${Math.round(nemFit.forfeitureRate * 100)}% of generation`}
-                />
+                <InfoTooltip>
+                  <div className="space-y-2">
+                    <p>How well this layout is sized for your usage under NEM Rakyat 3.0.</p>
+                    <div className="space-y-1">
+                      <p>
+                        <span className="font-semibold">Good:</span> most generation offsets your own bill, with very
+                        few credits left over.
+                      </p>
+                      <p>
+                        <span className="font-semibold">Moderate:</span> some credit buildup. You will export more than
+                        you use in a few months and rely on previously banked credits in others.
+                      </p>
+                      <p>
+                        <span className="font-semibold">Oversized:</span> heavy credit buildup. Excess credits are not
+                        cash and are forfeited at year-end if unused.
+                      </p>
+                    </div>
+                    <div className="space-y-0.5 border-t border-primary-foreground/20 pt-2 text-primary-foreground/80">
+                      <p>
+                        Generation vs. consumption:{' '}
+                        <span className="font-semibold text-primary-foreground">{generationRatioPct}%</span>
+                      </p>
+                      <p>
+                        Forfeited credits:{' '}
+                        <span className="font-semibold text-primary-foreground">
+                          {Math.round(nemFit.forfeitureRate * 100)}%
+                        </span>{' '}
+                        of generation
+                      </p>
+                    </div>
+                  </div>
+                </InfoTooltip>
               </span>
             </div>
             <p className="text-xl font-semibold">{NEM_FIT_LABELS[nemFit.fit]}</p>

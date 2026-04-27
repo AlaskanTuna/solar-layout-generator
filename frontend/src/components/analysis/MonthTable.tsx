@@ -17,7 +17,7 @@ export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
       <CardHeader>
         <CardTitle>
           Month-by-Month Breakdown
-          <InfoTooltip text="Full monthly breakdown showing consumption, solar generation, net import, NEM credit usage and resulting bill savings. Expand the table to see all 12 months." />
+          <InfoTooltip text="A full month-by-month view showing consumption, solar generation, net import from the grid, NEM credit usage, and the resulting bill savings. Expand the table to see all 12 months." />
         </CardTitle>
         <CardDescription>Monthly billing inputs, credits and savings.</CardDescription>
       </CardHeader>

@@ -14,8 +14,8 @@ type TariffField = {
 }
 
 const TARIFF_FIELDS: TariffField[] = [
-  { key: 'energyLow', label: 'Energy Charge — Low Tier', unit: 'sen/kWh', description: 'Energy charge for ≤ 1500 kWh.' },
-  { key: 'energyHigh', label: 'Energy Charge — High Tier', unit: 'sen/kWh', description: 'Energy charge above 1500 kWh.' },
+  { key: 'energyLow', label: 'Energy Charge (Low Tier)', unit: 'sen/kWh', description: 'Energy charge for usage at or below 1500 kWh.' },
+  { key: 'energyHigh', label: 'Energy Charge (High Tier)', unit: 'sen/kWh', description: 'Energy charge for usage above 1500 kWh.' },
   { key: 'capacity', label: 'Capacity Charge', unit: 'sen/kWh', description: 'TNB capacity component.' },
   { key: 'network', label: 'Network Charge', unit: 'sen/kWh', description: 'Distribution network charge.' },
   { key: 'retailChargeRm', label: 'Retail Charge', unit: 'RM/month', description: 'Flat retail service charge.' },

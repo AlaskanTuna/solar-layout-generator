@@ -153,7 +153,7 @@ export function WorkbenchSidebar({
               <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
               <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
               {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
-              <p>Max panels (API): {maxArrayPanelsCount}</p>
+              <p>Max Panels: {maxArrayPanelsCount}</p>
               {panelLifetimeYears != null && <p>Lifespan: {panelLifetimeYears} years</p>}
             </div>
           </details>

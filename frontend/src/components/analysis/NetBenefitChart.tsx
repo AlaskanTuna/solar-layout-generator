@@ -15,7 +15,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { COLORS, getChartTooltipStyle } from '@/lib/constants'
 import { ChartTooltipContent } from './ChartTooltipContent'
 import { formatCurrency } from './formatters'
-import { computeDegradedSavings } from '@/lib/analysis'
+import { computeDegradedSavings, normalizeInverterReplacements, type InverterReplacement } from '@/lib/analysis'
 
 type NetBenefitChartProps = {
   year1Savings: number
@@ -25,10 +25,14 @@ type NetBenefitChartProps = {
   tariffEscalationRate?: number
   /** Override the default active year range (e.g. 25 for PDF exports). */
   defaultYearRange?: YearRange
-  /** When 'lifecycle', subtracts maintenance + inverter replacement at the right years. Defaults to 'simple'. */
+  /** When 'lifecycle', subtracts maintenance and any scheduled inverter replacements. Defaults to 'simple'. */
   analysisMode?: 'simple' | 'lifecycle'
   annualMaintenanceRm?: number
+  /** Each entry is one planned inverter swap. Empty array = no swaps factored in. */
+  inverterReplacements?: InverterReplacement[]
+  /** @deprecated Pass `inverterReplacements` instead. */
   inverterReplacementCostRm?: number
+  /** @deprecated Pass `inverterReplacements` instead. */
   inverterReplacementYear?: number
 }
 
@@ -45,12 +49,18 @@ export function NetBenefitChart({
   defaultYearRange = 10,
   analysisMode = 'simple',
   annualMaintenanceRm = 0,
-  inverterReplacementCostRm = 0,
-  inverterReplacementYear = 12
+  inverterReplacements,
+  inverterReplacementCostRm,
+  inverterReplacementYear
 }: NetBenefitChartProps) {
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
   const [yearRange, setYearRange] = useState<YearRange>(defaultYearRange)
+
+  const replacements = useMemo(
+    () => normalizeInverterReplacements(inverterReplacements, inverterReplacementCostRm, inverterReplacementYear),
+    [inverterReplacements, inverterReplacementCostRm, inverterReplacementYear]
+  )
 
   const netBenefitData = useMemo(
     () =>
@@ -59,7 +69,9 @@ export function NetBenefitChart({
         const grossSavings = computeDegradedSavings(year1Savings, degradationRate, yr, tariffEscalationRate)
         const maintenanceCost = analysisMode === 'lifecycle' ? annualMaintenanceRm * yr : 0
         const inverterCost =
-          analysisMode === 'lifecycle' && yr >= inverterReplacementYear ? inverterReplacementCostRm : 0
+          analysisMode === 'lifecycle'
+            ? replacements.filter((r) => r.year <= yr).reduce((sum, r) => sum + r.costRm, 0)
+            : 0
         return {
           year: `Yr ${yr}`,
           value: round2(grossSavings - systemCostRm - maintenanceCost - inverterCost)
@@ -73,8 +85,7 @@ export function NetBenefitChart({
       yearRange,
       analysisMode,
       annualMaintenanceRm,
-      inverterReplacementCostRm,
-      inverterReplacementYear
+      replacements
     ]
   )
 
@@ -89,11 +100,17 @@ export function NetBenefitChart({
             <CardTitle>
               Net Benefit Projection
               <InfoTooltip
-                text={`Projects your cumulative savings minus the upfront system cost over ${yearRange} years. When bars turn green, you've recovered your investment and are in net profit. Includes annual panel degradation.`}
+                text={
+                  analysisMode === 'lifecycle'
+                    ? `Your cumulative savings minus the upfront system cost, yearly maintenance, and any scheduled inverter replacements, projected over ${yearRange} years. Once the bars turn green, you have recovered your investment and are in net profit. Annual panel degradation is included.`
+                    : `Your cumulative savings minus the upfront system cost, projected over ${yearRange} years. Once the bars turn green, you have recovered your investment and are in net profit. Annual panel degradation is included.`
+                }
               />
             </CardTitle>
             <CardDescription>
-              How much you gain/lose after subtracting the cost of installing your solar system yearly.
+              {analysisMode === 'lifecycle'
+                ? 'How much you gain or lose after subtracting the system cost, yearly maintenance, and inverter replacements.'
+                : 'How much you gain or lose after subtracting the upfront system cost.'}
             </CardDescription>
           </div>
           <div className="pdf-hide">

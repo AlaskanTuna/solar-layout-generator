@@ -124,7 +124,7 @@ export function SystemCostCard({
           <div>
             <CardTitle>
               System Cost
-              <InfoTooltip text="A bottom-up turnkey estimate based on typical residential solar costs in Malaysia. Covers panels, inverter, mounting, wiring and electrical components, permits, labour and installer margin." />
+              <InfoTooltip text="A bottom-up turnkey estimate based on typical Malaysian residential solar costs. Covers panels, inverter, mounting, wiring, permits, labour, and installer margin." />
             </CardTitle>
             <CardDescription>Estimated total turnkey installation cost.</CardDescription>
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown, Sliders } from 'lucide-react'
+import { ChevronDown, Plus, Sliders, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -12,7 +12,15 @@ import {
 } from '@/components/ui/DropdownMenu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { SEASONAL_MULTIPLIERS, type ConnectionPhase, type ConsumptionProfile } from '@/lib/analysis'
+import {
+  DEFAULT_ANNUAL_MAINTENANCE_RM,
+  DEFAULT_INVERTER_REPLACEMENT,
+  SEASONAL_MULTIPLIERS,
+  type AnalysisMode,
+  type ConnectionPhase,
+  type ConsumptionProfile,
+  type InverterReplacement
+} from '@/lib/analysis'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import tnbBillImg from '@/assets/tnb-bill-avg-kwh.png'
 import { ImagePopup } from '@/components/ui/ImagePopup'
@@ -31,6 +39,11 @@ const ROOF_TYPE_LABELS: Record<RoofType, string> = {
   tile: 'Tile (Clay/Concrete)',
   metal: 'Metal',
   flat: 'Flat (Concrete Slab)'
+}
+
+const ANALYSIS_MODE_LABELS: Record<AnalysisMode, string> = {
+  simple: 'Simple',
+  lifecycle: 'Lifecycle'
 }
 
 function DegradationInput({ value, onChange }: { value: number; onChange: (rate: number) => void }) {
@@ -134,7 +147,7 @@ export function AnalysisSidebar({
             <div className="rounded-lg bg-muted p-3">
               <p className="text-muted-foreground">
                 System Size
-                <InfoTooltip text="Kilowatt-peak (kWp) is the maximum power your solar system can produce under ideal sunlight conditions." />
+                <InfoTooltip text="The maximum power your solar system can produce under ideal sunlight, measured in kilowatt-peak (kWp)." />
               </p>
               <p className="mt-1 text-lg font-semibold">{formatNumber(systemKwp, 'kWp')}</p>
             </div>
@@ -161,7 +174,7 @@ export function AnalysisSidebar({
                 <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
                 <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
                 {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
-                <p>Max panels (API): {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
+                <p>Max Panels: {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
                 {buildingInsights.solarPotential.panelLifetimeYears != null && (
                   <p>Lifespan: {buildingInsights.solarPotential.panelLifetimeYears} years</p>
                 )}
@@ -245,11 +258,11 @@ export function AnalysisSidebar({
                   Seasonal
                 </button>
               </div>
-              <InfoTooltip text="Flat uses the same kWh every month. Seasonal applies typical Malaysian monthly variation (higher in hot months, lower during monsoon)." />
+              <InfoTooltip text="Flat assumes the same kWh every month. Seasonal applies typical Malaysian variation, with higher use in hot months and lower use during the monsoon." />
             </div>
             {formState.consumptionProfile === 'seasonal' && (
               <p className="text-xs text-muted-foreground">
-                Monthly range: {Math.round(formState.monthlyConsumptionKwh * Math.min(...SEASONAL_MULTIPLIERS))}–
+                Monthly range: {Math.round(formState.monthlyConsumptionKwh * Math.min(...SEASONAL_MULTIPLIERS))} to{' '}
                 {Math.round(formState.monthlyConsumptionKwh * Math.max(...SEASONAL_MULTIPLIERS))} kWh
               </p>
             )}
@@ -267,11 +280,11 @@ export function AnalysisSidebar({
                     </p>
                     <div className="space-y-1">
                       <p>
-                        <span className="font-semibold">Single Phase:</span> standard in most Malaysian homes. Solar
+                        <span className="font-semibold">Single Phase:</span> Standard in most Malaysian homes. Solar
                         export is capped at 5 kW under TNB's NEM 3.0 rules.
                       </p>
                       <p>
-                        <span className="font-semibold">Three Phase:</span> common in larger bungalows or homes with
+                        <span className="font-semibold">Three Phase:</span> Common in larger bungalows or homes with
                         heavy appliances. The cap rises to 12.5 kW.
                       </p>
                     </div>
@@ -317,7 +330,7 @@ export function AnalysisSidebar({
               <div className="space-y-1">
                 <Label>
                   Roof Type
-                  <InfoTooltip text="Roof construction affects mounting hardware and labour. Tile roofs need scaffolding and specialised hooks; flat roofs use ballasted frames; metal roofs use simple L-feet clamps. Simple view assumes tile, which is most common in Malaysian homes." />
+                  <InfoTooltip text="The roof material decides the mounting hardware and labour cost. Tile roofs need scaffolding and special hooks. Metal roofs use simple L-foot clamps. Flat roofs use ballasted frames. Simple view assumes tile, which is most common in Malaysian homes." />
                 </Label>
                 <p className="text-xs text-muted-foreground">Affects mounting cost and, for tile, scaffolding.</p>
               </div>
@@ -348,11 +361,190 @@ export function AnalysisSidebar({
 
           {viewMode === 'advanced' && (
             <>
+              <div className="space-y-3 rounded-xl border border-border bg-card/90 p-4">
+                <div className="space-y-1">
+                  <Label className="text-sm font-semibold text-foreground">
+                    Financial Mode
+                    <InfoTooltip>
+                      <div className="space-y-2">
+                        <p>Choose how the payback and 25-year savings are calculated.</p>
+                        <div className="space-y-1">
+                          <p>
+                            <span className="font-semibold">Simple:</span> Counts only the upfront installation cost.
+                            Gives the cleanest, most optimistic payback figure.
+                          </p>
+                          <p>
+                            <span className="font-semibold">Lifecycle:</span> Also subtracts yearly maintenance and any
+                            inverter replacements you schedule. Payback is longer but the 25-year picture is more
+                            realistic.
+                          </p>
+                        </div>
+                      </div>
+                    </InfoTooltip>
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Switch to Lifecycle for a more realistic long-term view.
+                  </p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="h-10 w-full justify-between px-3 font-normal text-foreground">
+                      {ANALYSIS_MODE_LABELS[formState.analysisMode ?? 'simple']}
+                      <ChevronDown className="h-4 w-4 opacity-60" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                    <DropdownMenuRadioGroup
+                      value={formState.analysisMode ?? 'simple'}
+                      onValueChange={(v) =>
+                        setFormState((current) => {
+                          if (!current) return current
+                          const nextMode = v as AnalysisMode
+                          if (nextMode !== 'lifecycle') {
+                            return { ...current, analysisMode: nextMode }
+                          }
+                          // Seed sensible defaults the first time the user enters Lifecycle
+                          // so the figures actually shift away from the Simple-mode result.
+                          const annualMaintenanceRm =
+                            !current.annualMaintenanceRm || current.annualMaintenanceRm <= 0
+                              ? DEFAULT_ANNUAL_MAINTENANCE_RM
+                              : current.annualMaintenanceRm
+                          const inverterReplacements =
+                            current.inverterReplacements && current.inverterReplacements.length > 0
+                              ? current.inverterReplacements
+                              : [{ ...DEFAULT_INVERTER_REPLACEMENT }]
+                          return {
+                            ...current,
+                            analysisMode: nextMode,
+                            annualMaintenanceRm,
+                            inverterReplacements
+                          }
+                        })
+                      }
+                    >
+                      {(Object.keys(ANALYSIS_MODE_LABELS) as AnalysisMode[]).map((mode) => (
+                        <DropdownMenuRadioItem key={mode} value={mode}>
+                          {ANALYSIS_MODE_LABELS[mode]}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {formState.analysisMode === 'lifecycle' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Annual Maintenance (RM/yr)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={50}
+                        value={formState.annualMaintenanceRm ?? 0}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (v >= 0) setFormState((c) => (c ? { ...c, annualMaintenanceRm: v } : c))
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[11px] text-muted-foreground">Inverter Replacements</Label>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 px-2 text-xs"
+                          onClick={() =>
+                            setFormState((c) => {
+                              if (!c) return c
+                              const existing = c.inverterReplacements ?? []
+                              const lastYear = existing.length > 0 ? existing[existing.length - 1].year : 0
+                              const nextYear = Math.min(25, Math.max(lastYear + 5, DEFAULT_INVERTER_REPLACEMENT.year))
+                              const next: InverterReplacement = {
+                                year: nextYear,
+                                costRm: DEFAULT_INVERTER_REPLACEMENT.costRm
+                              }
+                              return { ...c, inverterReplacements: [...existing, next] }
+                            })
+                          }
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          Add
+                        </Button>
+                      </div>
+                      {(formState.inverterReplacements ?? []).length === 0 && (
+                        <p className="text-[11px] text-muted-foreground">
+                          No replacements scheduled. Click Add to plan one.
+                        </p>
+                      )}
+                      {(formState.inverterReplacements ?? []).map((replacement, index) => (
+                        <div key={index} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">Cost (RM)</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step={500}
+                              value={replacement.costRm}
+                              onChange={(e) => {
+                                const v = Number(e.target.value)
+                                if (v < 0) return
+                                setFormState((c) => {
+                                  if (!c?.inverterReplacements) return c
+                                  const next = [...c.inverterReplacements]
+                                  next[index] = { ...next[index], costRm: v }
+                                  return { ...c, inverterReplacements: next }
+                                })
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground">At Year</Label>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={25}
+                              step={1}
+                              value={replacement.year}
+                              onChange={(e) => {
+                                const v = Number(e.target.value)
+                                if (v < 1 || v > 25) return
+                                setFormState((c) => {
+                                  if (!c?.inverterReplacements) return c
+                                  const next = [...c.inverterReplacements]
+                                  next[index] = { ...next[index], year: v }
+                                  return { ...c, inverterReplacements: next }
+                                })
+                              }}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive"
+                            aria-label={`Remove replacement ${index + 1}`}
+                            onClick={() =>
+                              setFormState((c) => {
+                                if (!c?.inverterReplacements) return c
+                                const next = c.inverterReplacements.filter((_, i) => i !== index)
+                                return { ...c, inverterReplacements: next }
+                              })
+                            }
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
                     AFA Rate
-                    <InfoTooltip text="Automatic Fuel Adjustment surcharge (or rebate if negative) in sen/kWh, set periodically by the government." />
+                    <InfoTooltip text="A government-set surcharge or rebate added to every kWh of consumption, in sen/kWh. Negative values mean a rebate. Updated periodically." />
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
@@ -396,29 +588,15 @@ export function AnalysisSidebar({
                 />
               </div>
 
-              <div className="my-2 border-t border-border" />
-
-              <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
-                <div className="space-y-1">
-                  <Label>
-                    Panel Degradation
-                    <InfoTooltip text="Annual generation decline rate. A higher rate means your panels produce less each year, reducing long-term savings and extending payback. N-type panels: ~0.5%/yr. Older PERC panels: ~0.7%/yr." />
-                  </Label>
-                  <p className="text-xs text-muted-foreground">%/year — affects payback and 10-year projections</p>
-                </div>
-                <DegradationInput
-                  value={formState.degradationRate}
-                  onChange={(rate) => setFormState((c) => (c ? { ...c, degradationRate: rate } : c))}
-                />
-              </div>
-
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
                     Tariff Escalation
-                    <InfoTooltip text="Annual compounding rate at which TNB tariffs are expected to rise. A higher rate shortens payback and grows long-term savings. Malaysian RP4 revisions historically trend around 3–5%/year. Default 0% assumes flat tariffs." />
+                    <InfoTooltip text="How much you expect TNB tariffs to rise each year. A higher rate shortens payback and grows long-term savings. RP4 revisions in Malaysia have historically trended around 3 to 5% per year. Set to 0% if you want to assume flat tariffs." />
                   </Label>
-                  <p className="text-xs text-muted-foreground">%/year — compounds savings across projection horizon</p>
+                  <p className="text-xs text-muted-foreground">
+                    %/year. Compounds savings across the projection horizon.
+                  </p>
                 </div>
                 <DegradationInput
                   value={formState.tariffEscalationRate}
@@ -430,7 +608,7 @@ export function AnalysisSidebar({
                 <div className="space-y-1">
                   <Label>
                     Tariff Parameters
-                    <InfoTooltip text="Override individual TNB RP4 tariff rate fields for this project (energy/capacity/network charges, retail charge, SST, RE Fund, minimum charge). Saved with the analysis — does not modify the global tariff config." />
+                    <InfoTooltip text="Override individual TNB RP4 tariff fields for this project, such as energy, capacity, and network charges, retail charge, SST, RE Fund, and minimum charge. Defaults match the published rates." />
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     Per-project overrides for TNB RP4 base rates. Defaults are the published values.
@@ -463,10 +641,26 @@ export function AnalysisSidebar({
                 onSave={(next) => setFormState((c) => (c ? { ...c, tariffRatesOverride: next } : c))}
               />
 
+              <div className="my-2 border-t border-border" />
+
+              <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
+                <div className="space-y-1">
+                  <Label>
+                    Panel Degradation
+                    <InfoTooltip text="How much your panels lose in output each year. A higher rate means less generation over time, lower long-term savings, and a longer payback. Modern N-type panels lose around 0.5% per year. Older PERC panels lose around 0.7% per year." />
+                  </Label>
+                  <p className="text-xs text-muted-foreground">%/year. Affects payback and 10-year projections.</p>
+                </div>
+                <DegradationInput
+                  value={formState.degradationRate}
+                  onChange={(rate) => setFormState((c) => (c ? { ...c, degradationRate: rate } : c))}
+                />
+              </div>
+
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <Label className="text-sm font-semibold text-foreground">
                   System Assumptions
-                  <InfoTooltip text="These values affect how the system's real-world output is estimated. Most homeowners can leave these at their defaults." />
+                  <InfoTooltip text="Engineering factors that fine-tune how the real-world output is estimated. Most homeowners can leave these at their defaults." />
                 </Label>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
@@ -508,82 +702,6 @@ export function AnalysisSidebar({
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-3 rounded-xl border border-border bg-card/90 p-4">
-                <Label className="text-sm font-semibold text-foreground">
-                  Financial Mode
-                  <InfoTooltip text="Simple = upfront cost only (cleanest payback figure). Lifecycle = also subtracts annual maintenance and a one-off inverter replacement around year 10–15. Switching to Lifecycle gives a more realistic 25-year picture but a longer payback." />
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setFormState((c) => (c ? { ...c, analysisMode: 'simple' } : c))}
-                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
-                      (formState.analysisMode ?? 'simple') === 'simple'
-                        ? 'border-primary bg-primary/5 text-foreground'
-                        : 'border-border bg-background text-muted-foreground hover:bg-muted/50'
-                    }`}
-                  >
-                    Simple
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormState((c) => (c ? { ...c, analysisMode: 'lifecycle' } : c))}
-                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
-                      formState.analysisMode === 'lifecycle'
-                        ? 'border-primary bg-primary/5 text-foreground'
-                        : 'border-border bg-background text-muted-foreground hover:bg-muted/50'
-                    }`}
-                  >
-                    Lifecycle
-                  </button>
-                </div>
-                {formState.analysisMode === 'lifecycle' && (
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <Label className="text-[11px] text-muted-foreground">Maint. (RM/yr)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        step={50}
-                        value={formState.annualMaintenanceRm ?? 0}
-                        onChange={(e) => {
-                          const v = Number(e.target.value)
-                          if (v >= 0) setFormState((c) => (c ? { ...c, annualMaintenanceRm: v } : c))
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-[11px] text-muted-foreground">Inverter (RM)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        step={500}
-                        value={formState.inverterReplacementCostRm ?? 0}
-                        onChange={(e) => {
-                          const v = Number(e.target.value)
-                          if (v >= 0) setFormState((c) => (c ? { ...c, inverterReplacementCostRm: v } : c))
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-[11px] text-muted-foreground">At year</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={25}
-                        step={1}
-                        value={formState.inverterReplacementYear ?? 12}
-                        onChange={(e) => {
-                          const v = Number(e.target.value)
-                          if (v >= 1 && v <= 25)
-                            setFormState((c) => (c ? { ...c, inverterReplacementYear: v } : c))
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             </>
           )}

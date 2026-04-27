@@ -16,7 +16,13 @@ import {
 } from 'recharts'
 import type { ProjectResponse } from '@/api/projects'
 import type { AnalysisResultsRecord } from '@/lib/analysis'
-import { ANALYSIS_DISCLAIMERS, MONTH_LABELS, computeDegradedSavings, summarizeLayoutOrientation } from '@/lib/analysis'
+import {
+  ANALYSIS_DISCLAIMERS,
+  MONTH_LABELS,
+  computeDegradedSavings,
+  normalizeInverterReplacements,
+  summarizeLayoutOrientation
+} from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 import type { CostBreakdown, RoofType } from '@shared/types'
@@ -338,8 +344,11 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
   const systemCostRm = project.analysisConfig?.systemCostRm ?? 0
   const analysisMode = project.analysisConfig?.analysisMode === 'lifecycle' ? 'lifecycle' : 'simple'
   const annualMaintenanceRm = project.analysisConfig?.annualMaintenanceRm ?? 0
-  const inverterReplacementCostRm = project.analysisConfig?.inverterReplacementCostRm ?? 0
-  const inverterReplacementYear = project.analysisConfig?.inverterReplacementYear ?? 12
+  const inverterReplacements = normalizeInverterReplacements(
+    project.analysisConfig?.inverterReplacements,
+    project.analysisConfig?.inverterReplacementCostRm,
+    project.analysisConfig?.inverterReplacementYear
+  )
   const buildingInsights = project.location?.buildingInsightsJson
     ? parseBuildingInsights(project.location.buildingInsightsJson)
     : null
@@ -390,7 +399,13 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
   const year25NetBenefit = year25DegradedCumulative - systemCostRm
   const breakEvenYear = analysisResults.paybackYears
 
+  const lifecycleActive = analysisMode === 'lifecycle'
   const assumptionTiles = [
+    {
+      label: 'Financial mode',
+      value: lifecycleActive ? 'Lifecycle' : 'Simple',
+      detail: lifecycleActive ? 'incl. maint. + inverter' : 'upfront cost only'
+    },
     { label: 'Perf. ratio', value: `${Math.round(performanceRatio * 100)}%`, detail: 'MY residential' },
     { label: 'Losses', value: `${Math.round(assumedLosses * 100)}%`, detail: 'soiling/wiring' },
     { label: 'Degradation', value: `${(degradationRate * 100).toFixed(1)}%/yr`, detail: 'annual' },
@@ -398,6 +413,16 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
       ? { label: 'Tariff escalation', value: `${(tariffEscalationRate * 100).toFixed(1)}%/yr`, detail: 'compounding' }
       : null,
     { label: 'DC/AC ratio', value: String(dcAcRatio), detail: 'inverter sizing' },
+    lifecycleActive && annualMaintenanceRm > 0
+      ? { label: 'Maintenance', value: `${formatCurrency(annualMaintenanceRm)}/yr`, detail: 'subtracted' }
+      : null,
+    ...(lifecycleActive
+      ? inverterReplacements.map((r, idx) => ({
+          label: inverterReplacements.length === 1 ? 'Inverter swap' : `Inverter swap #${idx + 1}`,
+          value: formatCurrency(r.costRm),
+          detail: `at year ${r.year}`
+        }))
+      : []),
     panelLifetimeYears != null ? { label: 'Panel lifetime', value: `${panelLifetimeYears} yrs`, detail: 'Solar API' } : null,
     layoutOrientation
       ? {
@@ -499,7 +524,11 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
       {/* Page 6: Net Benefit Projection + Summary */}
       <PdfPageShell
         sectionLabel="Net Benefit Projection"
-        context="Cumulative solar savings minus your upfront system cost over 25 years. Green bars indicate years where you are in net profit after break-even."
+        context={
+          lifecycleActive
+            ? 'Cumulative solar savings minus your upfront system cost, yearly maintenance, and any scheduled inverter replacements, over 25 years. Green bars indicate years where you are in net profit after break-even.'
+            : 'Cumulative solar savings minus your upfront system cost over 25 years. Green bars indicate years where you are in net profit after break-even.'
+        }
       >
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="pdf-card-break min-h-0 flex-1">
@@ -511,8 +540,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
               defaultYearRange={25}
               analysisMode={analysisMode}
               annualMaintenanceRm={annualMaintenanceRm}
-              inverterReplacementCostRm={inverterReplacementCostRm}
-              inverterReplacementYear={inverterReplacementYear}
+              inverterReplacements={inverterReplacements}
             />
           </div>
           <div className="pdf-card-break">
@@ -521,7 +549,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
               tiles={[
                 {
                   label: 'Break-even',
-                  value: breakEvenYear !== null ? `${breakEvenYear.toFixed(1)} yrs` : '—',
+                  value: breakEvenYear !== null ? `${breakEvenYear.toFixed(1)} yrs` : 'N/A',
                   detail: 'payback period'
                 },
                 {
@@ -555,8 +583,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
             tariffEscalationRate={tariffEscalationRate}
             analysisMode={analysisMode}
             annualMaintenanceRm={annualMaintenanceRm}
-            inverterReplacementCostRm={inverterReplacementCostRm}
-            inverterReplacementYear={inverterReplacementYear}
+            inverterReplacements={inverterReplacements}
           />
         </div>
       </PdfPageShell>
