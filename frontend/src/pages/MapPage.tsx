@@ -18,7 +18,7 @@ import { GuidedTour, type TourStep } from '@/components/ui/GuidedTour'
 
 const MAP_TOUR_STEPS: TourStep[] = [
   {
-    title: 'Welcome to the Solar Layout Generator',
+    title: 'Welcome to SolarSim',
     description:
       "This tool helps you estimate how much you could save on your electricity bill by installing solar panels. Let's start by finding your home."
   },
