@@ -267,6 +267,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* DUAL-STOP FOCUS RING — premium B2C polish on interactive elements only.
+   Solid 2px ring + soft 4px tangerine glow for Stripe/Linear-grade focus state. */
+button:focus-visible,
+[role='button']:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:not([tabindex='-1']):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 18%, transparent);
+}
+
 /* CUSTOM SCROLLBAR */
 * {
   scrollbar-width: thin;
