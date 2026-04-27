@@ -253,7 +253,7 @@ export function LandingPage() {
           <span className="text-stone-700">·</span>
           <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Peninsular Malaysia tariff" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="No data sold" />
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Independent of installers" />
           <span className="text-stone-700">·</span>
           {/* Duplicated for seamless loop */}
           <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
@@ -264,7 +264,7 @@ export function LandingPage() {
           <span className="text-stone-700">·</span>
           <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Peninsular Malaysia tariff" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="No data sold" />
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Independent of installers" />
           <span className="text-stone-700">·</span>
         </div>
       </section>
@@ -407,7 +407,7 @@ export function LandingPage() {
               answer="Within ±8% of actual yield in development testing. Your real number depends on shading we can't see (overhanging trees, neighbor's new build), inverter losses, and how your usage shifts after install."
             />
             <FaqItem
-              question="What if Google Solar API doesn't have my address?"
+              question="What if I can't find my address?"
               answer="Coverage in Peninsular Malaysia is strong but not universal. If we can't pull your rooftop, we fall back to a manual-coordinates flow where you outline your roof yourself — same calculations downstream."
             />
             <FaqItem
@@ -427,7 +427,9 @@ export function LandingPage() {
         </div>
       </section>
 
-      <AppFooter />
+      <div className="snap-end">
+        <AppFooter />
+      </div>
 
       {/* Scroll-to-top button — glassmorphism, fades in past first viewport */}
       <button
