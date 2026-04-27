@@ -51,6 +51,12 @@
   /* Font tokens */
   --font-heading: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Leaf accent tokens — emerald paired with tangerine */
+  --color-leaf: var(--leaf);
+  --color-leaf-soft: var(--leaf-soft);
+  --color-leaf-deep: var(--leaf-deep);
 
   /* Animation tokens */
   --animate-fade-in: fade-in 0.4s ease-out;
@@ -179,6 +185,11 @@
   --chart-4: #0ea5e9;
   --chart-5: #f43f5e;
 
+  /* Leaf accent */
+  --leaf: #16a34a;
+  --leaf-soft: #86efac;
+  --leaf-deep: #15803d;
+
   /* Sidebar */
   --sidebar: #fff7ed;
   --sidebar-foreground: #1c1917;
@@ -238,6 +249,11 @@
   --chart-3: #fbbf24;
   --chart-4: #38bdf8;
   --chart-5: #fb7185;
+
+  /* Leaf accent */
+  --leaf: #4ade80;
+  --leaf-soft: #86efac;
+  --leaf-deep: #86efac;
 
   /* Sidebar */
   --sidebar: #1c1917;
@@ -331,6 +347,20 @@ select:focus-visible,
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+}
+
+@utility hero-glass {
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.5), rgba(255, 247, 237, 0.2));
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 30px 60px -20px rgba(80, 25, 5, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.dark .hero-glass {
+  background: linear-gradient(135deg, rgba(28, 25, 23, 0.55), rgba(28, 25, 23, 0.3));
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 @utility glass-card {

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
@@ -17,12 +18,15 @@ import {
   Star,
   Check,
   Leaf,
+  ChevronDown,
   ChevronRight,
+  Sun,
   AlertTriangle
 } from 'lucide-react'
 
 export function LandingPage() {
   const { session, loading } = useAuth()
+  const ticker = useHeroTicker()
 
   if (loading) return null
   const isSignedIn = !!session
@@ -59,60 +63,180 @@ export function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-6 pt-24 text-center">
-        {/* Decorative gradient orbs */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-primary/15 blur-[120px] animate-glow-pulse" />
-          <div className="absolute -bottom-32 right-1/4 h-[400px] w-[400px] rounded-full bg-solar-400/10 blur-[100px] animate-glow-pulse [animation-delay:1.5s]" />
+      <section className="relative min-h-[100vh] overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src="/landing/landing-hero.webp"
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover object-[right_center]"
+          />
+          {/* Warm light-mode legibility wash on left half */}
+          <div
+            className="absolute inset-0 dark:hidden"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(253,249,244,0.85) 0%, rgba(253,249,244,0.45) 35%, rgba(253,249,244,0) 60%)'
+            }}
+          />
+          {/* Dark-mode darkening overlay */}
+          <div className="absolute inset-0 hidden bg-background/65 dark:block" />
         </div>
 
-        <div className="relative animate-fade-in-up">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-1.5 text-sm text-muted-foreground backdrop-blur-sm">
-            <Satellite className="h-3.5 w-3.5 text-primary" />
-            Powered by Google Solar API
+        <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-24 lg:pt-40 lg:pb-32">
+          <div className="grid items-center gap-10 lg:grid-cols-12">
+            {/* Left: glass content card */}
+            <div className="lg:col-span-7">
+              <div className="hero-glass max-w-2xl rounded-3xl p-8 sm:p-12 animate-fade-in-up">
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/40 bg-orange-50/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#7c2d12] dark:border-white/10 dark:bg-stone-900/40 dark:text-orange-200">
+                  <Sun className="h-3.5 w-3.5 text-primary" />
+                  Built for Malaysian rooftops
+                </div>
+
+                <h1 className="font-heading text-5xl font-bold leading-[1.04] tracking-tight text-[#1a0a02] dark:text-foreground sm:text-6xl lg:text-7xl">
+                  See solar on
+                  <br />
+                  your roof —
+                  <br />
+                  <span className="bg-gradient-to-r from-[#7c2d12] via-primary to-emerald-600 bg-clip-text text-transparent dark:from-orange-300 dark:via-primary dark:to-emerald-400">
+                    before you commit.
+                  </span>
+                </h1>
+
+                <p className="mt-6 max-w-lg text-lg leading-relaxed text-[#1a0a02]/75 dark:text-foreground/75">
+                  SolarSim drops real solar panels onto your actual rooftop using satellite data, then runs the numbers
+                  under Malaysia's NEM Rakyat 3.0 — so you walk into installer quotes already knowing the answer.
+                </p>
+
+                <div className="mt-9 flex flex-wrap items-center gap-3">
+                  <Link to={isSignedIn ? '/dashboard' : '/sign-up'}>
+                    <Button size="lg" className="gap-2 rounded-full px-7 text-base">
+                      {isSignedIn ? 'Open Dashboard' : 'Get Started Free'}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <a href="#how">
+                    <Button variant="outline" size="lg" className="gap-2 rounded-full text-base">
+                      How it works
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </a>
+                </div>
+
+                {/* Inline meta dots */}
+                <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 font-mono text-[11px] uppercase tracking-wider text-[#1a0a02]/60 dark:text-foreground/60">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Free to start
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    No installer call
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Results in 90 sec
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: sample report card (lg+ only) */}
+            <div className="hidden lg:col-span-5 lg:block">
+              <div className="relative ml-auto max-w-md animate-fade-in-up [animation-delay:120ms]">
+                <div
+                  className="rounded-2xl p-6 text-white"
+                  style={{
+                    background: 'rgba(28,10,2,0.62)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    boxShadow: '0 30px 60px -20px rgba(0,0,0,0.6)'
+                  }}
+                >
+                  <div className="mb-5 flex items-center justify-between">
+                    <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/70">
+                      Sample report · Bandar Utama
+                    </div>
+                    <span className="rounded-full border border-emerald-400/40 bg-emerald-500/25 px-2 py-0.5 font-mono text-[10px] text-emerald-200">
+                      LIVE
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/60">System size</div>
+                      <div className="mt-0.5 font-heading text-3xl font-bold">
+                        <span className="tabular-nums">{ticker.kwp.toFixed(1)}</span>{' '}
+                        <span className="text-base font-normal text-amber-100/70">kWp</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="rounded-xl border border-orange-300/25 bg-orange-400/15 p-3">
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-orange-200">Yearly savings</div>
+                        <div className="mt-1 font-heading text-xl font-bold">
+                          RM <span className="tabular-nums">{ticker.savings.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/15 p-3">
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-emerald-200">Payback</div>
+                        <div className="mt-1 font-heading text-xl font-bold">
+                          <span className="tabular-nums">{ticker.payback.toFixed(1)}</span>{' '}
+                          <span className="text-sm font-normal text-amber-100/70">yrs</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mini bar chart */}
+                    <div>
+                      <div className="mb-2 font-mono text-[11px] uppercase tracking-wider text-amber-100/60">
+                        Monthly yield (kWh)
+                      </div>
+                      <div className="flex h-16 items-end gap-1">
+                        {[62, 70, 80, 88, 96, 92, 84, 90, 82, 74, 68, 60].map((h, i) => (
+                          <div
+                            key={i}
+                            className={`flex-1 rounded-sm ${
+                              h > 86
+                                ? 'bg-gradient-to-b from-amber-300 to-orange-500'
+                                : 'bg-gradient-to-b from-orange-400 to-orange-600'
+                            }`}
+                            style={{ height: `${h}%` }}
+                          />
+                        ))}
+                      </div>
+                      <div className="mt-1.5 flex justify-between font-mono text-[9px] text-amber-100/50">
+                        <span>JAN</span>
+                        <span>JUN</span>
+                        <span>DEC</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating SDG badge */}
+                <div
+                  className="absolute -left-4 -top-4 rounded-xl bg-card px-3 py-2 shadow-lg"
+                  style={{ transform: 'rotate(-4deg)' }}
+                >
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    SDG 7
+                  </div>
+                  <div className="font-heading text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                    Clean energy
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <h1 className="mx-auto max-w-3xl font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            See what solar can do{' '}
-            <span className="bg-gradient-to-r from-primary to-solar-400 bg-clip-text text-transparent">
-              for your rooftop
-            </span>
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Get a data-driven preliminary assessment of your rooftop solar potential using real satellite imagery and
-            Malaysian NEM Rakyat 3.0 tariff rates — in minutes, not days.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <Link to={isSignedIn ? '/dashboard' : '/sign-up'}>
-              <Button size="lg" className="gap-2 px-8 text-base">
-                {isSignedIn ? 'Go to Dashboard' : 'Get Started Free'}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <a href="#how-it-works">
-              <Button variant="outline" size="lg" className="text-base">
-                See How It Works
-              </Button>
-            </a>
-          </div>
-
-          {/* Trust badges */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Shield className="h-3.5 w-3.5 text-primary" />
-              Free to use
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-primary" />
-              Results in minutes
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Leaf className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
-              SDG 7 aligned
-            </span>
-          </div>
+        {/* Scroll cue */}
+        <div className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[#1a0a02]/55 dark:text-foreground/55 md:flex">
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em]">scroll</span>
+          <ChevronDown className="h-4 w-4 animate-bounce" />
         </div>
       </section>
 
@@ -365,6 +489,32 @@ export function LandingPage() {
 }
 
 /* SUB-COMPONENTS */
+
+function useHeroTicker() {
+  const [vals, setVals] = useState({ kwp: 6.2, savings: 3000, payback: 8.5 })
+
+  useEffect(() => {
+    const targets = { kwp: 8.4, savings: 5840, payback: 5.7 }
+    const start = { kwp: 6.2, savings: 3000, payback: 8.5 }
+    const dur = 1400
+    const t0 = performance.now()
+    let raf = 0
+    const frame = (t: number) => {
+      const p = Math.min(1, (t - t0) / dur)
+      const ease = 1 - Math.pow(1 - p, 3)
+      setVals({
+        kwp: start.kwp + (targets.kwp - start.kwp) * ease,
+        savings: Math.round(start.savings + (targets.savings - start.savings) * ease),
+        payback: start.payback + (targets.payback - start.payback) * ease
+      })
+      if (p < 1) raf = requestAnimationFrame(frame)
+    }
+    raf = requestAnimationFrame(frame)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  return vals
+}
 
 function StepCard({
   step,
