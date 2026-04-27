@@ -92,7 +92,7 @@ export function SettingsPage() {
 
   return (
     <PageContainer>
-      <PageHeaderCard>
+      <PageHeaderCard artSrc="/dashboard/settings.webp">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
