@@ -135,7 +135,7 @@
   --radius: 0.625rem;
 
   /* Surfaces */
-  --background: #fafaf9;
+  --background: #fdf9f4;
   --foreground: #1c1917;
   --card: #ffffff;
   --card-foreground: #1c1917;
@@ -149,7 +149,7 @@
   --secondary-foreground: #9a3412;
 
   /* Neutral */
-  --muted: #f5f0eb;
+  --muted: #f7efe5;
   --muted-foreground: #78716c;
   --accent: #ffedd5;
   --accent-foreground: #9a3412;
@@ -159,7 +159,7 @@
   --destructive-foreground: #fafafa;
 
   /* Borders & Input */
-  --border: #e7e5e4;
+  --border: #efe5d9;
   --input: #d6d3d1;
   --ring: #ea580c;
 
@@ -187,8 +187,8 @@
 
   /* Glassmorphism tokens */
   --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.45);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --glass-border: rgba(234, 88, 12, 0.1);
+  --glass-shadow: 0 1px 3px rgba(234, 88, 12, 0.05), 0 8px 24px rgba(234, 88, 12, 0.04);
   --glass-blur: 16px;
 }
 
