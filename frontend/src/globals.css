@@ -339,8 +339,12 @@ select:focus-visible,
   backdrop-filter: var(--tw-backdrop-blur);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-lg);
+}
+
+.dark .glass-card {
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 @utility glass-nav {
