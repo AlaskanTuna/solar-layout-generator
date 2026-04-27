@@ -19,12 +19,17 @@ function useBreadcrumbs(): Crumb[] {
     { label: 'Dashboard', to: '/dashboard' }
   ]
 
+  if (pathname === '/settings') {
+    return [{ label: 'Home', to: '/', icon: <Home className="h-3.5 w-3.5" /> }, { label: 'Settings' }]
+  }
+
   // Dashboard sub-pages
   if (pathname.startsWith('/dashboard/')) {
     const sub = pathname.split('/')[2]
     if (sub === 'summary') crumbs.push({ label: 'Summary' })
     else if (sub === 'projects') crumbs.push({ label: 'Projects' })
     else if (sub === 'analytics') crumbs.push({ label: 'Analytics' })
+    else if (sub === 'faq') crumbs.push({ label: 'FAQ' })
     return crumbs
   }
 
@@ -136,14 +141,14 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
                     <p className="text-xs text-muted-foreground">{planLabel}</p>
                   </div>
                   <div className="p-1">
-                    <button
-                      disabled
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground"
+                    <Link
+                      to="/settings"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                     >
                       <Settings className="h-4 w-4" />
                       Settings
-                      <span className="ml-auto text-xs">Soon</span>
-                    </button>
+                    </Link>
                   </div>
                   <div className="border-t border-border p-1">
                     <button

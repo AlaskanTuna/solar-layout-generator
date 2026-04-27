@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { ProtectedRoute } from './components/layout/ProtectedRoute'
+import { AppLayout } from './components/layout/AppLayout'
 import { DashboardLayout } from './components/layout/DashboardLayout'
 import { LoadingOverlay } from './components/ui/LoadingOverlay'
 import { LandingPage } from './pages/LandingPage'
@@ -10,6 +11,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { SummaryPage } from './pages/SummaryPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { FAQPage } from './pages/FAQPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { MapPage } from './pages/MapPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -58,6 +60,14 @@ export function App() {
             }
           />
         </Route>
+        <Route
+          path="/settings"
+          element={
+            <AppLayout>
+              <SettingsPage />
+            </AppLayout>
+          }
+        />
         <Route path="/project/:projectId/map" element={<MapPage />} />
         <Route
           path="/project/:projectId/workbench"
