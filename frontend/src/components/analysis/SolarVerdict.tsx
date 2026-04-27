@@ -45,13 +45,28 @@ function StarRating({ count, color, label }: { count: number; color: string; lab
 export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictProps) {
   const condition = getRoiCondition(analysisResults.paybackYears)
   const headline = buildHeadline(analysisResults)
-  const { averageMonthlySavingsRm, averageMonthlySavingsPct, annualTotals, paybackYears } = analysisResults
+  const { averageMonthlySavingsRm, averageMonthlySavingsPct, annualTotals, paybackYears, monthlyBreakdown } =
+    analysisResults
   const nemFit = classifyNemFit({
     totalConsumptionKwh: annualTotals.totalConsumptionKwh,
     totalGenerationKwh: annualTotals.totalGenerationKwh,
     totalCreditsForfeitedKwh: annualTotals.totalCreditsForfeitedKwh
   })
-  const generationRatioPct = Math.round(nemFit.generationRatio * 100)
+  // Physical grid flows: per-month sum of consumption beyond generation (import) and
+  // generation beyond consumption (export). NEM credits net these out for billing,
+  // but the raw flows are the most intuitive "what comes in / goes out" signal.
+  const totalImportKwh = monthlyBreakdown.reduce(
+    (sum, m) => sum + Math.max(0, m.consumptionKwh - m.generationKwh),
+    0
+  )
+  const totalExportKwh = monthlyBreakdown.reduce(
+    (sum, m) => sum + Math.max(0, m.generationKwh - m.consumptionKwh),
+    0
+  )
+  const importRatePct =
+    annualTotals.totalConsumptionKwh > 0 ? Math.round((totalImportKwh / annualTotals.totalConsumptionKwh) * 100) : 0
+  const exportRatePct =
+    annualTotals.totalGenerationKwh > 0 ? Math.round((totalExportKwh / annualTotals.totalGenerationKwh) * 100) : 0
 
   return (
     <Card className="border-border bg-card/90 shadow-sm">
@@ -140,29 +155,28 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                     <p>How well this layout is sized for your usage under NEM Rakyat 3.0.</p>
                     <div className="space-y-1">
                       <p>
-                        <span className="font-semibold">Good:</span> most generation offsets your own bill, with very
+                        <span className="font-semibold">Good:</span> Most generation offsets your own bill, with very
                         few credits left over.
                       </p>
                       <p>
-                        <span className="font-semibold">Moderate:</span> some credit buildup. You will export more than
+                        <span className="font-semibold">Moderate:</span> Some credit buildup. You will export more than
                         you use in a few months and rely on previously banked credits in others.
                       </p>
                       <p>
-                        <span className="font-semibold">Oversized:</span> heavy credit buildup. Excess credits are not
+                        <span className="font-semibold">Oversized:</span> Heavy credit buildup. Excess credits are not
                         cash and are forfeited at year-end if unused.
                       </p>
                     </div>
                     <div className="space-y-0.5 border-t border-primary-foreground/20 pt-2 text-primary-foreground/80">
                       <p>
-                        Generation vs. consumption:{' '}
-                        <span className="font-semibold text-primary-foreground">{generationRatioPct}%</span>
+                        Import Rate:{' '}
+                        <span className="font-semibold text-primary-foreground">{importRatePct}%</span> of usage drawn
+                        from the grid
                       </p>
                       <p>
-                        Forfeited credits:{' '}
-                        <span className="font-semibold text-primary-foreground">
-                          {Math.round(nemFit.forfeitureRate * 100)}%
-                        </span>{' '}
-                        of generation
+                        Export Rate:{' '}
+                        <span className="font-semibold text-primary-foreground">{exportRatePct}%</span> of generation
+                        sent back to the grid
                       </p>
                     </div>
                   </div>
