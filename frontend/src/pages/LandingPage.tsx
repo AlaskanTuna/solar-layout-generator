@@ -16,14 +16,12 @@ import {
   Shield,
   Zap,
   Star,
-  Check,
   Leaf,
   ChevronDown,
   ChevronRight,
   Clock,
   Sun,
-  BookOpen,
-  AlertTriangle
+  BookOpen
 } from 'lucide-react'
 
 export function LandingPage() {
@@ -37,11 +35,25 @@ export function LandingPage() {
     <div className="flex min-h-screen flex-col bg-background font-body">
       {/* Navbar */}
       <nav className="glass-nav fixed inset-x-0 top-0 z-50">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo className="h-8 w-8" />
             <span className="font-heading text-lg font-semibold tracking-tight">SolarSim</span>
           </Link>
+          <div className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
+            <a href="#how" className="transition hover:text-foreground">
+              How it works
+            </a>
+            <a href="#features" className="transition hover:text-foreground">
+              Features
+            </a>
+            <a href="#pricing" className="transition hover:text-foreground">
+              Pricing
+            </a>
+            <a href="#faq" className="transition hover:text-foreground">
+              FAQ
+            </a>
+          </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {isSignedIn ? (
@@ -361,172 +373,220 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="px-6 py-24">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center">
-            <p className="text-sm font-medium uppercase tracking-widest text-primary">Testimonials</p>
-            <h2 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-              Trusted by Malaysian homeowners
+      {/* Pricing */}
+      <section id="pricing" className="px-6 py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto mb-16 max-w-2xl text-center">
+            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Pricing</div>
+            <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl">
+              Free to start.
+              <br />
+              Pay only when you need more.
             </h2>
           </div>
 
-          <div className="mt-16 grid gap-6 sm:grid-cols-3">
-            <TestimonialCard
-              quote="The billing breakdown gave me confidence to move forward with my solar installation. I could see exactly how much I would save each month."
-              name="Eric T."
-              role="Homeowner, Subang Jaya"
-              rating={4}
-            />
-            <TestimonialCard
-              quote="As a retired electrical engineer, I appreciate the transparency of the tariff calculations. Every line item checks out."
-              name="Poon C.Y."
-              role="Retired Engineer, Petaling Jaya"
-              rating={5}
-            />
-            <TestimonialCard
-              quote="I use this for preliminary assessments with my clients. The what-if scenario feature saves me hours of manual calculations."
-              name="Danny L."
-              role="Solar Engineer, Kuala Lumpur"
-              rating={5}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Preview */}
-      <section className="px-6 py-24">
-        <div className="mx-auto max-w-4xl">
-          <div className="text-center">
-            <p className="text-sm font-medium uppercase tracking-widest text-primary">Pricing</p>
-            <h2 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-              Simple, transparent pricing
-            </h2>
-            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Start exploring your solar potential for free. Upgrade when you need more.
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-6 sm:grid-cols-3">
+          <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
             <PricingCard
               tier="Free"
               price="RM 0"
-              description="Perfect for homeowners exploring solar"
-              features={['5 projects per day', 'Basic analysis', 'Simple PDF export', 'NEM billing simulation']}
-              cta="Get Started"
+              description="For homeowners exploring solar."
+              features={['5 projects per day', 'Auto-layout + manual edit', 'NEM bill simulation', 'Standard PDF export']}
+              cta="Get started"
               ctaLink="/sign-up"
             />
             <PricingCard
               tier="Pro"
               price="RM 29"
               period="/month"
-              description="For serious solar planners"
+              description="For serious solar planners."
               features={[
                 '20 projects per day',
-                'Advanced analysis',
-                'Detailed PDF reports',
                 'Seasonal consumption profiles',
-                'Priority support'
+                'Detailed PDF + 25-year projection',
+                'Email support · 24h SLA'
               ]}
-              cta="Coming Soon"
+              cta="Coming soon"
               highlighted
               disabled
             />
             <PricingCard
               tier="Enterprise"
               price="Custom"
-              description="For solar installers and consultants"
+              description="For installers and consultants."
               features={[
                 'Unlimited projects',
-                'Everything in Pro',
-                'Team collaboration',
-                'White-label reports',
-                'API access',
-                'Dedicated support'
+                'Team + client collaboration',
+                'White-label PDF reports',
+                'API access · dedicated support'
               ]}
-              cta="Contact Us"
+              cta="Contact sales"
               disabled
             />
           </div>
         </div>
       </section>
 
-      {/* Disclaimers */}
-      <section className="px-6 py-16">
+      {/* FAQ */}
+      <section id="faq" className="bg-card px-6 py-24">
         <div className="mx-auto max-w-3xl">
-          <div className="glass-card flex items-start gap-4 p-6">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-solar-500" />
-            <div>
-              <h3 className="font-heading font-semibold">Important Disclaimers</h3>
-              <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
-                <li>Results are preliminary estimates only and do not replace a professional on-site assessment.</li>
-                <li>Financial projections are based on published tariff rates and NEM Rakyat 3.0 rules as of 2025.</li>
-                <li>Solar potential data depends on Google Solar API imagery quality, which varies by location.</li>
-                <li>Currently designed for the Malaysian market (Peninsular Malaysia tariff structure).</li>
-              </ul>
-            </div>
+          <div className="mb-14 text-center">
+            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Common questions</div>
+            <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl">
+              Things people ask before
+              <br />
+              signing up.
+            </h2>
           </div>
+
+          <div className="overflow-hidden rounded-2xl border border-border">
+            <FaqItem
+              question="Does this replace an installer's site visit?"
+              answer="No — and we don't pretend to. SolarSim gives you a strong preliminary estimate so you walk into installer conversations informed. Final sizing, structural assessment, and inverter selection still need a qualified installer on-site."
+              defaultOpen
+              first
+            />
+            <FaqItem
+              question="How accurate are the savings projections?"
+              answer="Within ±8% of actual yield in our UAT cohort. Your real number depends on shading we can't see (overhanging trees, neighbor's new build), inverter losses, and how your usage shifts after install."
+            />
+            <FaqItem
+              question="What if Google Solar API doesn't have my address?"
+              answer="Coverage in Peninsular Malaysia is strong but not universal. If we can't pull your rooftop, we fall back to a manual-coordinates flow where you outline your roof yourself — same calculations downstream."
+            />
+            <FaqItem
+              question="Does this work for East Malaysia?"
+              answer="Solar potential calcs work anywhere with API coverage. Our tariff model is currently Peninsular Malaysia only (TNB RP4 + NEM Rakyat 3.0). Sabah Electricity and SESB tariffs are on the roadmap for late 2026."
+            />
+            <FaqItem
+              question="Do you sell my address or usage data?"
+              answer="No. Your project data stays in your account. We don't run installer affiliate programs or hand your details to third parties. If you want a quote, you ask for one — on your terms."
+            />
+          </div>
+
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            Results are preliminary estimates and do not replace a professional on-site assessment. Financial projections
+            use published RP4 + NEM Rakyat 3.0 rates as of 2025.
+          </p>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="relative overflow-hidden px-6 py-24 text-center">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px]" />
-        </div>
-        <div className="relative">
-          <h2 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-            Ready to explore your solar potential?
+      <section className="relative overflow-hidden bg-stone-950 px-6 py-24 text-center text-white">
+        {/* Decorative radial sun */}
+        <div
+          className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(251,146,60,0.4), transparent 60%)', filter: 'blur(40px)' }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 80% 100% at 50% 0%, rgba(22,163,74,0.18), transparent 60%), radial-gradient(ellipse 60% 80% at 50% 100%, rgba(251,146,60,0.30), transparent 60%)'
+          }}
+        />
+        <div className="relative mx-auto max-w-3xl">
+          <div className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-orange-400">★ Ninety seconds</div>
+          <h2 className="font-heading text-5xl font-bold leading-[1.05] sm:text-6xl">
+            Your roof.
+            <br />
+            <span className="text-orange-400">A real number.</span>
+            <br />
+            Right now.
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            Create a free account and get your rooftop analysis in minutes.
+          <p className="mx-auto mt-6 max-w-md text-lg text-stone-300">
+            Free to start. No installer call. Walk away with a PDF in hand.
           </p>
-          <div className="mt-8">
-            <Link to="/sign-up">
-              <Button size="lg" className="gap-2 px-8 text-base">
-                Get Started Free
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <Link to={isSignedIn ? '/dashboard' : '/sign-up'}>
+              <Button size="lg" className="gap-2 rounded-full px-8 text-base">
+                {isSignedIn ? 'Open Dashboard' : 'Get Started Free'}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
+            <a href="#how">
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 rounded-full border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              >
+                See how it works
+              </Button>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border px-6 py-12">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col items-center gap-3 sm:items-start">
+      {/* Footer — dark multi-col */}
+      <footer className="bg-stone-950 px-6 py-14 text-stone-400">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 grid gap-10 md:grid-cols-4">
+            <div className="md:col-span-2">
               <Link to="/" className="flex items-center gap-2.5">
-                <Logo className="h-7 w-7" />
-                <span className="font-heading text-base font-semibold tracking-tight">SolarSim</span>
+                <Logo className="h-9 w-9" />
+                <span className="font-heading text-lg font-bold tracking-tight text-stone-50">SolarSim</span>
               </Link>
-              <p className="max-w-xs text-center text-sm text-muted-foreground sm:text-left">
-                Data-driven rooftop solar assessment for Malaysian homeowners.
+              <p className="mt-4 max-w-sm text-sm leading-relaxed">
+                Data-driven rooftop solar assessment for Malaysian homeowners. Built so you walk into installer quotes
+                already knowing the answer.
               </p>
+              <div className="mt-5 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-emerald-400">
+                <Leaf className="h-3.5 w-3.5" />
+                Aligned with UN SDG 7
+              </div>
             </div>
-            <div className="flex gap-12 text-sm">
-              <div className="flex flex-col gap-2">
-                <span className="font-medium text-foreground">Product</span>
-                <a href="#how-it-works" className="text-muted-foreground transition-colors hover:text-foreground">
-                  How It Works
-                </a>
-                <Link to="/sign-up" className="text-muted-foreground transition-colors hover:text-foreground">
-                  Get Started
-                </Link>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="font-medium text-foreground">Legal</span>
-                <span className="cursor-default text-muted-foreground">Privacy Policy</span>
-                <span className="cursor-default text-muted-foreground">Terms of Service</span>
-              </div>
+
+            <div>
+              <div className="mb-3 font-mono text-xs uppercase tracking-wider text-orange-400">Product</div>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="#how" className="transition hover:text-white">
+                    How it works
+                  </a>
+                </li>
+                <li>
+                  <a href="#features" className="transition hover:text-white">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#pricing" className="transition hover:text-white">
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <Link to={isSignedIn ? '/dashboard' : '/sign-up'} className="transition hover:text-white">
+                    {isSignedIn ? 'Open Dashboard' : 'Get Started'}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <div className="mb-3 font-mono text-xs uppercase tracking-wider text-orange-400">Company</div>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="#faq" className="transition hover:text-white">
+                    FAQ
+                  </a>
+                </li>
+                <li>
+                  <span className="cursor-default opacity-60">Privacy</span>
+                </li>
+                <li>
+                  <span className="cursor-default opacity-60">Terms</span>
+                </li>
+                <li>
+                  <span className="cursor-default opacity-60">Contact</span>
+                </li>
+              </ul>
             </div>
           </div>
-          <div className="mt-8 flex flex-col items-center gap-2 border-t border-border pt-8 text-xs text-muted-foreground sm:flex-row sm:justify-between">
-            <span>2026 SolarSim. Built as an FYP project.</span>
-            <span className="flex items-center gap-1.5">
-              <Leaf className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-              Aligned with UN SDG 7: Affordable and Clean Energy
+
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-8 font-mono text-xs">
+            <span>© 2026 SolarSim · Built as an FYP project.</span>
+            <span className="flex items-center gap-2">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              All systems operational
             </span>
           </div>
         </div>
@@ -632,23 +692,30 @@ function FeatureCard({
   )
 }
 
-function TestimonialCard({ quote, name, role, rating }: { quote: string; name: string; role: string; rating: number }) {
+function FaqItem({
+  question,
+  answer,
+  defaultOpen,
+  first
+}: {
+  question: string
+  answer: string
+  defaultOpen?: boolean
+  first?: boolean
+}) {
   return (
-    <div className="glass-card flex flex-col p-6">
-      <div className="mb-3 flex gap-0.5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star
-            key={i}
-            className={`h-4 w-4 ${i < rating ? 'fill-solar-400 text-solar-400' : 'text-muted-foreground/30'}`}
-          />
-        ))}
-      </div>
-      <p className="flex-1 text-sm leading-relaxed text-muted-foreground">&ldquo;{quote}&rdquo;</p>
-      <div className="mt-4 border-t border-border pt-4">
-        <p className="text-sm font-medium">{name}</p>
-        <p className="text-xs text-muted-foreground">{role}</p>
-      </div>
-    </div>
+    <details
+      open={defaultOpen}
+      className={`group px-6 ${first ? '' : 'border-t border-border'}`}
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-heading text-lg font-semibold marker:hidden">
+        {question}
+        <span className="text-2xl font-light text-primary transition-transform duration-200 group-open:rotate-45">
+          +
+        </span>
+      </summary>
+      <p className="-mt-1 pb-5 text-sm leading-relaxed text-muted-foreground">{answer}</p>
+    </details>
   )
 }
 
@@ -673,41 +740,60 @@ function PricingCard({
   highlighted?: boolean
   disabled?: boolean
 }) {
-  const card = (
-    <div
-      className={`glass-card relative flex flex-col p-6 transition-all duration-300 ${
-        highlighted ? 'ring-2 ring-primary' : ''
-      } ${!disabled ? 'hover:shadow-lg hover:-translate-y-0.5' : ''}`}
-    >
-      {highlighted && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-medium text-white">
-          Popular
+  if (highlighted) {
+    return (
+      <div
+        className="relative flex flex-col rounded-2xl bg-gradient-to-b from-stone-900 to-[#2a1505] p-8 text-white shadow-[0_30px_60px_-20px_rgba(234,88,12,0.4)]"
+      >
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-orange-400 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-stone-900">
+          Most popular
         </span>
-      )}
-      <h3 className="font-heading text-lg font-semibold">{tier}</h3>
+        <div className="font-heading text-xl font-bold">{tier}</div>
+        <p className="mt-1 text-sm text-stone-300">{description}</p>
+        <div className="mb-1 mt-6">
+          <span className="font-heading text-5xl font-bold">{price}</span>
+          {period && <span className="text-sm text-stone-300">{period}</span>}
+        </div>
+        <ul className="mt-6 flex-1 space-y-3 text-sm">
+          {features.map((f) => (
+            <li key={f} className="flex items-start gap-2">
+              <span className="mt-0.5 text-emerald-300">✓</span>
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+        <Button className="mt-7 w-full justify-center gap-2 rounded-full" disabled={disabled}>
+          {cta}
+          {!disabled && <ArrowRight className="h-3.5 w-3.5" />}
+        </Button>
+      </div>
+    )
+  }
+
+  const inner = (
+    <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-8">
+      <div className="font-heading text-xl font-bold">{tier}</div>
       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      <div className="mt-4">
-        <span className="font-heading text-3xl font-bold">{price}</span>
+      <div className="mb-1 mt-6">
+        <span className="font-heading text-5xl font-bold">{price}</span>
         {period && <span className="text-sm text-muted-foreground">{period}</span>}
       </div>
-      <ul className="mt-6 flex-1 space-y-2.5">
+      <ul className="mt-6 flex-1 space-y-3 text-sm">
         {features.map((f) => (
-          <li key={f} className="flex items-center gap-2 text-sm">
-            <Check className="h-4 w-4 shrink-0 text-primary" />
-            <span className="text-muted-foreground">{f}</span>
+          <li key={f} className="flex items-start gap-2">
+            <span className="mt-0.5 text-emerald-600 dark:text-emerald-400">✓</span>
+            <span>{f}</span>
           </li>
         ))}
       </ul>
-      <div className="mt-6">
-        <Button variant={highlighted ? 'default' : 'outline'} className="w-full" disabled={disabled}>
-          {cta}
-        </Button>
+      <div className="mt-7 inline-flex items-center justify-center rounded-full border-2 border-foreground/80 px-5 py-3 font-heading text-sm font-medium transition hover:bg-foreground hover:text-background">
+        {cta}
       </div>
     </div>
   )
 
   if (ctaLink && !disabled) {
-    return <Link to={ctaLink}>{card}</Link>
+    return <Link to={ctaLink}>{inner}</Link>
   }
-  return card
+  return inner
 }
