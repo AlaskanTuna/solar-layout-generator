@@ -20,7 +20,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Activity, ArrowRight, Clock, FolderKanban, PieChart, MapPin, LayoutDashboard } from 'lucide-react'
+import { Activity, ArrowRight, CircleHelp, Clock, FolderKanban, PieChart, MapPin, LayoutDashboard } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
@@ -50,6 +50,13 @@ const QUICK_ACTIONS = [
     label: 'Analytics',
     desc: 'Compare performance signals and savings across your solar work.',
     art: '/dashboard/analytics.webp'
+  },
+  {
+    to: '/dashboard/faq',
+    icon: CircleHelp,
+    label: 'FAQ',
+    desc: 'Find answers about Solar API data, NEM tariffs, and how to use the workbench.',
+    art: '/dashboard/faq.webp'
   }
 ]
 
