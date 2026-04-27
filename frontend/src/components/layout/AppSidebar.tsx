@@ -31,9 +31,9 @@ function NavLink({ to, icon: Icon, label, active }: { to: string; icon: LucideIc
   return (
     <Link
       to={to}
-      className={`group flex h-12 items-center gap-2.5 rounded-lg px-2 text-sm transition-colors ${
+      className={`group relative flex h-12 items-center gap-2.5 rounded-lg px-2 text-sm transition-colors ${
         active
-          ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+          ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[2px] before:rounded-full before:bg-primary'
           : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
       }`}
     >
