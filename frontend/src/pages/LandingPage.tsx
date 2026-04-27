@@ -30,73 +30,6 @@ export function LandingPage() {
   const navScrolled = scrollY > 24
   const heroBlur = Math.min(14, scrollY / 40)
 
-  useEffect(() => {
-    document.documentElement.classList.add('landing-snap')
-    return () => document.documentElement.classList.remove('landing-snap')
-  }, [])
-
-  // Cinematic JS-driven snap on wheel — slower than browser-native snap (~300ms) so the
-  // section transitions feel deliberate. Touch/keyboard still use the CSS proximity snap.
-  useEffect(() => {
-    const DURATION_MS = 1100
-    const COOLDOWN_MS = 1200
-    const NAV_OFFSET = 64
-    let isAnimating = false
-    let lastSnapTime = 0
-
-    function ease(t: number) {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-    }
-
-    function snapTo(targetY: number) {
-      isAnimating = true
-      const startY = window.scrollY
-      const distance = targetY - startY
-      const t0 = performance.now()
-      function frame(t: number) {
-        const p = Math.min(1, (t - t0) / DURATION_MS)
-        window.scrollTo(0, startY + distance * ease(p))
-        if (p < 1) requestAnimationFrame(frame)
-        else isAnimating = false
-      }
-      requestAnimationFrame(frame)
-    }
-
-    function onWheel(e: WheelEvent) {
-      if (e.deltaY === 0) return
-      const now = performance.now()
-      if (isAnimating || now - lastSnapTime < COOLDOWN_MS) {
-        e.preventDefault()
-        return
-      }
-
-      const targets = Array.from(document.querySelectorAll<HTMLElement>('.snap-start'))
-      const direction = e.deltaY > 0 ? 1 : -1
-      const currentY = window.scrollY
-      let next: HTMLElement | undefined
-
-      if (direction > 0) {
-        next = targets.find((el) => el.offsetTop > currentY + 10)
-      } else {
-        for (let i = targets.length - 1; i >= 0; i--) {
-          if (targets[i].offsetTop < currentY - 10) {
-            next = targets[i]
-            break
-          }
-        }
-      }
-
-      if (next) {
-        e.preventDefault()
-        lastSnapTime = now
-        snapTo(Math.max(0, next.offsetTop - NAV_OFFSET))
-      }
-    }
-
-    window.addEventListener('wheel', onWheel, { passive: false })
-    return () => window.removeEventListener('wheel', onWheel)
-  }, [])
-
   if (loading) return null
   const isSignedIn = !!session
 
@@ -136,7 +69,7 @@ export function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative h-screen snap-start overflow-hidden">
+      <section className="relative h-screen overflow-hidden">
         {/* Background image — blurs progressively on scroll */}
         <div className="absolute inset-0">
           <img
@@ -318,7 +251,7 @@ export function LandingPage() {
       {/* Trust band — scrolling marquee */}
       <section
         aria-label="Trust signals"
-        className="snap-start overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
+        className="overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
       >
         <div className="flex w-max animate-marquee items-center gap-12 px-6 font-mono text-sm uppercase tracking-[0.18em] text-stone-400">
           <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
@@ -349,7 +282,7 @@ export function LandingPage() {
       <PipelineSection />
 
       {/* Features */}
-      <section id="features" className="snap-start px-6 py-24">
+      <section id="features" className="px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ What's inside</div>
@@ -402,7 +335,7 @@ export function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="snap-start px-6 py-24">
+      <section id="pricing" className="px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Pricing</div>
@@ -455,7 +388,7 @@ export function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="snap-start bg-card px-6 py-24">
+      <section id="faq" className="bg-card px-6 py-24">
         <div className="mx-auto max-w-3xl">
           <div className="mb-14 text-center">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Common questions</div>
@@ -499,7 +432,7 @@ export function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative snap-start overflow-hidden bg-stone-950 px-6 py-24 text-center text-white">
+      <section className="relative overflow-hidden bg-stone-950 px-6 py-24 text-center text-white">
         {/* Decorative radial sun */}
         <div
           className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full"
@@ -752,7 +685,7 @@ function PipelineSection() {
   }, [])
 
   return (
-    <section id="how" className="relative snap-start bg-stone-950 px-6 text-stone-50">
+    <section id="how" className="relative bg-stone-950 px-6 text-stone-50">
       <div className="mx-auto max-w-7xl pb-16 pt-24">
         <div className="max-w-2xl">
           <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-orange-400">★ The Pipeline</div>
@@ -776,7 +709,7 @@ function PipelineSection() {
                   ref={(el) => {
                     stepRefs.current[i] = el
                   }}
-                  className={`snap-start border-t py-10 transition-colors duration-300 ${
+                  className={`border-t py-10 transition-colors duration-300 ${
                     isActive ? 'border-orange-400/45' : 'border-white/10'
                   }`}
                 >
