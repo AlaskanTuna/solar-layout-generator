@@ -87,15 +87,15 @@ export function DashboardPage() {
   }
 
   const userName = user?.email?.split('@')[0] ?? ''
-  const recentProject = [...(projectsQuery.data ?? [])].sort((a, b) => {
-    const aVisited = getProjectLastVisitedAt(a.id)
-    const bVisited = getProjectLastVisitedAt(b.id)
-    const aTime = new Date(aVisited ?? a.updatedAt).getTime()
-    const bTime = new Date(bVisited ?? b.updatedAt).getTime()
-    return bTime - aTime
-  })[0]
-  const recentVisitedAt = recentProject ? getProjectLastVisitedAt(recentProject.id) : null
-  const recentStatus = recentProject ? getProjectStatusConfig(recentProject.status) : null
+  const recentProjects = [...(projectsQuery.data ?? [])]
+    .sort((a, b) => {
+      const aVisited = getProjectLastVisitedAt(a.id)
+      const bVisited = getProjectLastVisitedAt(b.id)
+      const aTime = new Date(aVisited ?? a.updatedAt).getTime()
+      const bTime = new Date(bVisited ?? b.updatedAt).getTime()
+      return bTime - aTime
+    })
+    .slice(0, 3)
 
   const actionCardClass =
     'glass-card group relative flex min-h-[168px] w-full flex-col items-start justify-between overflow-hidden p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:min-h-[176px]'
@@ -197,30 +197,39 @@ export function DashboardPage() {
             <div className="flex flex-1 flex-col">
               {projectsQuery.isLoading ? (
                 <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">Loading...</div>
-              ) : recentProject && recentStatus ? (
-                <button
-                  type="button"
-                  onClick={() => navigate(projectRoute(recentProject))}
-                  className="group relative z-10 mt-5 w-full rounded-xl border border-border bg-muted/30 p-4 text-left transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-heading text-sm font-semibold">{recentProject.name}</p>
-                      <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {formatRelativeDate(recentVisitedAt ?? recentProject.updatedAt)}
-                      </p>
-                    </div>
-                    <recentStatus.icon className="h-4 w-4 shrink-0 text-primary" />
-                  </div>
-                  <div className="mt-4 flex items-center justify-between gap-3 text-xs font-medium">
-                    <span className="text-muted-foreground">{recentStatus.label}</span>
-                    <span className="flex items-center gap-1 text-primary">
-                      Continue
-                      <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                  </div>
-                </button>
+              ) : recentProjects.length > 0 ? (
+                <div className="relative z-10 mt-5 space-y-2">
+                  {recentProjects.map((project) => {
+                    const visitedAt = getProjectLastVisitedAt(project.id)
+                    const status = getProjectStatusConfig(project.status)
+                    return (
+                      <button
+                        key={project.id}
+                        type="button"
+                        onClick={() => navigate(projectRoute(project))}
+                        className="group w-full rounded-xl border border-border bg-muted/30 p-3 text-left transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate font-heading text-sm font-semibold">{project.name}</p>
+                            <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {formatRelativeDate(visitedAt ?? project.updatedAt)}
+                            </p>
+                          </div>
+                          <status.icon className="h-4 w-4 shrink-0 text-primary" />
+                        </div>
+                        <div className="mt-2 flex items-center justify-between gap-3 text-xs font-medium">
+                          <span className="truncate text-muted-foreground">{status.label}</span>
+                          <span className="flex shrink-0 items-center gap-1 text-primary">
+                            Continue
+                            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                          </span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
               ) : (
                 <div className="relative z-10 flex flex-1 items-center justify-center text-sm font-medium text-muted-foreground">
                   None
