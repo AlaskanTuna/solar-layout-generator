@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
@@ -16,6 +16,7 @@ import {
   Star,
   Leaf,
   ChevronDown,
+  ChevronUp,
   Clock,
   Sun,
   BookOpen
@@ -172,8 +173,8 @@ export function LandingPage() {
                   }}
                 >
                   <div className="mb-5 flex items-center justify-between">
-                    <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/70">
-                      Sample report · Bandar Utama
+                    <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/70 transition-opacity duration-300">
+                      Sample report · {ticker.location}
                     </div>
                     <span className="rounded-full border border-emerald-400/40 bg-emerald-500/25 px-2 py-0.5 font-mono text-[10px] text-emerald-200">
                       LIVE
@@ -211,10 +212,10 @@ export function LandingPage() {
                         Monthly yield (kWh)
                       </div>
                       <div className="flex h-16 items-end gap-1">
-                        {[62, 70, 80, 88, 96, 92, 84, 90, 82, 74, 68, 60].map((h, i) => (
+                        {ticker.monthly.map((h, i) => (
                           <div
                             key={i}
-                            className={`flex-1 rounded-sm ${
+                            className={`flex-1 rounded-sm transition-all duration-700 ease-out ${
                               h > 86
                                 ? 'bg-gradient-to-b from-amber-300 to-orange-500'
                                 : 'bg-gradient-to-b from-orange-400 to-orange-600'
@@ -555,6 +556,20 @@ export function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll-to-top button — glassmorphism, fades in past first viewport */}
+      <button
+        type="button"
+        aria-label="Scroll to top"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className={`fixed bottom-8 left-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-white/60 bg-white/40 text-foreground shadow-[0_8px_24px_rgba(234,88,12,0.18)] backdrop-blur-xl transition-all duration-300 hover:bg-white/60 dark:border-white/10 dark:bg-stone-900/55 dark:text-foreground dark:hover:bg-stone-900/75 ${
+          scrollY > 400
+            ? 'translate-y-0 opacity-100'
+            : 'pointer-events-none translate-y-4 opacity-0'
+        }`}
+      >
+        <ChevronUp className="h-5 w-5" />
+      </button>
     </div>
   )
 }
@@ -572,30 +587,87 @@ function useScrollY() {
   return y
 }
 
-function useHeroTicker() {
-  const [vals, setVals] = useState({ kwp: 6.2, savings: 3000, payback: 8.5 })
+type HeroProfile = {
+  location: string
+  kwp: number
+  savings: number
+  payback: number
+  monthly: number[]
+}
 
+const HERO_PROFILES: HeroProfile[] = [
+  {
+    location: 'Bandar Utama · PJ',
+    kwp: 8.4,
+    savings: 5840,
+    payback: 5.7,
+    monthly: [62, 70, 80, 88, 96, 92, 84, 90, 82, 74, 68, 60]
+  },
+  {
+    location: 'George Town · Penang',
+    kwp: 5.6,
+    savings: 4120,
+    payback: 6.2,
+    monthly: [58, 66, 76, 84, 90, 86, 78, 82, 80, 72, 64, 56]
+  },
+  {
+    location: 'Mount Austin · JB',
+    kwp: 11.2,
+    savings: 7950,
+    payback: 5.2,
+    monthly: [70, 76, 84, 92, 98, 94, 88, 92, 86, 78, 72, 64]
+  },
+  {
+    location: 'Section 7 · Shah Alam',
+    kwp: 7.8,
+    savings: 5240,
+    payback: 5.9,
+    monthly: [60, 68, 78, 86, 94, 90, 82, 88, 80, 72, 66, 58]
+  },
+  {
+    location: 'PJU 5 · Kota Damansara',
+    kwp: 9.2,
+    savings: 6480,
+    payback: 5.5,
+    monthly: [64, 72, 82, 90, 96, 92, 86, 90, 84, 76, 70, 62]
+  }
+]
+
+function useHeroTicker() {
+  const [profileIdx, setProfileIdx] = useState(0)
+  const [vals, setVals] = useState({ kwp: 6.2, savings: 3000, payback: 8.5 })
+  const valsRef = useRef(vals)
+  valsRef.current = vals
+
+  // Rotate to next profile every 5s
   useEffect(() => {
-    const targets = { kwp: 8.4, savings: 5840, payback: 5.7 }
-    const start = { kwp: 6.2, savings: 3000, payback: 8.5 }
-    const dur = 1400
+    const id = setInterval(() => setProfileIdx((i) => (i + 1) % HERO_PROFILES.length), 5000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Animate ticker values from current displayed values to the new target whenever the profile flips
+  useEffect(() => {
+    const target = HERO_PROFILES[profileIdx]
+    const start = { ...valsRef.current }
+    const dur = 1100
     const t0 = performance.now()
     let raf = 0
     const frame = (t: number) => {
       const p = Math.min(1, (t - t0) / dur)
       const ease = 1 - Math.pow(1 - p, 3)
       setVals({
-        kwp: start.kwp + (targets.kwp - start.kwp) * ease,
-        savings: Math.round(start.savings + (targets.savings - start.savings) * ease),
-        payback: start.payback + (targets.payback - start.payback) * ease
+        kwp: start.kwp + (target.kwp - start.kwp) * ease,
+        savings: Math.round(start.savings + (target.savings - start.savings) * ease),
+        payback: start.payback + (target.payback - start.payback) * ease
       })
       if (p < 1) raf = requestAnimationFrame(frame)
     }
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [])
+  }, [profileIdx])
 
-  return vals
+  const profile = useMemo(() => HERO_PROFILES[profileIdx], [profileIdx])
+  return { ...vals, location: profile.location, monthly: profile.monthly }
 }
 
 function TrustItem({ icon, label }: { icon: React.ReactNode; label: string }) {
@@ -715,7 +787,7 @@ function PipelineSection() {
                   ref={(el) => {
                     stepRefs.current[i] = el
                   }}
-                  className={`border-t py-10 transition-colors duration-300 ${
+                  className={`snap-start border-t py-10 transition-colors duration-300 ${
                     isActive ? 'border-orange-400/45' : 'border-white/10'
                   }`}
                 >
