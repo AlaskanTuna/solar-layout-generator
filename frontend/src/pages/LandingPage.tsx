@@ -240,8 +240,38 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Trust band — scrolling marquee */}
+      <section
+        aria-label="Trust signals"
+        className="overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
+      >
+        <div className="flex w-max animate-marquee items-center gap-12 px-6 font-mono text-sm uppercase tracking-[0.18em] text-stone-400">
+          <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 compliant" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label="Aligned with UN SDG 7" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Peninsular Malaysia tariff" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="No data sold" />
+          <span className="text-stone-700">·</span>
+          {/* Duplicated for seamless loop */}
+          <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 compliant" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label="Aligned with UN SDG 7" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Peninsular Malaysia tariff" />
+          <span className="text-stone-700">·</span>
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="No data sold" />
+          <span className="text-stone-700">·</span>
+        </div>
+      </section>
+
       {/* How It Works */}
-      <section id="how-it-works" className="relative px-6 py-24">
+      <section id="how" className="relative px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <div className="text-center animate-fade-in">
             <p className="text-sm font-medium uppercase tracking-widest text-primary">How It Works</p>
@@ -514,6 +544,15 @@ function useHeroTicker() {
   }, [])
 
   return vals
+}
+
+function TrustItem({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+      {icon}
+      {label}
+    </span>
+  )
 }
 
 function StepCard({
