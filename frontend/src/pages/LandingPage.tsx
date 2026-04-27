@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/Logo'
 import {
   MapPin,
-  SlidersHorizontal,
-  FileBarChart,
   Satellite,
   Move,
   Receipt,
@@ -18,7 +16,6 @@ import {
   Star,
   Leaf,
   ChevronDown,
-  ChevronRight,
   Clock,
   Sun,
   BookOpen
@@ -284,41 +281,8 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how" className="relative px-6 py-24">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center animate-fade-in">
-            <p className="text-sm font-medium uppercase tracking-widest text-primary">How It Works</p>
-            <h2 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-              Three steps to solar clarity
-            </h2>
-            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              From address search to savings report — no engineering degree required.
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-3">
-            <StepCard
-              step={1}
-              icon={<MapPin className="h-6 w-6" />}
-              title="Search Your Location"
-              description="Enter your address and confirm your building on the satellite map. We fetch real rooftop data from Google Solar API."
-            />
-            <StepCard
-              step={2}
-              icon={<SlidersHorizontal className="h-6 w-6" />}
-              title="Adjust Your Layout"
-              description="Fine-tune your solar panel layout on an interactive canvas. Drag, rotate, add or remove panels to match your roof."
-            />
-            <StepCard
-              step={3}
-              icon={<FileBarChart className="h-6 w-6" />}
-              title="Analyze Your Savings"
-              description="See your projected monthly savings, payback period and bill breakdown based on current Malaysian NEM tariff rates."
-            />
-          </div>
-        </div>
-      </section>
+      {/* How It Works — sticky-scroll pipeline */}
+      <PipelineSection />
 
       {/* Features */}
       <section id="features" className="px-6 py-24">
@@ -632,36 +596,226 @@ function TrustItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   )
 }
 
-function StepCard({
-  step,
-  icon,
-  title,
-  description
-}: {
-  step: number
-  icon: React.ReactNode
+type PipelineStep = {
+  num: string
+  label: string
   title: string
-  description: string
-}) {
-  return (
-    <div className="group relative flex flex-col items-center text-center">
-      {/* Connector line (between cards) */}
-      {step < 3 && (
-        <div className="absolute left-[calc(50%+40px)] top-7 hidden h-px w-[calc(100%-80px)] bg-border sm:block">
-          <ChevronRight className="absolute -right-2 -top-2 h-4 w-4 text-muted-foreground" />
-        </div>
-      )}
+  body: string
+  tags: { label: string; tone: 'tangerine' | 'leaf' }[]
+  mockSrc: string
+  mockHost: string
+  mockHeadline: string
+  mockSub: string
+  mockBg: string
+}
 
-      <div className="relative mb-5">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
-          {icon}
+const PIPELINE_STEPS: PipelineStep[] = [
+  {
+    num: 'STEP 01',
+    label: 'LOCATE',
+    title: 'Find your roof on the map.',
+    body: "Type your address. We center on your building, pull Google Solar API rooftop geometry, and show you exactly which structure we'll analyze — so there's no mistaking your home for the neighbor's.",
+    tags: [
+      { label: 'Google Maps', tone: 'tangerine' },
+      { label: 'Solar API', tone: 'tangerine' }
+    ],
+    mockSrc: '/screenshots/map.webp',
+    mockHost: 'solarsim.app/locate',
+    mockHeadline: '142 m²',
+    mockSub: 'Roof area detected',
+    mockBg: 'linear-gradient(135deg, #1a1f1a, #23291f 40%, #3a4233 100%)'
+  },
+  {
+    num: 'STEP 02',
+    label: 'LAYOUT',
+    title: 'Drop, drag, rotate panels.',
+    body: "We auto-place a yield-optimized array on your rooftop. Don't like it? Drag panels around, rotate them, delete the ones that fall in shade. Total energy and savings update on every move — no recalc button.",
+    tags: [
+      { label: 'Interactive canvas', tone: 'leaf' },
+      { label: 'Live yield', tone: 'leaf' }
+    ],
+    mockSrc: '/screenshots/workbench.webp',
+    mockHost: 'solarsim.app/workbench',
+    mockHeadline: '26 panels · 10.4 kWp',
+    mockSub: '+2.1% vs auto-layout',
+    mockBg: 'linear-gradient(135deg, #221a13, #3a2a1c 60%, #2a3525 100%)'
+  },
+  {
+    num: 'STEP 03',
+    label: 'ANALYZE',
+    title: 'See your bill, twelve months out.',
+    body: "We model your monthly bill against post-July 2025 RP4 tariffs, EEI rebates, AFA, SST and the RE Fund — month-by-month. Export the whole thing as a PDF to bring to your installer.",
+    tags: [
+      { label: 'RP4 tariff', tone: 'tangerine' },
+      { label: 'PDF export', tone: 'tangerine' }
+    ],
+    mockSrc: '/screenshots/analysis.webp',
+    mockHost: 'solarsim.app/analysis',
+    mockHeadline: 'RM 5,840',
+    mockSub: 'yearly savings · 5.7 yr payback',
+    mockBg: 'linear-gradient(135deg, #1a140e, #2a1f15)'
+  }
+]
+
+function PipelineSection() {
+  const [active, setActive] = useState(0)
+  const stepRefs = useRef<(HTMLElement | null)[]>([])
+
+  useEffect(() => {
+    function update() {
+      const trigger = window.innerHeight * 0.5
+      let idx = 0
+      stepRefs.current.forEach((el, i) => {
+        if (el && el.getBoundingClientRect().top <= trigger) idx = i
+      })
+      setActive(idx)
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+
+  return (
+    <section id="how" className="relative bg-stone-950 px-6 text-stone-50">
+      <div className="mx-auto max-w-7xl pb-16 pt-24">
+        <div className="max-w-2xl">
+          <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-orange-400">★ The Pipeline</div>
+          <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
+            From address to answer
+            <br />
+            <span className="text-stone-500">in three steps.</span>
+          </h2>
         </div>
-        <span className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-          {step}
-        </span>
       </div>
-      <h3 className="font-heading text-lg font-semibold">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
+
+      <div className="mx-auto max-w-7xl pb-32">
+        <div className="grid gap-12 lg:grid-cols-12">
+          {/* Left — text steps */}
+          <div className="space-y-2 lg:col-span-6">
+            {PIPELINE_STEPS.map((step, i) => {
+              const isActive = i === active
+              return (
+                <article
+                  key={step.num}
+                  ref={(el) => {
+                    stepRefs.current[i] = el
+                  }}
+                  className={`border-t py-10 transition-colors duration-300 ${
+                    isActive ? 'border-orange-400/45' : 'border-white/10'
+                  }`}
+                >
+                  <div
+                    className={`mb-3 font-mono text-xs uppercase tracking-[0.18em] transition-colors duration-300 ${
+                      isActive ? 'text-orange-400' : 'text-stone-500'
+                    }`}
+                  >
+                    {step.num} — {step.label}
+                  </div>
+                  <h3
+                    className={`mb-4 font-heading text-3xl font-bold leading-tight transition-colors duration-300 sm:text-4xl ${
+                      isActive ? 'text-stone-50' : 'text-stone-400'
+                    }`}
+                  >
+                    {step.title}
+                  </h3>
+                  <p className="max-w-md text-base leading-relaxed text-stone-400">{step.body}</p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {step.tags.map((t) => (
+                      <span
+                        key={t.label}
+                        className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-wider ${
+                          t.tone === 'leaf'
+                            ? 'border-emerald-400/25 bg-emerald-500/10 text-emerald-300'
+                            : 'border-orange-400/25 bg-orange-500/10 text-orange-300'
+                        }`}
+                      >
+                        {t.label}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+
+          {/* Right — sticky mock visuals */}
+          <div className="lg:col-span-6">
+            <div className="sticky top-28">
+              <div className="relative h-[460px]">
+                {PIPELINE_STEPS.map((step, i) => (
+                  <PipelineMock key={step.num} step={step} visible={i === active} />
+                ))}
+              </div>
+
+              {/* Step pip indicator */}
+              <div className="mt-6 flex items-center justify-center gap-2">
+                {PIPELINE_STEPS.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i === active ? 'w-8 bg-orange-400' : 'w-5 bg-white/20'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PipelineMock({ step, visible }: { step: PipelineStep; visible: boolean }) {
+  const [imgLoaded, setImgLoaded] = useState(false)
+
+  return (
+    <div
+      className={`absolute inset-0 overflow-hidden rounded-[20px] border border-white/10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] transition-opacity duration-500 ${
+        visible ? 'opacity-100' : 'pointer-events-none opacity-0'
+      }`}
+      style={{ background: '#161310' }}
+    >
+      {/* Browser chrome */}
+      <div className="flex h-9 items-center gap-1.5 border-b border-white/5 bg-white/[0.02] px-3.5">
+        <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+        <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+        <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+        <span className="ml-3 font-mono text-[11px] text-stone-500">{step.mockHost}</span>
+      </div>
+
+      {/* Content area */}
+      <div className="relative h-[calc(100%-2.25rem)]">
+        {/* Real screenshot if available */}
+        <img
+          src={step.mockSrc}
+          alt=""
+          aria-hidden="true"
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgLoaded(false)}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+            imgLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+
+        {/* Editorial fallback (also visible behind transparent corners of real screenshots) */}
+        <div
+          className={`absolute inset-0 flex flex-col justify-between p-7 transition-opacity duration-300 ${
+            imgLoaded ? 'opacity-0' : 'opacity-100'
+          }`}
+          style={{ background: step.mockBg }}
+        >
+          <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-orange-400">{step.label}</div>
+          <div>
+            <div className="font-heading text-4xl font-bold text-white sm:text-5xl">{step.mockHeadline}</div>
+            <div className="mt-2 font-mono text-xs uppercase tracking-wider text-stone-400">{step.mockSub}</div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
