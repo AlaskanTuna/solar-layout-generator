@@ -20,7 +20,9 @@ import {
   Leaf,
   ChevronDown,
   ChevronRight,
+  Clock,
   Sun,
+  BookOpen,
   AlertTriangle
 } from 'lucide-react'
 
@@ -307,38 +309,53 @@ export function LandingPage() {
       </section>
 
       {/* Features */}
-      <section className="px-6 py-24">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center">
-            <p className="text-sm font-medium uppercase tracking-widest text-primary">Features</p>
-            <h2 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-              Built for the Malaysian solar market
+      <section id="features" className="px-6 py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="max-w-2xl">
+            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ What's inside</div>
+            <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl">
+              Built like an engineer would.
+              <br />
+              <span className="text-muted-foreground">Designed for everyone else.</span>
             </h2>
-            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Everything you need to make an informed decision about going solar.
-            </p>
           </div>
 
-          <div className="mt-16 grid gap-6 sm:grid-cols-2">
+          <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
+              accent="tangerine"
               icon={<Satellite className="h-5 w-5" />}
-              title="Real Satellite Data"
-              description="Uses Google Solar API imagery and solar flux data — no guesswork or manual measurements needed."
+              title="Real satellite, not estimates"
+              description="Every panel sits on actual rooftop geometry from Google Solar API. We don't ask you for measurements you don't have."
             />
             <FeatureCard
+              accent="leaf"
               icon={<Move className="h-5 w-5" />}
-              title="Interactive Workbench"
-              description="Drag, rotate and delete panels on your actual rooftop image. Energy output updates in real time."
+              title="Drag-to-edit workbench"
+              description="Auto-layout you don't like? Move, rotate, delete any panel. Yield recalculates the moment you let go."
             />
             <FeatureCard
+              accent="tangerine"
               icon={<Receipt className="h-5 w-5" />}
-              title="NEM Billing Simulation"
-              description="Accurate bill projection using post-July 2025 RP4 tariff rates, EEI rebates, AFA, SST and RE Fund charges."
+              title="RP4 + NEM, line by line"
+              description="Bills modeled with the post-July 2025 RP4 tariff, EEI rebates, AFA, SST, RE Fund — every charge attributable to a row."
             />
             <FeatureCard
+              accent="leaf"
               icon={<FileDown className="h-5 w-5" />}
-              title="PDF Export"
-              description="Download a complete analysis report with system summary, monthly breakdown and financial projections."
+              title="Installer-ready PDF"
+              description="Export a one-click report with system summary, monthly breakdown, and 25-year projection. Walk into quotes informed."
+            />
+            <FeatureCard
+              accent="tangerine"
+              icon={<Clock className="h-5 w-5" />}
+              title="Seasonal consumption profiles"
+              description="Tell us how your usage shifts in school holidays, fasting month, year-end. We'll model it month-by-month."
+            />
+            <FeatureCard
+              accent="leaf"
+              icon={<BookOpen className="h-5 w-5" />}
+              title="Citations on every number"
+              description="Every kWh, every ringgit traces back to a published source — TNB tariff sheet, ST gazette, Google Solar API record."
             />
           </div>
         </div>
@@ -589,18 +606,28 @@ function StepCard({
   )
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function FeatureCard({
+  icon,
+  title,
+  description,
+  accent = 'tangerine'
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+  accent?: 'tangerine' | 'leaf'
+}) {
+  const iconClass =
+    accent === 'leaf'
+      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+      : 'bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-200'
   return (
-    <div className="glass-card group cursor-default p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-      <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
-          {icon}
-        </div>
-        <div>
-          <h3 className="font-heading font-semibold">{title}</h3>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
-        </div>
+    <div className="group rounded-3xl border border-border bg-gradient-to-b from-card to-orange-50/40 p-7 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_20px_40px_-20px_rgba(234,88,12,0.25)] dark:from-card dark:to-stone-900/50">
+      <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${iconClass}`}>
+        {icon}
       </div>
+      <h3 className="font-heading text-xl font-bold">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
     </div>
   )
 }
