@@ -55,14 +55,8 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
   // Physical grid flows: per-month sum of consumption beyond generation (import) and
   // generation beyond consumption (export). NEM credits net these out for billing,
   // but the raw flows are the most intuitive "what comes in / goes out" signal.
-  const totalImportKwh = monthlyBreakdown.reduce(
-    (sum, m) => sum + Math.max(0, m.consumptionKwh - m.generationKwh),
-    0
-  )
-  const totalExportKwh = monthlyBreakdown.reduce(
-    (sum, m) => sum + Math.max(0, m.generationKwh - m.consumptionKwh),
-    0
-  )
+  const totalImportKwh = monthlyBreakdown.reduce((sum, m) => sum + Math.max(0, m.consumptionKwh - m.generationKwh), 0)
+  const totalExportKwh = monthlyBreakdown.reduce((sum, m) => sum + Math.max(0, m.generationKwh - m.consumptionKwh), 0)
   const importRatePct =
     annualTotals.totalConsumptionKwh > 0 ? Math.round((totalImportKwh / annualTotals.totalConsumptionKwh) * 100) : 0
   const exportRatePct =
@@ -152,7 +146,7 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 NEM Fit
                 <InfoTooltip>
                   <div className="space-y-2">
-                    <p>How well this layout is sized for your usage under NEM Rakyat 3.0.</p>
+                    <p>How well this layout is sized for your usage under the current solar incentive program.</p>
                     <div className="space-y-1">
                       <p>
                         <span className="font-semibold">Good:</span> Most generation offsets your own bill, with very
@@ -169,14 +163,12 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                     </div>
                     <div className="space-y-0.5 border-t border-primary-foreground/20 pt-2 text-primary-foreground/80">
                       <p>
-                        Import Rate:{' '}
-                        <span className="font-semibold text-primary-foreground">{importRatePct}%</span> of usage drawn
-                        from the grid
+                        Import Rate: <span className="font-semibold text-primary-foreground">{importRatePct}%</span> of
+                        usage drawn from the grid
                       </p>
                       <p>
-                        Export Rate:{' '}
-                        <span className="font-semibold text-primary-foreground">{exportRatePct}%</span> of generation
-                        sent back to the grid
+                        Export Rate: <span className="font-semibold text-primary-foreground">{exportRatePct}%</span> of
+                        generation sent back to the grid
                       </p>
                     </div>
                   </div>

@@ -24,7 +24,10 @@ export async function getUserTier(userId: string): Promise<UserTier> {
 }
 
 export async function countProjectsSinceUtcMidnight(userId: string, now: Date = new Date()): Promise<number> {
-  return prisma.project.count({
+  // Counts immutable quota-usage rows so deleting a project does not refund the
+  // user's daily slot. The audit row is inserted in the same transaction as the
+  // project create (see projectService.createProject).
+  return prisma.projectQuotaUsage.count({
     where: {
       userId,
       createdAt: { gte: startOfUtcDay(now) }

@@ -11,7 +11,7 @@ const { count, single, eq, select, from } = vi.hoisted(() => {
 
 vi.mock('../../config/prisma.js', () => ({
   prisma: {
-    project: { count }
+    projectQuotaUsage: { count }
   }
 }))
 

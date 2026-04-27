@@ -57,6 +57,18 @@ model Project {
   location           Location      @relation(fields: [locationId], references: [id])
 }
 
+// Immutable audit log of project creations used to enforce daily quota limits.
+// Inserted alongside every successful Project create; never deleted, so deleting
+// a Project does not refund a user's daily slot. Counted by the quota middleware.
+model ProjectQuotaUsage {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
 model TariffConfig {
   id              String    @id @default(uuid())
   tariffVersion   String    @unique

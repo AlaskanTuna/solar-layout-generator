@@ -3,8 +3,15 @@ import { prisma } from '../config/prisma.js'
 import type { PanelEdit } from '@shared/types'
 
 export async function createProject(userId: string, name: string, locationId: string) {
-  return prisma.project.create({
-    data: { userId, name, locationId }
+  // Wrap in a transaction so the immutable quota-usage row lands atomically with
+  // the Project itself. Counting from ProjectQuotaUsage means deleting a project
+  // does not refund the user's daily slot.
+  return prisma.$transaction(async (tx) => {
+    const project = await tx.project.create({ data: { userId, name, locationId } })
+    await tx.projectQuotaUsage.create({
+      data: { userId, projectId: project.id, createdAt: project.createdAt }
+    })
+    return project
   })
 }
 
