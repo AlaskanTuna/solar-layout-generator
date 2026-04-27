@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { AppFooter } from '@/components/layout/AppFooter'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/Logo'
 import {
@@ -543,81 +544,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Footer — dark multi-col */}
-      <footer className="bg-stone-950 px-6 py-14 text-stone-400">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 grid gap-10 md:grid-cols-4">
-            <div className="md:col-span-2">
-              <Link to="/" className="flex items-center gap-2.5">
-                <Logo className="h-9 w-9" />
-                <span className="font-heading text-lg font-bold tracking-tight text-stone-50">SolarSim</span>
-              </Link>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed">
-                Data-driven rooftop solar assessment for Malaysian homeowners. Built so you walk into installer quotes
-                already knowing the answer.
-              </p>
-              <div className="mt-5 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-emerald-400">
-                <Leaf className="h-3.5 w-3.5" />
-                Aligned with UN SDG 7
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-3 font-mono text-xs uppercase tracking-wider text-orange-400">Product</div>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#how" className="transition hover:text-white">
-                    How it works
-                  </a>
-                </li>
-                <li>
-                  <a href="#features" className="transition hover:text-white">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#pricing" className="transition hover:text-white">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <Link to={isSignedIn ? '/dashboard' : '/sign-up'} className="transition hover:text-white">
-                    {isSignedIn ? 'Open Dashboard' : 'Get Started'}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <div className="mb-3 font-mono text-xs uppercase tracking-wider text-orange-400">Company</div>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#faq" className="transition hover:text-white">
-                    FAQ
-                  </a>
-                </li>
-                <li>
-                  <span className="cursor-default opacity-60">Privacy</span>
-                </li>
-                <li>
-                  <span className="cursor-default opacity-60">Terms</span>
-                </li>
-                <li>
-                  <span className="cursor-default opacity-60">Contact</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-8 font-mono text-xs">
-            <span>© 2026 SolarSim · Built as an FYP project.</span>
-            <span className="flex items-center gap-2">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              All systems operational
-            </span>
-          </div>
-        </div>
-      </footer>
+      <AppFooter />
 
       {/* Scroll-to-top button — glassmorphism, fades in past first viewport */}
       <button
