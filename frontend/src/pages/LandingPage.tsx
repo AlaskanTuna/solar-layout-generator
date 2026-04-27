@@ -109,7 +109,7 @@ export function LandingPage() {
               Results in minutes
             </span>
             <span className="flex items-center gap-1.5">
-              <Leaf className="h-3.5 w-3.5 text-primary" />
+              <Leaf className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
               SDG 7 aligned
             </span>
           </div>

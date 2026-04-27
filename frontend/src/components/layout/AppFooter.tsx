@@ -7,7 +7,7 @@ export function AppFooter() {
     <footer className="border-t border-border bg-muted/30 px-6 py-8">
       <div className="flex items-center justify-end gap-3">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Leaf className="h-3 w-3 text-green-600 dark:text-green-400" />
+          <Leaf className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
           UN SDG 7: Affordable and Clean Energy
         </div>
         <div className="h-3 w-px bg-border" />
