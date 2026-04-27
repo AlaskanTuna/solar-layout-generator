@@ -286,6 +286,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* LANDING PAGE SCROLL SNAP — proximity mode so each section nudges into view
+   from the top of the next, without forcing snap during intra-section scroll
+   (e.g. inside the sticky-scroll pipeline). Toggled via class on <html> so it
+   never leaks into auth/dashboard/workspace routes. */
+html.landing-snap {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 4rem;
+}
+
 /* Disable transitions during theme switch */
 html[style*='--theme-transition: none'] *,
 html[style*='--theme-transition: none'] *::before,
