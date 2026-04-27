@@ -24,6 +24,9 @@ import {
 export function LandingPage() {
   const { session, loading } = useAuth()
   const ticker = useHeroTicker()
+  const scrollY = useScrollY()
+  const navScrolled = scrollY > 24
+  const heroBlur = Math.min(14, scrollY / 40)
 
   if (loading) return null
   const isSignedIn = !!session
@@ -31,26 +34,16 @@ export function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background font-body">
       {/* Navbar */}
-      <nav className="glass-nav fixed inset-x-0 top-0 z-50">
+      <nav
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 ${
+          navScrolled ? 'glass-nav' : 'border-b border-transparent bg-transparent'
+        }`}
+      >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo className="h-8 w-8" />
             <span className="font-heading text-lg font-semibold tracking-tight">SolarSim</span>
           </Link>
-          <div className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
-            <a href="#how" className="transition hover:text-foreground">
-              How it works
-            </a>
-            <a href="#features" className="transition hover:text-foreground">
-              Features
-            </a>
-            <a href="#pricing" className="transition hover:text-foreground">
-              Pricing
-            </a>
-            <a href="#faq" className="transition hover:text-foreground">
-              FAQ
-            </a>
-          </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {isSignedIn ? (
@@ -74,16 +67,17 @@ export function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-[100vh] overflow-hidden">
-        {/* Background image */}
+      <section className="relative h-screen overflow-hidden">
+        {/* Background image — blurs progressively on scroll */}
         <div className="absolute inset-0">
           <img
             src="/landing/landing-hero.webp"
             alt=""
             aria-hidden="true"
-            className="h-full w-full object-cover object-[right_center]"
+            className="h-full w-full object-cover object-[right_center] will-change-[filter]"
+            style={{ filter: `blur(${heroBlur}px)`, transform: heroBlur > 0 ? 'scale(1.04)' : 'scale(1)' }}
           />
-          {/* Warm light-mode legibility wash on left half */}
+          {/* Light-mode left-to-right warm wash */}
           <div
             className="absolute inset-0 dark:hidden"
             style={{
@@ -91,12 +85,18 @@ export function LandingPage() {
                 'linear-gradient(90deg, rgba(253,249,244,0.85) 0%, rgba(253,249,244,0.45) 35%, rgba(253,249,244,0) 60%)'
             }}
           />
-          {/* Dark-mode darkening overlay */}
-          <div className="absolute inset-0 hidden bg-background/65 dark:block" />
+          {/* Dark-mode left-to-right black wash (mirror of light-mode fade — keeps house exposed on right) */}
+          <div
+            className="absolute inset-0 hidden dark:block"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0) 60%)'
+            }}
+          />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-24 lg:pt-40 lg:pb-32">
-          <div className="grid items-center gap-10 lg:grid-cols-12">
+        <div className="relative mx-auto flex h-full max-w-7xl items-center px-6 pt-16">
+          <div className="grid w-full items-center gap-10 lg:grid-cols-12">
             {/* Left: glass content card */}
             <div className="lg:col-span-7">
               <div className="hero-glass max-w-2xl rounded-3xl p-8 sm:p-12 animate-fade-in-up">
@@ -244,11 +244,6 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* Scroll cue */}
-        <div className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[#1a0a02]/55 dark:text-foreground/55 md:flex">
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em]">scroll</span>
-          <ChevronDown className="h-4 w-4 animate-bounce" />
-        </div>
       </section>
 
       {/* Trust band — scrolling marquee */}
@@ -560,6 +555,17 @@ export function LandingPage() {
 }
 
 /* SUB-COMPONENTS */
+
+function useScrollY() {
+  const [y, setY] = useState(0)
+  useEffect(() => {
+    const onScroll = () => setY(window.scrollY)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  return y
+}
 
 function useHeroTicker() {
   const [vals, setVals] = useState({ kwp: 6.2, savings: 3000, payback: 8.5 })
