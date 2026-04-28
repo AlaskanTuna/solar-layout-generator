@@ -218,12 +218,12 @@ export function SystemCostCard({
                     style={{ backgroundColor: segment.color }}
                     aria-hidden="true"
                   />
-                  <div className="flex flex-1 items-baseline justify-between gap-3">
-                    <div className="min-w-0">
+                  <div className="flex min-w-0 flex-1 items-baseline justify-between gap-3">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate font-medium text-foreground">{segment.name}</p>
                       <p className="truncate text-xs text-muted-foreground">{segment.detail}</p>
                     </div>
-                    <div className="text-right tabular-nums">
+                    <div className="shrink-0 text-right tabular-nums">
                       <p className="font-semibold text-foreground">{formatCurrency(segment.value)}</p>
                       <p className="text-xs text-muted-foreground">{percent.toFixed(0)}%</p>
                     </div>
