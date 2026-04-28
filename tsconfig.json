@@ -5,6 +5,9 @@
     "moduleResolution": "bundler",
     "lib": ["ES2020"],
     "strict": true,
+    // Deliberately left off repo-wide for now because existing app sources are not yet
+    // aligned to indexed-access strictness; the PDF service enables it explicitly below.
+    "noUncheckedIndexedAccess": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

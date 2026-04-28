@@ -7,6 +7,8 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    // This stays enabled here intentionally because the PDF service has a small isolated
+    // request-parsing surface and can carry the stricter indexed-access checks already.
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
