@@ -37,9 +37,7 @@ export function BillBreakdown({
               <InfoTooltip>
                 <div className="space-y-2">
                   <p>{t('billBreakdown.titleTooltip.intro')}</p>
-                  <p>
-                    {t('billBreakdown.titleTooltip.threshold', { threshold: 600 })}
-                  </p>
+                  <p>{t('billBreakdown.titleTooltip.threshold', { threshold: 600 })}</p>
                   <div className="space-y-1">
                     <p>
                       <span className="font-semibold">{t('billBreakdown.titleTooltip.retail')}</span>{' '}
@@ -147,8 +145,12 @@ export function BillBreakdown({
         </div>
 
         <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/35">
-          <h3 className="text-sm font-semibold text-emerald-950 dark:text-emerald-100">{t('billBreakdown.withSolar.title')}</h3>
-          <p className="text-xs text-emerald-800/70 dark:text-emerald-200/75">{t('billBreakdown.withSolar.subtitle')}</p>
+          <h3 className="text-sm font-semibold text-emerald-950 dark:text-emerald-100">
+            {t('billBreakdown.withSolar.title')}
+          </h3>
+          <p className="text-xs text-emerald-800/70 dark:text-emerald-200/75">
+            {t('billBreakdown.withSolar.subtitle')}
+          </p>
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div>
               <p className="text-emerald-900/70 dark:text-emerald-100/70">

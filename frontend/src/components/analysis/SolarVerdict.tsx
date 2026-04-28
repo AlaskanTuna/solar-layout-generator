@@ -12,7 +12,17 @@ type SolarVerdictProps = {
   paybackTooltip: ReactNode
 }
 
-function StarRating({ count, color, label, ariaLabel }: { count: number; color: string; label: string; ariaLabel: string }) {
+function StarRating({
+  count,
+  color,
+  label,
+  ariaLabel
+}: {
+  count: number
+  color: string
+  label: string
+  ariaLabel: string
+}) {
   return (
     <div className="flex items-center gap-0.5" aria-label={ariaLabel}>
       {Array.from({ length: 5 }, (_, i) => (
@@ -94,9 +104,7 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 <InfoTooltip>
                   <div className="space-y-1.5">
                     <p>{t('verdict.metrics.monthlySavings.tooltip.line1')}</p>
-                    <p className="text-primary-foreground/80">
-                      {t('verdict.metrics.monthlySavings.tooltip.line2')}
-                    </p>
+                    <p className="text-primary-foreground/80">{t('verdict.metrics.monthlySavings.tooltip.line2')}</p>
                   </div>
                 </InfoTooltip>
               </span>
@@ -114,9 +122,7 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 <InfoTooltip>
                   <div className="space-y-1.5">
                     <p>{t('verdict.metrics.annualSavings.tooltip.line1')}</p>
-                    <p className="text-primary-foreground/80">
-                      {t('verdict.metrics.annualSavings.tooltip.line2')}
-                    </p>
+                    <p className="text-primary-foreground/80">{t('verdict.metrics.annualSavings.tooltip.line2')}</p>
                   </div>
                 </InfoTooltip>
               </span>

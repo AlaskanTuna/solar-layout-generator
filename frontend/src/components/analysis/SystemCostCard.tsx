@@ -89,9 +89,7 @@ export function SystemCostCard({
     items.push({
       key: 'permit',
       name: t('systemCost.segments.permit'),
-      detail: costBreakdown.cccFeeTriggered
-        ? t('systemCost.segments.permitCcc')
-        : t('systemCost.segments.permitSeda'),
+      detail: costBreakdown.cccFeeTriggered ? t('systemCost.segments.permitCcc') : t('systemCost.segments.permitSeda'),
       value: costBreakdown.permit,
       color: SEGMENT_COLORS.permit
     })

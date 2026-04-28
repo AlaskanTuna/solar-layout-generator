@@ -99,9 +99,9 @@ function scaffoldingCost(roofType: RoofType): number {
 
 function selectInverter(kwp: number, phase: SupplyPhase): InverterSku {
   const phaseCap = costModelDefaults.nemRakyatCapKwac[phase]
-  const candidates = costModelDefaults.inverterSkus.filter((sku) => sku.phase === phase && sku.kwac <= phaseCap).sort(
-    (a, b) => a.kwac - b.kwac
-  )
+  const candidates = costModelDefaults.inverterSkus
+    .filter((sku) => sku.phase === phase && sku.kwac <= phaseCap)
+    .sort((a, b) => a.kwac - b.kwac)
   for (const sku of candidates) {
     if (sku.kwac * costModelDefaults.dcAcMaxRatio >= kwp) return sku
   }

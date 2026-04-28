@@ -62,11 +62,10 @@ describe('pdfTokenService', () => {
   })
 
   it('rejects tokens missing required claims', () => {
-    const missingProject = jwt.sign(
-      { sub: userId, type: 'pdf-export' },
-      'test-secret-at-least-32-characters-long-ok',
-      { algorithm: 'HS256', expiresIn: 60 }
-    )
+    const missingProject = jwt.sign({ sub: userId, type: 'pdf-export' }, 'test-secret-at-least-32-characters-long-ok', {
+      algorithm: 'HS256',
+      expiresIn: 60
+    })
     expect(() => verifyPdfToken(missingProject)).toThrow(InvalidPdfTokenError)
   })
 })

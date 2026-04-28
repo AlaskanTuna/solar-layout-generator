@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { computeBill, computeNemMonth, lookupEeiRebate, runAnnualSimulation, type BillingConfig } from '../billingEngine'
+import {
+  computeBill,
+  computeNemMonth,
+  lookupEeiRebate,
+  runAnnualSimulation,
+  type BillingConfig
+} from '../billingEngine'
 
 /* TARIFF CONFIG */
 

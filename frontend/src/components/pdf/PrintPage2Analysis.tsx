@@ -39,24 +39,53 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
     return [
       {
         label: t('page5.assumptions.financialMode'),
-        value: lifecycleActive ? t('page5.assumptions.financialModeLifecycle') : t('page5.assumptions.financialModeSimple'),
-        detail: lifecycleActive ? t('page5.assumptions.financialModeLifecycleDetail') : t('page5.assumptions.financialModeSimpleDetail')
+        value: lifecycleActive
+          ? t('page5.assumptions.financialModeLifecycle')
+          : t('page5.assumptions.financialModeSimple'),
+        detail: lifecycleActive
+          ? t('page5.assumptions.financialModeLifecycleDetail')
+          : t('page5.assumptions.financialModeSimpleDetail')
       },
-      { label: t('page5.assumptions.perfRatio'), value: `${Math.round(viewModel.performanceRatio * 100)}%`, detail: t('page5.assumptions.perfRatioDetail') },
-      { label: t('page5.assumptions.losses'), value: `${Math.round(viewModel.assumedLosses * 100)}%`, detail: t('page5.assumptions.lossesDetail') },
-      { label: t('page5.assumptions.degradation'), value: `${(viewModel.degradationRate * 100).toFixed(1)}%/yr`, detail: t('page5.assumptions.degradationDetail') },
+      {
+        label: t('page5.assumptions.perfRatio'),
+        value: `${Math.round(viewModel.performanceRatio * 100)}%`,
+        detail: t('page5.assumptions.perfRatioDetail')
+      },
+      {
+        label: t('page5.assumptions.losses'),
+        value: `${Math.round(viewModel.assumedLosses * 100)}%`,
+        detail: t('page5.assumptions.lossesDetail')
+      },
+      {
+        label: t('page5.assumptions.degradation'),
+        value: `${(viewModel.degradationRate * 100).toFixed(1)}%/yr`,
+        detail: t('page5.assumptions.degradationDetail')
+      },
       viewModel.tariffEscalationRate > 0
-        ? { label: t('page5.assumptions.tariffEscalation'), value: `${(viewModel.tariffEscalationRate * 100).toFixed(1)}%/yr`, detail: t('page5.assumptions.tariffEscalationDetail') }
+        ? {
+            label: t('page5.assumptions.tariffEscalation'),
+            value: `${(viewModel.tariffEscalationRate * 100).toFixed(1)}%/yr`,
+            detail: t('page5.assumptions.tariffEscalationDetail')
+          }
         : null,
-      { label: t('page5.assumptions.dcAcRatio'), value: String(viewModel.dcAcRatio), detail: t('page5.assumptions.dcAcRatioDetail') },
+      {
+        label: t('page5.assumptions.dcAcRatio'),
+        value: String(viewModel.dcAcRatio),
+        detail: t('page5.assumptions.dcAcRatioDetail')
+      },
       lifecycleActive && viewModel.annualMaintenanceRm > 0
-        ? { label: t('page5.assumptions.maintenance'), value: `${formatCurrency(viewModel.annualMaintenanceRm)}/yr`, detail: t('page5.assumptions.maintenanceDetail') }
+        ? {
+            label: t('page5.assumptions.maintenance'),
+            value: `${formatCurrency(viewModel.annualMaintenanceRm)}/yr`,
+            detail: t('page5.assumptions.maintenanceDetail')
+          }
         : null,
       ...(lifecycleActive
         ? viewModel.inverterReplacements.map((replacement, index) => ({
-            label: viewModel.inverterReplacements.length === 1
-              ? t('page5.assumptions.inverterSwap')
-              : t('page5.assumptions.inverterSwapNumbered', { index: index + 1 }),
+            label:
+              viewModel.inverterReplacements.length === 1
+                ? t('page5.assumptions.inverterSwap')
+                : t('page5.assumptions.inverterSwapNumbered', { index: index + 1 }),
             value: formatCurrency(replacement.costRm),
             detail: t('page5.assumptions.inverterSwapDetail', { year: replacement.year })
           }))
@@ -115,10 +144,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
       <PdfPageShell sectionLabel={t('page2.sectionLabel')} context={t('page2.context')}>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="pdf-card-break">
-            <SolarVerdict
-              analysisResults={viewModel.analysisResults}
-              paybackTooltip={t('page2.paybackTooltip')}
-            />
+            <SolarVerdict analysisResults={viewModel.analysisResults} paybackTooltip={t('page2.paybackTooltip')} />
           </div>
           <div className="pdf-card-break">
             <PdfBillComparisonChart
@@ -226,7 +252,10 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
               tiles={[
                 {
                   label: t('page6.summary.breakEven'),
-                  value: viewModel.breakEvenYear !== null ? `${viewModel.breakEvenYear.toFixed(1)} yrs` : t('page6.summary.breakEvenNA'),
+                  value:
+                    viewModel.breakEvenYear !== null
+                      ? `${viewModel.breakEvenYear.toFixed(1)} yrs`
+                      : t('page6.summary.breakEvenNA'),
                   detail: t('page6.summary.breakEvenDetail')
                 },
                 {

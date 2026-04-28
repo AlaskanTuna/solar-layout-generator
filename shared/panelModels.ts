@@ -14,7 +14,7 @@ export const PANEL_MODELS: PanelModel[] = [
     efficiency: 0.204,
     costPerWp: 0.95,
     tagline:
-      "Generic reference panel from the Solar API. Good for a quick first estimate, but swap to a real model before sharing with an installer."
+      'Generic reference panel from the Solar API. Good for a quick first estimate, but swap to a real model before sharing with an installer.'
   },
   {
     id: 'jinko-tiger-neo',

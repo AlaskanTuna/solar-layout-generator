@@ -157,9 +157,7 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{t('layoutPresetModal.title')}</DialogTitle>
-          <DialogDescription>
-            {t('layoutPresetModal.description')}
-          </DialogDescription>
+          <DialogDescription>{t('layoutPresetModal.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
@@ -168,9 +166,7 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
               {t('layoutPresetModal.monthlyBill.label')}
               <InfoTooltip open={tooltipOpen}>
                 <div className="space-y-1.5">
-                  <p>
-                    {t('layoutPresetModal.monthlyBill.tooltip')}
-                  </p>
+                  <p>{t('layoutPresetModal.monthlyBill.tooltip')}</p>
                   <ImagePopup
                     src={tnbBillImg}
                     alt={t('layoutPresetModal.monthlyBill.tnbBillAlt')}

@@ -132,9 +132,7 @@ export function DashboardPage() {
       </div>
       <div className="relative z-10">
         <h2 className="font-heading text-xl font-semibold tracking-tight">{t('newProject.title')}</h2>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-          {t('newProject.description')}
-        </p>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{t('newProject.description')}</p>
       </div>
     </button>
   )

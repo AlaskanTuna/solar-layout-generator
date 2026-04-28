@@ -15,12 +15,7 @@ import {
 } from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
-import {
-  BILL_RANGE_TO_KWH_PER_MONTH,
-  computeSystemCost,
-  getPanelModel,
-  DEFAULT_PANEL_MODEL_ID
-} from '@shared/types'
+import { BILL_RANGE_TO_KWH_PER_MONTH, computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 /**
  * Editable analysis settings excluding derived system size
  */
@@ -110,7 +105,8 @@ export function useAnalysisForm(projectId: string | undefined) {
 
     const roofType = savedConfig?.roofType ?? 'tile'
     const connectionPhase = savedConfig?.connectionPhase ?? 'single'
-    const panelCostPerWp = selectedPanelModel?.costPerWp && selectedPanelModel.costPerWp > 0 ? selectedPanelModel.costPerWp : 0.95
+    const panelCostPerWp =
+      selectedPanelModel?.costPerWp && selectedPanelModel.costPerWp > 0 ? selectedPanelModel.costPerWp : 0.95
     const defaultSystemCostRm = computeSystemCost({
       panelCount: localPanels.length,
       panelWattageWp: localPanelCapacity,

@@ -61,14 +61,24 @@ export function SystemMetaCard({
             <p>
               {t('sidebar.panelSpecs.dimensions')} {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
             </p>
-            <p>{t('sidebar.panelSpecs.capacity')} {selectedPanelModel.capacityWp} Wp</p>
-            <p>{t('sidebar.panelSpecs.efficiency')} {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
+            <p>
+              {t('sidebar.panelSpecs.capacity')} {selectedPanelModel.capacityWp} Wp
+            </p>
+            <p>
+              {t('sidebar.panelSpecs.efficiency')} {(selectedPanelModel.efficiency * 100).toFixed(1)}%
+            </p>
             {selectedPanelModel.costPerWp > 0 && (
-              <p>{t('sidebar.panelSpecs.cost')} RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>
+              <p>
+                {t('sidebar.panelSpecs.cost')} RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp
+              </p>
             )}
-            <p>{t('sidebar.panelSpecs.maxPanels')} {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
+            <p>
+              {t('sidebar.panelSpecs.maxPanels')} {buildingInsights.solarPotential.maxArrayPanelsCount}
+            </p>
             {buildingInsights.solarPotential.panelLifetimeYears != null && (
-              <p>{t('sidebar.panelSpecs.lifespan')} {buildingInsights.solarPotential.panelLifetimeYears} years</p>
+              <p>
+                {t('sidebar.panelSpecs.lifespan')} {buildingInsights.solarPotential.panelLifetimeYears} years
+              </p>
             )}
           </div>
         </details>

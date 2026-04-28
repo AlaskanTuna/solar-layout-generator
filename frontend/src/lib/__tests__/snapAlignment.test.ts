@@ -216,13 +216,10 @@ describe('computeOverlapSnap', () => {
 
 describe('resolveOverlapEscape', () => {
   it('clamps a blocked edge escape to the stage and can preserve residual overlap', () => {
-    const result = resolveOverlapEscape(
-      { x: 20, y: 50, rotation: 0 },
-      [{ x: 45, y: 50, rotation: 0 }],
-      W,
-      H,
-      { stageWidth: 100, stageHeight: 100 }
-    )
+    const result = resolveOverlapEscape({ x: 20, y: 50, rotation: 0 }, [{ x: 45, y: 50, rotation: 0 }], W, H, {
+      stageWidth: 100,
+      stageHeight: 100
+    })
 
     expect(result.x).toBeCloseTo(W / 2, 5)
     expect(result.y).toBeCloseTo(50, 5)
@@ -234,25 +231,17 @@ describe('resolveOverlapEscape', () => {
   })
 
   it('keeps the dragged center inside the left stage boundary when the escape vector points left', () => {
-    const result = resolveOverlapEscape(
-      { x: 22, y: 50, rotation: 0 },
-      [{ x: 50, y: 50, rotation: 0 }],
-      W,
-      H,
-      { stageWidth: 100, stageHeight: 100 }
-    )
+    const result = resolveOverlapEscape({ x: 22, y: 50, rotation: 0 }, [{ x: 50, y: 50, rotation: 0 }], W, H, {
+      stageWidth: 100,
+      stageHeight: 100
+    })
 
     expect(result.x).toBeGreaterThanOrEqual(W / 2)
     expect(result.x).toBeLessThanOrEqual(100 - W / 2)
   })
 
   it('clears same-rotation overlap after repeated centroid-based escapes', () => {
-    const result = resolveOverlapEscape(
-      { x: 135, y: 100, rotation: 0 },
-      [{ x: 100, y: 100, rotation: 0 }],
-      W,
-      H
-    )
+    const result = resolveOverlapEscape({ x: 135, y: 100, rotation: 0 }, [{ x: 100, y: 100, rotation: 0 }], W, H)
 
     const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
     const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
@@ -261,12 +250,7 @@ describe('resolveOverlapEscape', () => {
   })
 
   it('clears overlap between 30° and 45° panels', () => {
-    const result = resolveOverlapEscape(
-      { x: 100, y: 100, rotation: 30 },
-      [{ x: 100, y: 100, rotation: 45 }],
-      W,
-      H
-    )
+    const result = resolveOverlapEscape({ x: 100, y: 100, rotation: 30 }, [{ x: 100, y: 100, rotation: 45 }], W, H)
 
     const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 30)
     const neighborPoly = getRotatedRectPoints(100, 100, W, H, 45)
@@ -275,12 +259,7 @@ describe('resolveOverlapEscape', () => {
   })
 
   it('clears the centroid-coincident pathological case', () => {
-    const result = resolveOverlapEscape(
-      { x: 100, y: 100, rotation: 0 },
-      [{ x: 100, y: 100, rotation: 0 }],
-      W,
-      H
-    )
+    const result = resolveOverlapEscape({ x: 100, y: 100, rotation: 0 }, [{ x: 100, y: 100, rotation: 0 }], W, H)
 
     const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
     const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
@@ -312,12 +291,7 @@ describe('resolveOverlapEscape', () => {
   })
 
   it('clears a tiny overlap smaller than one pixel', () => {
-    const result = resolveOverlapEscape(
-      { x: 139.6, y: 100, rotation: 0 },
-      [{ x: 100, y: 100, rotation: 0 }],
-      W,
-      H
-    )
+    const result = resolveOverlapEscape({ x: 139.6, y: 100, rotation: 0 }, [{ x: 100, y: 100, rotation: 0 }], W, H)
 
     const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
     const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
@@ -326,12 +300,7 @@ describe('resolveOverlapEscape', () => {
   })
 
   it('still resolves overlap when stage bounds are omitted', () => {
-    const result = resolveOverlapEscape(
-      { x: 135, y: 100, rotation: 0 },
-      [{ x: 100, y: 100, rotation: 0 }],
-      W,
-      H
-    )
+    const result = resolveOverlapEscape({ x: 135, y: 100, rotation: 0 }, [{ x: 100, y: 100, rotation: 0 }], W, H)
 
     const draggedPoly = getRotatedRectPoints(result.x, result.y, W, H, 0)
     const neighborPoly = getRotatedRectPoints(100, 100, W, H, 0)
@@ -347,9 +316,7 @@ describe('resolveGroupOverlapEscape', () => {
         { x: 100, y: 100, rotation: 0 },
         { x: 140, y: 100, rotation: 0 }
       ],
-      [
-        { x: 72, y: 100, rotation: 0 }
-      ],
+      [{ x: 72, y: 100, rotation: 0 }],
       { x: 0, y: 0 },
       W,
       H
@@ -373,14 +340,10 @@ describe('resolveGroupOverlapEscape', () => {
       { x: 60, y: 10, rotation: 0 }
     ]
 
-    const result = resolveGroupOverlapEscape(
-      movingPanels,
-      [{ x: 35, y: 20, rotation: 0 }],
-      { x: 0, y: 0 },
-      W,
-      H,
-      { stageWidth: 100, stageHeight: 100 }
-    )
+    const result = resolveGroupOverlapEscape(movingPanels, [{ x: 35, y: 20, rotation: 0 }], { x: 0, y: 0 }, W, H, {
+      stageWidth: 100,
+      stageHeight: 100
+    })
 
     const translatedPanels = movingPanels.map((panel) => ({
       x: panel.x + result.x,

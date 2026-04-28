@@ -1,5 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle } from 'lucide-react'
 
@@ -29,9 +36,7 @@ export function LowerResolutionConsentModal({ open, onAccept, onCancel }: Props)
             <AlertTriangle className="h-5 w-5" />
           </div>
           <DialogTitle>{t('consentModal.title')}</DialogTitle>
-          <DialogDescription>
-            {t('consentModal.description')}
-          </DialogDescription>
+          <DialogDescription>{t('consentModal.description')}</DialogDescription>
         </DialogHeader>
 
         <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">

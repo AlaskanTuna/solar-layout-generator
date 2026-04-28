@@ -227,11 +227,7 @@ describe('summarizeLayoutOrientation', () => {
   })
 
   it('returns the segment azimuth/pitch for a single-segment layout', () => {
-    const result = summarizeLayoutOrientation(
-      [editFor('p0'), editFor('p1'), editFor('p2')],
-      solarPanels,
-      segments
-    )
+    const result = summarizeLayoutOrientation([editFor('p0'), editFor('p1'), editFor('p2')], solarPanels, segments)
     expect(result).not.toBeNull()
     expect(result!.azimuthDegrees).toBeCloseTo(180, 0)
     expect(result!.pitchDegrees).toBeCloseTo(22, 1)
@@ -273,11 +269,7 @@ describe('summarizeLayoutOrientation', () => {
   })
 
   it('skips panel ids that are not in solarPanels', () => {
-    const result = summarizeLayoutOrientation(
-      [editFor('p0'), editFor('does-not-exist')],
-      solarPanels,
-      segments
-    )
+    const result = summarizeLayoutOrientation([editFor('p0'), editFor('does-not-exist')], solarPanels, segments)
     expect(result).not.toBeNull()
     expect(result!.panelCount).toBe(1)
     expect(result!.dominantSegmentIndex).toBe(0)

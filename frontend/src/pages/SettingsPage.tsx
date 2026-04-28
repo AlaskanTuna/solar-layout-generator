@@ -67,7 +67,9 @@ export function SettingsPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   const tier = quotaQuery.data?.tier
-  const planLabel = tier ? t('planLabel', { tier: tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() }) : t('account.loadingPlan')
+  const planLabel = tier
+    ? t('planLabel', { tier: tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() })
+    : t('account.loadingPlan')
   const unreadCount = notifications.filter((notification) => !notification.read).length
 
   const THEME_OPTIONS = [
@@ -121,11 +123,7 @@ export function SettingsPage() {
       {/* Settings grid */}
       <div className="mt-6 grid gap-4 xl:grid-cols-[1fr_1fr]">
         {/* Account info */}
-        <SettingCard
-          icon={UserRound}
-          title={t('account.title')}
-          description={t('account.description')}
-        >
+        <SettingCard icon={UserRound} title={t('account.title')} description={t('account.description')}>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-border bg-card/50 p-3">
               <p className="text-xs font-medium text-muted-foreground">{t('account.emailLabel')}</p>
@@ -170,11 +168,7 @@ export function SettingsPage() {
         </SettingCard>
 
         {/* Notification inbox controls */}
-        <SettingCard
-          icon={Bell}
-          title={t('notifications.title')}
-          description={t('notifications.description')}
-        >
+        <SettingCard icon={Bell} title={t('notifications.title')} description={t('notifications.description')}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm">
               <p className="font-semibold">{t('notifications.saved', { count: notifications.length })}</p>
@@ -187,22 +181,14 @@ export function SettingsPage() {
         </SettingCard>
 
         {/* Replay onboarding tours */}
-        <SettingCard
-          icon={RotateCcw}
-          title={t('guidedTours.title')}
-          description={t('guidedTours.description')}
-        >
+        <SettingCard icon={RotateCcw} title={t('guidedTours.title')} description={t('guidedTours.description')}>
           <Button type="button" variant="outline" onClick={resetGuidedTours}>
             {t('guidedTours.resetButton')}
           </Button>
         </SettingCard>
 
         {/* Clear recent activity history */}
-        <SettingCard
-          icon={History}
-          title={t('recentActivity.title')}
-          description={t('recentActivity.description')}
-        >
+        <SettingCard icon={History} title={t('recentActivity.title')} description={t('recentActivity.description')}>
           <Button type="button" variant="outline" onClick={clearRecentActivity}>
             {t('recentActivity.clearButton')}
           </Button>

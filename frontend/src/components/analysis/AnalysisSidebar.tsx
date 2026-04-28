@@ -95,9 +95,7 @@ export function AnalysisSidebar({
             tariffRatesDefaults={tariffRatesDefaults}
             tariffEffectiveDate={tariffEffectiveDate}
             lifecycleControls={
-              viewMode === 'advanced' ? (
-                <LifecycleControls formState={formState} setFormState={setFormState} />
-              ) : null
+              viewMode === 'advanced' ? <LifecycleControls formState={formState} setFormState={setFormState} /> : null
             }
           />
 

@@ -392,14 +392,9 @@ function resolveOverlapTranslation(
     }
 
     const clamped =
-      Number.isFinite(stageWidth) && Number.isFinite(stageHeight) && needsStageClamp(
-        movingPanels,
-        proposed,
-        panelWidth,
-        panelHeight,
-        stageWidth,
-        stageHeight
-      )
+      Number.isFinite(stageWidth) &&
+      Number.isFinite(stageHeight) &&
+      needsStageClamp(movingPanels, proposed, panelWidth, panelHeight, stageWidth, stageHeight)
         ? clampTranslationToStage(movingPanels, proposed, panelWidth, panelHeight, stageWidth, stageHeight)
         : proposed
     const wasClamped = clamped.x !== proposed.x || clamped.y !== proposed.y

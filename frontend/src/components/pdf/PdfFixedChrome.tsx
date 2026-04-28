@@ -50,9 +50,7 @@ export function PdfFixedFooter({ imageryQuality }: FooterProps = {}) {
       {imageryQuality === 'BASE' && (
         <>
           <div className="h-2 w-px bg-border" />
-          <span className="text-[8px] font-medium text-amber-700 dark:text-amber-400">
-            {t('footer.imageryBase')}
-          </span>
+          <span className="text-[8px] font-medium text-amber-700 dark:text-amber-400">{t('footer.imageryBase')}</span>
         </>
       )}
       <div className="h-2 w-px bg-border" />

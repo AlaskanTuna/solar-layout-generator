@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { getProjectStatusLabel, getProjectStatusVariant, getProjectStatusTooltip, getProjectStatusConfig } from '../projectStatus'
+import {
+  getProjectStatusLabel,
+  getProjectStatusVariant,
+  getProjectStatusTooltip,
+  getProjectStatusConfig
+} from '../projectStatus'
 import type { ProjectStatus } from '@shared/types'
 
 const ALL_STATUSES: ProjectStatus[] = ['draft', 'layout_saved', 'analysis_saved']

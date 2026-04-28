@@ -16,9 +16,7 @@ export async function checkQuota(req: Request, res: Response, next: NextFunction
   try {
     const summary = await getQuotaSummary(req.user.id)
     if (summary.limit !== null && summary.used >= summary.limit) {
-      console.warn(
-        `[Quota] user=${req.user.id} tier=${summary.tier} used=${summary.used}/${summary.limit} — blocked`
-      )
+      console.warn(`[Quota] user=${req.user.id} tier=${summary.tier} used=${summary.used}/${summary.limit} — blocked`)
       res.status(429).json({
         error: 'Daily project limit reached',
         tier: summary.tier,

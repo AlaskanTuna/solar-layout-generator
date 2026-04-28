@@ -55,7 +55,13 @@ export function PdfBillComparisonChart({
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={COLORS.chartGrid} />
-            <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: COLORS.chartTick, fontSize: 10 }} dy={6} />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: COLORS.chartTick, fontSize: 10 }}
+              dy={6}
+            />
             <YAxis
               tickFormatter={(value) => `RM${value}`}
               tickLine={false}

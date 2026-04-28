@@ -61,14 +61,22 @@ export function ConsumptionControls({ formState, setFormState }: ConsumptionCont
           <button
             type="button"
             className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'flat' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => setFormState((current) => (current ? { ...current, consumptionProfile: 'flat' as ConsumptionProfile } : current))}
+            onClick={() =>
+              setFormState((current) =>
+                current ? { ...current, consumptionProfile: 'flat' as ConsumptionProfile } : current
+              )
+            }
           >
             {t('sidebar.consumption.profileFlat')}
           </button>
           <button
             type="button"
             className={`rounded px-2.5 py-1 font-medium transition-colors ${formState.consumptionProfile === 'seasonal' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => setFormState((current) => (current ? { ...current, consumptionProfile: 'seasonal' as ConsumptionProfile } : current))}
+            onClick={() =>
+              setFormState((current) =>
+                current ? { ...current, consumptionProfile: 'seasonal' as ConsumptionProfile } : current
+              )
+            }
           >
             {t('sidebar.consumption.profileSeasonal')}
           </button>

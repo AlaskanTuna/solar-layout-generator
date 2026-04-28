@@ -42,10 +42,7 @@ export function PrintPage1Workbench({ project }: Props) {
   const roofTypeLabel = t(`page1.stats.roofType.labels.${roofType}`) ?? t('page1.stats.roofType.na')
 
   return (
-    <PdfPageShell
-      sectionLabel={t('page1.sectionLabel')}
-      context={t('page1.context')}
-    >
+    <PdfPageShell sectionLabel={t('page1.sectionLabel')} context={t('page1.context')}>
       {/* Rooftop preview */}
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         <div className="flex min-h-0 flex-1 justify-center">
@@ -104,11 +101,7 @@ export function PrintPage1Workbench({ project }: Props) {
             value={panelModel?.name ?? t('page1.stats.panelModel.na')}
             suffix={panelModel ? `${panelCapacityWp} Wp` : ''}
           />
-          <StatTile
-            label={t('page1.stats.roofType.label')}
-            value={roofTypeLabel}
-            suffix=""
-          />
+          <StatTile label={t('page1.stats.roofType.label')} value={roofTypeLabel} suffix="" />
         </div>
       </div>
     </PdfPageShell>

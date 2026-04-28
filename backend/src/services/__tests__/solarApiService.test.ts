@@ -10,11 +10,7 @@ const mockFetch = vi.fn()
 
 vi.stubGlobal('fetch', mockFetch)
 
-import {
-  fetchBuildingInsights,
-  fetchDataLayers,
-  findBestQualityForLocation
-} from '../solarApiService.js'
+import { fetchBuildingInsights, fetchDataLayers, findBestQualityForLocation } from '../solarApiService.js'
 
 describe('findBestQualityForLocation', () => {
   beforeEach(() => {

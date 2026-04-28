@@ -53,9 +53,7 @@ type UseCanvasInteractionsOptions = {
   rotatePanel: (id: string, rotation: number) => void
   deletePanel: (id: string) => void
   updatePanelEnergy: (panelId: string, monthlyEnergyDcKwh: number[]) => void
-  bulkUpdatePanels: (
-    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
-  ) => void
+  bulkUpdatePanels: (updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>) => void
   pushSnapshot: () => void
   showSegments: boolean
   solarPanels: SolarPanel[]
@@ -430,7 +428,11 @@ export function useCanvasInteractions({
           }
         )
         candidatePixel = { x: escaped.x, y: escaped.y }
-        placementError = getPlacementError(panelId, pixelToLatLng(candidatePixel.x, candidatePixel.y, geo), panel.rotation)
+        placementError = getPlacementError(
+          panelId,
+          pixelToLatLng(candidatePixel.x, candidatePixel.y, geo),
+          panel.rotation
+        )
       }
 
       // Overlap is best-effort accepted because SAT push-out converges
@@ -657,7 +659,7 @@ export function useCanvasInteractions({
     const { snapshots, centroid, startAngle } = state
     const currentAngle = Math.atan2(pointerY - centroid.y, pointerX - centroid.x)
     let deltaDeg = ((currentAngle - startAngle) * 180) / Math.PI
-    deltaDeg = (((deltaDeg + 180) % 360) + 360) % 360 - 180
+    deltaDeg = ((((deltaDeg + 180) % 360) + 360) % 360) - 180
     const snapped = Math.round(deltaDeg / snapDegrees) * snapDegrees
     const deltaRad = (snapped * Math.PI) / 180
     const cosD = Math.cos(deltaRad)

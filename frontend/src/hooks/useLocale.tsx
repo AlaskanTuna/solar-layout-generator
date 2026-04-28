@@ -1,10 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
-import i18n, {
-  DEFAULT_LOCALE,
-  isSupportedLocale,
-  LOCALE_STORAGE_KEY,
-  type SupportedLocale
-} from '@/lib/i18n'
+import i18n, { DEFAULT_LOCALE, isSupportedLocale, LOCALE_STORAGE_KEY, type SupportedLocale } from '@/lib/i18n'
 import { useAuth } from '@/hooks/useAuth'
 import { getSupabase } from '@/lib/supabase'
 

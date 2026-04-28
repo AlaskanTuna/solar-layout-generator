@@ -140,7 +140,9 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
       <p className="text-xs text-muted-foreground">{model.manufacturer}</p>
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>{model.capacityWp} Wp</span>
-        <span>{(model.efficiency * 100).toFixed(1)}% {t('panelDrawer.efficiencySuffix')}</span>
+        <span>
+          {(model.efficiency * 100).toFixed(1)}% {t('panelDrawer.efficiencySuffix')}
+        </span>
         <span>
           {model.heightM} x {model.widthM} m
         </span>

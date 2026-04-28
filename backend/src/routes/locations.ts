@@ -25,7 +25,12 @@ locationsRouter.post(
   asyncHandler(async (req, res) => {
     const { lat, lng, projectId, requiredQuality, expandedCoverage } = req.body
     const result = await locationService.resolveLocation(
-      req.user!.id, lat, lng, projectId, requiredQuality, expandedCoverage
+      req.user!.id,
+      lat,
+      lng,
+      projectId,
+      requiredQuality,
+      expandedCoverage
     )
     res.json(result)
   })

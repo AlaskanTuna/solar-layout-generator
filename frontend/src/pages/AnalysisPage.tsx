@@ -186,11 +186,7 @@ export function AnalysisPage() {
   if (projectQuery.isLoading || tariffQuery.isLoading || locationQuery.isLoading || !formState || !buildingInsights) {
     return (
       <LoadingOverlay
-        hints={[
-          t('page.loadingHints.loading'),
-          t('page.loadingHints.tariff'),
-          t('page.loadingHints.crunching')
-        ]}
+        hints={[t('page.loadingHints.loading'), t('page.loadingHints.tariff'), t('page.loadingHints.crunching')]}
       />
     )
   }
@@ -205,10 +201,7 @@ export function AnalysisPage() {
     !tariffQuery.data
   ) {
     const error =
-      projectQuery.error ??
-      tariffQuery.error ??
-      locationQuery.error ??
-      new Error(t('page.error.incompleteData'))
+      projectQuery.error ?? tariffQuery.error ?? locationQuery.error ?? new Error(t('page.error.incompleteData'))
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
@@ -218,7 +211,9 @@ export function AnalysisPage() {
             <CardDescription>{t('page.error.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-destructive">{error instanceof Error ? error.message : t('page.error.unknown')}</p>
+            <p className="text-sm text-destructive">
+              {error instanceof Error ? error.message : t('page.error.unknown')}
+            </p>
             <Button asChild variant="outline" size="sm" className="w-full justify-center gap-2">
               <Link to={`/project/${projectId}/workbench`}>{t('page.error.backToWorkbench')}</Link>
             </Button>

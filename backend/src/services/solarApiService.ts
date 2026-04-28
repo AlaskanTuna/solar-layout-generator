@@ -175,10 +175,7 @@ export async function findBestQualityForLocation(lat: number, lng: number): Prom
     expandedCoverage = false
   }
 
-  if (
-    bestQuality === null &&
-    (await probeFullChain(lat, lng, { requiredQuality: 'BASE', expandedCoverage: true }))
-  ) {
+  if (bestQuality === null && (await probeFullChain(lat, lng, { requiredQuality: 'BASE', expandedCoverage: true }))) {
     if (!available.includes('BASE')) available.push('BASE')
     bestQuality = 'BASE'
     expandedCoverage = true
@@ -240,9 +237,7 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
  */
 export function enrichBuildingInsights(insights: BuildingInsightsApiResponse): BuildingInsightsApiResponse {
   const solarPotential = isRecord(insights.solarPotential) ? insights.solarPotential : {}
-  const panels = Array.isArray(solarPotential.solarPanels)
-    ? solarPotential.solarPanels.filter(isRecord)
-    : []
+  const panels = Array.isArray(solarPotential.solarPanels) ? solarPotential.solarPanels.filter(isRecord) : []
   const enriched = panels.map((panel, idx) => ({
     ...panel,
     id: `panel_${idx}`

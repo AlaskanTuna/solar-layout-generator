@@ -79,7 +79,9 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const quotaQuery = useQuota()
   const tier = quotaQuery.data?.tier
-  const planLabel = tier ? t('menu.planLabel', { tier: tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() }) : t('menu.loadingPlan')
+  const planLabel = tier
+    ? t('menu.planLabel', { tier: tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() })
+    : t('menu.loadingPlan')
 
   useEffect(() => {
     if (!userMenuOpen) return

@@ -4,15 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
  * Renders the SummaryTile component
  * @param {Object} props - Props for the component
  */
-export function SummaryTile({
-  label,
-  value,
-  detail
-}: {
-  label: string
-  value: string
-  detail?: string
-}) {
+export function SummaryTile({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
     <div className="rounded-lg bg-muted/40 p-2.5">
       <p className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</p>

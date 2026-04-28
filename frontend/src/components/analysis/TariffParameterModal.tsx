@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { TariffRates } from '@shared/types'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { Label } from '@/components/ui/label'
@@ -14,8 +21,18 @@ type TariffField = {
 }
 
 const TARIFF_FIELDS: TariffField[] = [
-  { key: 'energyLow', label: 'Energy Charge (Low Tier)', unit: 'sen/kWh', description: 'Energy charge for usage at or below 1500 kWh.' },
-  { key: 'energyHigh', label: 'Energy Charge (High Tier)', unit: 'sen/kWh', description: 'Energy charge for usage above 1500 kWh.' },
+  {
+    key: 'energyLow',
+    label: 'Energy Charge (Low Tier)',
+    unit: 'sen/kWh',
+    description: 'Energy charge for usage at or below 1500 kWh.'
+  },
+  {
+    key: 'energyHigh',
+    label: 'Energy Charge (High Tier)',
+    unit: 'sen/kWh',
+    description: 'Energy charge for usage above 1500 kWh.'
+  },
   { key: 'capacity', label: 'Capacity Charge', unit: 'sen/kWh', description: 'TNB capacity component.' },
   { key: 'network', label: 'Network Charge', unit: 'sen/kWh', description: 'Distribution network charge.' },
   { key: 'retailChargeRm', label: 'Retail Charge', unit: 'RM/month', description: 'Flat retail service charge.' },

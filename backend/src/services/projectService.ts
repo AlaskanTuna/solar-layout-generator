@@ -122,11 +122,7 @@ export async function deleteProject(userId: string, projectId: string) {
  * @param {LayoutPreferencesDto} partial - Partial values to merge into the record
  * @returns {Promise} A promise resolving to the updated layout preferences
  */
-export async function updateLayoutPreferences(
-  userId: string,
-  projectId: string,
-  partial: LayoutPreferencesDto
-) {
+export async function updateLayoutPreferences(userId: string, projectId: string, partial: LayoutPreferencesDto) {
   const project = await findOwnedProject(userId, projectId)
   if (!project) return null
   const next = mergeLayoutPreferences(project.layoutPreferences, partial)

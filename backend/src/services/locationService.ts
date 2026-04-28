@@ -184,13 +184,7 @@ export async function getLocationDataResponseForUser(userId: string, locationId:
   const rgbImageUrl = await getSignedUrl(location.rgbImageUrl)
   const [imageGeoTransform, roofMask] = await Promise.all([loadReferenceGeoTransform(location), loadRoofMask(location)])
 
-  return buildLocationDataResponse(
-    buildingInsights,
-    rgbImageUrl,
-    location.imageryQuality,
-    imageGeoTransform,
-    roofMask
-  )
+  return buildLocationDataResponse(buildingInsights, rgbImageUrl, location.imageryQuality, imageGeoTransform, roofMask)
 }
 
 /**
@@ -200,11 +194,7 @@ export async function getLocationDataResponseForUser(userId: string, locationId:
  * @param {OverlayType} overlayType - Value used for overlay type
  * @returns {Promise<{ url: string; }>} A promise resolving to the requested overlay response for user
  */
-export async function getOverlayResponseForUser(
-  userId: string,
-  locationId: string,
-  overlayType: OverlayType
-) {
+export async function getOverlayResponseForUser(userId: string, locationId: string, overlayType: OverlayType) {
   const location = await getLocationDataForUser(userId, locationId)
   if (!location || location.status !== 'ready') {
     throw new NotFoundError('Location not found or not ready')

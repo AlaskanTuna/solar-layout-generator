@@ -97,7 +97,9 @@ export function CanvasControls({
           </>
         )}
 
-        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">{t('controls.sectionTools')}</span>
+        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">
+          {t('controls.sectionTools')}
+        </span>
         <ToolButton {...tt} onClick={onUndo} disabled={!canUndo} tooltip={t('controls.undo')}>
           <UndoIcon />
         </ToolButton>
@@ -112,11 +114,21 @@ export function CanvasControls({
         >
           <MarqueeIcon />
         </ToolButton>
-        <ToolButton {...tt} onClick={onToggleSnap} active={snapEnabled} tooltip={snapEnabled ? t('controls.snapOn') : t('controls.snap')}>
+        <ToolButton
+          {...tt}
+          onClick={onToggleSnap}
+          active={snapEnabled}
+          tooltip={snapEnabled ? t('controls.snapOn') : t('controls.snap')}
+        >
           <SnapIcon />
         </ToolButton>
         {onDeleteSelected && (
-          <ToolButton {...tt} onClick={onDeleteSelected} disabled={!hasSelection} tooltip={t('controls.deleteSelected')}>
+          <ToolButton
+            {...tt}
+            onClick={onDeleteSelected}
+            disabled={!hasSelection}
+            tooltip={t('controls.deleteSelected')}
+          >
             <DeleteIcon />
           </ToolButton>
         )}
@@ -133,7 +145,9 @@ export function CanvasControls({
 
         <div className="my-1 border-t border-border" />
 
-        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">{t('controls.sectionView')}</span>
+        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">
+          {t('controls.sectionView')}
+        </span>
         <ToolButton {...tt} onClick={onZoomIn} tooltip={t('controls.zoomIn')}>
           <span className="text-sm font-bold">+</span>
         </ToolButton>

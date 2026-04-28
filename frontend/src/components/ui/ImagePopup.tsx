@@ -35,10 +35,7 @@ export function ImagePopup({ src, alt, className, onOpenChange }: ImagePopupProp
       />
       {open &&
         createPortal(
-          <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60"
-            onClick={handleClose}
-          >
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60" onClick={handleClose}>
             <div className="relative max-h-[80vh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"

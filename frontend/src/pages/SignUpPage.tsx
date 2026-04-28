@@ -119,7 +119,9 @@ export function SignUpPage() {
                 {/* Divider */}
                 <div className="my-6 flex items-center gap-3">
                   <div className="h-px flex-1 bg-border" />
-                  <span className="text-xs uppercase tracking-wider text-muted-foreground">{t('signUp.orDivider')}</span>
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {t('signUp.orDivider')}
+                  </span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
 

@@ -8,8 +8,8 @@ Vercel serverless function that renders a given frontend URL to a PDF binary usi
 
 ## Environment Variables
 
-| Name                      | Purpose                                                               | Example                                |
-| ------------------------- | --------------------------------------------------------------------- | -------------------------------------- |
+| Name                      | Purpose                                                                | Example                                        |
+| ------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------- |
 | `ALLOWED_FRONTEND_ORIGIN` | SSRF guard — only URLs whose origin matches this value can be rendered | `https://solar-layout-generator.herokuapp.com` |
 
 Set via:

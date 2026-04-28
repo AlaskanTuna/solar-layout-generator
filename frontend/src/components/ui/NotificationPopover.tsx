@@ -65,12 +65,7 @@ export function NotificationPopover() {
             <div className="flex items-center justify-between border-b border-border p-4">
               <h3 className="text-sm font-semibold">Notifications</h3>
               {notifications.length > 0 && (
-                <Button
-                  onClick={() => notificationStore.clearAll()}
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs"
-                >
+                <Button onClick={() => notificationStore.clearAll()} variant="ghost" size="sm" className="h-7 text-xs">
                   Clear all
                 </Button>
               )}

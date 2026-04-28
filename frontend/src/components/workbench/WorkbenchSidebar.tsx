@@ -134,9 +134,7 @@ export function WorkbenchSidebar({
             <div className="rounded-lg bg-muted p-3">
               <p className="text-muted-foreground">
                 {t('sidebar.stats.co2Offset')}
-                <InfoTooltip
-                  text={t('sidebar.stats.co2OffsetTooltip', { factor: carbonOffsetFactorKgPerMwh })}
-                />
+                <InfoTooltip text={t('sidebar.stats.co2OffsetTooltip', { factor: carbonOffsetFactorKgPerMwh })} />
               </p>
               <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
             </div>
@@ -155,10 +153,15 @@ export function WorkbenchSidebar({
             </summary>
             <div className="space-y-1 border-t border-border px-3 py-2 text-muted-foreground">
               <p>
-                {t('sidebar.panelSpecs.dimensions', { height: selectedPanelModel.heightM, width: selectedPanelModel.widthM })}
+                {t('sidebar.panelSpecs.dimensions', {
+                  height: selectedPanelModel.heightM,
+                  width: selectedPanelModel.widthM
+                })}
               </p>
               <p>{t('sidebar.panelSpecs.capacity', { capacityWp: selectedPanelModel.capacityWp })}</p>
-              <p>{t('sidebar.panelSpecs.efficiency', { efficiency: (selectedPanelModel.efficiency * 100).toFixed(1) })}</p>
+              <p>
+                {t('sidebar.panelSpecs.efficiency', { efficiency: (selectedPanelModel.efficiency * 100).toFixed(1) })}
+              </p>
               {selectedPanelModel.costPerWp > 0 && (
                 <p>{t('sidebar.panelSpecs.cost', { costPerWp: selectedPanelModel.costPerWp.toFixed(2) })}</p>
               )}
@@ -218,9 +221,7 @@ export function WorkbenchSidebar({
               }}
               disabled={maxVisibleCount <= minVisibleCount}
             />
-            <p className="text-xs text-muted-foreground">
-              {t('sidebar.panelQuantity.hint')}
-            </p>
+            <p className="text-xs text-muted-foreground">{t('sidebar.panelQuantity.hint')}</p>
           </div>
 
           <div className="border-t border-border" />
@@ -241,10 +242,10 @@ export function WorkbenchSidebar({
 
             {selectedPanelIds.size > 1 ? (
               <div className="text-sm text-muted-foreground">
-                <p className="font-medium">{t('sidebar.selectedPanel.multiSelectedTitle', { count: selectedPanelIds.size })}</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {t('sidebar.selectedPanel.multiSelectedHint')}
+                <p className="font-medium">
+                  {t('sidebar.selectedPanel.multiSelectedTitle', { count: selectedPanelIds.size })}
                 </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t('sidebar.selectedPanel.multiSelectedHint')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">

@@ -214,9 +214,7 @@ export function ProjectsPage() {
                 <div className="glass-card flex flex-col items-center py-16 text-center animate-fade-in-up">
                   <FolderOpen className="h-12 w-12 text-muted-foreground/30" />
                   <p className="mt-4 text-sm text-muted-foreground">
-                    {filter === 'all'
-                      ? t('empty.noProjects')
-                      : t('empty.noFiltered', { filter })}
+                    {filter === 'all' ? t('empty.noProjects') : t('empty.noFiltered', { filter })}
                   </p>
                 </div>
               ) : (
@@ -301,9 +299,7 @@ export function ProjectsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('dialog.delete.title')}</DialogTitle>
-            <DialogDescription>
-              {t('dialog.delete.description', { name: deleteTarget?.name ?? '' })}
-            </DialogDescription>
+            <DialogDescription>{t('dialog.delete.description', { name: deleteTarget?.name ?? '' })}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>

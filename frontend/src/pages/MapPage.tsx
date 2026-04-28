@@ -428,23 +428,26 @@ export function MapPage() {
             </div>
           )}
 
-          <GuidedTour storageKey="slg-tour-map" steps={[
-            {
-              title: t('tour.step1Title'),
-              description: t('tour.step1Body')
-            },
-            {
-              target: '[data-tour="search-box"]',
-              title: t('tour.step2Title'),
-              description: t('tour.step2Body'),
-              placement: 'below' as const
-            },
-            {
-              title: t('tour.step3Title'),
-              description: t('tour.step3Body'),
-              placement: 'center-bottom' as const
-            }
-          ]} />
+          <GuidedTour
+            storageKey="slg-tour-map"
+            steps={[
+              {
+                title: t('tour.step1Title'),
+                description: t('tour.step1Body')
+              },
+              {
+                target: '[data-tour="search-box"]',
+                title: t('tour.step2Title'),
+                description: t('tour.step2Body'),
+                placement: 'below' as const
+              },
+              {
+                title: t('tour.step3Title'),
+                description: t('tour.step3Body'),
+                placement: 'center-bottom' as const
+              }
+            ]}
+          />
 
           {!isLoaded && <LoadingOverlay hints={[t('loading.loadingMaps'), t('loading.preparingMap')]} />}
 
@@ -484,9 +487,7 @@ export function MapPage() {
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 <div>
                   <p className="text-sm font-medium">{t('processing.title')}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t('processing.description')}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t('processing.description')}</p>
                 </div>
               </div>
             </div>

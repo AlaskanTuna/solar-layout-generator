@@ -241,7 +241,9 @@ export function WorkbenchPage() {
             <CardDescription>{t('errorState.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-destructive">{error instanceof Error ? error.message : t('errorState.unknownError')}</p>
+            <p className="text-sm text-destructive">
+              {error instanceof Error ? error.message : t('errorState.unknownError')}
+            </p>
             <Button asChild variant="outline" size="sm" className="w-full justify-center gap-2">
               <Link to="/dashboard">{t('errorState.backToDashboard')}</Link>
             </Button>
@@ -254,11 +256,7 @@ export function WorkbenchPage() {
   if (isLoading || !project || !buildingInsights || !backgroundImage) {
     return (
       <LoadingOverlay
-        hints={[
-          t('loading.rooftopImage'),
-          t('loading.mappingPanels'),
-          t('loading.preparingWorkbench')
-        ]}
+        hints={[t('loading.rooftopImage'), t('loading.mappingPanels'), t('loading.preparingWorkbench')]}
       />
     )
   }

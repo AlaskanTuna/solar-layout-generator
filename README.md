@@ -73,18 +73,18 @@ cp .env.example .env
 
 Fill in all values in `.env`. Every `VITE_`-prefixed variant uses `${VAR}` interpolation from a canonical (non-prefixed) name, so each secret is written once.
 
-| Variable                    | Description                                                          |
-| --------------------------- | -------------------------------------------------------------------- |
-| `GOOGLE_API_KEY`            | Google Cloud API key with Solar + Maps JS APIs enabled               |
-| `GOOGLE_OAUTH_CLIENT_ID`    | Google OAuth 2.0 client ID (for SSO)                                 |
-| `GOOGLE_OAUTH_SECRET`       | Google OAuth 2.0 client secret                                       |
-| `SUPABASE_URL`              | Your Supabase project URL                                            |
-| `SUPABASE_ANON_KEY`         | Supabase anonymous/public key                                        |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (backend only)                             |
-| `SUPABASE_DATABASE_URL`     | Direct PostgreSQL connection string                                  |
-| `FRONTEND_URL`              | Allowed origin for CORS (default `http://localhost:5173`)            |
-| `PDF_TOKEN_SECRET`          | 32+ char hex secret for signing PDF export tokens (backend only)     |
-| `PDF_EXPORT_URL`            | URL of the deployed Vercel PDF function (see "PDF Export" below)     |
+| Variable                    | Description                                                      |
+| --------------------------- | ---------------------------------------------------------------- |
+| `GOOGLE_API_KEY`            | Google Cloud API key with Solar + Maps JS APIs enabled           |
+| `GOOGLE_OAUTH_CLIENT_ID`    | Google OAuth 2.0 client ID (for SSO)                             |
+| `GOOGLE_OAUTH_SECRET`       | Google OAuth 2.0 client secret                                   |
+| `SUPABASE_URL`              | Your Supabase project URL                                        |
+| `SUPABASE_ANON_KEY`         | Supabase anonymous/public key                                    |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (backend only)                         |
+| `SUPABASE_DATABASE_URL`     | Direct PostgreSQL connection string                              |
+| `FRONTEND_URL`              | Allowed origin for CORS (default `http://localhost:5173`)        |
+| `PDF_TOKEN_SECRET`          | 32+ char hex secret for signing PDF export tokens (backend only) |
+| `PDF_EXPORT_URL`            | URL of the deployed Vercel PDF function (see "PDF Export" below) |
 
 ### 3. Set up the database
 
@@ -230,11 +230,11 @@ vercel --prod                                # production deploy; prints the fun
 
 Then set `PDF_EXPORT_URL` (backend + frontend build) and `ALLOWED_FRONTEND_ORIGIN` (Vercel) to the corresponding values:
 
-| Where                        | Variable                  | Value                                   |
-| ---------------------------- | ------------------------- | --------------------------------------- |
-| Root `.env` (local + Heroku) | `PDF_EXPORT_URL`          | e.g. `https://pdf-service-teal.vercel.app` |
+| Where                        | Variable                  | Value                                                                      |
+| ---------------------------- | ------------------------- | -------------------------------------------------------------------------- |
+| Root `.env` (local + Heroku) | `PDF_EXPORT_URL`          | e.g. `https://pdf-service-teal.vercel.app`                                 |
 | Root `.env` (local + Heroku) | `PDF_TOKEN_SECRET`        | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| Vercel function config       | `ALLOWED_FRONTEND_ORIGIN` | Production frontend URL (SSRF guard)    |
+| Vercel function config       | `ALLOWED_FRONTEND_ORIGIN` | Production frontend URL (SSRF guard)                                       |
 
 ### Redeploying
 

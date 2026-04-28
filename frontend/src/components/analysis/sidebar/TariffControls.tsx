@@ -135,7 +135,9 @@ export function TariffControls({
             <DropdownMenuRadioGroup
               value={formState.connectionPhase}
               onValueChange={(value) =>
-                setFormState((current) => (current ? { ...current, connectionPhase: value as ConnectionPhase } : current))
+                setFormState((current) =>
+                  current ? { ...current, connectionPhase: value as ConnectionPhase } : current
+                )
               }
             >
               {(Object.keys(connectionPhaseLabels) as ConnectionPhase[]).map((phase) => (
@@ -220,11 +222,7 @@ export function TariffControls({
                     ? {
                         ...current,
                         afaRateSenPerKwh:
-                          raw === '' || raw === '-'
-                            ? 0
-                            : Number.isFinite(parsed)
-                              ? parsed
-                              : current.afaRateSenPerKwh
+                          raw === '' || raw === '-' ? 0 : Number.isFinite(parsed) ? parsed : current.afaRateSenPerKwh
                       }
                     : current
                 )
@@ -242,7 +240,9 @@ export function TariffControls({
             </div>
             <PercentageInput
               value={formState.tariffEscalationRate}
-              onChange={(rate) => setFormState((current) => (current ? { ...current, tariffEscalationRate: rate } : current))}
+              onChange={(rate) =>
+                setFormState((current) => (current ? { ...current, tariffEscalationRate: rate } : current))
+              }
             />
           </div>
 
@@ -278,7 +278,9 @@ export function TariffControls({
             onOpenChange={setTariffModalOpen}
             defaults={tariffRatesDefaults}
             override={formState.tariffRatesOverride}
-            onSave={(next) => setFormState((current) => (current ? { ...current, tariffRatesOverride: next } : current))}
+            onSave={(next) =>
+              setFormState((current) => (current ? { ...current, tariffRatesOverride: next } : current))
+            }
           />
 
           <div className="my-2 border-t border-border" />
@@ -293,7 +295,9 @@ export function TariffControls({
             </div>
             <PercentageInput
               value={formState.degradationRate}
-              onChange={(rate) => setFormState((current) => (current ? { ...current, degradationRate: rate } : current))}
+              onChange={(rate) =>
+                setFormState((current) => (current ? { ...current, degradationRate: rate } : current))
+              }
             />
           </div>
 
@@ -315,7 +319,9 @@ export function TariffControls({
                     const value = Number(event.target.value)
                     if (value >= 50 && value <= 100) {
                       setFormState((current) =>
-                        current ? { ...current, performanceRatio: value / 100, assumedLosses: 1 - value / 100 } : current
+                        current
+                          ? { ...current, performanceRatio: value / 100, assumedLosses: 1 - value / 100 }
+                          : current
                       )
                     }
                   }}

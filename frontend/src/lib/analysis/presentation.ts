@@ -12,18 +12,7 @@ export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'A
  * Malaysian aircon-heavy hot months.
  */
 export const SEASONAL_MULTIPLIERS: readonly number[] = [
-  0.93,
-  0.95,
-  1.08,
-  1.1,
-  1.1,
-  1.08,
-  1.02,
-  1,
-  0.98,
-  0.95,
-  0.9,
-  0.91
+  0.93, 0.95, 1.08, 1.1, 1.1, 1.08, 1.02, 1, 0.98, 0.95, 0.9, 0.91
 ] as const
 
 /** One x-axis tick of the analysis bill-comparison chart — month label plus baseline / NEM / cumulative-savings amounts. */

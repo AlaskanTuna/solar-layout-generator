@@ -9,7 +9,7 @@ import { getProjectStatusConfig } from '@/lib/projectStatus'
 export function ProjectCard({
   project,
   onOpen,
-  onDelete,
+  onDelete
 }: {
   project: ProjectResponse
   onOpen: () => void
@@ -64,7 +64,9 @@ export function ProjectCard({
               <Receipt className="h-3 w-3 text-green-500" />
               Savings/mo
             </span>
-            <span className="font-medium text-green-600 dark:text-green-400">RM {analysis.averageMonthlySavingsRm.toFixed(0)}</span>
+            <span className="font-medium text-green-600 dark:text-green-400">
+              RM {analysis.averageMonthlySavingsRm.toFixed(0)}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-muted-foreground">
@@ -95,7 +97,9 @@ export function ProjectCard({
         <div className="mt-3">
           <div className="flex gap-1">
             <div className="h-1 flex-1 rounded-full bg-primary" />
-            <div className={`h-1 flex-1 rounded-full ${project.status === 'layout_saved' ? 'bg-primary' : 'bg-muted'}`} />
+            <div
+              className={`h-1 flex-1 rounded-full ${project.status === 'layout_saved' ? 'bg-primary' : 'bg-muted'}`}
+            />
             <div className="h-1 flex-1 rounded-full bg-muted" />
           </div>
           <p className="mt-1.5 text-[10px] text-muted-foreground">

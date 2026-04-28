@@ -122,7 +122,10 @@ export function FinancialRoadmap({
       t('financialRoadmap.footer.lifecycle', {
         maintenance: formatCurrency(maintenancePerYear),
         replacements: replacementsSuffix
-      }) + (tariffEscalationRate > 0 ? t('financialRoadmap.footer.escalationSuffix', { rate: (tariffEscalationRate * 100).toFixed(1) }) : '')
+      }) +
+      (tariffEscalationRate > 0
+        ? t('financialRoadmap.footer.escalationSuffix', { rate: (tariffEscalationRate * 100).toFixed(1) })
+        : '')
   } else if (tariffEscalationRate > 0) {
     footerText = t('financialRoadmap.footer.simpleWithEscalation', { rate: (tariffEscalationRate * 100).toFixed(1) })
   } else {

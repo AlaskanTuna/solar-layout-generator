@@ -28,11 +28,10 @@ export type SignedPdfToken = {
  * @returns {SignedPdfToken} The resulting sign pdf token value
  */
 export function signPdfToken(userId: string, projectId: string): SignedPdfToken {
-  const token = jwt.sign(
-    { sub: userId, projectId, type: TOKEN_TYPE } satisfies PdfTokenPayload,
-    env.PDF_TOKEN_SECRET,
-    { algorithm: 'HS256', expiresIn: TOKEN_TTL_SECONDS }
-  )
+  const token = jwt.sign({ sub: userId, projectId, type: TOKEN_TYPE } satisfies PdfTokenPayload, env.PDF_TOKEN_SECRET, {
+    algorithm: 'HS256',
+    expiresIn: TOKEN_TTL_SECONDS
+  })
   const expiresAt = new Date(Date.now() + TOKEN_TTL_SECONDS * 1000).toISOString()
   return { token, expiresAt }
 }

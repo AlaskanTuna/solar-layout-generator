@@ -77,7 +77,12 @@ projectsRouter.patch(
     console.info(
       `[ProjectSaveLayout] user=${req.user!.id} project=${req.params.id as string} panels=${req.body.editedLayout.length}`
     )
-    const updated = await projectService.saveLayout(req.user!.id, req.params.id as string, req.body.editedLayout, req.body.selectedPanelModelId)
+    const updated = await projectService.saveLayout(
+      req.user!.id,
+      req.params.id as string,
+      req.body.editedLayout,
+      req.body.selectedPanelModelId
+    )
     if (!updated) {
       console.warn(`[ProjectSaveLayout] not found user=${req.user!.id} project=${req.params.id as string}`)
       throw new NotFoundError('Project not found')
@@ -92,7 +97,11 @@ projectsRouter.patch(
   validate(updateLayoutPreferencesSchema),
   asyncHandler(async (req, res) => {
     console.info(`[ProjectSavePrefs] user=${req.user!.id} project=${req.params.id as string}`)
-    const updated = await projectService.updateLayoutPreferences(req.user!.id, req.params.id as string, req.body.layoutPreferences)
+    const updated = await projectService.updateLayoutPreferences(
+      req.user!.id,
+      req.params.id as string,
+      req.body.layoutPreferences
+    )
     if (!updated) {
       console.warn(`[ProjectSavePrefs] not found user=${req.user!.id} project=${req.params.id as string}`)
       throw new NotFoundError('Project not found')
@@ -107,7 +116,12 @@ projectsRouter.patch(
   validate(saveAnalysisSchema),
   asyncHandler(async (req, res) => {
     console.info(`[ProjectSaveAnalysis] user=${req.user!.id} project=${req.params.id as string}`)
-    const updated = await projectService.saveAnalysis(req.user!.id, req.params.id as string, req.body.analysisConfig, req.body.analysisResults)
+    const updated = await projectService.saveAnalysis(
+      req.user!.id,
+      req.params.id as string,
+      req.body.analysisConfig,
+      req.body.analysisResults
+    )
     if (!updated) {
       console.warn(`[ProjectSaveAnalysis] not found user=${req.user!.id} project=${req.params.id as string}`)
       throw new NotFoundError('Project not found')

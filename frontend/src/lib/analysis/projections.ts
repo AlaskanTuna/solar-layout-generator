@@ -120,7 +120,9 @@ export function buildNetBenefitSeries({
     const maintenanceCost = analysisMode === 'lifecycle' ? annualMaintenanceRm * year : 0
     const inverterCost =
       analysisMode === 'lifecycle'
-        ? replacements.filter((replacement) => replacement.year <= year).reduce((sum, replacement) => sum + replacement.costRm, 0)
+        ? replacements
+            .filter((replacement) => replacement.year <= year)
+            .reduce((sum, replacement) => sum + replacement.costRm, 0)
         : 0
 
     return {

@@ -142,10 +142,7 @@ export function parseLayoutPreferences(value: unknown): LayoutPreferencesDto {
  * @param {AnalysisConfigDto} nextValue - Value used for next value
  * @returns {Object} The merged analysis config
  */
-export function mergeAnalysisConfig(
-  existingValue: unknown,
-  nextValue: AnalysisConfigDto
-): AnalysisConfigDto {
+export function mergeAnalysisConfig(existingValue: unknown, nextValue: AnalysisConfigDto): AnalysisConfigDto {
   const existing = parseAnalysisConfig(existingValue)
   return existing ? { ...existing, ...nextValue } : nextValue
 }
@@ -156,10 +153,7 @@ export function mergeAnalysisConfig(
  * @param {LayoutPreferencesDto} partial - Partial values to merge into the record
  * @returns {Object} The merged layout preferences
  */
-export function mergeLayoutPreferences(
-  existingValue: unknown,
-  partial: LayoutPreferencesDto
-): LayoutPreferencesDto {
+export function mergeLayoutPreferences(existingValue: unknown, partial: LayoutPreferencesDto): LayoutPreferencesDto {
   return { ...parseLayoutPreferences(existingValue), ...partial }
 }
 

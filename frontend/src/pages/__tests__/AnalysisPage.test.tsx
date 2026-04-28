@@ -138,13 +138,7 @@ vi.mock('@/components/ui/LoadingOverlay', () => ({
 }))
 
 vi.mock('@/components/analysis/AnalysisSidebar', () => ({
-  AnalysisSidebar: ({
-    onExportPdf,
-    onSaveAnalysis
-  }: {
-    onExportPdf: () => void
-    onSaveAnalysis: () => void
-  }) => (
+  AnalysisSidebar: ({ onExportPdf, onSaveAnalysis }: { onExportPdf: () => void; onSaveAnalysis: () => void }) => (
     <div>
       <button type="button" onClick={onExportPdf}>
         export
@@ -217,10 +211,12 @@ describe('AnalysisPage', () => {
       }
     })
 
-    handleExportPdfMock.mockImplementation(async (_projectId: string, _projectName: string, beforeExport?: () => Promise<void>) => {
-      await beforeExport?.()
-      callOrder.push('export')
-    })
+    handleExportPdfMock.mockImplementation(
+      async (_projectId: string, _projectName: string, beforeExport?: () => Promise<void>) => {
+        await beforeExport?.()
+        callOrder.push('export')
+      }
+    )
 
     renderPage()
 

@@ -14,18 +14,10 @@ import { SettingsPage } from './pages/SettingsPage'
 import { MapPage } from './pages/MapPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
-const WorkbenchPage = lazy(() =>
-  import('./pages/WorkbenchPage').then((m) => ({ default: m.WorkbenchPage }))
-)
-const AnalysisPage = lazy(() =>
-  import('./pages/AnalysisPage').then((m) => ({ default: m.AnalysisPage }))
-)
-const AnalyticsPage = lazy(() =>
-  import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage }))
-)
-const PdfPreviewPage = lazy(() =>
-  import('./pages/PdfPreviewPage').then((m) => ({ default: m.PdfPreviewPage }))
-)
+const WorkbenchPage = lazy(() => import('./pages/WorkbenchPage').then((m) => ({ default: m.WorkbenchPage })))
+const AnalysisPage = lazy(() => import('./pages/AnalysisPage').then((m) => ({ default: m.AnalysisPage })))
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })))
+const PdfPreviewPage = lazy(() => import('./pages/PdfPreviewPage').then((m) => ({ default: m.PdfPreviewPage })))
 
 const PAGE_LOADING_HINTS = ['Loading page...']
 

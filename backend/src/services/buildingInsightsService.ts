@@ -2,25 +2,29 @@ import { z } from 'zod'
 
 const solarPanelSchema = z.object({}).passthrough()
 
-const solarPotentialSchema = z.object({
-  panelWidthMeters: z.number().positive().finite(),
-  panelHeightMeters: z.number().positive().finite(),
-  panelCapacityWatts: z.number().positive().finite(),
-  solarPanels: z.array(solarPanelSchema).optional()
-}).passthrough()
+const solarPotentialSchema = z
+  .object({
+    panelWidthMeters: z.number().positive().finite(),
+    panelHeightMeters: z.number().positive().finite(),
+    panelCapacityWatts: z.number().positive().finite(),
+    solarPanels: z.array(solarPanelSchema).optional()
+  })
+  .passthrough()
 
 const latLngSchema = z.object({
   latitude: z.number().finite(),
   longitude: z.number().finite()
 })
 
-const buildingInsightsSchema = z.object({
-  boundingBox: z.object({
-    sw: latLngSchema,
-    ne: latLngSchema
-  }),
-  solarPotential: solarPotentialSchema
-}).passthrough()
+const buildingInsightsSchema = z
+  .object({
+    boundingBox: z.object({
+      sw: latLngSchema,
+      ne: latLngSchema
+    }),
+    solarPotential: solarPotentialSchema
+  })
+  .passthrough()
 
 /**
  * Solar potential subset used to size and recompute panels

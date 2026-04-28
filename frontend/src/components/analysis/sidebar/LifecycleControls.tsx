@@ -115,7 +115,8 @@ export function LifecycleControls({ formState, setFormState }: LifecycleControls
               value={formState.annualMaintenanceRm ?? 0}
               onChange={(event) => {
                 const value = Number(event.target.value)
-                if (value >= 0) setFormState((current) => (current ? { ...current, annualMaintenanceRm: value } : current))
+                if (value >= 0)
+                  setFormState((current) => (current ? { ...current, annualMaintenanceRm: value } : current))
               }}
             />
           </div>
@@ -212,7 +213,9 @@ export function LifecycleControls({ formState, setFormState }: LifecycleControls
                       if (!current?.inverterReplacements) return current
                       return {
                         ...current,
-                        inverterReplacements: current.inverterReplacements.filter((_, replacementIndex) => replacementIndex !== index)
+                        inverterReplacements: current.inverterReplacements.filter(
+                          (_, replacementIndex) => replacementIndex !== index
+                        )
                       }
                     })
                   }

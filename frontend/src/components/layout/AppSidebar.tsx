@@ -62,19 +62,19 @@ type NavSectionDef = {
 const NAV_SECTIONS: NavSectionDef[] = [
   {
     titleKey: 'sections.overview',
-    items: [{ to: '/dashboard', labelKey: 'items.dashboard', icon: LayoutDashboard, exact: true }],
+    items: [{ to: '/dashboard', labelKey: 'items.dashboard', icon: LayoutDashboard, exact: true }]
   },
   {
     titleKey: 'sections.insights',
     items: [
       { to: '/dashboard/projects', labelKey: 'items.projects', icon: FolderKanban },
-      { to: '/dashboard/analytics', labelKey: 'items.analytics', icon: PieChart },
-    ],
+      { to: '/dashboard/analytics', labelKey: 'items.analytics', icon: PieChart }
+    ]
   },
   {
     titleKey: 'sections.help',
-    items: [{ to: '/dashboard/faq', labelKey: 'items.faq', icon: CircleHelp }],
-  },
+    items: [{ to: '/dashboard/faq', labelKey: 'items.faq', icon: CircleHelp }]
+  }
 ]
 
 /**
@@ -96,7 +96,7 @@ export function AppSidebar() {
         onMouseLeave={handleMouseLeave}
         style={{
           width: collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED,
-          boxShadow: collapsed ? 'none' : '0 8px 40px rgba(0, 0, 0, 0.16)',
+          boxShadow: collapsed ? 'none' : '0 8px 40px rgba(0, 0, 0, 0.16)'
         }}
         className="group/sidebar fixed inset-y-0 left-0 z-[60] flex flex-col overflow-hidden border-r border-border bg-sidebar"
       >

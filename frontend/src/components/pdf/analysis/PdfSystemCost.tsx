@@ -141,9 +141,23 @@ export function PdfSystemCost({
                     </linearGradient>
                   ))}
                 </defs>
-                <Pie data={segments} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={38} outerRadius={65} paddingAngle={0}>
+                <Pie
+                  data={segments}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={38}
+                  outerRadius={65}
+                  paddingAngle={0}
+                >
                   {segments.map((segment) => (
-                    <Cell key={segment.key} fill={`url(#pdfSystemCost-${segment.key})`} stroke={segment.color} strokeWidth={1.5} />
+                    <Cell
+                      key={segment.key}
+                      fill={`url(#pdfSystemCost-${segment.key})`}
+                      stroke={segment.color}
+                      strokeWidth={1.5}
+                    />
                   ))}
                 </Pie>
                 <Tooltip

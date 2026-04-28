@@ -68,7 +68,9 @@ export function SystemAssumptions({
                 {t('systemAssumptions.panelLifetime.label')}
                 <InfoTooltip text={t('systemAssumptions.panelLifetime.tooltip')} />
               </p>
-              <p className="mt-1 text-lg font-semibold">{t('systemAssumptions.panelLifetime.value', { years: panelLifetimeYears })}</p>
+              <p className="mt-1 text-lg font-semibold">
+                {t('systemAssumptions.panelLifetime.value', { years: panelLifetimeYears })}
+              </p>
               <p className="text-xs text-muted-foreground">{t('systemAssumptions.panelLifetime.detail')}</p>
             </div>
           )}

@@ -306,9 +306,7 @@ export function usePanelState({
     updatePanelState(panelId, (panel) => ({ ...panel, monthlyEnergyDcKwh }))
   }
 
-  function bulkUpdatePanels(
-    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
-  ) {
+  function bulkUpdatePanels(updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>) {
     if (updates.length === 0) return
     const updateMap = new Map(updates.map((u) => [u.id, u]))
     setPanels((current) =>
