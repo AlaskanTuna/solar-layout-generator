@@ -1,27 +1,31 @@
 import { apiFetch } from './client'
 import type {
+  AnalysisResultsDto,
+  BuildingInsightsDto,
   CreateProjectRequest,
+  PanelEdit,
   SaveLayoutRequest,
   SaveAnalysisRequest,
+  StoredAnalysisConfigDto,
   UpdateLayoutPreferencesRequest,
   LayoutPreferences,
-  ImageryQuality
+  ImageryQuality,
+  ProjectStatus
 } from '@shared/types'
-import type { AnalysisConfig, AnalysisResultsRecord } from '@/lib/analysis'
 import type { LocationImageGeoTransform } from './locations'
 
-/** Partial after layout save (only selectedPanelModelId), full after analysis save */
-export type ProjectAnalysisConfig = Partial<AnalysisConfig> & { selectedPanelModelId?: string }
+/** Partial after layout save (only selectedPanelModelId), fuller after analysis save */
+export type ProjectAnalysisConfig = StoredAnalysisConfigDto
 
 export type ProjectResponse = {
   id: string
   userId: string
   locationId: string
   name: string
-  status: 'draft' | 'layout_saved' | 'analysis_saved'
-  editedLayout: unknown[] | null
+  status: ProjectStatus
+  editedLayout: PanelEdit[] | null
   analysisConfig: ProjectAnalysisConfig | null
-  analysisResults: AnalysisResultsRecord | null
+  analysisResults: AnalysisResultsDto | null
   layoutPreferences: LayoutPreferences | null
   createdAt: string
   updatedAt: string
@@ -31,7 +35,7 @@ export type ProjectResponse = {
     lng: number
     status: 'processing' | 'ready' | 'failed'
     imageryQuality: ImageryQuality | null
-    buildingInsightsJson?: Record<string, unknown>
+    buildingInsightsJson?: BuildingInsightsDto
     rgbImageUrl?: string | null
   }
   /** Populated only by `/pdf-data` — a short-lived signed URL for the RGB satellite image. */

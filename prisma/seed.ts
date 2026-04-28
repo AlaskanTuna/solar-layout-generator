@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
+import { tariffDefaults } from '../shared/tariffDefaults.ts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, '../.env') })
@@ -23,7 +24,7 @@ async function main() {
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
       afaRateDefault: -2.15,
-      defaults: DEFAULTS,
+      defaults: tariffDefaults,
       effectiveDate: TARIFF_EFFECTIVE_DATE,
       sourceNote: TARIFF_SOURCE_NOTE
     },
@@ -33,7 +34,7 @@ async function main() {
       thresholds: THRESHOLDS,
       eeiTable: EEI_TABLE,
       afaRateDefault: -2.15,
-      defaults: DEFAULTS,
+      defaults: tariffDefaults,
       effectiveDate: TARIFF_EFFECTIVE_DATE,
       sourceNote: TARIFF_SOURCE_NOTE
     }
@@ -61,14 +62,6 @@ const THRESHOLDS = {
   sstExemption: 600, // kWh — below this, SST = 0
   eeiCutoff: 1000, // kWh — above this, no EEI rebate
   reFundExemption: 300 // kWh — below this, no RE Fund
-}
-
-// Analysis defaults (adjustable without code changes)
-const DEFAULTS = {
-  nemCapSinglePhaseKw: 5,
-  nemCapThreePhaseKw: 12.5,
-  systemCostPerKwp: 4500, // RM per kWp
-  annualYieldPerKwp: 1200 // kWh per kWp
 }
 
 // EEI lookup: [upperBoundKwh, rebateSenPerKwh]

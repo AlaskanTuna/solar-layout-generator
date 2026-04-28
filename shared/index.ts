@@ -1,3 +1,8 @@
+import type { LayoutPreferences } from './layoutPreferences.ts'
+import type { PanelEdit } from './panelTypes.ts'
+import type { AnalysisConfigDto, AnalysisResultsDto, BuildingInsightsDto } from './projectDtos.ts'
+import type { TariffDefaults } from './tariffDefaults.ts'
+
 /* LOCATION */
 
 export type LocationStatus = 'processing' | 'ready' | 'failed'
@@ -10,41 +15,20 @@ export type ProjectStatus = 'draft' | 'layout_saved' | 'analysis_saved'
 
 /* LAYOUT PRESET (W-1) */
 
-export type BillRange = '<100' | '100-200' | '200-400' | '400-600' | '600+' | 'unknown'
-
-export type SizingGoal = 'conservative' | 'balanced' | 'maximum' | 'custom'
-
-export type RoofDirection = 'any' | 'south' | 'east' | 'west' | 'north'
-
-export type LayoutPreferences = {
-  billRange?: BillRange
-  sizingGoal: SizingGoal
-  roofDirection?: RoofDirection
-  dismissedAt?: string
-}
-
-// Estimated monthly kWh consumption by bill bucket — derived from average TNB blended
-// residential tariff (~RM 0.35/kWh after capacity, network, retail, AFA, and SST).
-// Midpoints chosen to err slightly conservative so balanced/conservative presets do
-// not over-size systems.
-export const BILL_RANGE_TO_KWH_PER_MONTH: Record<BillRange, number> = {
-  '<100': 250,
-  '100-200': 450,
-  '200-400': 800,
-  '400-600': 1300,
-  '600+': 1800,
-  unknown: 600
-}
+export {
+  BILL_RANGE_TO_KWH_PER_MONTH,
+  billRangeSchema,
+  layoutPreferencesPartialSchema,
+  layoutPreferencesSchema,
+  roofDirectionSchema,
+  sizingGoalSchema
+} from './layoutPreferences.ts'
+export type { BillRange, LayoutPreferences, RoofDirection, SizingGoal } from './layoutPreferences.ts'
 
 /* PANEL EDIT */
 
-export type PanelEdit = {
-  id: string
-  status: 'kept' | 'moved' | 'deleted'
-  center: { lat: number; lng: number }
-  rotation: number
-  monthlyEnergyDcKwh: number[]
-}
+export { panelEditSchema } from './panelTypes.ts'
+export type { PanelEdit } from './panelTypes.ts'
 
 /* API REQUEST / RESPONSE TYPES */
 
@@ -66,7 +50,7 @@ export type LocationStatusResponse = {
 }
 
 export type LocationDataResponse = {
-  buildingInsights: Record<string, unknown>
+  buildingInsights: BuildingInsightsDto
   rgbImageUrl: string
   imageryQuality: ImageryQuality | null
 }
@@ -114,8 +98,8 @@ export type UpdateLayoutPreferencesRequest = {
 }
 
 export type SaveAnalysisRequest = {
-  analysisConfig: Record<string, unknown>
-  analysisResults: Record<string, unknown>
+  analysisConfig: AnalysisConfigDto
+  analysisResults: AnalysisResultsDto
 }
 
 export type TariffRates = {
@@ -138,13 +122,6 @@ export type TariffThresholds = {
   reFundExemption: number
 }
 
-export type TariffDefaults = {
-  nemCapSinglePhaseKw: number
-  nemCapThreePhaseKw: number
-  systemCostPerKwp: number
-  annualYieldPerKwp: number
-}
-
 export type TariffConfigResponse = {
   rates: TariffRates
   thresholds: TariffThresholds
@@ -161,20 +138,26 @@ export type HealthResponse = {
   status: 'ok'
 }
 
+export {
+  analysisConfigSchema,
+  analysisResultsSchema,
+  buildingInsightsSchema,
+  createProjectRequestSchema,
+  saveAnalysisRequestSchema,
+  saveLayoutRequestSchema,
+  storedAnalysisConfigSchema,
+  updateLayoutPreferencesRequestSchema
+} from './projectDtos.ts'
+export type {
+  AnalysisConfigDto,
+  AnalysisResultsDto,
+  BuildingInsightsDto,
+  StoredAnalysisConfigDto
+} from './projectDtos.ts'
+
 /* PANEL MODEL */
 
-export interface PanelModel {
-  id: string
-  name: string
-  manufacturer: string
-  widthM: number
-  heightM: number
-  capacityWp: number
-  efficiency: number
-  costPerWp: number // RM per Wp (panel module cost only; installation multiplier applied at analysis time)
-  tagline?: string // short distinguishing factor shown in the model picker
-}
-
+export type { PanelModel } from './panelTypes.ts'
 export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelModels.ts'
 
 export { computeSystemCost, MOUNTING_PER_PANEL } from './costModel.ts'
@@ -182,3 +165,6 @@ export type { CostBreakdown, CostInputs, RoofType, SupplyPhase } from './costMod
 
 export { TIER_DAILY_LIMITS, WARNING_THRESHOLD } from './quota.ts'
 export type { UserTier, QuotaSummary } from './quota.ts'
+
+export { tariffDefaults } from './tariffDefaults.ts'
+export type { TariffDefaults } from './tariffDefaults.ts'

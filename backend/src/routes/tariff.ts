@@ -2,7 +2,7 @@ import { Router, type Router as ExpressRouter } from 'express'
 import { prisma } from '../config/prisma.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { NotFoundError } from '../errors.js'
-import type { TariffConfigResponse } from '@shared/types'
+import { tariffDefaults, type TariffConfigResponse } from '@shared/types'
 
 export const tariffRouter: ExpressRouter = Router()
 
@@ -22,12 +22,7 @@ tariffRouter.get(
       thresholds: config.thresholds as TariffConfigResponse['thresholds'],
       eeiTable: config.eeiTable as TariffConfigResponse['eeiTable'],
       afaRateDefault: config.afaRateDefault,
-      defaults: (config.defaults ?? {
-        nemCapSinglePhaseKw: 5,
-        nemCapThreePhaseKw: 12.5,
-        systemCostPerKwp: 4500,
-        annualYieldPerKwp: 1200
-      }) as TariffConfigResponse['defaults'],
+      defaults: (config.defaults ?? tariffDefaults) as TariffConfigResponse['defaults'],
       effectiveDate: config.effectiveDate ? config.effectiveDate.toISOString() : null,
       sourceNote: config.sourceNote ?? null
     }

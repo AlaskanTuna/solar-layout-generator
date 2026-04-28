@@ -1,4 +1,4 @@
-import type { PanelModel } from './index'
+import type { PanelModel } from './panelTypes.ts'
 
 // widthM = short side, heightM = long side (matches Google Solar API convention)
 // costPerWp is distributor-to-installer panel module price (RM/Wp) per doc §1.
