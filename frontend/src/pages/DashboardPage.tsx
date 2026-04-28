@@ -160,6 +160,7 @@ export function DashboardPage() {
 
         {/* Action grid and recents */}
         <div className="mt-6 grid flex-1 gap-4 animate-fade-in-up xl:grid-cols-[minmax(0,1fr)_320px]">
+          {/* New project + quick actions */}
           <div className="grid gap-4 sm:grid-cols-2">
             {quotaReached && quota ? (
               <TooltipProvider>

@@ -79,6 +79,7 @@ export function SignInPage() {
 
       {/* Form panel */}
       <div className="flex flex-1 flex-col">
+        {/* Mobile logo + theme/language toggles */}
         <div className="flex items-center justify-between p-6">
           <Link to="/" className="flex items-center gap-2 lg:hidden">
             <Logo className="h-7 w-7" />
@@ -90,21 +91,26 @@ export function SignInPage() {
           </div>
         </div>
 
+        {/* Centered form */}
         <div className="flex flex-1 items-center justify-center px-6 pb-12">
           <div className="w-full max-w-sm animate-fade-in">
+            {/* Heading */}
             <div className="mb-8">
               <h1 className="font-heading text-2xl font-bold tracking-tight">{t('signIn.title')}</h1>
               <p className="mt-1 text-sm text-muted-foreground">{t('signIn.subtitle')}</p>
             </div>
 
+            {/* Google OAuth */}
             <GoogleSignInButton label={t('signIn.googleButton')} onError={setError} />
 
+            {/* Divider */}
             <div className="my-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
               <span className="text-xs uppercase tracking-wider text-muted-foreground">{t('signIn.orDivider')}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
+            {/* Email/password form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">{t('signIn.emailLabel')}</Label>

@@ -120,6 +120,7 @@ export function SettingsPage() {
 
       {/* Settings grid */}
       <div className="mt-6 grid gap-4 xl:grid-cols-[1fr_1fr]">
+        {/* Account info */}
         <SettingCard
           icon={UserRound}
           title={t('account.title')}
@@ -137,6 +138,7 @@ export function SettingsPage() {
           </div>
         </SettingCard>
 
+        {/* Theme picker */}
         <SettingCard
           icon={Palette}
           title={t('appearance.title')}
@@ -167,6 +169,7 @@ export function SettingsPage() {
           </div>
         </SettingCard>
 
+        {/* Notification inbox controls */}
         <SettingCard
           icon={Bell}
           title={t('notifications.title')}
@@ -183,6 +186,7 @@ export function SettingsPage() {
           </div>
         </SettingCard>
 
+        {/* Replay onboarding tours */}
         <SettingCard
           icon={RotateCcw}
           title={t('guidedTours.title')}
@@ -193,6 +197,7 @@ export function SettingsPage() {
           </Button>
         </SettingCard>
 
+        {/* Clear recent activity history */}
         <SettingCard
           icon={History}
           title={t('recentActivity.title')}
