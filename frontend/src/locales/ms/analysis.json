@@ -228,13 +228,13 @@
       "nemFit": {
         "label": "Padanan NEM",
         "tooltip": {
-          "intro": "Seberapa baik susun atur ini disaizkan untuk penggunaan anda di bawah program insentif solar semasa.",
-          "good": "Baik:",
-          "goodDetail": "Kebanyakan penjanaan mengimbangi bil anda sendiri, dengan sangat sedikit kredit yang tersisa.",
-          "moderate": "Sederhana:",
-          "moderateDetail": "Masih ada pergantungan grid atau sedikit pengumpulan kredit. Susun atur ini berfungsi, tetapi belum dipadankan rapat dengan penggunaan.",
+          "intro": "Padanan NEM menerangkan gaya saiz susun atur, bukan penarafan bintang. Bintang menilai kelajuan bayar balik; Padanan NEM menerangkan self-consumption: sama ada sistem ini lean, seimbang, atau menjana lebih banyak kredit daripada yang boleh digunakan.",
+          "lean": "Lean:",
+          "leanDetail": "Sistem lebih kecil dengan kredit terbazir yang rendah dan bayar balik lebih kuat, tetapi lebih banyak penggunaan tahunan masih datang daripada grid.",
+          "balanced": "Seimbang:",
+          "balancedDetail": "Padanan self-consumption yang lebih rapat. Kebanyakan penggunaan tahunan diliputi solar atau kredit NEM, sementara eksport bulanan dan kredit luput hujung tahun kekal rendah.",
           "oversized": "Terlalu Besar:",
-          "oversizedDetail": "Pengumpulan kredit yang banyak. Kredit berlebihan bukan wang tunai dan akan dilucutkan pada hujung tahun jika tidak digunakan.",
+          "oversizedDetail": "Penjanaan cukup tinggi sehingga kredit terkumpul dengan banyak. Kredit berlebihan bukan wang tunai dan akan dilucutkan pada hujung tahun jika tidak digunakan.",
           "importRate": "Kadar Import:",
           "importRateValue": "{{pct}}% penggunaan diambil dari grid",
           "importRateSuffix": "penggunaan diambil dari grid",
@@ -243,8 +243,8 @@
           "exportRateSuffix": "penjanaan dihantar balik ke grid"
         },
         "labels": {
-          "good": "Baik",
-          "moderate": "Sederhana",
+          "lean": "Lean",
+          "balanced": "Seimbang",
           "oversized": "Terlalu Besar"
         }
       }

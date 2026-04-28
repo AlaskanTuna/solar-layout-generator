@@ -130,7 +130,7 @@ describe('classifyNemFit', () => {
     expect(metrics.monthlyExportRate).toBeCloseTo(0.125, 4)
   })
 
-  it('returns Good for a well-matched layout with low import, low export, and low forfeiture', () => {
+  it('returns Balanced for a well-matched layout with low import, low export, and low forfeiture', () => {
     const metrics = computeNemFitMetrics(
       Array.from({ length: 12 }, (_, index) =>
         nemMonth({ month: index + 1, consumptionKwh: 800, generationKwh: 800, billableKwh: 0 })
@@ -138,14 +138,14 @@ describe('classifyNemFit', () => {
     )
     const result = classifyNemFit(metrics)
 
-    expect(result.fit).toBe('good')
-    expect(result.detail).toBe('Low unused credits')
+    expect(result.fit).toBe('balanced')
+    expect(result.detail).toBe('Matched to usage')
     expect(result.billableImportRate).toBe(0)
     expect(result.monthlyExportRate).toBe(0)
     expect(result.forfeitureRate).toBe(0)
   })
 
-  it('returns Moderate for a clean but undersized layout that still imports a lot from the grid', () => {
+  it('returns Lean for a clean but undersized layout that still imports a lot from the grid', () => {
     const metrics = computeNemFitMetrics(
       Array.from({ length: 12 }, (_, index) =>
         nemMonth({ month: index + 1, consumptionKwh: 800, generationKwh: 480, billableKwh: 320 })
@@ -153,8 +153,8 @@ describe('classifyNemFit', () => {
     )
     const result = classifyNemFit(metrics)
 
-    expect(result.fit).toBe('moderate')
-    expect(result.detail).toBe('Still imports from grid')
+    expect(result.fit).toBe('lean')
+    expect(result.detail).toBe('Fast payback, grid backup')
     expect(result.billableImportRate).toBeCloseTo(0.4, 4)
     expect(result.monthlyExportRate).toBe(0)
   })
@@ -189,7 +189,7 @@ describe('classifyNemFit', () => {
     expect(metrics.billableImportRate).toBe(0)
     expect(metrics.monthlyExportRate).toBe(0)
     expect(metrics.forfeitureRate).toBe(0)
-    expect(result.fit).toBe('good')
+    expect(result.fit).toBe('balanced')
   })
 })
 

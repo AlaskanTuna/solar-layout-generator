@@ -149,12 +149,12 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                     <p>{t('verdict.metrics.nemFit.tooltip.intro')}</p>
                     <div className="space-y-1">
                       <p>
-                        <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.good')}</span>{' '}
-                        {t('verdict.metrics.nemFit.tooltip.goodDetail')}
+                        <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.lean')}</span>{' '}
+                        {t('verdict.metrics.nemFit.tooltip.leanDetail')}
                       </p>
                       <p>
-                        <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.moderate')}</span>{' '}
-                        {t('verdict.metrics.nemFit.tooltip.moderateDetail')}
+                        <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.balanced')}</span>{' '}
+                        {t('verdict.metrics.nemFit.tooltip.balancedDetail')}
                       </p>
                       <p>
                         <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.oversized')}</span>{' '}

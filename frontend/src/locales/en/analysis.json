@@ -228,13 +228,13 @@
       "nemFit": {
         "label": "NEM Fit",
         "tooltip": {
-          "intro": "How well this layout is sized for your usage under the current solar incentive program.",
-          "good": "Good:",
-          "goodDetail": "Most generation offsets your own bill, with very few credits left over.",
-          "moderate": "Moderate:",
-          "moderateDetail": "Some grid reliance or credit buildup. The layout works, but it is not yet tightly matched to usage.",
+          "intro": "NEM Fit describes the layout's sizing style, not the star rating. Stars judge payback speed; NEM Fit explains self-consumption: whether the system is lean, balanced, or producing more credits than you can use.",
+          "lean": "Lean:",
+          "leanDetail": "A smaller system with low wasted credits and stronger payback, but more of your yearly usage still comes from the grid.",
+          "balanced": "Balanced:",
+          "balancedDetail": "A closer self-consumption match. Most yearly usage is covered by solar or NEM credits, while monthly export and year-end forfeiture stay low.",
           "oversized": "Oversized:",
-          "oversizedDetail": "Heavy credit buildup. Excess credits are not cash and are forfeited at year-end if unused.",
+          "oversizedDetail": "Generation is high enough that credits build up heavily. Excess credits are not cash and are forfeited at year-end if unused.",
           "importRate": "Import Rate:",
           "importRateValue": "{{pct}}% of usage drawn from the grid",
           "importRateSuffix": "of usage drawn from the grid",
@@ -243,8 +243,8 @@
           "exportRateSuffix": "of generation sent back to the grid"
         },
         "labels": {
-          "good": "Good",
-          "moderate": "Moderate",
+          "lean": "Lean",
+          "balanced": "Balanced",
           "oversized": "Oversized"
         }
       }

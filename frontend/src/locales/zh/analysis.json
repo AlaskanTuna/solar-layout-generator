@@ -228,13 +228,13 @@
       "nemFit": {
         "label": "NEM 适配度",
         "tooltip": {
-          "intro": "该布局在当前太阳能激励计划下与您用电量的匹配程度。",
-          "good": "良好：",
-          "goodDetail": "大部分发电量用于抵消自身账单，剩余积分极少。",
-          "moderate": "一般：",
-          "moderateDetail": "仍有一定电网依赖或积分累积。该布局可用，但与用电量的匹配还不够紧密。",
+          "intro": "NEM 适配度说明的是布局的系统大小类型，不是星级评分。星级看回本速度；NEM 适配度说明 self-consumption（自发自用）：系统是偏精简、较均衡，还是产生了超过可使用量的积分。",
+          "lean": "精简：",
+          "leanDetail": "较小的系统，浪费积分少、回本通常更快，但年度用电中仍有较多来自电网。",
+          "balanced": "均衡：",
+          "balancedDetail": "更接近 self-consumption（自发自用）的匹配。大部分年度用电由太阳能或 NEM 积分抵消，同时月度输出和年末失效积分都保持较低。",
           "oversized": "过大：",
-          "oversizedDetail": "积分大量累积，多余积分不可兑现，年末未使用的积分将失效。",
+          "oversizedDetail": "发电量高到积分明显累积。多余积分不可兑现，年末未使用的积分将失效。",
           "importRate": "从电网用电比例：",
           "importRateValue": "{{pct}}% 的用电量来自电网",
           "importRateSuffix": "的用电量来自电网",
@@ -243,8 +243,8 @@
           "exportRateSuffix": "的发电量输送回电网"
         },
         "labels": {
-          "good": "良好",
-          "moderate": "一般",
+          "lean": "精简",
+          "balanced": "均衡",
           "oversized": "过大"
         }
       }
