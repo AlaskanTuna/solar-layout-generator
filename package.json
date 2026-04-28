@@ -19,7 +19,7 @@
     "typecheck": "pnpm --filter @shared/types build && pnpm --filter backend exec tsc -p tsconfig.json --noEmit && pnpm --filter frontend exec tsc -p tsconfig.json --noEmit && pnpm --dir services/pdf-service exec tsc -p tsconfig.json --noEmit",
     "test": "pnpm --filter @shared/types build && pnpm --filter frontend test && pnpm --filter backend test",
     "build": "pnpm --filter @shared/types build && pnpm exec prisma generate --schema prisma/schema.prisma && pnpm --filter backend exec tsc -p tsconfig.json && pnpm --filter frontend build",
-    "start": "pnpm --filter @shared/types build && pnpm --filter backend exec tsc -p tsconfig.json && pnpm --filter backend start",
+    "start": "pnpm --filter backend start",
     "heroku-postbuild": "pnpm build"
   },
   "dependencies": {
