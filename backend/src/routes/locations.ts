@@ -9,28 +9,11 @@ import {
   fluxRecomputeBatchSchema
 } from '../validators/locations.js'
 import * as locationService from '../services/locationService.js'
-import { findBestQualityForLocation } from '../services/solarApiService.js'
-import { getSignedUrl } from '../services/storageService.js'
-import { loadReferenceGeoTransform, loadRoofMask } from '../services/geoTiffService.js'
-import { resolveTifPath, getOrGenerateOverlay } from '../services/overlayService.js'
 import { validateFluxLocation, recomputeSinglePanel, recomputeBatchPanels } from '../services/fluxRecomputeService.js'
-import { NotFoundError, BadRequestError, AppError } from '../errors.js'
+import { NotFoundError, BadRequestError } from '../errors.js'
 import type { OverlayType } from '../services/overlayService.js'
-import type {
-  ResolveLocationResponse,
-  LocationStatusResponse,
-  LocationDataResponse,
-  ProbeLocationResponse,
-  FluxRecomputeBatchResponse
-} from '@shared/types'
-import type { ImageGeoTransform, RoofMaskResult } from '../services/geoTiffService.js'
 
 export const locationsRouter: ExpressRouter = Router()
-
-type LocationDataRouteResponse = LocationDataResponse & {
-  imageGeoTransform: ImageGeoTransform
-  roofMask: RoofMaskResult
-}
 
 // POST /api/locations/resolve
 locationsRouter.post(
@@ -40,15 +23,9 @@ locationsRouter.post(
   asyncHandler(async (req, res) => {
     const { lat, lng, projectId, requiredQuality, expandedCoverage } = req.body
     const result = await locationService.resolveLocation(
-      req.user!.id,
-      lat,
-      lng,
-      projectId,
-      requiredQuality,
-      expandedCoverage
+      req.user!.id, lat, lng, projectId, requiredQuality, expandedCoverage
     )
-    const response: ResolveLocationResponse = { locationId: result.locationId, status: result.status }
-    res.json(response)
+    res.json(result)
   })
 )
 
@@ -62,9 +39,7 @@ locationsRouter.get(
       throw new BadRequestError('Invalid lat/lng query parameters')
     }
     const { lat, lng } = parsed.data
-    const result = await findBestQualityForLocation(lat, lng)
-    const response: ProbeLocationResponse = result
-    res.json(response)
+    res.json(await locationService.probeLocation(lat, lng))
   })
 )
 
@@ -73,10 +48,9 @@ locationsRouter.get(
   '/:id/status',
   requireAuth,
   asyncHandler(async (req, res) => {
-    const location = await locationService.getLocationStatusForUser(req.user!.id, req.params.id as string)
+    const location = await locationService.getLocationStatusResponseForUser(req.user!.id, req.params.id as string)
     if (!location) throw new NotFoundError('Location not found')
-    const response: LocationStatusResponse = { status: location.status }
-    res.json(response)
+    res.json(location)
   })
 )
 
@@ -85,27 +59,9 @@ locationsRouter.get(
   '/:id/data',
   requireAuth,
   asyncHandler(async (req, res) => {
-    const location = await locationService.getLocationDataForUser(req.user!.id, req.params.id as string)
+    const location = await locationService.getLocationDataResponseForUser(req.user!.id, req.params.id as string)
     if (!location) throw new NotFoundError('Location not found')
-    if (location.status !== 'ready') throw new AppError('Location data not ready', 409)
-    if (!location.buildingInsightsJson || !location.rgbImageUrl || !location.maskPath) {
-      throw new AppError('Location data is incomplete', 500)
-    }
-
-    const rgbImageUrl = await getSignedUrl(location.rgbImageUrl)
-    const [imageGeoTransform, roofMask] = await Promise.all([
-      loadReferenceGeoTransform(location),
-      loadRoofMask(location)
-    ])
-
-    const response: LocationDataRouteResponse = {
-      buildingInsights: location.buildingInsightsJson as Record<string, unknown>,
-      rgbImageUrl,
-      imageryQuality: location.imageryQuality,
-      imageGeoTransform,
-      roofMask
-    }
-    res.json(response)
+    res.json(location)
   })
 )
 
@@ -118,15 +74,13 @@ locationsRouter.get(
     if (overlayType !== 'annual-flux' && overlayType !== 'dsm' && overlayType !== 'mask') {
       throw new BadRequestError('Invalid overlay type. Must be "annual-flux", "dsm", or "mask".')
     }
-
-    const location = await locationService.getLocationDataForUser(req.user!.id, req.params.locationId as string)
-    if (!location || location.status !== 'ready') throw new NotFoundError('Location not found or not ready')
-
-    const tifPath = resolveTifPath(overlayType as OverlayType, location)
-    if (!tifPath) throw new NotFoundError(`${overlayType} layer not available for this location`)
-
-    const url = await getOrGenerateOverlay(tifPath, overlayType as OverlayType, location.rgbImageUrl)
-    res.json({ url })
+    res.json(
+      await locationService.getOverlayResponseForUser(
+        req.user!.id,
+        req.params.locationId as string,
+        overlayType as OverlayType
+      )
+    )
   })
 )
 
@@ -160,7 +114,6 @@ locationsRouter.post(
     const { location, panelSpecs } = await validateFluxLocation(req.user!.id, req.params.locationId as string)
 
     const results = await recomputeBatchPanels(location.monthlyFluxPath!, panelSpecs, req.body.panels)
-    const response: FluxRecomputeBatchResponse = { results }
-    res.json(response)
+    res.json({ results })
   })
 )

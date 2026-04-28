@@ -9,6 +9,38 @@ export type SolarApiOpts = {
   expandedCoverage?: boolean
 }
 
+export type SolarCoordinate = {
+  latitude: number
+  longitude: number
+}
+
+export type SolarBoundingBox = {
+  sw: SolarCoordinate
+  ne: SolarCoordinate
+}
+
+export type BuildingInsightsApiResponse = {
+  boundingBox?: SolarBoundingBox
+  solarPotential?: {
+    solarPanels?: Record<string, unknown>[]
+    [key: string]: unknown
+  }
+  [key: string]: unknown
+}
+
+export type DataLayersApiResponse = {
+  dsmUrl?: string
+  rgbUrl?: string
+  maskUrl?: string
+  annualFluxUrl?: string
+  monthlyFluxUrl?: string
+  hourlyShadeUrls?: string[]
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
 function buildSolarParams(lat: number, lng: number, opts: SolarApiOpts = {}): URLSearchParams {
   const { requiredQuality = 'HIGH', expandedCoverage = false } = opts
   const params = new URLSearchParams({
@@ -21,13 +53,21 @@ function buildSolarParams(lat: number, lng: number, opts: SolarApiOpts = {}): UR
   return params
 }
 
-export async function fetchBuildingInsights(lat: number, lng: number, opts: SolarApiOpts = {}) {
+export async function fetchBuildingInsights(
+  lat: number,
+  lng: number,
+  opts: SolarApiOpts = {}
+): Promise<BuildingInsightsApiResponse> {
   const params = buildSolarParams(lat, lng, opts)
   const response = await fetch(`${BASE_URL}/buildingInsights:findClosest?${params}`)
   if (!response.ok) {
     throw new Error(`Solar API error: ${response.status} ${await response.text()}`)
   }
-  return response.json()
+  const json = await response.json()
+  if (!isRecord(json)) {
+    throw new Error('Solar API returned invalid building insights payload')
+  }
+  return json
 }
 
 export async function fetchDataLayers(
@@ -35,7 +75,7 @@ export async function fetchDataLayers(
   lng: number,
   radiusMeters: number,
   opts: SolarApiOpts = {}
-) {
+): Promise<DataLayersApiResponse> {
   const { requiredQuality = 'HIGH', expandedCoverage = false } = opts
   // FULL_LAYERS works for both HIGH and BASE+EXPANDED (validated empirically
   // against tests/smoke/m2-klang-matrix.ts — for BASE+EXPANDED it returns
@@ -54,7 +94,17 @@ export async function fetchDataLayers(
   if (!response.ok) {
     throw new Error(`DataLayers error: ${response.status} ${await response.text()}`)
   }
-  return response.json()
+  const json = (await response.json()) as Partial<DataLayersApiResponse>
+  return {
+    dsmUrl: typeof json.dsmUrl === 'string' ? json.dsmUrl : undefined,
+    rgbUrl: typeof json.rgbUrl === 'string' ? json.rgbUrl : undefined,
+    maskUrl: typeof json.maskUrl === 'string' ? json.maskUrl : undefined,
+    annualFluxUrl: typeof json.annualFluxUrl === 'string' ? json.annualFluxUrl : undefined,
+    monthlyFluxUrl: typeof json.monthlyFluxUrl === 'string' ? json.monthlyFluxUrl : undefined,
+    hourlyShadeUrls: Array.isArray(json.hourlyShadeUrls)
+      ? json.hourlyShadeUrls.filter((value): value is string => typeof value === 'string')
+      : undefined
+  }
 }
 
 // Probe a coordinate end-to-end at three tiers in priority order:
@@ -141,10 +191,7 @@ async function probeEndpoint(
   }
 }
 
-export function calculateRadius(bbox: {
-  sw: { latitude: number; longitude: number }
-  ne: { latitude: number; longitude: number }
-}): number {
+export function calculateRadius(bbox: SolarBoundingBox): number {
   const diameter = haversineDistance(bbox.sw.latitude, bbox.sw.longitude, bbox.ne.latitude, bbox.ne.longitude)
   return Math.ceil(diameter / 2) + 10
 }
@@ -159,18 +206,19 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function enrichBuildingInsights(insights: any): any {
-  const panels = insights.solarPotential?.solarPanels ?? []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const enriched = panels.map((panel: any, idx: number) => ({
+export function enrichBuildingInsights(insights: BuildingInsightsApiResponse): BuildingInsightsApiResponse {
+  const solarPotential = isRecord(insights.solarPotential) ? insights.solarPotential : {}
+  const panels = Array.isArray(solarPotential.solarPanels)
+    ? solarPotential.solarPanels.filter(isRecord)
+    : []
+  const enriched = panels.map((panel, idx) => ({
     ...panel,
     id: `panel_${idx}`
   }))
   return {
     ...insights,
     solarPotential: {
-      ...insights.solarPotential,
+      ...solarPotential,
       solarPanels: enriched
     }
   }

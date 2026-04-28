@@ -1,33 +1,54 @@
 import { Prisma } from '@prisma/client'
 import { prisma } from '../config/prisma.js'
+import { getSignedUrl } from './storageService.js'
+import { loadReferenceGeoTransform } from './geoTiffService.js'
 import type { PanelEdit } from '@shared/types'
+import {
+  buildPdfProjectResponse,
+  mergeAnalysisConfig,
+  mergeLayoutPreferences,
+  normalizeProjectResponse,
+  serializeJsonValue,
+  type AnalysisConfigDto,
+  type AnalysisResultsDto,
+  type LayoutPreferencesDto
+} from './viewModels/projectResponse.js'
+
+async function findOwnedProject(userId: string, projectId: string) {
+  return prisma.project.findFirst({
+    where: { id: projectId, userId },
+    include: { location: true }
+  })
+}
 
 export async function createProject(userId: string, name: string, locationId: string) {
   // Wrap in a transaction so the immutable quota-usage row lands atomically with
   // the Project itself. Counting from ProjectQuotaUsage means deleting a project
   // does not refund the user's daily slot.
   return prisma.$transaction(async (tx) => {
-    const project = await tx.project.create({ data: { userId, name, locationId } })
+    const project = await tx.project.create({
+      data: { userId, name, locationId },
+      include: { location: true }
+    })
     await tx.projectQuotaUsage.create({
       data: { userId, projectId: project.id, createdAt: project.createdAt }
     })
-    return project
+    return normalizeProjectResponse(project)
   })
 }
 
 export async function listProjects(userId: string) {
-  return prisma.project.findMany({
+  const projects = await prisma.project.findMany({
     where: { userId },
     include: { location: { select: { status: true } } },
     orderBy: { createdAt: 'desc' }
   })
+  return projects.map((project) => normalizeProjectResponse(project))
 }
 
 export async function getProject(userId: string, projectId: string) {
-  return prisma.project.findFirst({
-    where: { id: projectId, userId },
-    include: { location: true }
-  })
+  const project = await findOwnedProject(userId, projectId)
+  return project ? normalizeProjectResponse(project) : null
 }
 
 export async function saveLayout(
@@ -36,24 +57,26 @@ export async function saveLayout(
   editedLayout: PanelEdit[],
   selectedPanelModelId?: string
 ) {
-  const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
+  const project = await findOwnedProject(userId, projectId)
   if (!project) return null
 
-  const existingConfig = (project.analysisConfig as Record<string, unknown>) ?? {}
-  const nextAnalysisConfig = selectedPanelModelId ? { ...existingConfig, selectedPanelModelId } : existingConfig
+  const nextAnalysisConfig = mergeAnalysisConfig(
+    project.analysisConfig,
+    selectedPanelModelId ? { selectedPanelModelId } : {}
+  )
 
-  // Preserve analysis_saved status — only set layout_saved if not already completed
   const nextStatus = project.status === 'analysis_saved' ? 'analysis_saved' : 'layout_saved'
 
-  return prisma.project.update({
+  const updated = await prisma.project.update({
     where: { id: projectId },
     data: {
-      editedLayout: editedLayout as unknown as Prisma.InputJsonValue,
-      analysisConfig: nextAnalysisConfig as Prisma.InputJsonValue,
+      editedLayout: serializeJsonValue(editedLayout),
+      analysisConfig: serializeJsonValue(nextAnalysisConfig),
       status: nextStatus
     },
     include: { location: true }
   })
+  return normalizeProjectResponse(updated)
 }
 
 export async function deleteProject(userId: string, projectId: string) {
@@ -66,36 +89,52 @@ export async function deleteProject(userId: string, projectId: string) {
 export async function updateLayoutPreferences(
   userId: string,
   projectId: string,
-  partial: Record<string, unknown>
+  partial: LayoutPreferencesDto
 ) {
-  const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
+  const project = await findOwnedProject(userId, projectId)
   if (!project) return null
-  const existing = (project.layoutPreferences as Record<string, unknown>) ?? {}
-  const next = { ...existing, ...partial }
-  return prisma.project.update({
+  const next = mergeLayoutPreferences(project.layoutPreferences, partial)
+  const updated = await prisma.project.update({
     where: { id: projectId },
-    data: { layoutPreferences: next as Prisma.InputJsonValue },
+    data: { layoutPreferences: serializeJsonValue(next) },
     include: { location: true }
   })
+  return normalizeProjectResponse(updated)
 }
 
 export async function saveAnalysis(
   userId: string,
   projectId: string,
-  analysisConfig: Record<string, unknown>,
-  analysisResults: Record<string, unknown>
+  analysisConfig: AnalysisConfigDto,
+  analysisResults: AnalysisResultsDto
 ) {
-  const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
+  const project = await findOwnedProject(userId, projectId)
   if (!project) return null
-  const existingConfig = (project.analysisConfig as Record<string, unknown>) ?? {}
-  const nextAnalysisConfig = { ...existingConfig, ...analysisConfig }
-  return prisma.project.update({
+  const nextAnalysisConfig = mergeAnalysisConfig(project.analysisConfig, analysisConfig)
+  const updated = await prisma.project.update({
     where: { id: projectId },
     data: {
-      analysisConfig: nextAnalysisConfig as Prisma.InputJsonValue,
-      analysisResults: analysisResults as Prisma.InputJsonValue,
+      analysisConfig: serializeJsonValue(nextAnalysisConfig),
+      analysisResults: serializeJsonValue(analysisResults),
       status: 'analysis_saved'
     },
     include: { location: true }
   })
+  return normalizeProjectResponse(updated)
+}
+
+export async function getPdfProjectData(userId: string, projectId: string) {
+  const project = await findOwnedProject(userId, projectId)
+  if (!project) return null
+
+  const rgbPath = project.location?.rgbImageUrl
+  const rgbSignedUrl = rgbPath ? await getSignedUrl(rgbPath) : null
+  const imageGeoTransform = project.location
+    ? await loadReferenceGeoTransform({
+        id: project.location.id,
+        dsmPath: project.location.dsmPath ?? null
+      }).catch(() => null)
+    : null
+
+  return buildPdfProjectResponse(project, rgbSignedUrl, imageGeoTransform)
 }

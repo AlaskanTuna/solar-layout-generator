@@ -1,51 +1,13 @@
-import * as GeoTIFF from 'geotiff'
-import sharp from 'sharp'
-import { prisma } from '../config/prisma.js'
-import { env } from '../config/env.js'
-import { fetchBuildingInsights, fetchDataLayers, calculateRadius, enrichBuildingInsights } from './solarApiService.js'
-import { uploadToStorage } from './storageService.js'
-
-const LAYER_FIELDS: Record<string, string> = {
-  dsmUrl: 'dsm.tif',
-  rgbUrl: 'rgb.tif',
-  maskUrl: 'mask.tif',
-  annualFluxUrl: 'annual_flux.tif',
-  monthlyFluxUrl: 'monthly_flux.tif'
-}
-
-async function convertRgbToPng(rgbTifBuffer: ArrayBuffer | Buffer): Promise<Buffer> {
-  const arrayBuffer =
-    rgbTifBuffer instanceof Buffer
-      ? rgbTifBuffer.buffer.slice(rgbTifBuffer.byteOffset, rgbTifBuffer.byteOffset + rgbTifBuffer.byteLength)
-      : rgbTifBuffer
-  const tiff = await GeoTIFF.fromArrayBuffer(arrayBuffer as ArrayBuffer)
-  const image = await tiff.getImage()
-  const width = image.getWidth()
-  const height = image.getHeight()
-
-  const rasters = await image.readRasters({ samples: [0, 1, 2] })
-  const r = rasters[0] as Uint8Array
-  const g = rasters[1] as Uint8Array
-  const b = rasters[2] as Uint8Array
-
-  // Interleave into RGB pixel buffer
-  const pixels = Buffer.alloc(width * height * 3)
-  for (let i = 0; i < width * height; i++) {
-    pixels[i * 3] = r[i]
-    pixels[i * 3 + 1] = g[i]
-    pixels[i * 3 + 2] = b[i]
-  }
-
-  return sharp(pixels, { raw: { width, height, channels: 3 } })
-    .png()
-    .toBuffer()
-}
+import { fetchLocationPipelineInputs } from './locationPipeline/fetch.js'
+import { persistLocationPipelineFailure, persistLocationPipelineSuccess } from './locationPipeline/persist.js'
+import { storeLocationPipelineAssets } from './locationPipeline/store.js'
+import type { ImageryQuality } from './solarApiService.js'
 
 export async function runLocationPipeline(
   locationId: string,
   lat: number,
   lng: number,
-  requiredQuality: 'HIGH' | 'BASE' = 'HIGH',
+  requiredQuality: ImageryQuality = 'HIGH',
   expandedCoverage = false
 ): Promise<void> {
   try {
@@ -53,68 +15,14 @@ export async function runLocationPipeline(
       `[Pipeline] start location=${locationId} lat=${lat.toFixed(6)} lng=${lng.toFixed(6)} quality=${requiredQuality} expanded=${expandedCoverage}`
     )
 
-    const opts = { requiredQuality, expandedCoverage }
+    const fetchedInputs = await fetchLocationPipelineInputs(lat, lng, requiredQuality, expandedCoverage)
+    const storedAssets = await storeLocationPipelineAssets(locationId, fetchedInputs.downloadedLayers)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawInsights = (await fetchBuildingInsights(lat, lng, opts)) as any
-    const buildingInsightsJson = enrichBuildingInsights(rawInsights)
-
-    const bbox = rawInsights.boundingBox
-    const radius = calculateRadius(bbox)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dataLayers = (await fetchDataLayers(lat, lng, radius, opts)) as Record<string, any>
-
-    const storagePaths: Record<string, string> = {}
-    let rgbBuffer: Buffer | null = null
-
-    for (const [field, filename] of Object.entries(LAYER_FIELDS)) {
-      const url = dataLayers[field]
-      if (!url) continue
-
-      // Append API key to GeoTIFF download URL
-      const downloadUrl = new URL(url)
-      downloadUrl.searchParams.set('key', env.GOOGLE_API_KEY)
-      const response = await fetch(downloadUrl.toString())
-      if (!response.ok) throw new Error(`Failed to download ${field}`)
-      const buffer = Buffer.from(await response.arrayBuffer())
-
-      const storagePath = `locations/${locationId}/${filename}`
-      await uploadToStorage(storagePath, buffer, 'image/tiff')
-      storagePaths[field] = storagePath
-      console.info(`[Pipeline] uploaded ${storagePath}`)
-
-      if (field === 'rgbUrl') rgbBuffer = buffer
-    }
-
-    let rgbImageUrl: string | null = null
-    if (rgbBuffer) {
-      const pngBuffer = await convertRgbToPng(rgbBuffer)
-      const pngPath = `locations/${locationId}/rgb.png`
-      await uploadToStorage(pngPath, pngBuffer, 'image/png')
-      rgbImageUrl = pngPath
-      console.info(`[Pipeline] uploaded ${pngPath}`)
-    }
-
-    await prisma.location.update({
-      where: { id: locationId },
-      data: {
-        status: 'ready',
-        imageryQuality: requiredQuality,
-        buildingInsightsJson,
-        rgbImageUrl,
-        monthlyFluxPath: storagePaths['monthlyFluxUrl'] ?? null,
-        maskPath: storagePaths['maskUrl'] ?? null,
-        annualFluxPath: storagePaths['annualFluxUrl'] ?? null,
-        dsmPath: storagePaths['dsmUrl'] ?? null
-      }
-    })
+    await persistLocationPipelineSuccess(locationId, requiredQuality, fetchedInputs.buildingInsightsJson, storedAssets)
 
     console.info(`[Pipeline] completed location=${locationId}`)
   } catch (error) {
     console.error(`[Pipeline] failed location=${locationId}`, error)
-    await prisma.location.update({
-      where: { id: locationId },
-      data: { status: 'failed' }
-    })
+    await persistLocationPipelineFailure(locationId)
   }
 }

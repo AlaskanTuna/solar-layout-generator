@@ -1,7 +1,18 @@
 import { prisma } from '../config/prisma.js'
 import { runLocationPipeline } from './locationPipeline.js'
-import { NotFoundError } from '../errors.js'
-import type { ImageryQuality } from './solarApiService.js'
+import { NotFoundError, AppError } from '../errors.js'
+import { findBestQualityForLocation, type ImageryQuality } from './solarApiService.js'
+import { getSignedUrl } from './storageService.js'
+import { loadReferenceGeoTransform, loadRoofMask } from './geoTiffService.js'
+import { getOrGenerateOverlay, resolveTifPath, type OverlayType } from './overlayService.js'
+import { parseBuildingInsights } from './buildingInsightsService.js'
+import {
+  buildLocationDataResponse,
+  buildLocationStatusResponse,
+  buildOverlayResponse,
+  buildProbeLocationResponse,
+  buildResolveLocationResponse
+} from './viewModels/locationResponse.js'
 
 const COORDINATE_TOLERANCE = 0.0001
 
@@ -69,6 +80,23 @@ export async function resolveLocation(
   return { locationId: location.id, status: 'processing' as const }
 }
 
+export async function resolveLocationResponse(
+  userId: string,
+  lat: number,
+  lng: number,
+  projectId?: string,
+  requiredQuality: ImageryQuality = 'HIGH',
+  expandedCoverage = false
+) {
+  const result = await resolveLocation(userId, lat, lng, projectId, requiredQuality, expandedCoverage)
+  return buildResolveLocationResponse(result.locationId, result.status)
+}
+
+export async function probeLocation(lat: number, lng: number) {
+  const result = await findBestQualityForLocation(lat, lng)
+  return buildProbeLocationResponse(result)
+}
+
 export async function getLocationStatusForUser(userId: string, locationId: string) {
   return prisma.location.findFirst({
     where: {
@@ -79,8 +107,57 @@ export async function getLocationStatusForUser(userId: string, locationId: strin
   })
 }
 
+export async function getLocationStatusResponseForUser(userId: string, locationId: string) {
+  const location = await getLocationStatusForUser(userId, locationId)
+  return location ? buildLocationStatusResponse(location.status) : null
+}
+
 export async function getLocationDataForUser(userId: string, locationId: string) {
   return prisma.location.findFirst({
     where: { id: locationId, projects: { some: { userId } } }
   })
+}
+
+export async function getLocationDataResponseForUser(userId: string, locationId: string) {
+  const location = await getLocationDataForUser(userId, locationId)
+  if (!location) return null
+  if (location.status !== 'ready') throw new AppError('Location data not ready', 409)
+  if (!location.buildingInsightsJson || !location.rgbImageUrl || !location.maskPath) {
+    throw new AppError('Location data is incomplete', 500)
+  }
+
+  const buildingInsights = parseBuildingInsights(location.buildingInsightsJson)
+  if (!buildingInsights) {
+    throw new AppError('Location data is incomplete', 500)
+  }
+
+  const rgbImageUrl = await getSignedUrl(location.rgbImageUrl)
+  const [imageGeoTransform, roofMask] = await Promise.all([loadReferenceGeoTransform(location), loadRoofMask(location)])
+
+  return buildLocationDataResponse(
+    buildingInsights,
+    rgbImageUrl,
+    location.imageryQuality,
+    imageGeoTransform,
+    roofMask
+  )
+}
+
+export async function getOverlayResponseForUser(
+  userId: string,
+  locationId: string,
+  overlayType: OverlayType
+) {
+  const location = await getLocationDataForUser(userId, locationId)
+  if (!location || location.status !== 'ready') {
+    throw new NotFoundError('Location not found or not ready')
+  }
+
+  const tifPath = resolveTifPath(overlayType, location)
+  if (!tifPath) {
+    throw new NotFoundError(`${overlayType} layer not available for this location`)
+  }
+
+  const url = await getOrGenerateOverlay(tifPath, overlayType, location.rgbImageUrl)
+  return buildOverlayResponse(url)
 }

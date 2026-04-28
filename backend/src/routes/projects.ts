@@ -13,8 +13,6 @@ import {
 } from '../validators/projects.js'
 import * as projectService from '../services/projectService.js'
 import { signPdfToken } from '../services/pdfTokenService.js'
-import { getSignedUrl } from '../services/storageService.js'
-import { loadReferenceGeoTransform } from '../services/geoTiffService.js'
 import { NotFoundError } from '../errors.js'
 
 export const projectsRouter: ExpressRouter = Router()
@@ -28,8 +26,7 @@ projectsRouter.post(
   asyncHandler(async (req, res) => {
     const { name, locationId } = req.body
     console.info(`[ProjectCreate] user=${req.user!.id} location=${locationId} name="${name}"`)
-    const project = await projectService.createProject(req.user!.id, name, locationId)
-    res.status(201).json(project)
+    res.status(201).json(await projectService.createProject(req.user!.id, name, locationId))
   })
 )
 
@@ -39,8 +36,7 @@ projectsRouter.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     console.info(`[ProjectList] user=${req.user!.id}`)
-    const projects = await projectService.listProjects(req.user!.id)
-    res.json(projects)
+    res.json(await projectService.listProjects(req.user!.id))
   })
 )
 
@@ -83,12 +79,7 @@ projectsRouter.patch(
     console.info(
       `[ProjectSaveLayout] user=${req.user!.id} project=${req.params.id as string} panels=${req.body.editedLayout.length}`
     )
-    const updated = await projectService.saveLayout(
-      req.user!.id,
-      req.params.id as string,
-      req.body.editedLayout,
-      req.body.selectedPanelModelId
-    )
+    const updated = await projectService.saveLayout(req.user!.id, req.params.id as string, req.body.editedLayout, req.body.selectedPanelModelId)
     if (!updated) {
       console.warn(`[ProjectSaveLayout] not found user=${req.user!.id} project=${req.params.id as string}`)
       throw new NotFoundError('Project not found')
@@ -104,11 +95,7 @@ projectsRouter.patch(
   validate(updateLayoutPreferencesSchema),
   asyncHandler(async (req, res) => {
     console.info(`[ProjectSavePrefs] user=${req.user!.id} project=${req.params.id as string}`)
-    const updated = await projectService.updateLayoutPreferences(
-      req.user!.id,
-      req.params.id as string,
-      req.body.layoutPreferences
-    )
+    const updated = await projectService.updateLayoutPreferences(req.user!.id, req.params.id as string, req.body.layoutPreferences)
     if (!updated) {
       console.warn(`[ProjectSavePrefs] not found user=${req.user!.id} project=${req.params.id as string}`)
       throw new NotFoundError('Project not found')
@@ -124,12 +111,7 @@ projectsRouter.patch(
   validate(saveAnalysisSchema),
   asyncHandler(async (req, res) => {
     console.info(`[ProjectSaveAnalysis] user=${req.user!.id} project=${req.params.id as string}`)
-    const updated = await projectService.saveAnalysis(
-      req.user!.id,
-      req.params.id as string,
-      req.body.analysisConfig,
-      req.body.analysisResults
-    )
+    const updated = await projectService.saveAnalysis(req.user!.id, req.params.id as string, req.body.analysisConfig, req.body.analysisResults)
     if (!updated) {
       console.warn(`[ProjectSaveAnalysis] not found user=${req.user!.id} project=${req.params.id as string}`)
       throw new NotFoundError('Project not found')
@@ -162,22 +144,11 @@ projectsRouter.get(
   requirePdfToken,
   asyncHandler(async (req, res) => {
     const { userId, projectId } = req.pdfToken!
-    const project = await projectService.getProject(userId, projectId)
+    const project = await projectService.getPdfProjectData(userId, projectId)
     if (!project) {
       console.warn(`[PdfData] project not found user=${userId} project=${projectId}`)
       throw new NotFoundError('Project not found')
     }
-    // Supabase Storage paths need a signed URL to render in the print view.
-    const rgbPath = project.location?.rgbImageUrl
-    const rgbSignedUrl = rgbPath ? await getSignedUrl(rgbPath) : null
-    // Include imageGeoTransform so the print view can place panels with the same
-    // proj4 math WorkbenchPage uses (matches sizes exactly).
-    const imageGeoTransform = project.location
-      ? await loadReferenceGeoTransform({
-          id: project.location.id,
-          dsmPath: project.location.dsmPath ?? null
-        }).catch(() => null)
-      : null
-    res.json({ ...project, rgbSignedUrl, imageGeoTransform })
+    res.json(project)
   })
 )
