@@ -16,6 +16,28 @@ vi.mock('../locationPipeline.js', () => ({
   runLocationPipeline: vi.fn()
 }))
 
+vi.mock('../solarApiService.js', () => ({
+  findBestQualityForLocation: vi.fn()
+}))
+
+vi.mock('../storageService.js', () => ({
+  getSignedUrl: vi.fn()
+}))
+
+vi.mock('../geoTiffService.js', () => ({
+  loadReferenceGeoTransform: vi.fn(),
+  loadRoofMask: vi.fn()
+}))
+
+vi.mock('../overlayService.js', () => ({
+  getOrGenerateOverlay: vi.fn(),
+  resolveTifPath: vi.fn()
+}))
+
+vi.mock('../buildingInsightsService.js', () => ({
+  parseBuildingInsights: vi.fn()
+}))
+
 import { getLocationDataForUser, getLocationStatusForUser } from '../locationService.js'
 
 describe('locationService ownership filters', () => {
