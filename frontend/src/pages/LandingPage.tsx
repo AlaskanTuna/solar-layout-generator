@@ -438,6 +438,10 @@ export function LandingPage() {
           <p className="mt-8 text-center text-xs text-muted-foreground">
             {t('faq.disclaimer')}
           </p>
+
+          <p className="mx-auto mt-3 max-w-3xl text-center text-[11px] leading-relaxed text-muted-foreground/80">
+            {t('faq.asteriskNote')}
+          </p>
         </div>
       </section>
 
@@ -704,7 +708,7 @@ function PipelineSection() {
                       isActive ? 'text-primary' : 'text-muted-foreground'
                     }`}
                   >
-                    {step.num} — {step.label}
+                    {step.num} ({step.label})
                   </div>
                   <h3
                     className={`mb-4 font-heading text-3xl font-bold leading-tight transition-colors duration-300 sm:text-4xl ${

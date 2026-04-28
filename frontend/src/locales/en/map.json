@@ -62,6 +62,6 @@
     "step2Title": "Search for Your Address",
     "step2Body": "Type your full home address or postcode here. The map will zoom to your building and show its outline.",
     "step3Title": "Confirm Your Building",
-    "step3Body": "After selecting an address, you'll see your building highlighted. Click \"Analyze This Location\" to fetch satellite solar data — this usually takes 15–30 seconds."
+    "step3Body": "After selecting an address, you'll see your building highlighted. Click \"Analyze This Location\" to fetch satellite solar data. This usually takes 15–30 seconds."
   }
 }

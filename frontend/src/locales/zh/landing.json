@@ -8,7 +8,7 @@
     "title1": "在您的屋顶上",
     "title2": "看到太阳能——",
     "titleHighlight": "在决定之前。",
-    "subtitle": "SolarSim 利用卫星数据将真实太阳能板叠加在您的屋顶上，并依据马来西亚 NEM Rakyat 3.0 进行计算——让您在接触安装商前已心中有数。",
+    "subtitle": "SolarSim 利用卫星数据将真实太阳能板叠加在您的屋顶上，并依据马来西亚 NEM Rakyat 3.0* 进行计算——让您在接触安装商前已心中有数。",
     "metaFreeToStart": "免费开始",
     "metaNoCall": "无需联系安装商",
     "metaResults": "90 秒出结果",
@@ -152,6 +152,7 @@
     "title": "注册前大家常问的",
     "titleMuted": "问题。",
     "disclaimer": "结果为初步估算，不能替代专业现场评估。财务预测使用截至 2025 年的已发布 RP4 + NEM Rakyat 3.0 费率。",
+    "asteriskNote": "* 在研究期间，NEM Rakyat 3.0 是马来西亚住宅领域文档最完善的激励计划，因此财务模型以此为基准。一旦 SolarATAP 的电价与计量细节公开，计算逻辑将迁移至该计划。",
     "questions": {
       "replaceInstaller": {
         "question": "这能替代安装商的现场勘查吗？",

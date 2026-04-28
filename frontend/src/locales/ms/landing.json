@@ -6,9 +6,9 @@
   "hero": {
     "badge": "Dibina untuk bumbung Malaysia",
     "title1": "Lihat solar di",
-    "title2": "bumbung anda —",
+    "title2": "bumbung anda",
     "titleHighlight": "sebelum anda komited.",
-    "subtitle": "SolarSim meletakkan panel solar sebenar di atas bumbung anda menggunakan data satelit, kemudian mengira angka di bawah NEM Rakyat 3.0 Malaysia — supaya anda masuk ke dalam sebut harga pemasang dengan jawapan yang sudah ada.",
+    "subtitle": "SolarSim meletakkan panel solar sebenar di atas bumbung anda menggunakan data satelit, kemudian mengira angka di bawah NEM Rakyat 3.0* Malaysia, supaya anda masuk ke dalam sebut harga pemasang dengan jawapan yang sudah ada.",
     "metaFreeToStart": "Percuma untuk bermula",
     "metaNoCall": "Tiada panggilan pemasang",
     "metaResults": "Keputusan dalam 90 saat",
@@ -40,7 +40,7 @@
         "num": "LANGKAH 01",
         "label": "CARI LOKASI",
         "title": "Cari bumbung anda di peta.",
-        "body": "Taip alamat anda. Kami akan menumpu pada bangunan anda, mengambil geometri bumbung Google Solar API, dan menunjukkan kepada anda dengan tepat struktur yang akan dianalisis — supaya tiada kekeliruan antara rumah anda dan rumah jiran.",
+        "body": "Taip alamat anda. Kami akan menumpu pada bangunan anda, mengambil geometri bumbung Google Solar API, dan menunjukkan kepada anda dengan tepat struktur yang akan dianalisis, supaya tiada kekeliruan antara rumah anda dan rumah jiran.",
         "tagGoogleMaps": "Google Maps",
         "tagSolarApi": "Solar API",
         "mockHost": "solarsim.app/locate",
@@ -51,7 +51,7 @@
         "num": "LANGKAH 02",
         "label": "SUSUN ATUR",
         "title": "Letak, seret, putar panel.",
-        "body": "Kami akan meletakkan susunan yang dioptimumkan untuk hasil di bumbung anda secara automatik. Tidak suka? Seret panel, putar, atau padam yang jatuh dalam kawasan teduhan. Jumlah tenaga dan penjimatan dikemas kini pada setiap pergerakan — tanpa butang kira semula.",
+        "body": "Kami akan meletakkan susunan yang dioptimumkan untuk hasil di bumbung anda secara automatik. Tidak suka? Seret panel, putar, atau padam yang jatuh dalam kawasan teduhan. Jumlah tenaga dan penjimatan dikemas kini pada setiap pergerakan, tanpa butang kira semula.",
         "tagCanvas": "Kanvas interaktif",
         "tagLiveYield": "Hasil langsung",
         "mockHost": "solarsim.app/workbench",
@@ -62,7 +62,7 @@
         "num": "LANGKAH 03",
         "label": "ANALISIS",
         "title": "Lihat bil anda, dua belas bulan ke hadapan.",
-        "body": "Kami akan model bil bulanan anda berdasarkan tarif RP4 selepas Julai 2025, rebat EEI, AFA, SST dan Dana RE — bulan demi bulan. Eksport kesemuanya sebagai PDF untuk dibawa kepada pemasang anda.",
+        "body": "Kami akan model bil bulanan anda berdasarkan tarif RP4 selepas Julai 2025, rebat EEI, AFA, SST dan Dana RE, bulan demi bulan. Eksport kesemuanya sebagai PDF untuk dibawa kepada pemasang anda.",
         "tagRp4": "Tarif RP4",
         "tagPdf": "Eksport PDF",
         "mockHost": "solarsim.app/analysis",
@@ -86,7 +86,7 @@
       },
       "billing": {
         "title": "RP4 + NEM, baris demi baris",
-        "description": "Bil dimodelkan dengan tarif RP4 selepas Julai 2025, rebat EEI, AFA, SST, Dana RE — setiap caj boleh ditelusuri ke satu baris."
+        "description": "Bil dimodelkan dengan tarif RP4 selepas Julai 2025, rebat EEI, AFA, SST dan Dana RE. Setiap caj boleh ditelusuri ke satu baris."
       },
       "pdf": {
         "title": "PDF sedia untuk pemasang",
@@ -98,7 +98,7 @@
       },
       "citations": {
         "title": "Rujukan pada setiap angka",
-        "description": "Setiap kWh, setiap ringgit boleh ditelusuri kembali ke sumber yang diterbitkan — helaian tarif TNB, gazet ST, rekod Google Solar API."
+        "description": "Setiap kWh dan setiap ringgit boleh ditelusuri kembali ke sumber yang diterbitkan (helaian tarif TNB, gazet ST, rekod Google Solar API)."
       }
     }
   },
@@ -152,10 +152,11 @@
     "title": "Perkara yang orang tanya sebelum",
     "titleMuted": "mendaftar.",
     "disclaimer": "Keputusan adalah anggaran awal dan tidak menggantikan penilaian profesional di tapak. Unjuran kewangan menggunakan kadar RP4 + NEM Rakyat 3.0 yang diterbitkan setakat 2025.",
+    "asteriskNote": "* Pada masa penyelidikan, NEM Rakyat 3.0 adalah skim insentif kediaman yang paling lengkap dokumentasinya di Malaysia, jadi model kewangan mengikut skim tersebut. Pengiraan akan dialihkan ke SolarATAP sebaik sahaja butiran tarif dan metering program itu didedahkan.",
     "questions": {
       "replaceInstaller": {
         "question": "Adakah ini menggantikan lawatan tapak pemasang?",
-        "answer": "Tidak — dan kami tidak berpura-pura begitu. SolarSim memberikan anda anggaran awal yang kukuh supaya anda masuk ke dalam perbualan dengan pemasang dengan pengetahuan yang cukup. Saiz akhir, penilaian struktur, dan pemilihan penyongsang masih memerlukan pemasang bertauliah di tapak."
+        "answer": "Tidak, dan kami tidak berpura-pura begitu. SolarSim memberikan anda anggaran awal yang kukuh supaya anda masuk ke dalam perbualan dengan pemasang dengan pengetahuan yang cukup. Saiz akhir, penilaian struktur, dan pemilihan penyongsang masih memerlukan pemasang bertauliah di tapak."
       },
       "accuracy": {
         "question": "Seberapa tepat unjuran penjimatan?",
@@ -163,7 +164,7 @@
       },
       "addressNotFound": {
         "question": "Bagaimana jika saya tidak dapat mencari alamat saya?",
-        "answer": "Liputan di Semenanjung Malaysia adalah baik tetapi tidak menyeluruh. Jika kami tidak dapat mengambil data bumbung anda, kami akan beralih kepada alur koordinat manual di mana anda menggariskan bumbung sendiri — pengiraan yang sama di hilir."
+        "answer": "Liputan di Semenanjung Malaysia adalah baik tetapi tidak menyeluruh. Jika kami tidak dapat mengambil data bumbung anda, kami akan beralih kepada alur koordinat manual di mana anda menggariskan bumbung sendiri. Pengiraan yang sama digunakan di hilir."
       },
       "eastMalaysia": {
         "question": "Adakah ini berfungsi untuk Malaysia Timur?",
@@ -171,7 +172,7 @@
       },
       "dataPrivacy": {
         "question": "Adakah anda menjual alamat atau data penggunaan saya?",
-        "answer": "Tidak. Data projek anda kekal dalam akaun anda. Kami tidak menjalankan program afiliasi pemasang atau memberikan butiran anda kepada pihak ketiga. Jika anda mahukan sebut harga, anda memintanya sendiri — mengikut syarat anda."
+        "answer": "Tidak. Data projek anda kekal dalam akaun anda. Kami tidak menjalankan program afiliasi pemasang atau memberikan butiran anda kepada pihak ketiga. Jika anda mahukan sebut harga, anda memintanya sendiri mengikut syarat anda."
       }
     }
   },

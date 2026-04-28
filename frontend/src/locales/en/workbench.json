@@ -137,7 +137,7 @@
   },
   "layoutPresetModal": {
     "title": "Layout Preset",
-    "description": "Help us right-size your system. Presets only adjust how many panels are active — they don't move panel positions. Skip to keep the maximum-coverage default.",
+    "description": "Help us right-size your system. Presets only adjust how many panels are active. They don't move panel positions. Skip to keep the maximum-coverage default.",
     "monthlyBill": {
       "label": "Monthly Electricity Bill",
       "tooltip": "Find this on your TNB bill. We translate it to kWh using the average TNB tariff to size your system. Look for \"Purata Penggunaan\" on your bill:",
@@ -190,7 +190,7 @@
     "step1Title": "Your Roof Layout",
     "step1Body": "The blue rectangles are solar panels placed on your roof by satellite analysis. You can tweak this layout before calculating your savings. Hover the info icons beside each control for deeper detail.",
     "step2Title": "Layout Preset",
-    "step2Body": "Tell us your monthly bill and savings goal — we'll right-size the layout for you. You can re-open this anytime, or skip to keep the maximum-coverage default.",
+    "step2Body": "Tell us your monthly bill and savings goal, and we'll right-size the layout for you. You can re-open this anytime, or skip to keep the maximum-coverage default.",
     "step3Title": "Shape the Layout",
     "step3Body": "Pick a panel model and count from the sidebar, then click any panel on the canvas to drag, rotate or delete it.",
     "step4Title": "Canvas Tools",

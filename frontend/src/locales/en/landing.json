@@ -6,9 +6,9 @@
   "hero": {
     "badge": "Built for Malaysian rooftops",
     "title1": "See solar on",
-    "title2": "your roof —",
+    "title2": "your roof",
     "titleHighlight": "before you commit.",
-    "subtitle": "SolarSim drops real solar panels onto your actual rooftop using satellite data, then runs the numbers under Malaysia's NEM Rakyat 3.0 — so you walk into installer quotes already knowing the answer.",
+    "subtitle": "SolarSim drops real solar panels onto your actual rooftop using satellite data, then runs the numbers under Malaysia's NEM Rakyat 3.0*, so you walk into installer quotes already knowing the answer.",
     "metaFreeToStart": "Free to start",
     "metaNoCall": "No installer call",
     "metaResults": "Results in 90 sec",
@@ -40,7 +40,7 @@
         "num": "STEP 01",
         "label": "LOCATE",
         "title": "Find your roof on the map.",
-        "body": "Type your address. We center on your building, pull Google Solar API rooftop geometry, and show you exactly which structure we'll analyze — so there's no mistaking your home for the neighbor's.",
+        "body": "Type your address. We center on your building, pull Google Solar API rooftop geometry, and show you exactly which structure we'll analyze, so there's no mistaking your home for the neighbor's.",
         "tagGoogleMaps": "Google Maps",
         "tagSolarApi": "Solar API",
         "mockHost": "solarsim.app/locate",
@@ -51,7 +51,7 @@
         "num": "STEP 02",
         "label": "LAYOUT",
         "title": "Drop, drag, rotate panels.",
-        "body": "We auto-place a yield-optimized array on your rooftop. Don't like it? Drag panels around, rotate them, delete the ones that fall in shade. Total energy and savings update on every move — no recalc button.",
+        "body": "We auto-place a yield-optimized array on your rooftop. Don't like it? Drag panels around, rotate them, delete the ones that fall in shade. Total energy and savings update on every move, with no recalc button.",
         "tagCanvas": "Interactive canvas",
         "tagLiveYield": "Live yield",
         "mockHost": "solarsim.app/workbench",
@@ -62,7 +62,7 @@
         "num": "STEP 03",
         "label": "ANALYZE",
         "title": "See your bill, twelve months out.",
-        "body": "We model your monthly bill against post-July 2025 RP4 tariffs, EEI rebates, AFA, SST and the RE Fund — month-by-month. Export the whole thing as a PDF to bring to your installer.",
+        "body": "We model your monthly bill against post-July 2025 RP4 tariffs, EEI rebates, AFA, SST and the RE Fund, month by month. Export the whole thing as a PDF to bring to your installer.",
         "tagRp4": "RP4 tariff",
         "tagPdf": "PDF export",
         "mockHost": "solarsim.app/analysis",
@@ -86,7 +86,7 @@
       },
       "billing": {
         "title": "RP4 + NEM, line by line",
-        "description": "Bills modeled with the post-July 2025 RP4 tariff, EEI rebates, AFA, SST, RE Fund — every charge attributable to a row."
+        "description": "Bills modeled with the post-July 2025 RP4 tariff, EEI rebates, AFA, SST, and the RE Fund. Every charge is attributable to a row."
       },
       "pdf": {
         "title": "Installer-ready PDF",
@@ -98,7 +98,7 @@
       },
       "citations": {
         "title": "Citations on every number",
-        "description": "Every kWh, every ringgit traces back to a published source — TNB tariff sheet, ST gazette, Google Solar API record."
+        "description": "Every kWh and every ringgit traces back to a published source (TNB tariff sheet, ST gazette, Google Solar API record)."
       }
     }
   },
@@ -152,10 +152,11 @@
     "title": "Things people ask before",
     "titleMuted": "signing up.",
     "disclaimer": "Results are preliminary estimates and do not replace a professional on-site assessment. Financial projections use published RP4 + NEM Rakyat 3.0 rates as of 2025.",
+    "asteriskNote": "* At the time of research, NEM Rakyat 3.0 was the most well-documented residential incentive in Malaysia, so the financial model targets it. The calculations will migrate to SolarATAP once that programme's tariff and metering details are public.",
     "questions": {
       "replaceInstaller": {
         "question": "Does this replace an installer's site visit?",
-        "answer": "No — and we don't pretend to. SolarSim gives you a strong preliminary estimate so you walk into installer conversations informed. Final sizing, structural assessment, and inverter selection still need a qualified installer on-site."
+        "answer": "No, and we don't pretend to. SolarSim gives you a strong preliminary estimate so you walk into installer conversations informed. Final sizing, structural assessment, and inverter selection still need a qualified installer on-site."
       },
       "accuracy": {
         "question": "How accurate are the savings projections?",
@@ -163,7 +164,7 @@
       },
       "addressNotFound": {
         "question": "What if I can't find my address?",
-        "answer": "Coverage in Peninsular Malaysia is strong but not universal. If we can't pull your rooftop, we fall back to a manual-coordinates flow where you outline your roof yourself — same calculations downstream."
+        "answer": "Coverage in Peninsular Malaysia is strong but not universal. If we can't pull your rooftop, we fall back to a manual-coordinates flow where you outline your roof yourself. The same calculations apply downstream."
       },
       "eastMalaysia": {
         "question": "Does this work for East Malaysia?",
@@ -171,7 +172,7 @@
       },
       "dataPrivacy": {
         "question": "Do you sell my address or usage data?",
-        "answer": "No. Your project data stays in your account. We don't run installer affiliate programs or hand your details to third parties. If you want a quote, you ask for one — on your terms."
+        "answer": "No. Your project data stays in your account. We don't run installer affiliate programs or hand your details to third parties. If you want a quote, you ask for one on your terms."
       }
     }
   },

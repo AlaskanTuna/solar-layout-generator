@@ -137,7 +137,7 @@
   },
   "layoutPresetModal": {
     "title": "Pratetap Susun Atur",
-    "description": "Bantu kami menyaizkan sistem anda dengan betul. Pratetap hanya melaraskan bilangan panel yang aktif — ia tidak mengalihkan kedudukan panel. Langkau untuk kekalkan lalai liputan maksimum.",
+    "description": "Bantu kami menyaizkan sistem anda dengan betul. Pratetap hanya melaraskan bilangan panel yang aktif. Ia tidak mengalihkan kedudukan panel. Langkau untuk kekalkan lalai liputan maksimum.",
     "monthlyBill": {
       "label": "Bil Elektrik Bulanan",
       "tooltip": "Cari ini pada bil TNB anda. Kami menterjemahkannya kepada kWh menggunakan purata tarif TNB untuk menyaizkan sistem anda. Cari \"Purata Penggunaan\" pada bil anda:",
@@ -190,7 +190,7 @@
     "step1Title": "Susun Atur Bumbung Anda",
     "step1Body": "Segiempat biru adalah panel solar yang diletakkan di bumbung anda melalui analisis satelit. Anda boleh mengubah suai susun atur ini sebelum mengira penjimatan anda. Layangkan kursor pada ikon maklumat di sebelah setiap kawalan untuk butiran lanjut.",
     "step2Title": "Pratetap Susun Atur",
-    "step2Body": "Beritahu kami bil bulanan dan matlamat penjimatan anda — kami akan menyaizkan susun atur untuk anda. Anda boleh membukanya semula pada bila-bila masa, atau langkau untuk kekalkan lalai liputan maksimum.",
+    "step2Body": "Beritahu kami bil bulanan dan matlamat penjimatan anda, dan kami akan menyaizkan susun atur untuk anda. Anda boleh membukanya semula pada bila-bila masa, atau langkau untuk kekalkan lalai liputan maksimum.",
     "step3Title": "Bentuk Susun Atur",
     "step3Body": "Pilih model dan bilangan panel dari bar sisi, kemudian klik mana-mana panel di kanvas untuk menyeret, memutar atau memadamnya.",
     "step4Title": "Alat Kanvas",
