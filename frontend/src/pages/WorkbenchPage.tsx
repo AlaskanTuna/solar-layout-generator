@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
+import { Monitor } from 'lucide-react'
 import { MONTHLY_AZIMUTH, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
 import { Badge } from '@/components/ui/badge'
@@ -58,6 +59,16 @@ export function WorkbenchPage() {
   const [overlayExpanded, setOverlayExpanded] = useState(false)
   const [showSegments, setShowSegments] = useState(false)
   const [spaceHeld, setSpaceHeld] = useState(false)
+
+  // Mobile guard: workbench needs precise gestures, so block below md (768px)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const update = (e: MediaQueryListEvent | MediaQueryList) => setIsMobile(e.matches)
+    update(mq)
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   const { irradianceMonth, setIrradianceMonth, irradianceStyle } = useIrradiance()
 
@@ -231,6 +242,25 @@ export function WorkbenchPage() {
     onSpaceDown: () => setSpaceHeld(true),
     onSpaceUp: () => setSpaceHeld(false)
   })
+
+  if (isMobile) {
+    return (
+      <AppLayout>
+        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-6 py-12">
+          <div className="w-full max-w-sm text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Monitor className="h-8 w-8" />
+            </div>
+            <h1 className="font-heading text-2xl font-bold tracking-tight">{t('mobileGuard.title')}</h1>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t('mobileGuard.subtitle')}</p>
+            <Button asChild className="mt-7 w-full">
+              <Link to="/dashboard">{t('mobileGuard.backToDashboard')}</Link>
+            </Button>
+          </div>
+        </div>
+      </AppLayout>
+    )
+  }
 
   if (error) {
     return (

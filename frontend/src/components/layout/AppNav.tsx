@@ -8,7 +8,7 @@ import { LanguageToggle } from '@/components/layout/LanguageToggle'
 import { NotificationPopover } from '@/components/ui/NotificationPopover'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, ChevronRight, Home, Settings } from 'lucide-react'
+import { LogOut, ChevronRight, Home, Settings, Menu } from 'lucide-react'
 
 type Crumb = { label: string; to?: string; icon?: React.ReactNode }
 
@@ -67,11 +67,7 @@ function useBreadcrumbs(): Crumb[] {
   return crumbs
 }
 
-/**
- * Renders the AppNav component
- * @param {Object} props - Props for the component
- */
-export function AppNav({ minimal }: { minimal?: boolean } = {}) {
+export function AppNav({ minimal, onMenuClick }: { minimal?: boolean; onMenuClick?: () => void } = {}) {
   const { t } = useTranslation('nav')
   const { user, signOut } = useAuth()
   const crumbs = useBreadcrumbs()
@@ -82,6 +78,9 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
   const planLabel = tier
     ? t('menu.planLabel', { tier: tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() })
     : t('menu.loadingPlan')
+
+  // Show only the last (current) crumb on mobile to save horizontal space
+  const lastCrumb = crumbs[crumbs.length - 1]
 
   useEffect(() => {
     if (!userMenuOpen) return
@@ -96,36 +95,54 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
 
   return (
     <nav className="glass-nav fixed inset-x-0 top-0 z-50">
-      <div className="flex h-14 items-center justify-between px-6" style={{ marginLeft: 64 }}>
-        {/* Left — Breadcrumbs */}
-        <div className="flex items-center">
+      <div className="flex h-14 items-center justify-between gap-2 px-4 sm:px-6 lg:ml-16">
+        {/* Left — Hamburger (mobile) + Breadcrumbs */}
+        <div className="flex min-w-0 items-center gap-2">
+          {!minimal && onMenuClick && (
+            <button
+              type="button"
+              aria-label="Open menu"
+              onClick={onMenuClick}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
           {!minimal && (
-            <div className="flex items-center gap-1 text-sm">
-              {crumbs.map((crumb, i) => (
-                <span key={i} className="flex items-center gap-1">
-                  {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/50" />}
-                  {crumb.to ? (
-                    <Link
-                      to={crumb.to}
-                      className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {crumb.icon}
-                      {crumb.label}
-                    </Link>
-                  ) : (
-                    <span className="flex items-center gap-1.5 font-medium text-foreground">
-                      {crumb.icon}
-                      {crumb.label}
-                    </span>
-                  )}
-                </span>
-              ))}
-            </div>
+            <>
+              {/* Full breadcrumbs at sm+ */}
+              <div className="hidden min-w-0 items-center gap-1 text-sm sm:flex">
+                {crumbs.map((crumb, i) => (
+                  <span key={i} className="flex items-center gap-1">
+                    {i > 0 && <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />}
+                    {crumb.to ? (
+                      <Link
+                        to={crumb.to}
+                        className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {crumb.icon}
+                        <span className="truncate">{crumb.label}</span>
+                      </Link>
+                    ) : (
+                      <span className="flex items-center gap-1.5 font-medium text-foreground">
+                        {crumb.icon}
+                        <span className="truncate">{crumb.label}</span>
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+              {/* Current page only on mobile */}
+              <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-medium text-foreground sm:hidden">
+                {lastCrumb?.icon}
+                {lastCrumb?.label}
+              </span>
+            </>
           )}
         </div>
 
         {/* Right — Theme + Notifications + User */}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <LanguageToggle />
           <ThemeToggle />
           <NotificationPopover />
@@ -148,7 +165,7 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
                   className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-xl"
                 >
                   <div className="border-b border-border px-3 py-2.5">
-                    <p className="text-sm font-medium">{user?.email}</p>
+                    <p className="truncate text-sm font-medium">{user?.email}</p>
                     <p className="text-xs text-muted-foreground">{planLabel}</p>
                   </div>
                   <div className="p-1">

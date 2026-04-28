@@ -5,6 +5,11 @@
     "unknownError": "Unknown error",
     "backToDashboard": "Back to Dashboard"
   },
+  "mobileGuard": {
+    "title": "Open this on a larger screen",
+    "subtitle": "The roof layout workbench needs precise drag-and-drop, rotation, and multi-select gestures that work best on a desktop or tablet. Switch devices to edit your layout.",
+    "backToDashboard": "Back to Dashboard"
+  },
   "loading": {
     "rooftopImage": "Loading your rooftop image...",
     "mappingPanels": "Mapping solar panels to your roof...",

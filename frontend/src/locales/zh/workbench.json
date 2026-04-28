@@ -5,6 +5,11 @@
     "unknownError": "未知错误",
     "backToDashboard": "返回仪表板"
   },
+  "mobileGuard": {
+    "title": "请在更大的屏幕上打开",
+    "subtitle": "屋顶布局工作台需要精确的拖放、旋转与多选手势，在桌面或平板上体验最佳。请切换设备以编辑布局。",
+    "backToDashboard": "返回仪表板"
+  },
   "loading": {
     "rooftopImage": "正在加载屋顶影像...",
     "mappingPanels": "正在将太阳能板映射至屋顶...",

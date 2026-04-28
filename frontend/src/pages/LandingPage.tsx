@@ -82,12 +82,12 @@ export function LandingPage() {
           navScrolled ? 'glass-nav' : 'border-b border-transparent bg-transparent'
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2.5">
-            <Logo className="h-8 w-8" />
-            <span className="font-heading text-lg font-semibold tracking-tight">SolarSim</span>
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2 sm:gap-2.5">
+            <Logo className="h-7 w-7 sm:h-8 sm:w-8" />
+            <span className="hidden font-heading text-lg font-semibold tracking-tight sm:inline">SolarSim</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <LanguageToggle />
             <ThemeToggle />
             {isSignedIn ? (
@@ -132,13 +132,13 @@ export function LandingPage() {
         <div className="relative mx-auto flex h-full max-w-7xl items-center px-6 pt-16">
           <div className="grid w-full items-center gap-10 lg:grid-cols-12">
             <div className="lg:col-span-7">
-              <div className="hero-glass max-w-2xl rounded-3xl p-8 sm:p-12 animate-fade-in-up">
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/40 bg-orange-50/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#7c2d12] dark:border-white/10 dark:bg-stone-900/40 dark:text-orange-200">
+              <div className="hero-glass max-w-2xl rounded-3xl p-6 sm:p-8 lg:p-12 animate-fade-in-up">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/40 bg-orange-50/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#7c2d12] dark:border-white/10 dark:bg-stone-900/40 dark:text-orange-200 sm:mb-6">
                   <Sun className="h-3.5 w-3.5 text-primary" />
                   {t('hero.badge')}
                 </div>
 
-                <h1 className="font-heading text-5xl font-bold leading-[1.04] tracking-tight text-[#1a0a02] dark:text-foreground sm:text-6xl lg:text-7xl">
+                <h1 className="font-heading text-4xl font-bold leading-[1.04] tracking-tight text-[#1a0a02] dark:text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
                   {t('hero.title1')}
                   <br />
                   {t('hero.title2')}
@@ -148,11 +148,11 @@ export function LandingPage() {
                   </span>
                 </h1>
 
-                <p className="mt-6 max-w-lg text-lg leading-relaxed text-[#1a0a02]/75 dark:text-foreground/75">
+                <p className="mt-5 max-w-lg text-base leading-relaxed text-[#1a0a02]/75 dark:text-foreground/75 sm:mt-6 sm:text-lg">
                   {t('hero.subtitle')}
                 </p>
 
-                <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 font-mono text-[11px] uppercase tracking-wider text-[#1a0a02]/60 dark:text-foreground/60">
+                <div className="mt-8 flex flex-wrap gap-x-4 gap-y-3 font-mono text-[11px] uppercase tracking-wider text-[#1a0a02]/60 dark:text-foreground/60 sm:mt-10 sm:gap-x-7">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     {t('hero.metaFreeToStart')}
@@ -297,7 +297,7 @@ export function LandingPage() {
       <PipelineSection />
 
       {/* Features */}
-      <section id="features" className="snap-start px-6 py-24">
+      <section id="features" className="snap-start px-6 py-16 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">
@@ -352,7 +352,7 @@ export function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="snap-start px-6 py-24">
+      <section id="pricing" className="snap-start px-6 py-16 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('pricing.eyebrow')}</div>
@@ -395,7 +395,7 @@ export function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="snap-start bg-card px-6 py-24">
+      <section id="faq" className="snap-start bg-card px-6 py-16 lg:py-24">
         <div className="mx-auto max-w-3xl">
           <div className="mb-14 text-center">
             <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('faq.eyebrow')}</div>
@@ -661,7 +661,7 @@ function PipelineSection() {
 
   return (
     <section id="how" className="relative snap-start bg-card px-6 text-foreground">
-      <div className="mx-auto max-w-7xl pb-16 pt-24">
+      <div className="mx-auto max-w-7xl pb-12 pt-16 lg:pb-16 lg:pt-24">
         <div className="max-w-2xl">
           <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('pipeline.eyebrow')}</div>
           <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
@@ -672,8 +672,8 @@ function PipelineSection() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl pb-32">
-        <div className="grid gap-12 lg:grid-cols-12">
+      <div className="mx-auto max-w-7xl pb-20 lg:pb-32">
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
           <div className="space-y-2 lg:col-span-6">
             {PIPELINE_STEPS.map((step, i) => {
               const isActive = i === active
@@ -695,7 +695,7 @@ function PipelineSection() {
                     {step.num} ({step.label})
                   </div>
                   <h3
-                    className={`mb-4 font-heading text-3xl font-bold leading-tight transition-colors duration-300 sm:text-4xl ${
+                    className={`mb-4 font-heading text-2xl font-bold leading-tight transition-colors duration-300 sm:text-3xl md:text-4xl ${
                       isActive ? 'text-foreground' : 'text-muted-foreground'
                     }`}
                   >
@@ -723,7 +723,7 @@ function PipelineSection() {
 
           <div className="lg:col-span-6">
             <div className="sticky top-28">
-              <div className="relative h-[460px]">
+              <div className="relative h-[280px] sm:h-[360px] lg:h-[460px]">
                 {PIPELINE_STEPS.map((step, i) => (
                   <PipelineMock key={step.num} step={step} visible={i === active} />
                 ))}

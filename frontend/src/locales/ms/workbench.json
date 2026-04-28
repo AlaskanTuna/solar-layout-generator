@@ -5,6 +5,11 @@
     "unknownError": "Ralat tidak diketahui",
     "backToDashboard": "Kembali ke Papan Pemuka"
   },
+  "mobileGuard": {
+    "title": "Buka pada skrin yang lebih besar",
+    "subtitle": "Meja kerja susun atur bumbung memerlukan gerak isyarat tarik-lepas, putaran dan pilih berbilang yang tepat, paling sesuai pada desktop atau tablet. Tukar peranti untuk menyunting susun atur anda.",
+    "backToDashboard": "Kembali ke Papan Pemuka"
+  },
   "loading": {
     "rooftopImage": "Memuatkan imej bumbung anda...",
     "mappingPanels": "Memetakan panel solar ke bumbung anda...",
