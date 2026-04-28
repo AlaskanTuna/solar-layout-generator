@@ -1,6 +1,4 @@
-/**
- * Defines the COLORS constant
- */
+/** Canonical color tokens for charts, overlays, legends, and PDF exports. */
 export const COLORS = {
   chartBaseline: '#ea580c',
   chartSolar: '#16a34a',
@@ -29,9 +27,10 @@ export const COLORS = {
 type ThemeMode = 'light' | 'dark'
 
 /**
- * Computes the chart tooltip style value
- * @param {ThemeMode} theme - Value used for theme
- * @returns {Object} The requested chart tooltip style
+ * Builds the Recharts `<Tooltip>` style props for the active theme.
+ *
+ * @param theme - Resolved color scheme; `'dark'` swaps to dark surfaces and stronger shadow
+ * @returns Object with `contentStyle`, `labelStyle`, and `cursor` props ready to spread onto `<Tooltip>`
  */
 export function getChartTooltipStyle(theme: ThemeMode) {
   const isDark = theme === 'dark'
@@ -55,7 +54,5 @@ export function getChartTooltipStyle(theme: ThemeMode) {
   } as const
 }
 
-/**
- * Defines the CHART_TOOLTIP_STYLE constant
- */
+/** Light-theme chart tooltip style. Prefer {@link getChartTooltipStyle} when theme is dynamic. */
 export const CHART_TOOLTIP_STYLE = getChartTooltipStyle('light')

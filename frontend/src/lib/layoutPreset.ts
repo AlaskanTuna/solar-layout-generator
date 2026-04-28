@@ -7,17 +7,13 @@ import {
 } from '@shared/types'
 import { azimuthMatchesRoofDirection } from '@/lib/workbench/roofDirection'
 
-/**
- * Defines the PanelYieldEntry type
- */
+/** Subset of `SolarPanel` fields used for preset-driven panel ordering and count inference. */
 export type PanelYieldEntry = {
   yearlyEnergyDcKwh: number
   segmentIndex?: number
 }
 
-/**
- * Defines the RoofSegmentEntry type
- */
+/** Subset of `RoofSegment` fields needed to apply roof-direction filtering. */
 export type RoofSegmentEntry = {
   azimuthDegrees: number
 }
@@ -29,9 +25,12 @@ const SIZING_GOAL_OFFSET: Record<Exclude<SizingGoal, 'custom'>, number> = {
 }
 
 /**
- * Converts a bill range bucket to annual kWh
- * @param {BillRange | undefined} billRange - Value used for bill range
- * @returns {number} The resulting bill range to annual kwh value
+ * Converts a TNB bill bucket (e.g. `'200_400'`) into estimated annual consumption (kWh).
+ * Maps to monthly kWh via {@link BILL_RANGE_TO_KWH_PER_MONTH} then multiplies by 12.
+ * Defaults to the `'unknown'` bucket when `billRange` is undefined.
+ *
+ * @param billRange - Selected bucket from the layout-preset modal
+ * @returns Annual consumption estimate in kWh
  */
 export function billRangeToAnnualKwh(billRange: BillRange | undefined): number {
   const monthly = BILL_RANGE_TO_KWH_PER_MONTH[billRange ?? 'unknown']
@@ -54,11 +53,15 @@ function filterByDirection(
 }
 
 /**
- * Resolves the visible panel count for the current sizing goal
- * @param {PanelYieldEntry[]} panels - Collection of panels values
- * @param {LayoutPreferences} prefs - Value used for prefs
- * @param {RoofSegmentEntry[]} segments - Collection of segments values
- * @returns {number} The resulting infer visible count value
+ * Computes how many panels to leave visible for a given layout preset.
+ * `custom` always returns all panels; `maximum` returns all roof-direction-eligible panels;
+ * `conservative`/`balanced` pick the smallest panel set whose summed yearly DC kWh meets
+ * the daytime self-consumption target derived from `billRange × goalMultiplier`.
+ *
+ * @param panels - All available panels (sorted upstream by best-yield-first)
+ * @param prefs - Resolved layout preferences from the project
+ * @param segments - Optional roof-segment list used to filter by `prefs.roofDirection`
+ * @returns Number of panels to keep active, never exceeding `panels.length`
  */
 export function inferVisibleCount(
   panels: PanelYieldEntry[],

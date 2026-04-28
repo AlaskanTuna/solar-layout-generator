@@ -57,23 +57,17 @@ function useLoadedImage(src: string | undefined) {
   return { image, imageError }
 }
 
-/**
- * Defines the OverlayMode type
- */
-export type OverlayMode = 'rgb' | 'annual-flux' | 'dsm' | 'mask'/**
- * Provides the useOverlayImages hook
- * @param {string | undefined} rgbImageUrl - Rgb Image Url value
- * @param {string | undefined} locationId - Location identifier
- * @param {OverlayMode} overlayMode - Value used for overlay Mode
- */
-/**
- * Provides the useOverlayImages hook
- * @param {string | undefined} rgbImageUrl - Rgb image url value
- * @param {string | undefined} locationId - Location identifier
- * @param {OverlayMode} overlayMode - Value used for overlay mode
- */
+/** Selectable workbench overlay layers backed by the Solar API GeoTIFF endpoints. */
+export type OverlayMode = 'rgb' | 'annual-flux' | 'dsm' | 'mask'
 
-
+/**
+ * Loads and caches the active workbench overlay image, falling back to the cached RGB.
+ *
+ * @param rgbImageUrl - Signed URL of the RGB satellite image; used both as the `rgb` mode and as fallback
+ * @param locationId - Location id used to fetch the per-mode overlay PNG via `/api/locations/:id/overlay`
+ * @param overlayMode - Active overlay layer from the workbench toolbar
+ * @returns `{ image, imageError }` — `image` is the latest successfully loaded `HTMLImageElement`, `imageError` is the message of the most recent load failure (if any)
+ */
 export function useOverlayImages(
   rgbImageUrl: string | undefined,
   locationId: string | undefined,

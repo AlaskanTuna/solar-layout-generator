@@ -1,51 +1,27 @@
 import type { RoofType, TariffRates } from '@shared/types'
 
-/**
- * Defines the ConnectionPhase type
- */
-export type ConnectionPhase = 'single' | 'three'/**
- * Defines the AnalysisMode type
- */
-/**
- * Defines the AnalysisMode type
- */
+/** TNB connection class — drives NEM cap and capacity-charge tier. */
+export type ConnectionPhase = 'single' | 'three'
 
-
+/** Financial projection mode shown in the analysis UI. `lifecycle` adds maintenance + inverter replacement to the cumulative net benefit. */
 export type AnalysisMode = 'simple' | 'lifecycle'
 
-/**
- * Defines the ConsumptionProfile type
- */
-export type ConsumptionProfile = 'flat' | 'seasonal'/**
- * Defines the InverterReplacement type
- */
-/**
- * Defines the InverterReplacement type
- */
+/** Shape of monthly consumption: `flat` is constant, `seasonal` follows the Malaysian aircon-heavy hot-month profile. */
+export type ConsumptionProfile = 'flat' | 'seasonal'
 
-
+/** Single inverter-replacement event in the lifecycle projection. */
 export type InverterReplacement = {
   year: number
   costRm: number
 }
 
-/**
- * Defines the DEFAULT_ANNUAL_MAINTENANCE_RM constant
- */
-export const DEFAULT_ANNUAL_MAINTENANCE_RM = 500/**
- * Defines the DEFAULT_INVERTER_REPLACEMENT constant
- */
-/**
- * Defines the DEFAULT_INVERTER_REPLACEMENT constant
- */
-export const DEFAULT_INVERTER_REPLACEMENT: InverterReplacement = { year: 12, costRm: 4500 }/**
- * Defines the AnalysisConfig type
- */
-/**
- * Defines the AnalysisConfig type
- */
+/** Default annual O&M cost (RM/year) for a residential rooftop PV system. */
+export const DEFAULT_ANNUAL_MAINTENANCE_RM = 500
 
+/** Default first inverter replacement: year 12 at RM 4,500 (typical residential string inverter). */
+export const DEFAULT_INVERTER_REPLACEMENT: InverterReplacement = { year: 12, costRm: 4500 }
 
+/** Inputs to {@link buildAnalysisResults} — every adjustable assumption in the AnalysisPage sidebar. */
 export type AnalysisConfig = {
   monthlyConsumptionKwh: number
   connectionPhase: ConnectionPhase
@@ -141,9 +117,13 @@ function parseInverterReplacements(
 }
 
 /**
- * Defines the parseSavedAnalysisConfig function
- * @param {unknown} raw - Value used for raw
- * @returns {Partial<AnalysisConfig>} The parsed saved analysis config
+ * Coerces a `Project.analysisConfig` JSON blob from the database into a typed partial.
+ * Returns `null` when the input isn't an object; otherwise drops any field whose
+ * stored value can't be reconciled with {@link AnalysisConfig} so the rest of the
+ * UI seeds defaults for those fields instead of crashing on bad data.
+ *
+ * @param raw - Untyped JSON value from `prisma.project.analysisConfig`
+ * @returns Subset of {@link AnalysisConfig} with only the fields that parsed successfully, or `null`
  */
 export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> | null {
   if (!isRecord(raw)) return null

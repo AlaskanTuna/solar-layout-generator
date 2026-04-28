@@ -1,8 +1,6 @@
 import type { AnalysisMode, InverterReplacement } from './config'
 
-/**
- * Defines the NetBenefitPoint type
- */
+/** One year of the cumulative net-benefit series rendered by the lifecycle chart. */
 export type NetBenefitPoint = {
   year: number
   grossSavings: number
@@ -16,12 +14,14 @@ function round2(value: number): number {
 }
 
 /**
- * Defines the computeDegradedSavings function
- * @param {number} year1Savings - Value used for year1 savings
- * @param {number} degradationRate - Value used for degradation rate
- * @param {number} years - Value used for years
- * @param {number} tariffEscalationRate - Value used for tariff escalation rate
- * @returns {number} The computed degraded savings
+ * Sums year-1 savings projected over `years` with annual panel degradation and optional tariff escalation.
+ * Each year's contribution is `year1Savings × (1 - degradation)^(yr-1) × (1 + escalation)^(yr-1)`.
+ *
+ * @param year1Savings - Cash savings in the first year (RM)
+ * @param degradationRate - Annual panel output loss (e.g. `0.005` = 0.5%/yr)
+ * @param years - Number of years to project, inclusive
+ * @param tariffEscalationRate - Annual tariff inflation (defaults to `0` = flat tariff)
+ * @returns Cumulative RM saved over the projection window, rounded to 2 dp
  */
 export function computeDegradedSavings(
   year1Savings: number,
@@ -37,11 +37,14 @@ export function computeDegradedSavings(
 }
 
 /**
- * Defines the normalizeInverterReplacements function
- * @param {InverterReplacement[] | undefined} replacements - Collection of replacements values
- * @param {number} legacyCostRm - Value used for legacy cost rm
- * @param {number} legacyYear - Value used for legacy year
- * @returns {InverterReplacement[]} The normalized inverter replacements
+ * Validates and sorts user-provided inverter-replacement events.
+ * Accepts a legacy single-event pair (`costRm` + `year`) for projects saved before
+ * multi-event support was added.
+ *
+ * @param replacements - User-edited list of replacement events; invalid entries are dropped
+ * @param legacyCostRm - Single-event fallback cost (used only when `replacements` is empty)
+ * @param legacyYear - Single-event fallback year; defaults to 12 when omitted but `legacyCostRm` is present
+ * @returns Validated, year-sorted replacement list (possibly empty)
  */
 export function normalizeInverterReplacements(
   replacements: InverterReplacement[] | undefined,
@@ -75,9 +78,12 @@ export function normalizeInverterReplacements(
 }
 
 /**
- * Defines the buildNetBenefitSeries function
- * @param {Object} options - Collection of options values
- * @returns {NetBenefitPoint[]} The built net benefit series
+ * Builds the year-by-year net-benefit series shown on the AnalysisPage chart and in the PDF.
+ * In `lifecycle` mode subtracts annual maintenance and any inverter replacements that have
+ * occurred by year `n` from the gross savings; in `simple` mode only system cost is deducted.
+ *
+ * @param options - Inputs from the AnalysisConfig (savings, degradation, mode, costs)
+ * @returns Array of {@link NetBenefitPoint} entries, one per year up to `options.years`
  */
 export function buildNetBenefitSeries({
   year1Savings,

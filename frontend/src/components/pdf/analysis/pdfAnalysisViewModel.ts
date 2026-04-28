@@ -14,9 +14,7 @@ import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 import type { CostBreakdown, RoofType } from '@shared/types'
 
-/**
- * Defines the PdfAnalysisViewModel type
- */
+/** Pre-computed numeric view model consumed by the PDF analysis page templates. */
 export type PdfAnalysisViewModel = {
   analysisResults: AnalysisResultsRecord
   activePanelCount: number
@@ -48,9 +46,12 @@ export type PdfAnalysisViewModel = {
 }
 
 /**
- * Builds the buildpdfanalysis view model
- * @param {ProjectResponse} project - Project record to process
- * @returns {PdfAnalysisViewModel} The built pdf analysis view model
+ * Assembles every numeric tile, chart series, and breakdown the PDF analysis page renders.
+ * Returns `null` when the project has no saved `analysisResults` so the PDF can fall back
+ * to a "save the project first" message instead of crashing.
+ *
+ * @param project - Project record fetched via the PDF preview token endpoint
+ * @returns Fully-resolved {@link PdfAnalysisViewModel}, or `null` if analysis hasn't been saved yet
  */
 export function buildPdfAnalysisViewModel(project: ProjectResponse): PdfAnalysisViewModel | null {
   const analysisResults = project.analysisResults

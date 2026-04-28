@@ -18,8 +18,10 @@ function readEntries(): RecentProjectActivity[] {
 }
 
 /**
- * Defines the markProjectVisited function
- * @param {string} projectId - Project identifier
+ * Records that the user just opened `projectId`. Pinned to the front of the list,
+ * deduplicates, and trims to 25 entries.
+ *
+ * @param projectId - Active project id; the literal `'new'` placeholder is ignored
  */
 export function markProjectVisited(projectId: string) {
   if (!projectId || projectId === 'new') return
@@ -31,9 +33,10 @@ export function markProjectVisited(projectId: string) {
 }
 
 /**
- * Computes the project last visited at value
- * @param {string} projectId - Project identifier
- * @returns {string} The requested project last visited at
+ * Last time `projectId` was opened, as an ISO 8601 string.
+ *
+ * @param projectId - Project id to look up
+ * @returns ISO timestamp, or `null` when the project has never been visited
  */
 export function getProjectLastVisitedAt(projectId: string): string | null {
   return readEntries().find((entry) => entry.projectId === projectId)?.visitedAt ?? null

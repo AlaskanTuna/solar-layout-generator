@@ -1,6 +1,4 @@
-/**
- * Defines the NewProjectDraft type
- */
+/** In-flight new-project state held across the MapPage → Workbench navigation. */
 export type NewProjectDraft = {
   projectName: string
   locationId?: string
@@ -14,8 +12,10 @@ function canUseSessionStorage(): boolean {
 }
 
 /**
- * Defines the readNewProjectDraft function
- * @returns {NewProjectDraft} The resulting read new project draft value
+ * Reads the in-flight new-project draft from `sessionStorage`.
+ * Returns `null` if storage is unavailable, the value is missing, or the stored shape is invalid.
+ *
+ * @returns Parsed {@link NewProjectDraft} or `null`
  */
 export function readNewProjectDraft(): NewProjectDraft | null {
   if (!canUseSessionStorage()) return null
@@ -40,8 +40,9 @@ export function readNewProjectDraft(): NewProjectDraft | null {
 }
 
 /**
- * Defines the writeNewProjectDraft function
- * @param {NewProjectDraft} draft - Value used for draft
+ * Persists `draft` to `sessionStorage`. No-ops if storage is unavailable or `projectName` is empty.
+ *
+ * @param draft - Draft state to persist; whitespace in `projectName` is trimmed
  */
 export function writeNewProjectDraft(draft: NewProjectDraft) {
   if (!canUseSessionStorage()) return
@@ -57,9 +58,7 @@ export function writeNewProjectDraft(draft: NewProjectDraft) {
   window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
 }
 
-/**
- * Defines the clearNewProjectDraft function
- */
+/** Clears the new-project draft from `sessionStorage`. */
 export function clearNewProjectDraft() {
   if (!canUseSessionStorage()) return
   window.sessionStorage.removeItem(STORAGE_KEY)

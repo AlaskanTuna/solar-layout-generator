@@ -1,24 +1,18 @@
 import type { PanelEdit } from '@shared/types'
 
-/**
- * Defines the BoundingBox type
- */
+/** SW/NE corner pair from Google Solar API `buildingInsights.boundingBox`. */
 export type BoundingBox = {
   sw: { latitude: number; longitude: number }
   ne: { latitude: number; longitude: number }
 }
 
-/**
- * Defines the RoofSegment type
- */
+/** Single roof segment — only the fields the frontend actually consumes. */
 export type RoofSegment = {
   azimuthDegrees: number
   pitchDegrees: number
 }
 
-/**
- * Defines the SolarPanel type
- */
+/** Single panel candidate from Google Solar API, narrowed to the fields we need on the canvas. */
 export type SolarPanel = {
   id: string
   center: { lat: number; lng: number }
@@ -27,9 +21,7 @@ export type SolarPanel = {
   segmentIndex: number
 }
 
-/**
- * Defines the ParsedBuildingInsights type
- */
+/** Output of {@link parseBuildingInsights} — the strongly-typed subset of the Solar API JSON the app uses. */
 export type ParsedBuildingInsights = {
   boundingBox: BoundingBox
   solarPotential: {
@@ -86,9 +78,12 @@ function getPanelCenter(raw: unknown): { lat: number; lng: number } | null {
 }
 
 /**
- * Defines the parseBuildingInsights function
- * @param {unknown} raw - Value used for raw
- * @returns {ParsedBuildingInsights} The parsed building insights
+ * Validates and narrows the raw `Location.buildingInsightsJson` blob into the strongly-typed
+ * subset the frontend uses. Returns `null` when required fields (bounding box, panel dimensions,
+ * panel capacity) are missing or malformed; partial roof segments / panels with bad rows are dropped.
+ *
+ * @param raw - JSON value pulled from Supabase (`Location.buildingInsightsJson`)
+ * @returns {@link ParsedBuildingInsights} or `null` when the payload is unusable
  */
 export function parseBuildingInsights(raw: unknown): ParsedBuildingInsights | null {
   if (!isRecord(raw)) return null
@@ -164,9 +159,11 @@ export function parseBuildingInsights(raw: unknown): ParsedBuildingInsights | nu
 }
 
 /**
- * Defines the parsePanelEdits function
- * @param {unknown} raw - Value used for raw
- * @returns {Array} The parsed panel edits
+ * Coerces a `Project.editedLayout` JSON array into typed {@link PanelEdit} entries.
+ * Drops malformed rows silently so the workbench can still render even when one panel record is bad.
+ *
+ * @param raw - JSON array from `prisma.project.editedLayout`
+ * @returns Validated panel-edit list (possibly empty)
  */
 export function parsePanelEdits(raw: unknown): PanelEdit[] {
   if (!Array.isArray(raw)) return []
@@ -199,9 +196,10 @@ export function parsePanelEdits(raw: unknown): PanelEdit[] {
 }
 
 /**
- * Defines the normalizeRotation function
- * @param {number} rotation - Value used for rotation
- * @returns {number} The normalized rotation
+ * Normalizes any rotation angle (degrees) into the `[0, 360)` range.
+ *
+ * @param rotation - Rotation in degrees, possibly negative or ≥360
+ * @returns Equivalent rotation in `[0, 360)`
  */
 export function normalizeRotation(rotation: number): number {
   const normalized = rotation % 360
@@ -223,9 +221,10 @@ export function getInitialPanelRotation(panel: SolarPanel, roofSegments: RoofSeg
 }
 
 /**
- * Defines the annualEnergyFromMonthly function
- * @param {number[]} monthlyEnergyDcKwh - Collection of monthly energy dc kwh values
- * @returns {number} The resulting annual energy from monthly value
+ * Sums a monthly DC kWh array into an annual DC kWh total.
+ *
+ * @param monthlyEnergyDcKwh - 12 monthly DC kWh values
+ * @returns Annual DC kWh (no rounding)
  */
 export function annualEnergyFromMonthly(monthlyEnergyDcKwh: number[]): number {
   return monthlyEnergyDcKwh.reduce((sum, value) => sum + value, 0)

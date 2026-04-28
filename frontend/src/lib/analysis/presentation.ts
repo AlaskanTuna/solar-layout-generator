@@ -3,17 +3,14 @@ import type { NemMonthResult } from '../billingEngine'
 import type { RoofSegment, SolarPanel } from '../buildingInsights'
 import type { ConsumptionProfile } from './config'
 
-/**
- * Defines the MONTH_LABELS constant
- */
-export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']/**
- * Defines the SEASONAL_MULTIPLIERS constant
- */
-/**
- * Defines the SEASONAL_MULTIPLIERS constant
- */
+/** Three-letter English month labels for chart x-axes; mirror order of monthly billing arrays. */
+export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-
+/**
+ * Per-month consumption multipliers applied when `consumptionProfile === 'seasonal'`.
+ * Centered around 1.0 so the annual sum matches a flat profile; peaks in Mar-Jun reflect
+ * Malaysian aircon-heavy hot months.
+ */
 export const SEASONAL_MULTIPLIERS: readonly number[] = [
   0.93,
   0.95,
@@ -29,9 +26,7 @@ export const SEASONAL_MULTIPLIERS: readonly number[] = [
   0.91
 ] as const
 
-/**
- * Defines the AnalysisChartDataPoint type
- */
+/** One x-axis tick of the analysis bill-comparison chart — month label plus baseline / NEM / cumulative-savings amounts. */
 export type AnalysisChartDataPoint = {
   month: string
   baselineBill: number
@@ -39,9 +34,7 @@ export type AnalysisChartDataPoint = {
   cumulativeSavings: number
 }
 
-/**
- * Defines the LayoutOrientationSummary type
- */
+/** Roof-orientation summary derived from the active panel set — count-weighted azimuth/pitch + dominant segment. */
 export type LayoutOrientationSummary = {
   azimuthDegrees: number
   pitchDegrees: number
@@ -55,18 +48,20 @@ function round2(value: number): number {
 }
 
 /**
- * Defines the applySeasonalProfile function
- * @param {number} baseKwh - Value used for base kwh
- * @returns {number[]} The resulting collection
+ * Spreads a flat monthly consumption value across the year using {@link SEASONAL_MULTIPLIERS}.
+ *
+ * @param baseKwh - Flat monthly consumption (the user's "average month" estimate)
+ * @returns 12-element array (Jan→Dec) of seasonally-adjusted monthly kWh, 2 dp
  */
 export function applySeasonalProfile(baseKwh: number): number[] {
   return SEASONAL_MULTIPLIERS.map((multiplier) => round2(baseKwh * multiplier))
 }
 
 /**
- * Defines the aggregateMonthlyGeneration function
- * @param {PanelEdit[]} activePanels - Collection of active panels values
- * @returns {number[]} The resulting collection
+ * Sums per-panel monthly DC kWh into a single 12-element annual generation array.
+ *
+ * @param activePanels - Panels currently kept/moved (deletions excluded by caller)
+ * @returns 12 monthly DC kWh totals (Jan→Dec), 2 dp; missing months treated as zero
  */
 export function aggregateMonthlyGeneration(activePanels: PanelEdit[]): number[] {
   const totals = Array.from({ length: 12 }, () => 0)
@@ -83,20 +78,23 @@ export function aggregateMonthlyGeneration(activePanels: PanelEdit[]): number[] 
 const COMPASS_8 = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const
 
 /**
- * Defines the azimuthToCompass function
- * @param {number} deg - Value used for deg
- * @returns {string} The resulting azimuth to compass value
+ * Converts a compass azimuth into the closest 8-point label (`'N'`, `'NE'`, …, `'NW'`).
+ *
+ * @param deg - Azimuth in degrees (any range; normalized into 0–360 first)
+ * @returns Three-letter compass label
  */
 export function azimuthToCompass(deg: number): string {
   return COMPASS_8[Math.round((((deg % 360) + 360) % 360) / 45) % 8]
 }
 
 /**
- * Defines the summarizeLayoutOrientation function
- * @param {PanelEdit[]} activePanels - Collection of active panels values
- * @param {SolarPanel[]} solarPanels - Collection of solar panels values
- * @param {RoofSegment[]} roofSegments - Collection of roof segments values
- * @returns {LayoutOrientationSummary} The resulting summarize layout orientation value
+ * Computes a count-weighted azimuth/pitch summary across the active panel set.
+ * Azimuth uses circular mean (atan2 of sin/cos sums) so 350°/10° average to 0°, not 180°.
+ *
+ * @param activePanels - User's current edited layout (kept + moved panels)
+ * @param solarPanels - All Solar API panels (used to map panel id → segment index)
+ * @param roofSegments - Roof segments aligned to the segment index in `solarPanels`
+ * @returns {@link LayoutOrientationSummary} or `null` when no active panels resolve to a known segment
  */
 export function summarizeLayoutOrientation(
   activePanels: PanelEdit[],
@@ -157,19 +155,22 @@ export function summarizeLayoutOrientation(
 }
 
 /**
- * Defines the applyPerformanceRatio function
- * @param {number[]} monthlyKwh - Collection of monthly kwh values
- * @param {number} performanceRatio - Value used for performance ratio
- * @returns {number[]} The resulting collection
+ * Applies the system performance ratio (PR) to convert raw DC kWh into delivered AC kWh.
+ *
+ * @param monthlyKwh - Raw DC kWh per month (from Solar API + GeoTIFF sampling)
+ * @param performanceRatio - Combined PR including inverter efficiency, soiling, wiring (typically 0.75–0.85)
+ * @returns Derated monthly kWh, 2 dp
  */
 export function applyPerformanceRatio(monthlyKwh: number[], performanceRatio: number): number[] {
   return monthlyKwh.map((kwh) => round2(kwh * performanceRatio))
 }
 
 /**
- * Defines the buildMonthlyBillChartData function
- * @param {NemMonthResult[]} monthlyBreakdown - Collection of monthly breakdown values
- * @returns {AnalysisChartDataPoint[]} The built monthly bill chart data
+ * Reshapes the 12-month NEM simulation into the chart points used by the bill-comparison
+ * chart on AnalysisPage and in the PDF. Adds a running cumulative-savings field.
+ *
+ * @param monthlyBreakdown - 12 NEM month rows from the simulation
+ * @returns Array of {@link AnalysisChartDataPoint} ready to feed Recharts
  */
 export function buildMonthlyBillChartData(monthlyBreakdown: NemMonthResult[]): AnalysisChartDataPoint[] {
   let cumulativeSavings = 0
@@ -187,8 +188,10 @@ export function buildMonthlyBillChartData(monthlyBreakdown: NemMonthResult[]): A
 }
 
 /**
- * Defines the isSeasonalProfile function
- * @param {ConsumptionProfile} profile - Value used for profile
+ * Narrowing helper used in conditional branches so the consumption-profile literal stays a single source of truth.
+ *
+ * @param profile - Consumption-profile setting from the analysis config
+ * @returns `true` when the profile is `'seasonal'`
  */
 export function isSeasonalProfile(profile: ConsumptionProfile): boolean {
   return profile === 'seasonal'

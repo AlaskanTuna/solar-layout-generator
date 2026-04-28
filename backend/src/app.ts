@@ -22,7 +22,9 @@ if (env.NODE_ENV === 'development') {
 }
 
 /**
- * Defines the app constant
+ * Configured Express app — CORS, JSON body parsing, request logging, all `/api/*` routers,
+ * and (in production) a static + SPA-fallback handler for the built frontend.
+ * The error middleware is registered last so it catches errors from every prior layer.
  */
 export const app: Express = express()
 

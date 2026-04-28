@@ -6,9 +6,7 @@ import {
   obbsOverlapWithMinSeparation
 } from './canvasTransforms'
 
-/**
- * Defines the SnapGuide type
- */
+/** Single snap-target line drawn beside a dragged panel (alignment guide). */
 export type SnapGuide = {
   orientation: 'horizontal' | 'vertical'
   position: number
@@ -16,18 +14,14 @@ export type SnapGuide = {
   end: number
 }
 
-/**
- * Defines the SnapResult type
- */
+/** Result of an alignment-snap pass — the snapped position plus all matched guides. */
 export type SnapResult = {
   x: number
   y: number
   guides: SnapGuide[]
 }
 
-/**
- * Defines the OverlapSnapResult type
- */
+/** Discriminated result of overlap-snap: either a snapped position, or `{ snapped: false }`. */
 export type OverlapSnapResult = { snapped: true; x: number; y: number } | { snapped: false }
 
 type Pose = {
@@ -41,9 +35,7 @@ type Translation = {
   y: number
 }
 
-/**
- * Defines the OverlapEscapeResult type
- */
+/** Result of the iterative overlap-escape pass — final position, iteration count, and whether the panel cleared every neighbor. */
 export type OverlapEscapeResult = {
   x: number
   y: number
@@ -424,13 +416,15 @@ function resolveOverlapTranslation(
 }
 
 /**
- * Defines the resolveOverlapEscape function
- * @param {Pose} dragged - Value used for dragged
- * @param {Pose[]} neighbors - Collection of neighbors values
- * @param {number} panelWidth - Value used for panel width
- * @param {number} panelHeight - Value used for panel height
- * @param {Object} options - Value used for options
- * @returns {OverlapEscapeResult} The resolved overlap escape
+ * Iteratively nudges a single dragged panel out of overlap with its neighbors using SAT push-out vectors.
+ * Wraps {@link resolveGroupOverlapEscape} for the single-panel case.
+ *
+ * @param dragged - The panel being dragged (current pose)
+ * @param neighbors - Other panels currently on the canvas
+ * @param panelWidth - Panel width in pixels
+ * @param panelHeight - Panel height in pixels
+ * @param options - Optional iteration limits, step size, and stage bounds
+ * @returns Final pose plus iteration count and a `resolved` flag (`true` when no overlap remains)
  */
 export function resolveOverlapEscape(
   dragged: Pose,
@@ -455,14 +449,17 @@ export function resolveOverlapEscape(
 }
 
 /**
- * Defines the resolveGroupOverlapEscape function
- * @param {Pose[]} movingPanels - Collection of moving panels values
- * @param {Pose[]} staticPanels - Collection of static panels values
- * @param {Translation} translation - Value used for translation
- * @param {number} panelWidth - Value used for panel width
- * @param {number} panelHeight - Value used for panel height
- * @param {Object} options - Value used for options
- * @returns {OverlapEscapeResult} The resolved group overlap escape
+ * Iteratively translates a group of moving panels until none overlap any static panel.
+ * Used for marquee-drag and multi-select rotation. Sums per-pair push-out vectors so the
+ * group moves as a single rigid body.
+ *
+ * @param movingPanels - Group currently being dragged
+ * @param staticPanels - Other panels on the canvas
+ * @param translation - Tentative drag delta (overrides current pose offsets)
+ * @param panelWidth - Panel width in pixels
+ * @param panelHeight - Panel height in pixels
+ * @param options - Optional iteration limits, step size, and stage bounds
+ * @returns Final translation plus iteration count and a `resolved` flag
  */
 export function resolveGroupOverlapEscape(
   movingPanels: Pose[],

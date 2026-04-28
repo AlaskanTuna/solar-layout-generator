@@ -4,9 +4,7 @@ type UndoRedoOptions = {
   maxHistory?: number
 }
 
-/**
- * Defines the UndoRedoControls type
- */
+/** Imperative undo/redo controls returned by {@link useUndoRedo}. */
 export type UndoRedoControls<T> = {
   push: (snapshot: T) => void
   undo: () => T | undefined
@@ -17,9 +15,11 @@ export type UndoRedoControls<T> = {
 }
 
 /**
- * Provides the undoRedo hook
- * @param {UndoRedoOptions} options - Value used for options
- * @returns {UndoRedoControls<T>} Hook state for undo redo
+ * Generic snapshot-based undo/redo stack.
+ * Pushing a new snapshot truncates any forward (redo) history. Defaults to 30 entries; oldest are dropped first.
+ *
+ * @param options - Configuration (`maxHistory` defaults to 30)
+ * @returns {@link UndoRedoControls} with `push`/`undo`/`redo`/`clear` and `canUndo`/`canRedo` flags
  */
 export function useUndoRedo<T>(options?: UndoRedoOptions): UndoRedoControls<T> {
   const maxHistory = options?.maxHistory ?? 30

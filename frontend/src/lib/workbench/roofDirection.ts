@@ -12,9 +12,13 @@ const ROOF_DIRECTION_WINDOWS: Record<Exclude<RoofDirection, 'any'>, (azimuth: nu
 }
 
 /**
- * Defines the azimuthMatchesRoofDirection function
- * @param {number} azimuthDegrees - Value used for azimuth degrees
- * @param {RoofDirection | undefined} direction - Value used for direction
+ * Tests whether a panel azimuth falls within the user-selected roof-direction window.
+ * Direction `'any'` (or `undefined`) always matches. Used by both layout-preset inference
+ * and runtime panel ordering so the two paths stay consistent.
+ *
+ * @param azimuthDegrees - Panel azimuth in compass degrees (0=N, 90=E, 180=S, 270=W)
+ * @param direction - User-selected roof preference from the layout preset modal
+ * @returns `true` when the panel's azimuth lies in the chosen quadrant
  */
 export function azimuthMatchesRoofDirection(azimuthDegrees: number, direction: RoofDirection | undefined): boolean {
   if (!direction || direction === 'any') return true
@@ -22,10 +26,13 @@ export function azimuthMatchesRoofDirection(azimuthDegrees: number, direction: R
 }
 
 /**
- * Defines the segmentMatchesRoofDirection function
- * @param {number} segmentIndex - Value used for segment index
- * @param {SegmentWithAzimuth[]} segments - Collection of segments values
- * @param {RoofDirection | undefined} direction - Value used for direction
+ * Roof-segment variant of {@link azimuthMatchesRoofDirection}.
+ * Returns `false` if the segment index is out of bounds.
+ *
+ * @param segmentIndex - Index into `segments`
+ * @param segments - Roof segment list (only `azimuthDegrees` is read)
+ * @param direction - User-selected roof preference
+ * @returns `true` when the resolved segment's azimuth matches `direction`
  */
 export function segmentMatchesRoofDirection(
   segmentIndex: number,

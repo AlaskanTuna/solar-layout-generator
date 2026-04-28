@@ -1,8 +1,6 @@
 import type { SolarPanel, RoofSegment } from './buildingInsights'
 
-/**
- * Defines the SegmentHull type
- */
+/** Convex hull around the panels on a single roof segment, used for the "show segments" overlay. */
 export type SegmentHull = {
   segmentIndex: number
   azimuth: number
@@ -13,9 +11,11 @@ export type SegmentHull = {
 }
 
 /**
- * Maps azimuth angle to an HSL colour
- * @param {number} azimuth - Value used for azimuth
- * @returns {string} The resulting azimuth color value
+ * Maps a roof-segment azimuth to a soft hsla fill used for the segment overlay.
+ * Hue cycles around the compass (N→E→S→W) so each direction is visually distinct.
+ *
+ * @param azimuth - Compass azimuth in degrees (any range; normalized internally)
+ * @returns CSS `hsla(...)` string with 35% alpha, suitable for filled polygons
  */
 export function azimuthColor(azimuth: number): string {
   const a = ((azimuth % 360) + 360) % 360
@@ -38,9 +38,10 @@ export function azimuthColor(azimuth: number): string {
 }
 
 /**
- * Computes convex hull of 2D points
- * @param {Array} points - Collection of points values
- * @returns {Array} The resulting collection
+ * Andrew's monotone-chain convex hull. Returns the input verbatim when ≤2 points.
+ *
+ * @param points - 2D points to wrap
+ * @returns Hull vertices in counter-clockwise order
  */
 export function convexHull(points: { x: number; y: number }[]): { x: number; y: number }[] {
   if (points.length <= 2) return [...points]
@@ -77,14 +78,17 @@ export function convexHull(points: { x: number; y: number }[]): { x: number; y: 
 const HULL_PADDING = 4
 
 /**
- * Defines the computeSegmentHulls function
- * @param {SolarPanel[]} solarPanels - Collection of solar panels values
- * @param {RoofSegment[]} roofSegments - Collection of roof segments values
- * @param {Map<string, { x: number; y: number; rotation: number }>} panelPixelPositions - Panel pixel positions value
- * @param {Set<string>} visiblePanelIds - Visible panel identifiers
- * @param {number} panelWidth - Value used for panel width
- * @param {number} panelHeight - Value used for panel height
- * @returns {SegmentHull[]} The computed segment hulls
+ * Builds one {@link SegmentHull} per roof segment that has visible panels.
+ * Each hull wraps the rotated rectangular footprints (with a small padding) of every
+ * visible panel on that segment.
+ *
+ * @param solarPanels - All panels from the Solar API building insights
+ * @param roofSegments - Roof segments paired with `solarPanels` by `segmentIndex`
+ * @param panelPixelPositions - Live canvas positions/rotations keyed by panel id
+ * @param visiblePanelIds - Subset of panel ids currently shown (after edits/deletes)
+ * @param panelWidth - Panel width in pixels (canvas units)
+ * @param panelHeight - Panel height in pixels (canvas units)
+ * @returns One {@link SegmentHull} per segment with ≥3 visible panels; empty array when none qualify
  */
 export function computeSegmentHulls(
   solarPanels: SolarPanel[],

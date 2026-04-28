@@ -4,9 +4,7 @@ import { getLocationData, type LocationImageGeoTransform } from '@/api/locations
 import { getProject } from '@/api/projects'
 import { parseBuildingInsights } from '@/lib/buildingInsights'
 
-/**
- * Defines the DecodedRoofMask type
- */
+/** Decoded roof-mask raster ready for in-bounds testing on the canvas. `pixels` is a row-major 0/1 byte array. */
 export type DecodedRoofMask = {
   width: number
   height: number
@@ -26,9 +24,13 @@ function decodeBase64(dataBase64: string): Uint8Array {
 }
 
 /**
- * Provides the workbenchData hook
- * @param {string | undefined} projectId - Project identifier
- * @returns {Object} Hook state for workbench data
+ * Loads everything WorkbenchPage needs in one shot — the project, its location, the parsed
+ * building insights, the decoded roof mask, the geo-transform, and the signed RGB URL.
+ * Surfaces a single `error` field that resolves to the first missing/failed dependency so the page
+ * can render one failure state instead of orchestrating per-resource fallbacks.
+ *
+ * @param projectId - Active project id from the URL; `undefined` disables both queries
+ * @returns Workbench data, loading flag, and consolidated `error`
  */
 export function useWorkbenchData(projectId: string | undefined) {
   const projectQuery = useQuery({

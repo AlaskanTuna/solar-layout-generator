@@ -1,17 +1,10 @@
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-/**
- * Defines the TooltipState type
- */
-export type TooltipState = { label: string | null; pinned: boolean }/**
- * Defines the ToolButtonProps type
- */
-/**
- * Defines the ToolButtonProps type
- */
+/** Shared tooltip controller state — `pinned` keeps the tooltip open after click. */
+export type TooltipState = { label: string | null; pinned: boolean }
 
-
+/** Props for {@link ToolButton}. */
 export type ToolButtonProps = {
   onClick: () => void
   disabled?: boolean
@@ -23,10 +16,7 @@ export type ToolButtonProps = {
   children: React.ReactNode
 }
 
-/**
- * Renders the tool button
- * @param {ToolButtonProps} props - Props for the component
- */
+/** Square icon button for the workbench toolbar with a controlled, pin-aware tooltip. */
 export function ToolButton({
   onClick,
   disabled,
@@ -79,9 +69,7 @@ export function ToolButton({
   )
 }
 
-/**
- * Defines the SwatchButtonProps type
- */
+/** Props for {@link SwatchButton}. */
 export type SwatchButtonProps = {
   active: boolean
   background: string
@@ -91,10 +79,7 @@ export type SwatchButtonProps = {
   setTooltipState: React.Dispatch<React.SetStateAction<TooltipState>>
 }
 
-/**
- * Renders the swatch button
- * @param {SwatchButtonProps} props - Props for the component
- */
+/** Color-swatch button for picking a panel/segment color from the workbench toolbar. */
 export function SwatchButton({ active, background, label, onClick, tooltipState, setTooltipState }: SwatchButtonProps) {
   const isTooltipOpen = tooltipState.label === label
 

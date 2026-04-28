@@ -4,7 +4,9 @@ import type { AnalysisMode, InverterReplacement } from './config'
 import { computeDegradedSavings, normalizeInverterReplacements } from './projections'
 
 /**
- * Defines the AnalysisResultsRecord type
+ * Persisted output of the analysis run — saved on `Project.analysisResults` and re-read by both
+ * the live AnalysisPage and the PDF preview. Holds the 12-month breakdown plus every aggregate
+ * tile/chart needs (savings, payback, net benefit, CO2).
  */
 export type AnalysisResultsRecord = {
   monthlyBreakdown: NemMonthResult[]
@@ -31,17 +33,10 @@ export type AnalysisResultsRecord = {
   activePanelCount: number
 }
 
-/**
- * Defines the NemFit type
- */
-export type NemFit = 'lean' | 'balanced' | 'oversized'/**
- * Defines the NemFitClassification type
- */
-/**
- * Defines the NemFitClassification type
- */
+/** Coarse fit category between system size and household consumption used to pick verdict copy. */
+export type NemFit = 'lean' | 'balanced' | 'oversized'
 
-
+/** Output of {@link classifyNemFit} — the qualitative fit plus the underlying rate metrics. */
 export type NemFitClassification = {
   fit: NemFit
   detail: string
@@ -50,9 +45,7 @@ export type NemFitClassification = {
   forfeitureRate: number
 }
 
-/**
- * Defines the NemFitMetrics type
- */
+/** Aggregate kWh + ratio metrics produced by {@link computeNemFitMetrics} and consumed by {@link classifyNemFit}. */
 export type NemFitMetrics = {
   totalConsumptionKwh: number
   totalGenerationKwh: number
@@ -69,9 +62,10 @@ function round2(value: number): number {
 }
 
 /**
- * Defines the computeNemFitMetrics function
- * @param {NemMonthResult[]} monthlyBreakdown - Collection of monthly breakdown values
- * @returns {NemFitMetrics} The computed nem fit metrics
+ * Aggregates the 12 monthly NEM results into the kWh totals and ratios used to classify the fit.
+ *
+ * @param monthlyBreakdown - Output of the per-month NEM simulation
+ * @returns {@link NemFitMetrics} with 2dp-rounded kWh totals plus rate fractions in [0, 1]
  */
 export function computeNemFitMetrics(monthlyBreakdown: NemMonthResult[]): NemFitMetrics {
   const totalConsumptionKwh = monthlyBreakdown.reduce((sum, month) => sum + month.consumptionKwh, 0)
@@ -100,9 +94,11 @@ export function computeNemFitMetrics(monthlyBreakdown: NemMonthResult[]): NemFit
 }
 
 /**
- * Defines the classifyNemFit function
- * @param {NemFitMetrics} metrics - Value used for metrics
- * @returns {NemFitClassification} The resulting classify nem fit value
+ * Buckets a system into `lean`/`balanced`/`oversized` from its NEM rate metrics.
+ * Thresholds: oversized when forfeit > 15% or export > 35%; balanced when import ≤ 25%, export ≤ 20%, forfeit ≤ 5%; otherwise lean.
+ *
+ * @param metrics - Output of {@link computeNemFitMetrics}
+ * @returns Fit classification with the underlying rates passed through
  */
 export function classifyNemFit(metrics: NemFitMetrics): NemFitClassification {
   const { billableImportRate, monthlyExportRate, forfeitureRate } = metrics
@@ -190,9 +186,12 @@ function computeLifecyclePaybackYears({
 }
 
 /**
- * Defines the buildAnalysisResults function
- * @param {Object} options - Collection of options values
- * @returns {AnalysisResultsRecord} The built analysis results
+ * Top-level analysis builder — turns a 12-month NEM simulation into the full {@link AnalysisResultsRecord}.
+ * Computes both `simple` and `lifecycle` payback / net-benefit tracks so the UI can switch modes
+ * without rerunning the simulation.
+ *
+ * @param options - Simulation results + cost / degradation / lifecycle assumptions
+ * @returns Persisted-shape analysis record consumed by AnalysisPage and the PDF preview
  */
 export function buildAnalysisResults({
   simulation,
@@ -292,10 +291,13 @@ export function buildAnalysisResults({
 }
 
 /**
- * Defines the buildThresholdWarnings function
- * @param {NemMonthResult} month - Month value to render
- * @param {TariffThresholds} thresholds - Value used for thresholds
- * @returns {string[]} The built threshold warnings
+ * Surfaces tariff-tier "cliff avoided" warnings for a month — e.g. when NEM offset
+ * drops billable kWh below the retail/AFA/SST waiver line so those charges are skipped,
+ * or below the energy cliff so the lower per-kWh rate applies.
+ *
+ * @param month - One row of the monthly NEM breakdown
+ * @param thresholds - Active tariff thresholds (retailWaiver, afaWaiver, sstExemption, energyCliff)
+ * @returns Zero or more user-facing warning strings (already pluralized + tariff-aware)
  */
 export function buildThresholdWarnings(month: NemMonthResult, thresholds: TariffThresholds): string[] {
   const warnings: string[] = []

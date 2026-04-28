@@ -1,9 +1,7 @@
 import proj4 from 'proj4'
 import type { LocationImageGeoTransform } from '@/api/locations'
 
-/**
- * Defines the CanvasGeo type
- */
+/** Backend `LocationImageGeoTransform` augmented with the canvas display size + scale factors. */
 export type CanvasGeo = LocationImageGeoTransform & {
   displayWidth: number
   displayHeight: number
@@ -11,17 +9,13 @@ export type CanvasGeo = LocationImageGeoTransform & {
   scaleY: number
 }
 
-/**
- * Defines the PixelPoint type
- */
+/** A point in canvas pixel coordinates. */
 export type PixelPoint = {
   x: number
   y: number
 }
 
-/**
- * Defines the RectAabb type
- */
+/** Axis-aligned bounding box in pixel coordinates. */
 export type RectAabb = {
   minX: number
   maxX: number
@@ -29,9 +23,7 @@ export type RectAabb = {
   maxY: number
 }
 
-/**
- * Defines the RasterMask type
- */
+/** Raster mask used for inside-roof checks; `pixels` is row-major 0/1 with `width × height` length. */
 export type RasterMask = {
   width: number
   height: number
@@ -39,11 +31,12 @@ export type RasterMask = {
 }
 
 /**
- * Defines the createCanvasGeo function
- * @param {LocationImageGeoTransform} imageGeoTransform - Value used for image geo transform
- * @param {number} displayWidth - Value used for display width
- * @param {number} displayHeight - Value used for display height
- * @returns {any} The resulting canvas geo value
+ * Wraps a backend image geo-transform with the live canvas size, computing per-axis scale.
+ *
+ * @param imageGeoTransform - Origin/CRS metadata returned by the location pipeline
+ * @param displayWidth - Konva stage width in CSS pixels
+ * @param displayHeight - Konva stage height in CSS pixels
+ * @returns {@link CanvasGeo} usable by the lat/lng ↔ pixel helpers in this module
  */
 export function createCanvasGeo(
   imageGeoTransform: LocationImageGeoTransform,
@@ -60,11 +53,12 @@ export function createCanvasGeo(
 }
 
 /**
- * Defines the latLngToPixel function
- * @param {number} lat - Value used for lat
- * @param {number} lng - Value used for lng
- * @param {CanvasGeo} geo - Value used for geo
- * @returns {PixelPoint} The resulting lat lng to pixel value
+ * Converts a WGS84 lat/lng to canvas pixel coordinates using the layer CRS in `geo`.
+ *
+ * @param lat - WGS84 latitude (degrees)
+ * @param lng - WGS84 longitude (degrees)
+ * @param geo - {@link CanvasGeo} for the active location image
+ * @returns Pixel position relative to the canvas top-left
  */
 export function latLngToPixel(lat: number, lng: number, geo: CanvasGeo): PixelPoint {
   const [projX, projY] = proj4(geo.fromCRS, geo.toCRS, [lng, lat])
@@ -78,11 +72,12 @@ export function latLngToPixel(lat: number, lng: number, geo: CanvasGeo): PixelPo
 }
 
 /**
- * Defines the pixelToLatLng function
- * @param {number} x - Value used for x
- * @param {number} y - Value used for y
- * @param {CanvasGeo} geo - Value used for geo
- * @returns {Object} The resulting structured value
+ * Inverse of {@link latLngToPixel} — converts canvas pixel coordinates back to WGS84 lat/lng.
+ *
+ * @param x - Canvas x in pixels
+ * @param y - Canvas y in pixels
+ * @param geo - {@link CanvasGeo} for the active location image
+ * @returns `{ lat, lng }` in WGS84 degrees
  */
 export function pixelToLatLng(x: number, y: number, geo: CanvasGeo): { lat: number; lng: number } {
   const imageX = x / geo.scaleX
@@ -96,11 +91,12 @@ export function pixelToLatLng(x: number, y: number, geo: CanvasGeo): { lat: numb
 }
 
 /**
- * Defines the panelMetersToPixels function
- * @param {number} panelWidthMeters - Value used for panel width meters
- * @param {number} panelHeightMeters - Value used for panel height meters
- * @param {CanvasGeo} geo - Value used for geo
- * @returns {Object} The resulting structured value
+ * Converts physical panel dimensions (meters) into canvas pixels using the layer resolution + display scale.
+ *
+ * @param panelWidthMeters - Panel width in meters
+ * @param panelHeightMeters - Panel height in meters
+ * @param geo - {@link CanvasGeo} for the active location image
+ * @returns `{ width, height }` in canvas pixels
  */
 export function panelMetersToPixels(
   panelWidthMeters: number,
@@ -163,9 +159,11 @@ export function getRectAabb(points: PixelPoint[]): RectAabb {
 }
 
 /**
- * Defines the aabbsOverlap function
- * @param {RectAabb} a - Value used for a
- * @param {RectAabb} b - Value used for b
+ * Strict AABB overlap check (touching edges do NOT count as overlap).
+ *
+ * @param a - First axis-aligned bounding box
+ * @param b - Second axis-aligned bounding box
+ * @returns `true` when the two boxes share interior area
  */
 export function aabbsOverlap(a: RectAabb, b: RectAabb): boolean {
   return a.minX < b.maxX && a.maxX > b.minX && a.minY < b.maxY && a.maxY > b.minY
@@ -206,9 +204,12 @@ function getEdgeNormals(poly: PixelPoint[]): PixelPoint[] {
 }
 
 /**
- * Defines the obbsOverlap function
- * @param {PixelPoint[]} polyA - Collection of poly a values
- * @param {PixelPoint[]} polyB - Collection of poly b values
+ * SAT overlap test for two convex polygons (typically rotated rectangles).
+ * Avoids the false positives an AABB pre-check would produce when panels are at oblique angles.
+ *
+ * @param polyA - Polygon A vertices
+ * @param polyB - Polygon B vertices
+ * @returns `true` only when the polygon interiors intersect
  */
 export function obbsOverlap(polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
   const axes = [...getEdgeNormals(polyA), ...getEdgeNormals(polyB)]
@@ -218,9 +219,7 @@ export function obbsOverlap(polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
   return true
 }
 
-/**
- * Defines the MinSeparationResult type
- */
+/** Output of {@link obbsOverlapWithMinSeparation} — the minimum push-out vector needed to separate the polygons. */
 export type MinSeparationResult = {
   /** Signed penetration depth (positive = overlap, negative = gap) */
   penetration: number
@@ -273,20 +272,24 @@ export function obbsOverlapWithMinSeparation(polyA: PixelPoint[], polyB: PixelPo
 }
 
 /**
- * Defines the isAabbInsideStage function
- * @param {RectAabb} aabb - Value used for aabb
- * @param {number} stageWidth - Value used for stage width
- * @param {number} stageHeight - Value used for stage height
+ * Tests whether an AABB sits fully inside the canvas stage rectangle.
+ *
+ * @param aabb - Axis-aligned bounding box to test
+ * @param stageWidth - Stage width in pixels
+ * @param stageHeight - Stage height in pixels
+ * @returns `true` when every corner is within the stage bounds (touching edges allowed)
  */
 export function isAabbInsideStage(aabb: RectAabb, stageWidth: number, stageHeight: number): boolean {
   return aabb.minX >= 0 && aabb.maxX <= stageWidth && aabb.minY >= 0 && aabb.maxY <= stageHeight
 }
 
 /**
- * Defines the pointInPolygon function
- * @param {number} x - Value used for x
- * @param {number} y - Value used for y
- * @param {PixelPoint[]} polygon - Collection of polygon values
+ * Standard ray-casting point-in-polygon test. Polygon may be non-convex.
+ *
+ * @param x - Point x in canvas pixels
+ * @param y - Point y in canvas pixels
+ * @param polygon - Polygon vertices in CW or CCW order
+ * @returns `true` when the point sits inside the polygon
  */
 export function pointInPolygon(x: number, y: number, polygon: PixelPoint[]): boolean {
   let inside = false
@@ -307,9 +310,13 @@ export function pointInPolygon(x: number, y: number, polygon: PixelPoint[]): boo
 }
 
 /**
- * Defines the isPolygonInsideRasterMask function
- * @param {PixelPoint[]} polygon - Collection of polygon values
- * @param {RasterMask} mask - Value used for mask
+ * Tests whether a polygon's interior fits entirely inside a binary raster mask.
+ * Samples each mask pixel that lies inside the polygon's AABB; rejects on the first
+ * "inside-polygon but mask=0" pixel found. Used to keep panels within the roof outline.
+ *
+ * @param polygon - Polygon vertices in canvas pixels (≥3 points)
+ * @param mask - Binary roof mask matching the canvas image resolution
+ * @returns `true` when every interior pixel of the polygon falls on a mask `1` pixel
  */
 export function isPolygonInsideRasterMask(polygon: PixelPoint[], mask: RasterMask): boolean {
   if (polygon.length < 3 || mask.pixels.length !== mask.width * mask.height) {

@@ -44,32 +44,19 @@ import zhFaq from '@/locales/zh/faq.json'
 import zhSettings from '@/locales/zh/settings.json'
 import zhNotifications from '@/locales/zh/notifications.json'
 
-/**
- * Defines the SUPPORTED_LOCALES constant
- */
-export const SUPPORTED_LOCALES = ['en', 'ms', 'zh'] as const/**
- * Defines the SupportedLocale type
- */
-/**
- * Defines the SupportedLocale type
- */
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]/**
- * Defines the DEFAULT_LOCALE constant
- */
-/**
- * Defines the DEFAULT_LOCALE constant
- */
-export const DEFAULT_LOCALE: SupportedLocale = 'en'/**
- * Defines the LOCALE_STORAGE_KEY constant
- */
-/**
- * Defines the LOCALE_STORAGE_KEY constant
- */
+/** Locale codes the app ships translations for. First entry is the i18next fallback. */
+export const SUPPORTED_LOCALES = ['en', 'ms', 'zh'] as const
+
+/** Union of every locale code in {@link SUPPORTED_LOCALES}. */
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
+
+/** Default locale used before the language detector resolves. */
+export const DEFAULT_LOCALE: SupportedLocale = 'en'
+
+/** localStorage key i18next reads/writes the active locale to. */
 export const LOCALE_STORAGE_KEY = 'locale'
 
-/**
- * Defines the LOCALE_LABELS constant
- */
+/** Human-readable label shown in the language switcher, keyed by locale code. */
 export const LOCALE_LABELS: Record<SupportedLocale, string> = {
   en: 'English',
   ms: 'Bahasa Melayu',
@@ -77,7 +64,8 @@ export const LOCALE_LABELS: Record<SupportedLocale, string> = {
 }
 
 /**
- * Defines the LOCALE_TO_INTL constant
+ * BCP 47 tags passed to `Intl.NumberFormat` / `Intl.DateTimeFormat`.
+ * `zh-Hans-MY` pins the Chinese script to Simplified for the Malaysian audience.
  */
 export const LOCALE_TO_INTL: Record<SupportedLocale, string> = {
   en: 'en-MY',
@@ -134,8 +122,10 @@ const resources = {
 } as const
 
 /**
- * Defines the isSupportedLocale function
- * @param {string | null | undefined} value - Value to process
+ * Type guard for locale codes coming from external sources (URL params, localStorage, Supabase user metadata).
+ *
+ * @param value - Candidate locale string from an untrusted source
+ * @returns `true` when `value` is one of {@link SUPPORTED_LOCALES}, narrowing it to `SupportedLocale`
  */
 export function isSupportedLocale(value: string | null | undefined): value is SupportedLocale {
   return value !== null && value !== undefined && (SUPPORTED_LOCALES as readonly string[]).includes(value)
@@ -174,5 +164,5 @@ i18n
     }
   })
 
-/** Shared i18n instance */
+/** Configured i18next instance with all 13 namespaces registered for en/ms/zh. */
 export default i18n

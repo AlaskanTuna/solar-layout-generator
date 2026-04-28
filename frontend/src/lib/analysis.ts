@@ -1,6 +1,3 @@
-/**
- * Re-exports shared helpers
- */
 export {
   DEFAULT_ANNUAL_MAINTENANCE_RM,
   DEFAULT_INVERTER_REPLACEMENT,
@@ -11,9 +8,6 @@ export {
   type ConsumptionProfile,
   type InverterReplacement
 } from './analysis/config'
-/**
- * Re-exports shared helpers
- */
 export {
   aggregateMonthlyGeneration,
   applyPerformanceRatio,
@@ -27,18 +21,12 @@ export {
   type AnalysisChartDataPoint,
   type LayoutOrientationSummary
 } from './analysis/presentation'
-/**
- * Re-exports shared helpers
- */
 export {
   buildNetBenefitSeries,
   computeDegradedSavings,
   normalizeInverterReplacements,
   type NetBenefitPoint
 } from './analysis/projections'
-/**
- * Re-exports shared helpers
- */
 export {
   buildAnalysisResults,
   buildThresholdWarnings,
@@ -51,7 +39,8 @@ export {
 } from './analysis/results'
 
 /**
- * Defines the ANALYSIS_DISCLAIMER_KEYS constant
+ * i18n keys identifying each analysis-page disclaimer paragraph.
+ * Render via `t(\`page8.disclaimers.\${key}\`)` so the on-screen + PDF copy stay in sync across locales.
  */
 export const ANALYSIS_DISCLAIMER_KEYS = [
   'tnbTariff',
@@ -63,7 +52,5 @@ export const ANALYSIS_DISCLAIMER_KEYS = [
   'paybackProjections'
 ] as const
 
-/**
- * Defines the AnalysisDisclaimerKey type
- */
+/** Union of every key in {@link ANALYSIS_DISCLAIMER_KEYS}. */
 export type AnalysisDisclaimerKey = (typeof ANALYSIS_DISCLAIMER_KEYS)[number]

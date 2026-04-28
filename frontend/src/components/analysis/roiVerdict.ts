@@ -1,6 +1,4 @@
-/**
- * Defines the RoiCondition type
- */
+/** Verdict tier displayed on the SolarVerdict hero card — label, color tokens, and 1-5 star rating. */
 export type RoiCondition = {
   label: 'Excellent' | 'Good' | 'Fair' | 'Poor'
   color: string
@@ -12,9 +10,11 @@ export type RoiCondition = {
 }
 
 /**
- * Computes the roi condition value
- * @param {number | null} paybackYears - Value used for payback years
- * @returns {RoiCondition} The requested roi condition
+ * Maps a simple-payback period to a 4-tier verdict.
+ * Thresholds: ≤6yr Excellent · ≤12yr Good · ≤25yr Fair · otherwise (or null) Poor.
+ *
+ * @param paybackYears - Simple payback in years, or `null` when payback never occurs
+ * @returns {@link RoiCondition} with label, color tokens, and star count
  */
 export function getRoiCondition(paybackYears: number | null): RoiCondition {
   if (paybackYears === null || paybackYears > 25) {

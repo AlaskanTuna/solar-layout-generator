@@ -11,7 +11,9 @@ type AppErrorBoundaryState = {
 }
 
 /**
- * Defines the AppErrorBoundary class
+ * Top-level React error boundary mounted in `main.tsx`.
+ * Catches rendering errors anywhere in the tree, logs them, and shows a recoverable
+ * "Reload / Return to Dashboard" card instead of a blank screen.
  */
 export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
   state: AppErrorBoundaryState = {

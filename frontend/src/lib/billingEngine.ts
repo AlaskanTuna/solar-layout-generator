@@ -1,8 +1,6 @@
 import type { TariffRates, TariffThresholds } from '@shared/types'
 
-/**
- * Defines the BillBreakdown interface
- */
+/** Itemized monthly TNB bill — every line that appears on a printed bill, plus subtotals. */
 export interface BillBreakdown {
   kwh: number
   energy: number
@@ -17,9 +15,7 @@ export interface BillBreakdown {
   total: number
 }
 
-/**
- * Defines the NemMonthResult interface
- */
+/** Single-month output of the NEM simulation: baseline bill, NEM bill, savings, and credit flow. */
 export interface NemMonthResult {
   month: number
   consumptionKwh: number
@@ -33,9 +29,7 @@ export interface NemMonthResult {
   savingsRm: number
 }
 
-/**
- * Defines the AnnualSimulationResult interface
- */
+/** 12-month aggregate of {@link NemMonthResult} entries plus annual totals (RM, kWh, forfeited credits). */
 export interface AnnualSimulationResult {
   months: NemMonthResult[]
   totalConsumptionKwh: number
@@ -46,9 +40,7 @@ export interface AnnualSimulationResult {
   totalCreditsForfeited: number
 }
 
-/**
- * Defines the BillingConfig interface
- */
+/** Tariff configuration consumed by {@link computeBill} — rates, tier thresholds, EEI table, and AFA rate. */
 export interface BillingConfig {
   rates: TariffRates
   thresholds: TariffThresholds
@@ -65,10 +57,12 @@ function round5sen(n: number): number {
 }
 
 /**
- * Looks up EEI rebate rate for a consumption level
- * @param {number} consumptionKwh - Value used for consumption kwh
- * @param {[number, number][]} eeiTable - Collection of eei table values
- * @returns {number} The resulting lookup eei rebate value
+ * Looks up the EEI rebate rate (sen/kWh) for a given monthly consumption.
+ * `eeiTable` is sorted ascending; first row whose `upperBound >= consumptionKwh` wins.
+ *
+ * @param consumptionKwh - Monthly billable consumption (kWh)
+ * @param eeiTable - Sorted `[upperBound, rebateSen]` pairs from the tariff config
+ * @returns Rebate rate in sen per kWh, or `0` if outside the table or non-positive consumption
  */
 export function lookupEeiRebate(consumptionKwh: number, eeiTable: [number, number][]): number {
   if (consumptionKwh <= 0) return 0
@@ -79,10 +73,13 @@ export function lookupEeiRebate(consumptionKwh: number, eeiTable: [number, numbe
 }
 
 /**
- * Computes a monthly TNB domestic bill under RP4 tariff
- * @param {number} kwh - Value used for kwh
- * @param {BillingConfig} config - Value used for config
- * @returns {BillBreakdown} The computed bill
+ * Computes a monthly TNB domestic bill under the post-July-2025 RP4 tariff.
+ * Applies energy/capacity/network rates with tier cliffs, EEI rebate, AFA, RE Fund, and SST.
+ * Returns a fully itemized breakdown.
+ *
+ * @param kwh - Billable consumption for the month. `<= 0` returns the `minChargeRm` floor
+ * @param config - Tariff rates, thresholds, EEI table, and AFA rate
+ * @returns Itemized {@link BillBreakdown} including pre-tax subtotal and final total
  */
 export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
   if (kwh <= 0) {
@@ -149,13 +146,17 @@ export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
 }
 
 /**
- * Computes one month of NEM billing with credit carry-forward
- * @param {number} consumptionKwh - Value used for consumption kwh
- * @param {number} generationKwh - Value used for generation kwh
- * @param {number} creditBalance - Value used for credit balance
- * @param {BillingConfig} config - Value used for config
- * @param {number} month - Month value to render
- * @returns {NemMonthResult} The computed nem month
+ * Simulates one month of NEM billing with credit carry-forward.
+ * If solar generation exceeds consumption, the surplus is added to `creditBalance`.
+ * If consumption exceeds generation, the shortfall is offset by available credits before
+ * being billed. December (`month === 12`) forfeits any remaining balance per NEM rules.
+ *
+ * @param consumptionKwh - Household consumption for the month
+ * @param generationKwh - Solar generation for the month (DC kWh, post-PR derate)
+ * @param creditBalance - Credits carried in from the previous month
+ * @param config - Tariff config used for both baseline and NEM bills
+ * @param month - 1–12 (December triggers credit forfeiture)
+ * @returns {@link NemMonthResult} with both the baseline and NEM-adjusted bills, savings, and updated credits
  */
 export function computeNemMonth(
   consumptionKwh: number,

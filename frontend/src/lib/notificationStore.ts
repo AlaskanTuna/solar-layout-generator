@@ -28,7 +28,8 @@ function emit() {
 }
 
 /**
- * Defines the notificationStore constant
+ * App-wide toast/notification store backed by `localStorage` (key `slg-notifications`, max 50 entries).
+ * Subscribers receive the full list on every mutation.
  */
 export const notificationStore = {
   get: () => notifications,

@@ -2,11 +2,7 @@ import { useMemo } from 'react'
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-// Monthly solar irradiance factors for Malaysia (normalized, 1.0 = average)
-// Based on typical GHI data for ~3°N latitude
-/**
- * Defines the MONTHLY_IRRADIANCE constant
- */
+/** Monthly solar irradiance multipliers for Peninsular Malaysia (~3°N), normalized so 1.0 ≈ annual mean. */
 export const MONTHLY_IRRADIANCE = [
   0.85, // Jan — monsoon
   0.9, // Feb — monsoon tail
@@ -22,10 +18,9 @@ export const MONTHLY_IRRADIANCE = [
   0.8 // Dec — monsoon
 ]
 
-// Sun azimuth approximation for Malaysia by month (degrees from North, clockwise)
-// At 3°N, the sun is slightly south most of the year, crossing north briefly around equinoxes
 /**
- * Defines the MONTHLY_AZIMUTH constant
+ * Approximate noon sun azimuth (degrees from North, clockwise) by month for ~3°N.
+ * Sun is mostly south of zenith except briefly around equinoxes when it crosses north.
  */
 export const MONTHLY_AZIMUTH = [
   180, // Jan — south
@@ -42,9 +37,6 @@ export const MONTHLY_AZIMUTH = [
   180 // Dec — south
 ]
 
-/**
- * Re-exports shared helpers
- */
 export { MONTH_LABELS }
 
 type IrradianceGlowProps = {
@@ -52,8 +44,9 @@ type IrradianceGlowProps = {
 }
 
 /**
- * Renders the IrradianceGlow component
- * @param {IrradianceGlowProps} props - Props for the component
+ * Decorative absolute-positioned overlay that paints a directional sun glow on the workbench canvas.
+ * Position and brightness derive from {@link MONTHLY_AZIMUTH} and {@link MONTHLY_IRRADIANCE} for the
+ * selected month, giving a quick visual cue of seasonal sun angle.
  */
 export function IrradianceGlow({ month }: IrradianceGlowProps) {
   const style = useMemo(() => {
