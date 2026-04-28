@@ -85,7 +85,7 @@ export function LandingPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2 sm:gap-2.5">
             <Logo className="h-7 w-7 sm:h-8 sm:w-8" />
-            <span className="hidden font-heading text-lg font-semibold tracking-tight sm:inline">SolarSim</span>
+            <span className="font-heading text-base font-semibold tracking-tight sm:text-lg">SolarSim</span>
           </Link>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <LanguageToggle />
