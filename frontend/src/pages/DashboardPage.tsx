@@ -37,6 +37,9 @@ function formatResetTime(resetsAt: string): string {
   return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
+/**
+ * Renders the dashboard home page
+ */
 export function DashboardPage() {
   const { t } = useTranslation('dashboard')
   const { user } = useAuth()
@@ -139,6 +142,7 @@ export function DashboardPage() {
   return (
     <>
       <PageContainer flex>
+        {/* Header */}
         <PageHeaderCard>
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -154,6 +158,7 @@ export function DashboardPage() {
           </div>
         </PageHeaderCard>
 
+        {/* Action grid and recents */}
         <div className="mt-6 grid flex-1 gap-4 animate-fade-in-up xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="grid gap-4 sm:grid-cols-2">
             {quotaReached && quota ? (
@@ -192,6 +197,7 @@ export function DashboardPage() {
             ))}
           </div>
 
+          {/* Recent projects */}
           <aside className="glass-card group relative flex min-h-[168px] flex-col overflow-hidden p-5 sm:min-h-[176px] xl:min-h-0">
             <img
               src="/dashboard/recents.webp"
@@ -255,6 +261,7 @@ export function DashboardPage() {
         </div>
       </PageContainer>
 
+      {/* Create project dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <form onSubmit={handleCreateProject}>

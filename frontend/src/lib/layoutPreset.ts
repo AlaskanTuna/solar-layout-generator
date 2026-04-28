@@ -7,11 +7,17 @@ import {
 } from '@shared/types'
 import { azimuthMatchesRoofDirection } from '@/lib/workbench/roofDirection'
 
+/**
+ * Defines the PanelYieldEntry type
+ */
 export type PanelYieldEntry = {
   yearlyEnergyDcKwh: number
   segmentIndex?: number
 }
 
+/**
+ * Defines the RoofSegmentEntry type
+ */
 export type RoofSegmentEntry = {
   azimuthDegrees: number
 }
@@ -22,7 +28,11 @@ const SIZING_GOAL_OFFSET: Record<Exclude<SizingGoal, 'custom'>, number> = {
   maximum: Number.POSITIVE_INFINITY
 }
 
-/** Convert a bill range bucket to annual kWh */
+/**
+ * Converts a bill range bucket to annual kWh
+ * @param {BillRange | undefined} billRange - Value used for bill range
+ * @returns {number} The resulting bill range to annual kwh value
+ */
 export function billRangeToAnnualKwh(billRange: BillRange | undefined): number {
   const monthly = BILL_RANGE_TO_KWH_PER_MONTH[billRange ?? 'unknown']
   return monthly * 12
@@ -43,7 +53,13 @@ function filterByDirection(
   return filtered.length === 0 ? panels : filtered
 }
 
-/** Resolve the visible panel count for the current sizing goal */
+/**
+ * Resolves the visible panel count for the current sizing goal
+ * @param {PanelYieldEntry[]} panels - Collection of panels values
+ * @param {LayoutPreferences} prefs - Value used for prefs
+ * @param {RoofSegmentEntry[]} segments - Collection of segments values
+ * @returns {number} The resulting infer visible count value
+ */
 export function inferVisibleCount(
   panels: PanelYieldEntry[],
   prefs: LayoutPreferences,
@@ -72,7 +88,11 @@ export function inferVisibleCount(
   return sorted.length
 }
 
-/** Human-readable label for the sidebar preset pill */
+/**
+ * Human-readable label for the sidebar preset pill
+ * @param {LayoutPreferences | null | undefined} prefs - Value used for prefs
+ * @returns {string} The resulting describe layout preset value
+ */
 export function describeLayoutPreset(prefs: LayoutPreferences | null | undefined): string {
   if (!prefs) return 'Not set'
   switch (prefs.sizingGoal) {

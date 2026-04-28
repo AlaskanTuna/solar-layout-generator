@@ -9,6 +9,12 @@ declare global {
   }
 }
 
+/**
+ * Verify the bearer token and attach the authenticated user
+ * @param {Request} req - Incoming Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express middleware continuation callback
+ */
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization
   if (!authHeader?.startsWith('Bearer ')) {

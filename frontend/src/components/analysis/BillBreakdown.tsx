@@ -15,6 +15,10 @@ type BillBreakdownProps = {
   thresholdWarnings: string[]
 }
 
+/**
+ * Renders the BillBreakdown component
+ * @param {BillBreakdownProps} props - Props for the component
+ */
 export function BillBreakdown({
   selectedMonthIndex,
   onMonthSelect,

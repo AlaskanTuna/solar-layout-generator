@@ -13,6 +13,9 @@ import { validateFluxLocation, recomputeSinglePanel, recomputeBatchPanels } from
 import { NotFoundError, BadRequestError } from '../errors.js'
 import type { OverlayType } from '../services/overlayService.js'
 
+/**
+ * Location resolution and flux recompute routes
+ */
 export const locationsRouter: ExpressRouter = Router()
 
 locationsRouter.post(

@@ -5,6 +5,12 @@ const MAX_REQUESTS = 10
 
 const hits = new Map<string, number[]>()
 
+/**
+ * Rate limit PDF token issuance per user
+ * @param {Request} req - Incoming Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express middleware continuation callback
+ */
 export function pdfTokenRateLimit(req: Request, res: Response, next: NextFunction) {
   const userId = req.user?.id
   if (!userId) {

@@ -53,6 +53,10 @@ type WorkbenchSidebarProps = {
   onOpenLayoutPreset: () => void
 }
 
+/**
+ * Renders the workbench controls sidebar
+ * @param {WorkbenchSidebarProps} props - Props for the component
+ */
 export function WorkbenchSidebar({
   projectName,
   imageryQuality,
@@ -88,6 +92,7 @@ export function WorkbenchSidebar({
   return (
     <aside className="xl:overflow-y-auto xl:w-[22rem] xl:min-w-[22rem]">
       <Card className="border-border bg-card/90 shadow-sm">
+        {/* Project summary and model selector */}
         <CardHeader className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -163,6 +168,7 @@ export function WorkbenchSidebar({
           </details>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Status notices */}
           {initialBatchStatus === 'loading' && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
               {t('sidebar.batchStatus.loading')}
@@ -188,6 +194,7 @@ export function WorkbenchSidebar({
             </div>
           )}
 
+          {/* Panel count slider */}
           <div data-tour="panel-count" className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>
@@ -218,6 +225,7 @@ export function WorkbenchSidebar({
 
           <div className="border-t border-border" />
 
+          {/* Selected panel details */}
           <div className="space-y-3 rounded-xl border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <Label>

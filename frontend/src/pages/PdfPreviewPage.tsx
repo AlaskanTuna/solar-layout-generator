@@ -17,6 +17,9 @@ function applyThemeFromParam(raw: string | null) {
   document.documentElement.classList.toggle('dark', raw === 'dark')
 }
 
+/**
+ * Renders the PDF preview route used for browser-based report generation
+ */
 export function PdfPreviewPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const [searchParams] = useSearchParams()

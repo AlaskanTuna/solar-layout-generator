@@ -44,17 +44,41 @@ import zhFaq from '@/locales/zh/faq.json'
 import zhSettings from '@/locales/zh/settings.json'
 import zhNotifications from '@/locales/zh/notifications.json'
 
-export const SUPPORTED_LOCALES = ['en', 'ms', 'zh'] as const
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
-export const DEFAULT_LOCALE: SupportedLocale = 'en'
+/**
+ * Defines the SUPPORTED_LOCALES constant
+ */
+export const SUPPORTED_LOCALES = ['en', 'ms', 'zh'] as const/**
+ * Defines the SupportedLocale type
+ */
+/**
+ * Defines the SupportedLocale type
+ */
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]/**
+ * Defines the DEFAULT_LOCALE constant
+ */
+/**
+ * Defines the DEFAULT_LOCALE constant
+ */
+export const DEFAULT_LOCALE: SupportedLocale = 'en'/**
+ * Defines the LOCALE_STORAGE_KEY constant
+ */
+/**
+ * Defines the LOCALE_STORAGE_KEY constant
+ */
 export const LOCALE_STORAGE_KEY = 'locale'
 
+/**
+ * Defines the LOCALE_LABELS constant
+ */
 export const LOCALE_LABELS: Record<SupportedLocale, string> = {
   en: 'English',
   ms: 'Bahasa Melayu',
   zh: '中文'
 }
 
+/**
+ * Defines the LOCALE_TO_INTL constant
+ */
 export const LOCALE_TO_INTL: Record<SupportedLocale, string> = {
   en: 'en-MY',
   ms: 'ms-MY',
@@ -109,6 +133,10 @@ const resources = {
   }
 } as const
 
+/**
+ * Defines the isSupportedLocale function
+ * @param {string | null | undefined} value - Value to process
+ */
 export function isSupportedLocale(value: string | null | undefined): value is SupportedLocale {
   return value !== null && value !== undefined && (SUPPORTED_LOCALES as readonly string[]).includes(value)
 }
@@ -146,4 +174,5 @@ i18n
     }
   })
 
+/** Shared i18n instance */
 export default i18n

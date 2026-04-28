@@ -32,6 +32,10 @@ type AnalysisSidebarProps = {
   tariffEffectiveDate?: string | null
 }
 
+/**
+ * Renders the analysis controls sidebar
+ * @param {AnalysisSidebarProps} props - Props for the component
+ */
 export function AnalysisSidebar({
   projectId,
   projectName,
@@ -56,6 +60,7 @@ export function AnalysisSidebar({
   return (
     <aside className="xl:overflow-y-auto xl:w-[24rem] xl:min-w-[24rem]">
       <Card className="border-border bg-card/92 shadow-sm">
+        {/* Project summary */}
         <SystemMetaCard
           projectName={projectName}
           systemKwp={systemKwp}
@@ -64,6 +69,7 @@ export function AnalysisSidebar({
           buildingInsights={buildingInsights}
         />
         <CardContent className="space-y-4">
+          {/* Status notices */}
           <div className="border-t border-border pt-3">
             <p className="text-xs text-muted-foreground">{t('sidebar.adjustHint')}</p>
           </div>
@@ -79,6 +85,7 @@ export function AnalysisSidebar({
             </div>
           )}
 
+          {/* Consumption and tariff controls */}
           <ConsumptionControls formState={formState} setFormState={setFormState} />
           <TariffControls
             formState={formState}
@@ -94,6 +101,7 @@ export function AnalysisSidebar({
             }
           />
 
+          {/* Actions */}
           <div className="grid gap-3">
             <Button variant="outline" size="sm" asChild className="w-full justify-center gap-2">
               <Link to={`/project/${projectId}/workbench`}>{t('sidebar.buttons.backToWorkbench')}</Link>

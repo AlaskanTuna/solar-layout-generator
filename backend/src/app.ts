@@ -21,6 +21,9 @@ if (env.NODE_ENV === 'development') {
   }
 }
 
+/**
+ * Defines the app constant
+ */
 export const app: Express = express()
 
 app.use(cors({ origin: allowedOrigins }))

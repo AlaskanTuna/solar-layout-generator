@@ -10,6 +10,10 @@ type BillComparisonChartProps = {
   chartData: { month: string; baselineBill: number; nemBill: number }[]
 }
 
+/**
+ * Renders the billcomparison chart
+ * @param {BillComparisonChartProps} props - Props for the component
+ */
 export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
   const { t } = useTranslation('analysis')
   const { resolved } = useTheme()

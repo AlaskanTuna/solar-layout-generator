@@ -21,6 +21,10 @@ type Props = {
   tariffEffectiveDate?: string | null
 }
 
+/**
+ * Renders the analysis pages of the PDF report
+ * @param {Props} props - Props for the component
+ */
 export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Props) {
   const { t } = useTranslation('pdf')
   const { resolved } = useTheme()
@@ -107,6 +111,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
 
   return (
     <>
+      {/* Page 2 */}
       <PdfPageShell sectionLabel={t('page2.sectionLabel')} context={t('page2.context')}>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="pdf-card-break">
@@ -126,6 +131,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
         </div>
       </PdfPageShell>
 
+      {/* Page 3 */}
       <PdfPageShell sectionLabel={t('page3.sectionLabel')} context={t('page3.context')}>
         <div className="min-h-0 flex-1">
           <MonthTable
@@ -144,6 +150,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
         </div>
       </PdfPageShell>
 
+      {/* Page 4 */}
       <PdfPageShell sectionLabel={t('page4.sectionLabel')} context={t('page4.context')}>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="pdf-card-break min-h-0 flex-1">
@@ -174,6 +181,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
         </div>
       </PdfPageShell>
 
+      {/* Page 5 */}
       <PdfPageShell sectionLabel={t('page5.sectionLabel')} context={t('page5.context')}>
         <div className="min-h-0 flex-1">
           {viewModel.costBreakdown ? (
@@ -194,6 +202,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
         </div>
       </PdfPageShell>
 
+      {/* Page 6 */}
       <PdfPageShell
         sectionLabel={t('page6.sectionLabel')}
         context={lifecycleActive ? t('page6.contextLifecycle') : t('page6.contextSimple')}
@@ -236,6 +245,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
         </div>
       </PdfPageShell>
 
+      {/* Page 7 */}
       <PdfPageShell sectionLabel={t('page7.sectionLabel')} context={t('page7.context')}>
         <div className="min-h-0 flex-1">
           <FinancialRoadmap
@@ -252,6 +262,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
         </div>
       </PdfPageShell>
 
+      {/* Page 8 */}
       <PdfPageShell sectionLabel={t('page8.sectionLabel')} pageBreak={false}>
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-[11px] leading-relaxed text-muted-foreground">
           <p className="mb-2 text-sm font-semibold text-foreground">{t('page8.title')}</p>

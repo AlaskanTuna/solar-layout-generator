@@ -2,6 +2,9 @@ import * as GeoTIFF from 'geotiff'
 import { downloadFromStorage } from './storageService.js'
 import { setupGeoTransform } from '../geo/transforms.js'
 
+/**
+ * Geo transform and image dimensions for a loaded GeoTIFF
+ */
 export type ImageGeoTransform = {
   originX: number
   originY: number
@@ -13,6 +16,9 @@ export type ImageGeoTransform = {
   imageHeight: number
 }
 
+/**
+ * Base64 roof mask payload paired with its transform
+ */
 export type RoofMaskResult = {
   dataBase64: string
   geoTransform: ImageGeoTransform
@@ -49,6 +55,11 @@ function uniquePaths(paths: (string | null)[]): string[] {
   return paths.filter((path, index, array): path is string => Boolean(path) && array.indexOf(path) === index)
 }
 
+/**
+ * Loads a reference transform for a location's GeoTIFF
+ * @param {Object} location - Location record to process
+ * @returns {Promise<ImageGeoTransform>} A promise resolving to the requested reference geo transform
+ */
 export async function loadReferenceGeoTransform(location: {
   id: string
   dsmPath: string | null
@@ -65,6 +76,11 @@ export async function loadReferenceGeoTransform(location: {
   })
 }
 
+/**
+ * Loads and encode a roof mask GeoTIFF
+ * @param {Object} location - Location record to process
+ * @returns {Promise<RoofMaskResult>} A promise resolving to the requested roof mask
+ */
 export async function loadRoofMask(location: { id: string; maskPath: string | null }): Promise<RoofMaskResult> {
   const candidatePaths = uniquePaths([location.maskPath, `locations/${location.id}/mask.tif`])
 

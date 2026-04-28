@@ -27,6 +27,9 @@ function emit() {
   for (const listener of listeners) listener(notifications)
 }
 
+/**
+ * Defines the notificationStore constant
+ */
 export const notificationStore = {
   get: () => notifications,
 

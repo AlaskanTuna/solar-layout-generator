@@ -8,6 +8,10 @@ type PageHeaderCardProps = {
   artAlt?: string
 }
 
+/**
+ * Renders the pageheader card
+ * @param {PageHeaderCardProps} props - Props for the component
+ */
 export function PageHeaderCard({ children, className, artSrc, artAlt = '' }: PageHeaderCardProps) {
   return (
     <div

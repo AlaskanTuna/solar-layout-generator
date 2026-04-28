@@ -17,6 +17,10 @@ type CanvasLegendsProps = {
   isOverlayLoading: boolean
 }
 
+/**
+ * Renders the CanvasLegends component
+ * @param {CanvasLegendsProps} props - Props for the component
+ */
 export function CanvasLegends({ showSegments, segmentHulls, overlayMode, isOverlayLoading }: CanvasLegendsProps) {
   const { t } = useTranslation('workbench')
 

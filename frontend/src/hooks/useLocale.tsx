@@ -25,7 +25,10 @@ function readInitialLocale(): SupportedLocale {
   return DEFAULT_LOCALE
 }
 
-/** Provide the active UI locale */
+/**
+ * Provides the active UI locale
+ * @param {Object} props - Props for the component
+ */
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [locale, setLocaleState] = useState<SupportedLocale>(() => readInitialLocale())
@@ -75,6 +78,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   return <LocaleContext.Provider value={{ locale, setLocale }}>{children}</LocaleContext.Provider>
 }
 
+/**
+ * Provides the locale hook
+ * @returns {LocaleContextValue} Hook state for locale
+ */
 export function useLocale() {
   const ctx = useContext(LocaleContext)
   if (!ctx) throw new Error('useLocale must be used within a LocaleProvider')

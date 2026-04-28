@@ -16,6 +16,10 @@ type ChartTooltipContentProps = {
   valueFormatter?: (value: unknown) => string
 }
 
+/**
+ * Renders the ChartTooltipContent component
+ * @param {ChartTooltipContentProps} props - Props for the component
+ */
 export function ChartTooltipContent({
   active,
   payload,

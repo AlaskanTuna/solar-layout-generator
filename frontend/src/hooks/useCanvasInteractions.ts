@@ -62,6 +62,11 @@ type UseCanvasInteractionsOptions = {
   roofSegments: RoofSegment[]
 }
 
+/**
+ * Provides the canvasInteractions hook
+ * @param {UseCanvasInteractionsOptions} options - Value used for options
+ * @returns {Function} Hook state for canvas interactions
+ */
 export function useCanvasInteractions({
   locationId,
   imageGeoTransform,
@@ -257,8 +262,8 @@ export function useCanvasInteractions({
         return position
       }
 
-      // Disable snap during group drag: other selected panels drift mid-drag, which would
-      // cause the grabbed panel to snap to their temporary positions
+      // Disable snap during group drag because the other selected panels drift mid-drag
+      // Snapping to those temporary positions would make the grabbed panel chase them
       if (groupDragStateRef.current) {
         setSnapGuides([])
         return position
@@ -344,9 +349,7 @@ export function useCanvasInteractions({
       const enteredViaOverlap = placementError === 'overlap'
 
       // Auto-correct overlap against same-rotation neighbors by snapping edge-to-edge
-      // Iteratively resolves: each pass pushes the dragged panel out of its most-overlapping
-      // neighbor; repeats until no overlap, until rotation mismatch blocks the snap, or the
-      // iteration cap is hit (guards against oscillation between neighbors)
+      // Each pass pushes the panel out of its most-overlapping neighbor until clear or capped
       if (placementError === 'overlap' && panelDimensions) {
         const maxIterations = Math.max(4, renderPanels.length)
 
@@ -394,9 +397,8 @@ export function useCanvasInteractions({
         const correctedCenter = pixelToLatLng(candidatePixel.x, candidatePixel.y, geo)
         placementError = getPlacementError(panelId, correctedCenter, panel.rotation)
 
-        // After overlap-snap resolves the dominant SAT axis, try one axis-alignment pass
-        // to clean up residual perpendicular offset (e.g. corner-overlap cases). Revert if
-        // the alignment would re-introduce any placement error
+        // After SAT push-out, try one alignment pass to clean up residual perpendicular offset
+        // Revert if that alignment would reintroduce any placement error
         if (!placementError && snapEnabled) {
           const otherPanels = renderPanels
             .filter(({ panel: p }) => p.id !== panelId)
@@ -431,9 +433,8 @@ export function useCanvasInteractions({
         placementError = getPlacementError(panelId, pixelToLatLng(candidatePixel.x, candidatePixel.y, geo), panel.rotation)
       }
 
-      // Overlap is no longer a rejection — SAT push-out always converges so any residual
-      // 'overlap' is best-effort accepted. Bounds/mask are real boundary violations and
-      // still revert
+      // Overlap is best-effort accepted because SAT push-out converges
+      // Bounds and mask failures still revert because they are real boundary violations
       if (placementError && (!enteredViaOverlap || (placementError !== 'overlap' && placementError !== 'bounds'))) {
         resetPosition()
         notify.error(getPlacementErrorMessage(placementError))
@@ -450,9 +451,8 @@ export function useCanvasInteractions({
       return
     }
 
-    // Group branch: use cached pre-drag pixel positions from handlePanelDragStart
-    // Mid-drag updates via bulkUpdatePanels have drifted non-grabbed selected panels' centers,
-    // so reading them directly would double-apply the drag delta
+    // Group branch uses cached pre-drag pixel positions from handlePanelDragStart
+    // Mid-drag updates drift the other selected panels, so reading them directly would double-apply the delta
     const groupState = groupDragStateRef.current
     groupDragStateRef.current = null
 
@@ -472,10 +472,8 @@ export function useCanvasInteractions({
       .filter((x): x is NonNullable<typeof x> => x != null)
     let enteredViaOverlap = false
 
-    // Iteratively resolve group-vs-outside overlaps by shifting the shared delta
-    // Preserves intra-group geometry; the whole group translates as one unit
-    // SAT push-out runs regardless of rotation difference — any non-zero overlap is
-    // pushed apart along the minimum-separation axis until the group is clear
+    // Resolve group-vs-outside overlaps by shifting the shared delta
+    // The whole group translates as one unit along the SAT minimum-separation axis
     if (panelDimensions) {
       const outsidePanels = renderPanels.filter(({ panel: p }) => !selectedPanelIds.has(p.id))
       const maxIterations = Math.max(4, outsidePanels.length)
@@ -542,7 +540,8 @@ export function useCanvasInteractions({
       const prevCenter = pixelToLatLng(origPx.x, origPx.y, geo)
 
       const placementError = getPlacementError(sp.id, nextCenter, sp.rotation, selectedPanelIds)
-      // Best-effort accept residual overlap (SAT push converges); only revert on bounds/mask
+      // Best-effort accept residual overlap because SAT push converges
+      // Only bounds and mask failures trigger a revert
       if (placementError && (!enteredViaOverlap || (placementError !== 'overlap' && placementError !== 'bounds'))) {
         bulkUpdatePanels(
           selectedPanelsWithOrigin.map(({ panel: p, origPx: px }) => ({
@@ -609,7 +608,7 @@ export function useCanvasInteractions({
   function handleCanvasRotate(panelId: string, value: number) {
     const nextRotation = ((value % 360) + 360) % 360
 
-    // Single-panel rotation: use panelId directly to avoid stale closure on selectedPanel
+    // Single-panel rotation uses panelId directly to avoid a stale selectedPanel closure
     const panel = getPanel(panelId)
     if (!panel) return
 
@@ -618,8 +617,8 @@ export function useCanvasInteractions({
     }
 
     const placementError = getPlacementError(panel.id, panel.center, nextRotation)
-    // Overlap on rotation is silently blocked (matches group rotation behavior)
-    // Bounds/mask still toast since they're real boundary violations
+    // Rotation overlap is silently blocked to match group rotation behavior
+    // Bounds and mask still toast because they are real boundary violations
     if (placementError === 'overlap') return
     if (placementError) {
       notify.error(getPlacementErrorMessage(placementError))

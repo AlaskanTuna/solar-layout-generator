@@ -6,6 +6,11 @@ function toArrayBuffer(buffer: ArrayBuffer | Buffer): ArrayBuffer {
   return bytes.slice().buffer
 }
 
+/**
+ * Converts an RGB GeoTIFF buffer to PNG
+ * @param {ArrayBuffer | Buffer} rgbTifBuffer - Value used for rgb tif buffer
+ * @returns {Promise<Buffer<ArrayBufferLike>>} A promise resolving to the resulting value
+ */
 export async function convertRgbTiffToPng(rgbTifBuffer: ArrayBuffer | Buffer): Promise<Buffer> {
   const tiff = await GeoTIFF.fromArrayBuffer(toArrayBuffer(rgbTifBuffer))
   const image = await tiff.getImage()

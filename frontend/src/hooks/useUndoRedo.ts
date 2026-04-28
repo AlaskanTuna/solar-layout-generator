@@ -4,6 +4,9 @@ type UndoRedoOptions = {
   maxHistory?: number
 }
 
+/**
+ * Defines the UndoRedoControls type
+ */
 export type UndoRedoControls<T> = {
   push: (snapshot: T) => void
   undo: () => T | undefined
@@ -13,6 +16,11 @@ export type UndoRedoControls<T> = {
   clear: () => void
 }
 
+/**
+ * Provides the undoRedo hook
+ * @param {UndoRedoOptions} options - Value used for options
+ * @returns {UndoRedoControls<T>} Hook state for undo redo
+ */
 export function useUndoRedo<T>(options?: UndoRedoOptions): UndoRedoControls<T> {
   const maxHistory = options?.maxHistory ?? 30
   const historyRef = useRef<T[]>([])

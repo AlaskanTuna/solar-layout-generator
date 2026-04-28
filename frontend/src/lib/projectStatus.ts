@@ -32,18 +32,38 @@ const STATUS_CONFIGS: Record<ProjectStatus, StatusConfig> = {
   }
 }
 
+/**
+ * Computes the project status config value
+ * @param {ProjectStatus} status - Value used for status
+ * @returns {StatusConfig} The requested project status config
+ */
 export function getProjectStatusConfig(status: ProjectStatus): StatusConfig {
   return STATUS_CONFIGS[status] ?? STATUS_CONFIGS.draft
 }
 
+/**
+ * Computes the project status label value
+ * @param {ProjectStatus} status - Value used for status
+ * @returns {string} The requested project status label
+ */
 export function getProjectStatusLabel(status: ProjectStatus): string {
   return getProjectStatusConfig(status).label
 }
 
+/**
+ * Computes the project status variant value
+ * @param {ProjectStatus} status - Value used for status
+ * @returns {BadgeVariant} The requested project status variant
+ */
 export function getProjectStatusVariant(status: ProjectStatus): BadgeVariant {
   return getProjectStatusConfig(status).variant
 }
 
+/**
+ * Computes the project status tooltip value
+ * @param {ProjectStatus} status - Value used for status
+ * @returns {string} The requested project status tooltip
+ */
 export function getProjectStatusTooltip(status: ProjectStatus): string {
   return getProjectStatusConfig(status).tooltip
 }

@@ -27,7 +27,10 @@ function triggerDownload(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-/** Export a PDF from the analysis preview */
+/**
+ * Export a PDF from the analysis preview
+ * @returns {Function} Hook state for analysis pdf
+ */
 export function useAnalysisPdf() {
   const [isExporting, setIsExporting] = useState(false)
   const { resolved: resolvedTheme } = useTheme()

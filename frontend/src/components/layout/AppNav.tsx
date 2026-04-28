@@ -67,6 +67,10 @@ function useBreadcrumbs(): Crumb[] {
   return crumbs
 }
 
+/**
+ * Renders the AppNav component
+ * @param {Object} props - Props for the component
+ */
 export function AppNav({ minimal }: { minimal?: boolean } = {}) {
   const { t } = useTranslation('nav')
   const { user, signOut } = useAuth()

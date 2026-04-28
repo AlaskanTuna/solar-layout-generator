@@ -1,5 +1,6 @@
 import type { ProjectResponse } from '@/api/projects'
 
+/** Shared AggregatedStats type */
 export type AggregatedStats = {
   totalSavingsRm: number
   totalCarbonKg: number
@@ -7,6 +8,7 @@ export type AggregatedStats = {
   totalPanels: number
 }
 
+/** Shared helpers export */
 export function aggregateStats(projects: ProjectResponse[]): AggregatedStats {
   const stats: AggregatedStats = { totalSavingsRm: 0, totalCarbonKg: 0, totalEnergyKwh: 0, totalPanels: 0 }
   for (const p of projects) {
@@ -20,6 +22,7 @@ export function aggregateStats(projects: ProjectResponse[]): AggregatedStats {
   return stats
 }
 
+/** Shared helpers export */
 export function projectRoute(p: ProjectResponse): string {
   switch (p.status) {
     case 'analysis_saved':
@@ -31,6 +34,7 @@ export function projectRoute(p: ProjectResponse): string {
   }
 }
 
+/** Shared helpers export */
 export function formatRelativeDate(dateString: string): string {
   const date = new Date(dateString)
   const now = new Date()

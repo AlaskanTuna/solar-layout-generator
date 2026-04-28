@@ -13,6 +13,10 @@ type SystemMetaCardProps = {
   buildingInsights: ParsedBuildingInsights
 }
 
+/**
+ * Renders the systemmeta card
+ * @param {SystemMetaCardProps} props - Props for the component
+ */
 export function SystemMetaCard({
   projectName,
   systemKwp,

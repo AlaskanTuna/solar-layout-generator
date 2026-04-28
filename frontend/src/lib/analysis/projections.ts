@@ -1,5 +1,8 @@
 import type { AnalysisMode, InverterReplacement } from './config'
 
+/**
+ * Defines the NetBenefitPoint type
+ */
 export type NetBenefitPoint = {
   year: number
   grossSavings: number
@@ -12,6 +15,14 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100
 }
 
+/**
+ * Defines the computeDegradedSavings function
+ * @param {number} year1Savings - Value used for year1 savings
+ * @param {number} degradationRate - Value used for degradation rate
+ * @param {number} years - Value used for years
+ * @param {number} tariffEscalationRate - Value used for tariff escalation rate
+ * @returns {number} The computed degraded savings
+ */
 export function computeDegradedSavings(
   year1Savings: number,
   degradationRate: number,
@@ -25,6 +36,13 @@ export function computeDegradedSavings(
   return round2(total)
 }
 
+/**
+ * Defines the normalizeInverterReplacements function
+ * @param {InverterReplacement[] | undefined} replacements - Collection of replacements values
+ * @param {number} legacyCostRm - Value used for legacy cost rm
+ * @param {number} legacyYear - Value used for legacy year
+ * @returns {InverterReplacement[]} The normalized inverter replacements
+ */
 export function normalizeInverterReplacements(
   replacements: InverterReplacement[] | undefined,
   legacyCostRm?: number,
@@ -56,6 +74,11 @@ export function normalizeInverterReplacements(
   return []
 }
 
+/**
+ * Defines the buildNetBenefitSeries function
+ * @param {Object} options - Collection of options values
+ * @returns {NetBenefitPoint[]} The built net benefit series
+ */
 export function buildNetBenefitSeries({
   year1Savings,
   degradationRate,

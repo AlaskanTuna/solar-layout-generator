@@ -8,6 +8,10 @@ interface GoogleSignInButtonProps {
   onError?: (message: string) => void
 }
 
+/**
+ * Renders the googlesignin button
+ * @param {GoogleSignInButtonProps} props - Props for the component
+ */
 export function GoogleSignInButton({ label = 'Continue with Google', onError }: GoogleSignInButtonProps) {
   const { signInWithGoogle } = useAuth()
   const [loading, setLoading] = useState(false)

@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Leaf } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 
+/**
+ * Renders the AppFooter component
+ */
 export function AppFooter() {
   const { t } = useTranslation('nav')
 

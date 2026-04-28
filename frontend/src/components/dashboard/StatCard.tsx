@@ -1,3 +1,4 @@
+/** Render the stat card */
 export function StatCard({
   icon,
   label,

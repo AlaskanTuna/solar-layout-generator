@@ -1,5 +1,11 @@
 import { useEffect, useState, type RefObject } from 'react'
 
+/**
+ * Provides the stageSize hook
+ * @param {RefObject<HTMLDivElement | null>} containerRef - Value used for container ref
+ * @param {HTMLImageElement | null} image - Value used for image
+ * @returns {Object} Hook state for stage size
+ */
 export function useStageSize(containerRef: RefObject<HTMLDivElement | null>, image: HTMLImageElement | null) {
   const [size, setSize] = useState({ width: 0, height: 0 })
 

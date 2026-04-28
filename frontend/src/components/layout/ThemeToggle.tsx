@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/hooks/useTheme'
 import { Button } from '@/components/ui/button'
 
+/**
+ * Renders the ThemeToggle component
+ */
 export function ThemeToggle() {
   const { resolved, toggle } = useTheme()
   const { t } = useTranslation('common')

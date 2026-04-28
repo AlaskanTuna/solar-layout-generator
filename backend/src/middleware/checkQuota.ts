@@ -1,6 +1,12 @@
 import type { Request, Response, NextFunction } from 'express'
 import { getQuotaSummary } from '../services/userService.js'
 
+/**
+ * Enforces the authenticated user's daily project quota
+ * @param {Request} req - Incoming Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express middleware continuation callback
+ */
 export async function checkQuota(req: Request, res: Response, next: NextFunction) {
   if (!req.user) {
     res.status(401).json({ error: 'Unauthorized' })

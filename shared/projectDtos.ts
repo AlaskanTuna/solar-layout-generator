@@ -7,6 +7,9 @@ const latLngSchema = z.object({
   longitude: z.number().finite()
 })
 
+/**
+ * Building insights payload subset validated for storage and responses
+ */
 export const buildingInsightsSchema = z
   .object({
     boundingBox: z.object({
@@ -79,6 +82,9 @@ const inverterReplacementSchema = z
   })
   .strict()
 
+/**
+ * Analysis config payload accepted by the API
+ */
 export const analysisConfigSchema = z
   .object({
     monthlyConsumptionKwh: z.number(),
@@ -103,10 +109,16 @@ export const analysisConfigSchema = z
   })
   .strict()
 
+/**
+ * Stored analysis config shape with optional fields
+ */
 export const storedAnalysisConfigSchema = analysisConfigSchema.partial().extend({
   selectedPanelModelId: z.string().optional()
 })
 
+/**
+ * Analysis results payload persisted on a project
+ */
 export const analysisResultsSchema = z
   .object({
     monthlyBreakdown: z.array(monthlyBreakdownSchema),
@@ -136,6 +148,9 @@ export const analysisResultsSchema = z
   })
   .strict()
 
+/**
+ * Creates project request body
+ */
 export const createProjectRequestSchema = z
   .object({
     name: z.string().min(1),
@@ -143,6 +158,9 @@ export const createProjectRequestSchema = z
   })
   .strict()
 
+/**
+ * Saves layout request body
+ */
 export const saveLayoutRequestSchema = z
   .object({
     editedLayout: z.array(panelEditSchema),
@@ -150,6 +168,9 @@ export const saveLayoutRequestSchema = z
   })
   .strict()
 
+/**
+ * Saves analysis request body
+ */
 export const saveAnalysisRequestSchema = z
   .object({
     analysisConfig: analysisConfigSchema,
@@ -157,13 +178,28 @@ export const saveAnalysisRequestSchema = z
   })
   .strict()
 
+/**
+ * Updates layout preferences request body
+ */
 export const updateLayoutPreferencesRequestSchema = z
   .object({
     layoutPreferences: layoutPreferencesPartialSchema
   })
   .strict()
 
+/**
+ * Building insights DTO inferred from the schema
+ */
 export type BuildingInsightsDto = z.infer<typeof buildingInsightsSchema>
+/**
+ * Analysis config DTO inferred from the schema
+ */
 export type AnalysisConfigDto = z.infer<typeof analysisConfigSchema>
+/**
+ * Stored analysis config DTO inferred from the schema
+ */
 export type StoredAnalysisConfigDto = z.infer<typeof storedAnalysisConfigSchema>
+/**
+ * Analysis results DTO inferred from the schema
+ */
 export type AnalysisResultsDto = z.infer<typeof analysisResultsSchema>

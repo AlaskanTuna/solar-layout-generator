@@ -106,6 +106,9 @@ function FaqCard({ item }: { item: FaqItem }) {
   )
 }
 
+/**
+ * Renders the searchable FAQ page
+ */
 export function FAQPage() {
   const { t } = useTranslation('faq')
   const [query, setQuery] = useState('')
@@ -166,6 +169,7 @@ export function FAQPage() {
 
   return (
     <PageContainer>
+      {/* Header */}
       <PageHeaderCard artSrc="/dashboard/faq.webp">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -180,6 +184,7 @@ export function FAQPage() {
         </div>
       </PageHeaderCard>
 
+      {/* Search and filters */}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -213,6 +218,7 @@ export function FAQPage() {
         </DropdownMenu>
       </div>
 
+      {/* Question results */}
       <div className="mt-6 grid gap-4 animate-fade-in">
         {filteredItems.length > 0 ? (
           paginatedItems.map((item) => <FaqCard key={item.id} item={item} />)
@@ -224,6 +230,7 @@ export function FAQPage() {
         )}
       </div>
 
+      {/* Pagination */}
       {filteredItems.length > ITEMS_PER_PAGE && (
         <div className="mt-6 flex justify-end">
           <nav

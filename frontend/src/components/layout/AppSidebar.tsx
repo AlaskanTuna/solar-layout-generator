@@ -77,6 +77,9 @@ const NAV_SECTIONS: NavSectionDef[] = [
   },
 ]
 
+/**
+ * Renders the app sidebar
+ */
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true)
   const { pathname } = useLocation()

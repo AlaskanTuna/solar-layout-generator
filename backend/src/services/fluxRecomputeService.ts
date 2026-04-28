@@ -18,6 +18,12 @@ type FluxLocationData = {
 
 type ValidatedLocation = Awaited<ReturnType<typeof locationService.getLocationDataForUser>>
 
+/**
+ * Validates that a location is ready for flux recomputation
+ * @param {string} userId - Authenticated user identifier
+ * @param {string} locationId - Location identifier
+ * @returns {Promise} A promise resolving to the resulting value
+ */
 export async function validateFluxLocation(
   userId: string,
   locationId: string
@@ -44,6 +50,13 @@ async function loadFluxData(monthlyFluxPath: string, panelSpecs: PanelSpecs): Pr
   return { image, geo, panelSpecs }
 }
 
+/**
+ * Recompute monthly energy for a single moved panel
+ * @param {string} monthlyFluxPath - Monthly flux path value
+ * @param {PanelSpecs} panelSpecs - Value used for panel specs
+ * @param {Object} panel - Panel value
+ * @returns {Promise<FluxRecomputeResponse>} A promise resolving to the resulting value
+ */
 export async function recomputeSinglePanel(
   monthlyFluxPath: string,
   panelSpecs: PanelSpecs,
@@ -70,6 +83,13 @@ export async function recomputeSinglePanel(
   return { panelId: panel.panelId, monthlyEnergyDcKwh }
 }
 
+/**
+ * Recompute monthly energy for a batch of moved panels
+ * @param {string} monthlyFluxPath - Monthly flux path value
+ * @param {PanelSpecs} panelSpecs - Value used for panel specs
+ * @param {Array} panels - Collection of panels values
+ * @returns {Promise<FluxRecomputeResponse[]>} A promise resolving to the resulting value
+ */
 export async function recomputeBatchPanels(
   monthlyFluxPath: string,
   panelSpecs: PanelSpecs,

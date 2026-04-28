@@ -28,6 +28,10 @@ function getCursor(disabled: boolean, selected: boolean): string {
   return 'pointer'
 }
 
+/**
+ * Renders the PanelRect component
+ * @param {PanelRectProps} props - Props for the component
+ */
 export function PanelRect({
   id,
   x,

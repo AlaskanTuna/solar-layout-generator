@@ -20,6 +20,10 @@ type GroupRotationHandleProps = {
   onRotateEnd: () => void
 }
 
+/**
+ * Renders the GroupRotationHandle component
+ * @param {GroupRotationHandleProps} props - Props for the component
+ */
 export function GroupRotationHandle({
   panels,
   panelWidth,

@@ -29,6 +29,10 @@ type Milestone = {
   accent: string
 }
 
+/**
+ * Renders the FinancialRoadmap component
+ * @param {FinancialRoadmapProps} props - Props for the component
+ */
 export function FinancialRoadmap({
   systemCostRm,
   paybackYears,

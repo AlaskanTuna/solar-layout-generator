@@ -21,10 +21,14 @@ import {
   getPanelModel,
   DEFAULT_PANEL_MODEL_ID
 } from '@shared/types'
-/** Editable analysis settings excluding derived system size */
+/**
+ * Editable analysis settings excluding derived system size
+ */
 export type AnalysisFormState = Omit<AnalysisConfig, 'systemKwp'>
 
-/** Monthly bill chart point used by the analysis view */
+/**
+ * Monthly bill chart point used by the analysis view
+ */
 export type ChartDataPoint = {
   month: string
   baselineBill: number
@@ -32,7 +36,11 @@ export type ChartDataPoint = {
   cumulativeSavings: number
 }
 
-/** Load and derive the analysis form state for a project */
+/**
+ * Loads and derive the analysis form state for a project
+ * @param {string | undefined} projectId - Project identifier
+ * @returns {Object} Hook state for analysis form
+ */
 export function useAnalysisForm(projectId: string | undefined) {
   const initializedProjectIdRef = useRef<string | null>(null)
 

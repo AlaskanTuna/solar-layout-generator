@@ -1,3 +1,6 @@
+/**
+ * Defines the RoiCondition type
+ */
 export type RoiCondition = {
   label: 'Excellent' | 'Good' | 'Fair' | 'Poor'
   color: string
@@ -8,6 +11,11 @@ export type RoiCondition = {
   description: string
 }
 
+/**
+ * Computes the roi condition value
+ * @param {number | null} paybackYears - Value used for payback years
+ * @returns {RoiCondition} The requested roi condition
+ */
 export function getRoiCondition(paybackYears: number | null): RoiCondition {
   if (paybackYears === null || paybackYears > 25) {
     return {

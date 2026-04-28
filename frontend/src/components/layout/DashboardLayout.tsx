@@ -1,7 +1,9 @@
 import { Outlet } from 'react-router-dom'
 import { AppLayout } from './AppLayout'
 
-/** Shared layout for all /dashboard/* routes */
+/**
+ * Renders the DashboardLayout component
+ */
 export function DashboardLayout() {
   return (
     <AppLayout>

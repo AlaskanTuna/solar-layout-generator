@@ -67,6 +67,10 @@ function SortableCard({ id, children }: { id: string; children: ReactNode }) {
   )
 }
 
+/**
+ * Renders the SortableCardContainer component
+ * @param {Object} props - Props for the component
+ */
 export function SortableCardContainer({ cards }: { cards: CardItem[] }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

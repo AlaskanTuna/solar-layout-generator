@@ -1,6 +1,11 @@
 import type { TourStep } from '@/components/ui/GuidedTour'
 import type { TFunction } from 'i18next'
 
+/**
+ * Computes the workbench tour steps value
+ * @param {TFunction} t - Value used for t
+ * @returns {TourStep[]} The requested workbench tour steps
+ */
 export function getWorkbenchTourSteps(t: TFunction): TourStep[] {
   return [
     {

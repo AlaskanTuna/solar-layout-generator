@@ -24,6 +24,9 @@ const envSchema = z.object({
 
 const parsed = envSchema.parse(process.env)
 
+/**
+ * Parsed and validated runtime configuration
+ */
 export const env = {
   ...parsed,
   port: parsed.PORT ?? parsed.BACKEND_PORT

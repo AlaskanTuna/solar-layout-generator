@@ -8,6 +8,9 @@ import { Receipt, Zap, Leaf, Sun, PieChart } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
+/**
+ * Renders the cross-project analytics summary
+ */
 export function AnalyticsPage() {
   const { t } = useTranslation('nav')
   const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: listProjects })
@@ -19,6 +22,7 @@ export function AnalyticsPage() {
   if (completedProjects === 0) {
     return (
       <PageContainer>
+        {/* Header */}
         <PageHeaderCard artSrc="/dashboard/analytics.webp">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -30,6 +34,7 @@ export function AnalyticsPage() {
             </div>
           </div>
         </PageHeaderCard>
+        {/* Empty state */}
         <div className="mt-6 glass-card flex flex-col items-center py-16 text-center">
           <PieChart className="h-12 w-12 text-muted-foreground/30" />
           <h2 className="mt-4 font-heading text-lg font-semibold">{t('analytics.noData.title')}</h2>
@@ -51,6 +56,7 @@ export function AnalyticsPage() {
 
   return (
     <PageContainer>
+      {/* Header */}
       <PageHeaderCard artSrc="/dashboard/analytics.webp">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -65,6 +71,7 @@ export function AnalyticsPage() {
         </div>
       </PageHeaderCard>
 
+      {/* Summary stats */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
           icon={<Receipt className="h-5 w-5" />}
@@ -96,6 +103,7 @@ export function AnalyticsPage() {
         />
       </div>
 
+      {/* Averages */}
       <h2 className="mt-8 font-heading text-lg font-semibold">{t('analytics.averages.heading')}</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div className="glass-card p-5">
@@ -116,6 +124,7 @@ export function AnalyticsPage() {
         </div>
       </div>
 
+      {/* Breakdown table */}
       <h2 className="mt-8 font-heading text-lg font-semibold">{t('analytics.breakdown.heading')}</h2>
       <div className="mt-4 glass-card overflow-hidden">
         <div className="overflow-x-auto">

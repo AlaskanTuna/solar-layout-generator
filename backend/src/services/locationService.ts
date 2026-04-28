@@ -29,6 +29,16 @@ async function linkOwnedProjectToLocation(userId: string, projectId: string, loc
   return result.count > 0
 }
 
+/**
+ * Resolves a location and kick off the pipeline when needed
+ * @param {string} userId - Authenticated user identifier
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @param {string} projectId - Project identifier
+ * @param {ImageryQuality} requiredQuality - Value used for required quality
+ * @param {boolean} expandedCoverage - Whether expanded coverage
+ * @returns {Promise<ResolveLocationResult>} A promise resolving to the resulting value
+ */
 export async function resolveLocation(
   userId: string,
   lat: number,
@@ -80,6 +90,16 @@ export async function resolveLocation(
   return { locationId: location.id, status: 'processing' as const }
 }
 
+/**
+ * Resolves a location and build the API response
+ * @param {string} userId - Authenticated user identifier
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @param {string} projectId - Project identifier
+ * @param {ImageryQuality} requiredQuality - Value used for required quality
+ * @param {boolean} expandedCoverage - Whether expanded coverage
+ * @returns {Promise<{ locationId: string; status: LocationStatus; }>} A promise resolving to the resulting value
+ */
 export async function resolveLocationResponse(
   userId: string,
   lat: number,
@@ -92,11 +112,23 @@ export async function resolveLocationResponse(
   return buildResolveLocationResponse(result.locationId, result.status)
 }
 
+/**
+ * Probes which Solar API qualities are available
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @returns {Promise<ProbeLocationResponse>} A promise resolving to the resulting value
+ */
 export async function probeLocation(lat: number, lng: number) {
   const result = await findBestQualityForLocation(lat, lng)
   return buildProbeLocationResponse(result)
 }
 
+/**
+ * Fetches the location status when the user can access it
+ * @param {string} userId - Authenticated user identifier
+ * @param {string} locationId - Location identifier
+ * @returns {Promise<{ status: LocationStatus; }>} A promise resolving to the requested location status for user
+ */
 export async function getLocationStatusForUser(userId: string, locationId: string) {
   return prisma.location.findFirst({
     where: {
@@ -107,17 +139,35 @@ export async function getLocationStatusForUser(userId: string, locationId: strin
   })
 }
 
+/**
+ * Builds a location status response for the user
+ * @param {string} userId - Authenticated user identifier
+ * @param {string} locationId - Location identifier
+ * @returns {Promise<{ status: LocationStatus; }>} A promise resolving to the requested location status response for user
+ */
 export async function getLocationStatusResponseForUser(userId: string, locationId: string) {
   const location = await getLocationStatusForUser(userId, locationId)
   return location ? buildLocationStatusResponse(location.status) : null
 }
 
+/**
+ * Fetches the location row when the user owns the project
+ * @param {string} userId - Authenticated user identifier
+ * @param {string} locationId - Location identifier
+ * @returns {Promise} A promise resolving to the requested location data for user
+ */
 export async function getLocationDataForUser(userId: string, locationId: string) {
   return prisma.location.findFirst({
     where: { id: locationId, projects: { some: { userId } } }
   })
 }
 
+/**
+ * Builds the location data response for an owned project
+ * @param {string} userId - Authenticated user identifier
+ * @param {string} locationId - Location identifier
+ * @returns {Promise<LocationDataRouteResponse>} A promise resolving to the requested location data response for user
+ */
 export async function getLocationDataResponseForUser(userId: string, locationId: string) {
   const location = await getLocationDataForUser(userId, locationId)
   if (!location) return null
@@ -143,6 +193,13 @@ export async function getLocationDataResponseForUser(userId: string, locationId:
   )
 }
 
+/**
+ * Builds an overlay response for an owned project
+ * @param {string} userId - Authenticated user identifier
+ * @param {string} locationId - Location identifier
+ * @param {OverlayType} overlayType - Value used for overlay type
+ * @returns {Promise<{ url: string; }>} A promise resolving to the requested overlay response for user
+ */
 export async function getOverlayResponseForUser(
   userId: string,
   locationId: string,

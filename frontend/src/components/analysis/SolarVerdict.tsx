@@ -22,6 +22,10 @@ function StarRating({ count, color, label, ariaLabel }: { count: number; color: 
   )
 }
 
+/**
+ * Renders the SolarVerdict component
+ * @param {SolarVerdictProps} props - Props for the component
+ */
 export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictProps) {
   const { t } = useTranslation('analysis')
   const condition = getRoiCondition(analysisResults.paybackYears)

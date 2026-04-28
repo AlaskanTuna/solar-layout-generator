@@ -43,6 +43,10 @@ type CanvasControlsProps = {
   onToggleFreeRotate?: () => void
 }
 
+/**
+ * Renders the CanvasControls component
+ * @param {CanvasControlsProps} props - Props for the component
+ */
 export function CanvasControls({
   canUndo,
   canRedo,

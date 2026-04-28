@@ -3,6 +3,9 @@ import { requireAuth } from '../middleware/auth.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { getQuotaSummary } from '../services/userService.js'
 
+/**
+ * Quota summary route
+ */
 export const quotaRouter: ExpressRouter = Router()
 
 quotaRouter.get(

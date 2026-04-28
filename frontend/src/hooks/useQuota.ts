@@ -12,6 +12,10 @@ function formatReset(resetsAt: string): string {
   return d.toLocaleString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
+/**
+ * Provides the quota hook
+ * @returns {Function} Hook state for quota
+ */
 export function useQuota() {
   const { user } = useAuth()
   const queryClient = useQueryClient()

@@ -1,3 +1,6 @@
+/**
+ * Defines the COLORS constant
+ */
 export const COLORS = {
   chartBaseline: '#ea580c',
   chartSolar: '#16a34a',
@@ -25,6 +28,11 @@ export const COLORS = {
 
 type ThemeMode = 'light' | 'dark'
 
+/**
+ * Computes the chart tooltip style value
+ * @param {ThemeMode} theme - Value used for theme
+ * @returns {Object} The requested chart tooltip style
+ */
 export function getChartTooltipStyle(theme: ThemeMode) {
   const isDark = theme === 'dark'
 
@@ -47,4 +55,7 @@ export function getChartTooltipStyle(theme: ThemeMode) {
   } as const
 }
 
+/**
+ * Defines the CHART_TOOLTIP_STYLE constant
+ */
 export const CHART_TOOLTIP_STYLE = getChartTooltipStyle('light')

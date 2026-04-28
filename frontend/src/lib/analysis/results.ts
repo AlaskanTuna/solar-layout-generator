@@ -3,6 +3,9 @@ import type { AnnualSimulationResult, NemMonthResult } from '../billingEngine'
 import type { AnalysisMode, InverterReplacement } from './config'
 import { computeDegradedSavings, normalizeInverterReplacements } from './projections'
 
+/**
+ * Defines the AnalysisResultsRecord type
+ */
 export type AnalysisResultsRecord = {
   monthlyBreakdown: NemMonthResult[]
   annualTotals: {
@@ -28,7 +31,16 @@ export type AnalysisResultsRecord = {
   activePanelCount: number
 }
 
-export type NemFit = 'good' | 'moderate' | 'oversized'
+/**
+ * Defines the NemFit type
+ */
+export type NemFit = 'lean' | 'balanced' | 'oversized'/**
+ * Defines the NemFitClassification type
+ */
+/**
+ * Defines the NemFitClassification type
+ */
+
 
 export type NemFitClassification = {
   fit: NemFit
@@ -38,6 +50,9 @@ export type NemFitClassification = {
   forfeitureRate: number
 }
 
+/**
+ * Defines the NemFitMetrics type
+ */
 export type NemFitMetrics = {
   totalConsumptionKwh: number
   totalGenerationKwh: number
@@ -53,6 +68,11 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100
 }
 
+/**
+ * Defines the computeNemFitMetrics function
+ * @param {NemMonthResult[]} monthlyBreakdown - Collection of monthly breakdown values
+ * @returns {NemFitMetrics} The computed nem fit metrics
+ */
 export function computeNemFitMetrics(monthlyBreakdown: NemMonthResult[]): NemFitMetrics {
   const totalConsumptionKwh = monthlyBreakdown.reduce((sum, month) => sum + month.consumptionKwh, 0)
   const totalGenerationKwh = monthlyBreakdown.reduce((sum, month) => sum + month.generationKwh, 0)
@@ -79,6 +99,11 @@ export function computeNemFitMetrics(monthlyBreakdown: NemMonthResult[]): NemFit
   }
 }
 
+/**
+ * Defines the classifyNemFit function
+ * @param {NemFitMetrics} metrics - Value used for metrics
+ * @returns {NemFitClassification} The resulting classify nem fit value
+ */
 export function classifyNemFit(metrics: NemFitMetrics): NemFitClassification {
   const { billableImportRate, monthlyExportRate, forfeitureRate } = metrics
 
@@ -89,11 +114,11 @@ export function classifyNemFit(metrics: NemFitMetrics): NemFitClassification {
     fit = 'oversized'
     detail = 'Excess credits likely'
   } else if (billableImportRate <= 0.25 && monthlyExportRate <= 0.2 && forfeitureRate <= 0.05) {
-    fit = 'good'
-    detail = 'Low unused credits'
+    fit = 'balanced'
+    detail = 'Matched to usage'
   } else {
-    fit = 'moderate'
-    detail = billableImportRate > 0.25 ? 'Still imports from grid' : 'Some credit buildup'
+    fit = 'lean'
+    detail = 'Fast payback, grid backup'
   }
 
   return { fit, detail, billableImportRate, monthlyExportRate, forfeitureRate }
@@ -164,6 +189,11 @@ function computeLifecyclePaybackYears({
   return null
 }
 
+/**
+ * Defines the buildAnalysisResults function
+ * @param {Object} options - Collection of options values
+ * @returns {AnalysisResultsRecord} The built analysis results
+ */
 export function buildAnalysisResults({
   simulation,
   systemCostRm,
@@ -261,6 +291,12 @@ export function buildAnalysisResults({
   }
 }
 
+/**
+ * Defines the buildThresholdWarnings function
+ * @param {NemMonthResult} month - Month value to render
+ * @param {TariffThresholds} thresholds - Value used for thresholds
+ * @returns {string[]} The built threshold warnings
+ */
 export function buildThresholdWarnings(month: NemMonthResult, thresholds: TariffThresholds): string[] {
   const warnings: string[] = []
 

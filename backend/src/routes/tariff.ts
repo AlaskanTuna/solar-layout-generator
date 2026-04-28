@@ -4,6 +4,9 @@ import { asyncHandler } from '../middleware/asyncHandler.js'
 import { NotFoundError } from '../errors.js'
 import { tariffDefaults, type TariffConfigResponse } from '@shared/types'
 
+/**
+ * Tariff configuration route
+ */
 export const tariffRouter: ExpressRouter = Router()
 
 tariffRouter.get(

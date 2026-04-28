@@ -14,6 +14,10 @@ type RotationHandleProps = {
   onRotate: (panelId: string, rotation: number) => void
 }
 
+/**
+ * Renders the RotationHandle component
+ * @param {RotationHandleProps} props - Props for the component
+ */
 export function RotationHandle({
   panelId,
   snapDegrees = 5,

@@ -1,5 +1,8 @@
 import type { SolarPanel, RoofSegment } from './buildingInsights'
 
+/**
+ * Defines the SegmentHull type
+ */
 export type SegmentHull = {
   segmentIndex: number
   azimuth: number
@@ -9,7 +12,11 @@ export type SegmentHull = {
   color: string
 }
 
-/** Map azimuth angle to an HSL colour */
+/**
+ * Maps azimuth angle to an HSL colour
+ * @param {number} azimuth - Value used for azimuth
+ * @returns {string} The resulting azimuth color value
+ */
 export function azimuthColor(azimuth: number): string {
   const a = ((azimuth % 360) + 360) % 360
 
@@ -30,7 +37,11 @@ export function azimuthColor(azimuth: number): string {
   return `hsla(${Math.round(hue)}, 70%, 55%, 0.35)`
 }
 
-/** Compute convex hull of 2D points */
+/**
+ * Computes convex hull of 2D points
+ * @param {Array} points - Collection of points values
+ * @returns {Array} The resulting collection
+ */
 export function convexHull(points: { x: number; y: number }[]): { x: number; y: number }[] {
   if (points.length <= 2) return [...points]
 
@@ -65,6 +76,16 @@ export function convexHull(points: { x: number; y: number }[]): { x: number; y: 
 
 const HULL_PADDING = 4
 
+/**
+ * Defines the computeSegmentHulls function
+ * @param {SolarPanel[]} solarPanels - Collection of solar panels values
+ * @param {RoofSegment[]} roofSegments - Collection of roof segments values
+ * @param {Map<string, { x: number; y: number; rotation: number }>} panelPixelPositions - Panel pixel positions value
+ * @param {Set<string>} visiblePanelIds - Visible panel identifiers
+ * @param {number} panelWidth - Value used for panel width
+ * @param {number} panelHeight - Value used for panel height
+ * @returns {SegmentHull[]} The computed segment hulls
+ */
 export function computeSegmentHulls(
   solarPanels: SolarPanel[],
   roofSegments: RoofSegment[],

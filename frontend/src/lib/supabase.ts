@@ -2,6 +2,10 @@ import { createClient } from '@supabase/supabase-js'
 
 let supabaseClient: ReturnType<typeof createClient> | null = null
 
+/**
+ * Computes the supabase value
+ * @returns {Object} The requested supabase
+ */
 export function getSupabase() {
   if (supabaseClient) {
     return supabaseClient

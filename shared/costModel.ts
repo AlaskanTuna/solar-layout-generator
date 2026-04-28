@@ -1,6 +1,15 @@
+/**
+ * Roof types accepted by the cost model
+ */
 export type RoofType = 'metal' | 'tile' | 'flat'
+/**
+ * Supply phases accepted by the cost model
+ */
 export type SupplyPhase = 'single' | 'three'
 
+/**
+ * Cost breakdown returned by the pricing model
+ */
 export type CostBreakdown = {
   panels: number
   inverter: number
@@ -17,6 +26,9 @@ export type CostBreakdown = {
   cccFeeTriggered: boolean
 }
 
+/**
+ * Inputs required to compute a system cost
+ */
 export type CostInputs = {
   panelCount: number
   panelWattageWp: number
@@ -32,6 +44,9 @@ type InverterSku = {
   priceRm: number
 }
 
+/**
+ * Default assumptions used by the pricing model
+ */
 export const costModelDefaults = {
   mountingPerPanel: {
     metal: 200,
@@ -59,6 +74,9 @@ export const costModelDefaults = {
   installerMargin: 0.15
 }
 
+/**
+ * Mounting cost per panel by roof type
+ */
 export const MOUNTING_PER_PANEL = costModelDefaults.mountingPerPanel
 
 function permitCost(kwac: number, phase: SupplyPhase): { total: number; cccTriggered: boolean } {
@@ -90,6 +108,11 @@ function selectInverter(kwp: number, phase: SupplyPhase): InverterSku {
   return candidates[candidates.length - 1]!
 }
 
+/**
+ * Computes the total installed system cost
+ * @param {CostInputs} inputs - Inputs used for the calculation
+ * @returns {CostBreakdown} The computed system cost
+ */
 export function computeSystemCost(inputs: CostInputs): CostBreakdown {
   const kwp = (inputs.panelCount * inputs.panelWattageWp) / 1000
 

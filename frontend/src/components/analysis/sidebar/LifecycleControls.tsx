@@ -24,6 +24,10 @@ type LifecycleControlsProps = {
   setFormState: React.Dispatch<React.SetStateAction<AnalysisFormState | null>>
 }
 
+/**
+ * Renders the LifecycleControls component
+ * @param {LifecycleControlsProps} props - Props for the component
+ */
 export function LifecycleControls({ formState, setFormState }: LifecycleControlsProps) {
   const { t } = useTranslation('analysis')
 

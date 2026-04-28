@@ -9,6 +9,10 @@ type PrintReportProps = {
   tariffEffectiveDate?: string | null
 }
 
+/**
+ * Renders the multi-page PDF report
+ * @param {PrintReportProps} props - Props for the component
+ */
 export function PrintReport({ project, tariffEffectiveDate = null }: PrintReportProps) {
   const generatedAt = new Date().toLocaleDateString('en-MY', {
     day: '2-digit',
@@ -18,9 +22,12 @@ export function PrintReport({ project, tariffEffectiveDate = null }: PrintReport
 
   return (
     <div className="pdf-document">
+      {/* Fixed chrome */}
       <PdfFixedHeader projectName={project.name} generatedAt={generatedAt} />
       <PdfFixedFooter imageryQuality={project.location?.imageryQuality ?? null} />
+      {/* Page 1 */}
       <PrintPage1Workbench project={project} />
+      {/* Page 2+ */}
       <PrintPage2Analysis project={project} tariffEffectiveDate={tariffEffectiveDate} />
     </div>
   )

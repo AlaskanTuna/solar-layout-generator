@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react'
 import { MONTHLY_AZIMUTH, MONTHLY_IRRADIANCE } from '@/components/workbench/IrradianceGlow'
 
+/**
+ * Provides the irradiance hook
+ * @returns {Object} Hook state for irradiance
+ */
 export function useIrradiance() {
   const [irradianceMonth, setIrradianceMonth] = useState(new Date().getMonth())
 

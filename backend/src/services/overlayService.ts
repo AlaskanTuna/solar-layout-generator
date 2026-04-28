@@ -2,6 +2,9 @@ import * as GeoTIFF from 'geotiff'
 import sharp from 'sharp'
 import { downloadFromStorage, getSignedUrl, uploadToStorage } from './storageService.js'
 
+/**
+ * Overlay layers that can be rendered for a location
+ */
 export type OverlayType = 'annual-flux' | 'dsm' | 'mask'
 
 type ColorStop = { pos: number; r: number; g: number; b: number }
@@ -46,6 +49,12 @@ function getStopsForType(type: OverlayType): ColorStop[] {
   return type === 'annual-flux' ? fluxStops : type === 'dsm' ? dsmStops : maskStops
 }
 
+/**
+ * Resolves the storage path for a given overlay type
+ * @param {OverlayType} overlayType - Value used for overlay type
+ * @param {Object} location - Location record to process
+ * @returns {string} The resolved tif path
+ */
 export function resolveTifPath(
   overlayType: OverlayType,
   location: { annualFluxPath: string | null; dsmPath: string | null; maskPath: string | null }
@@ -57,6 +66,13 @@ export function resolveTifPath(
       : location.maskPath
 }
 
+/**
+ * Get a cached overlay PNG or generate one from the source GeoTIFF
+ * @param {string} tifPath - Tif path value
+ * @param {OverlayType} overlayType - Value used for overlay type
+ * @param {string | null} rgbImageUrl - Rgb image url value
+ * @returns {Promise<string>} A promise resolving to the requested or generate overlay
+ */
 export async function getOrGenerateOverlay(
   tifPath: string,
   overlayType: OverlayType,

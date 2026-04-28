@@ -10,6 +10,9 @@ import {
 import { useLocale } from '@/hooks/useLocale'
 import { LOCALE_LABELS, SUPPORTED_LOCALES, type SupportedLocale } from '@/lib/i18n'
 
+/**
+ * Renders the LanguageToggle component
+ */
 export function LanguageToggle() {
   const { locale, setLocale } = useLocale()
   const { t } = useTranslation('common')

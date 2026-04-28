@@ -8,6 +8,10 @@ type HeaderProps = {
   generatedAt: string
 }
 
+/**
+ * Renders the PdfFixedHeader component
+ * @param {HeaderProps} props - Props for the component
+ */
 export function PdfFixedHeader({ projectName, generatedAt }: HeaderProps) {
   const { t } = useTranslation('pdf')
 
@@ -30,6 +34,10 @@ type FooterProps = {
   imageryQuality?: ImageryQuality | null
 }
 
+/**
+ * Renders the PdfFixedFooter component
+ * @param {FooterProps} props - Props for the component
+ */
 export function PdfFixedFooter({ imageryQuality }: FooterProps = {}) {
   const { t } = useTranslation('pdf')
 

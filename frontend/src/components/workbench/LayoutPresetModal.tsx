@@ -45,6 +45,10 @@ type LayoutPresetModalProps = {
   onSkip: () => void
 }
 
+/**
+ * Renders the layoutpreset modal
+ * @param {LayoutPresetModalProps} props - Props for the component
+ */
 export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }: LayoutPresetModalProps) {
   const { t } = useTranslation('workbench')
 
@@ -93,25 +97,8 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
   const [roofDirection, setRoofDirection] = useState<RoofDirection>('any')
   const [billImageOpen, setBillImageOpen] = useState(false)
 
-  // Tooltip open state: undefined = uncontrolled (Radix manages via hover/focus),
-  // true = pinned open, false = forced closed.
-  //
-  // Why this is needed: Radix Dialog applies a body-level pointer-events lock
-  // while open. When the user clicks the image, the popup mounts a fixed
-  // backdrop above everything; the pointer that was inside the TooltipContent
-  // never receives a pointerleave on the trigger because the backdrop swallows
-  // every event. After the popup unmounts, Radix Tooltip's internal "open"
-  // state has nothing to drive it closed — switching from open={true} to
-  // open={undefined} is supposed to hand back to uncontrolled mode, but
-  // useControllableState retains the last value, leaving the tooltip pinned
-  // open until a fresh pointerleave/blur fires (which never happens because
-  // the dialog still owns pointer-events). A key-based remount cleans state
-  // but reintroduces immediate hover re-open if the cursor lands on the
-  // trigger after close.
-  //
-  // Fix: drive open={false} explicitly when the popup dismisses (deterministic
-  // close), then release to uncontrolled on the next frame so the user can
-  // re-hover normally.
+  // Radix Dialog's backdrop swallows pointerleave, so the tooltip can stay pinned open after the image popup closes
+  // Force open={false} on dismiss, then release to uncontrolled on the next frame so hover can resume normally
   const [tooltipOpen, setTooltipOpen] = useState<boolean | undefined>(undefined)
   const releaseTimerRef = useRef<number | null>(null)
 

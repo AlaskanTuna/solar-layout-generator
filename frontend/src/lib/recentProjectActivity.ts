@@ -17,6 +17,10 @@ function readEntries(): RecentProjectActivity[] {
   }
 }
 
+/**
+ * Defines the markProjectVisited function
+ * @param {string} projectId - Project identifier
+ */
 export function markProjectVisited(projectId: string) {
   if (!projectId || projectId === 'new') return
   const next = [
@@ -26,6 +30,11 @@ export function markProjectVisited(projectId: string) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
 }
 
+/**
+ * Computes the project last visited at value
+ * @param {string} projectId - Project identifier
+ * @returns {string} The requested project last visited at
+ */
 export function getProjectLastVisitedAt(projectId: string): string | null {
   return readEntries().find((entry) => entry.projectId === projectId)?.visitedAt ?? null
 }

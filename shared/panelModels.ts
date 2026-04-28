@@ -1,5 +1,8 @@
 import type { PanelModel } from './panelTypes.ts'
 
+/**
+ * Built-in panel catalog used by the UI and cost model
+ */
 export const PANEL_MODELS: PanelModel[] = [
   {
     id: 'google-default',
@@ -75,8 +78,16 @@ export const PANEL_MODELS: PanelModel[] = [
   }
 ]
 
+/**
+ * Default panel model id used for new projects
+ */
 export const DEFAULT_PANEL_MODEL_ID = 'jinko-tiger-neo'
 
+/**
+ * Looks up a panel model by id
+ * @param {string} id - Id value
+ * @returns {PanelModel} The requested panel model
+ */
 export function getPanelModel(id: string): PanelModel | undefined {
   return PANEL_MODELS.find((model) => model.id === id)
 }

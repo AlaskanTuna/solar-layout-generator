@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+/**
+ * Resolves location request schema
+ */
 export const resolveLocationSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
@@ -8,11 +11,17 @@ export const resolveLocationSchema = z.object({
   expandedCoverage: z.boolean().optional()
 })
 
+/**
+ * Probes location query schema
+ */
 export const probeLocationSchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180)
 })
 
+/**
+ * Single-panel flux recompute schema
+ */
 export const fluxRecomputeSchema = z.object({
   panelId: z.string().min(1),
   center: z.object({
@@ -25,6 +34,9 @@ export const fluxRecomputeSchema = z.object({
   capacityWp: z.number().positive().optional()
 })
 
+/**
+ * Batch flux recompute schema
+ */
 export const fluxRecomputeBatchSchema = z.object({
   panels: z.array(fluxRecomputeSchema).min(1).max(500)
 })

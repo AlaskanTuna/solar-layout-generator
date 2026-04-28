@@ -15,6 +15,9 @@ import * as projectService from '../services/projectService.js'
 import { signPdfToken } from '../services/pdfTokenService.js'
 import { NotFoundError } from '../errors.js'
 
+/**
+ * Projects CRUD and PDF export routes
+ */
 export const projectsRouter: ExpressRouter = Router()
 
 projectsRouter.post(

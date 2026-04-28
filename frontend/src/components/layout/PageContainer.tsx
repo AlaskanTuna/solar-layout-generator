@@ -3,13 +3,8 @@ import { cn } from '@/lib/utils'
 
 type PageContainerProps = {
   children: ReactNode
-  /**
-   * 'dashboard' – standard padded content area for /dashboard/* pages.
-   *               Use flex=true when the page needs flex-col + flex-1 inner expansion
-   *               (e.g. DashboardPage).
-   * 'mvp'       – wide-max-width workspace layout for WorkbenchPage / AnalysisPage.
-   * 'full-bleed'– edge-to-edge layout for MapPage (applies inline height separately).
-   */
+  // 'dashboard' is the standard padded content area, 'mvp' is the wide workspace, 'full-bleed' is edge to edge
+  // Use flex=true only when a dashboard page needs inner flex-1 expansion
   variant?: 'dashboard' | 'mvp' | 'full-bleed'
   /** When variant='dashboard', adds flex flex-col so inner flex-1 children fill height */
   flex?: boolean
@@ -23,6 +18,10 @@ const VARIANTS: Record<NonNullable<PageContainerProps['variant']>, string> = {
   'full-bleed': 'relative flex w-full flex-col overflow-hidden p-4'
 }
 
+/**
+ * Renders the PageContainer component
+ * @param {PageContainerProps} props - Props for the component
+ */
 export function PageContainer({ children, variant = 'dashboard', flex = false, className }: PageContainerProps) {
   const flexClass = flex && variant === 'dashboard' ? 'flex flex-col' : ''
   return <div className={cn(VARIANTS[variant], flexClass, className)}>{children}</div>

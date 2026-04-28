@@ -2,6 +2,9 @@ import { uploadToStorage } from '../storageService.js'
 import { convertRgbTiffToPng } from './convert.js'
 import type { DownloadedLayer } from './fetch.js'
 
+/**
+ * Storage paths produced by the location pipeline
+ */
 export type StoredLocationAssets = {
   monthlyFluxPath: string | null
   maskPath: string | null
@@ -10,6 +13,12 @@ export type StoredLocationAssets = {
   rgbImageUrl: string | null
 }
 
+/**
+ * Persists downloaded pipeline assets to storage
+ * @param {string} locationId - Location identifier
+ * @param {DownloadedLayer[]} downloadedLayers - Collection of downloaded layers values
+ * @returns {Promise<StoredLocationAssets>} A promise resolving to the resulting value
+ */
 export async function storeLocationPipelineAssets(
   locationId: string,
   downloadedLayers: DownloadedLayer[]

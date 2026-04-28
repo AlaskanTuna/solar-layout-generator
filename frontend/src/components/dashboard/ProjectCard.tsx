@@ -5,6 +5,7 @@ import { Trash2, Clock, FolderOpen, ArrowRight, Receipt, Zap, Leaf, Sun } from '
 import { formatRelativeDate } from './helpers'
 import { getProjectStatusConfig } from '@/lib/projectStatus'
 
+/** Render the project card */
 export function ProjectCard({
   project,
   onOpen,

@@ -57,7 +57,22 @@ function useLoadedImage(src: string | undefined) {
   return { image, imageError }
 }
 
-export type OverlayMode = 'rgb' | 'annual-flux' | 'dsm' | 'mask'
+/**
+ * Defines the OverlayMode type
+ */
+export type OverlayMode = 'rgb' | 'annual-flux' | 'dsm' | 'mask'/**
+ * Provides the useOverlayImages hook
+ * @param {string | undefined} rgbImageUrl - Rgb Image Url value
+ * @param {string | undefined} locationId - Location identifier
+ * @param {OverlayMode} overlayMode - Value used for overlay Mode
+ */
+/**
+ * Provides the useOverlayImages hook
+ * @param {string | undefined} rgbImageUrl - Rgb image url value
+ * @param {string | undefined} locationId - Location identifier
+ * @param {OverlayMode} overlayMode - Value used for overlay mode
+ */
+
 
 export function useOverlayImages(
   rgbImageUrl: string | undefined,

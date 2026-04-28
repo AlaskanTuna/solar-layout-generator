@@ -3,6 +3,14 @@ import { persistLocationPipelineFailure, persistLocationPipelineSuccess } from '
 import { storeLocationPipelineAssets } from './locationPipeline/store.js'
 import type { ImageryQuality } from './solarApiService.js'
 
+/**
+ * Run the full location pipeline and persist the outcome
+ * @param {string} locationId - Location identifier
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @param {ImageryQuality} requiredQuality - Value used for required quality
+ * @param {boolean} expandedCoverage - Whether expanded coverage
+ */
 export async function runLocationPipeline(
   locationId: string,
   lat: number,

@@ -30,6 +30,10 @@ const SEGMENT_COLORS = {
 
 type Segment = { key: string; name: string; detail: string; value: number; color: string }
 
+/**
+ * Renders the systemcost card
+ * @param {SystemCostCardProps} props - Props for the component
+ */
 export function SystemCostCard({
   costBreakdown,
   activePanelCount,

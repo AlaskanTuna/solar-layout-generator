@@ -4,6 +4,11 @@ import type { KonvaEventObject } from 'konva/lib/Node'
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 3
 
+/**
+ * Provides the canvasZoom hook
+ * @param {Object} stageSize - Value used for stage size
+ * @returns {Function} Hook state for canvas zoom
+ */
 export function useCanvasZoom(stageSize: { width: number; height: number }) {
   const [stageScale, setStageScale] = useState(1)
   const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 })

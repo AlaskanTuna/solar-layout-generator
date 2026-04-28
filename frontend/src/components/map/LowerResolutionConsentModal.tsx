@@ -9,6 +9,10 @@ type Props = {
   onCancel: () => void
 }
 
+/**
+ * Renders the lowerresolutionconsent modal
+ * @param {Props} props - Props for the component
+ */
 export function LowerResolutionConsentModal({ open, onAccept, onCancel }: Props) {
   const { t } = useTranslation('map')
 

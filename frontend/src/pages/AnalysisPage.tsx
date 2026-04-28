@@ -47,6 +47,9 @@ function buildSavePayload(formState: AnalysisFormState, systemKwp: number, analy
   }
 }
 
+/**
+ * Renders the analysis dashboard
+ */
 export function AnalysisPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
@@ -257,6 +260,7 @@ export function AnalysisPage() {
     <AppLayout>
       <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
       <PageContainer variant="mvp" className="gap-6 py-6">
+        {/* Analysis sidebar */}
         <AnalysisSidebar
           projectId={projectId}
           projectName={projectQuery.data.name}
@@ -285,7 +289,9 @@ export function AnalysisPage() {
           tariffEffectiveDate={tariffQuery.data.effectiveDate}
         />
 
+        {/* Results area */}
         <section className="min-w-0 flex-1 space-y-6 xl:overflow-y-auto">
+          {/* View toggle */}
           <div data-tour="view-toggle" className="inline-flex rounded-lg border border-border bg-card/90 p-1 shadow-sm">
             <button
               type="button"
@@ -304,6 +310,7 @@ export function AnalysisPage() {
           </div>
           <p className="text-xs text-muted-foreground">{t('page.viewToggle.hint')}</p>
 
+          {/* Reorderable analysis cards */}
           <SortableCardContainer
             cards={[
               {

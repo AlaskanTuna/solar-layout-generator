@@ -18,6 +18,10 @@ import type { AnalysisChartDataPoint } from '@/lib/analysis'
 
 type TooltipStyle = ReturnType<typeof getChartTooltipStyle>
 
+/**
+ * Renders the pdfbillcomparison chart
+ * @param {Object} props - Props for the component
+ */
 export function PdfBillComparisonChart({
   chartData,
   tooltipStyle,
@@ -89,6 +93,10 @@ export function PdfBillComparisonChart({
   )
 }
 
+/**
+ * Renders the pdfcumulativesavings chart
+ * @param {Object} props - Props for the component
+ */
 export function PdfCumulativeSavingsChart({
   chartData,
   tooltipStyle

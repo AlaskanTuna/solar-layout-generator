@@ -4,6 +4,9 @@ import { getLocationData, type LocationImageGeoTransform } from '@/api/locations
 import { getProject } from '@/api/projects'
 import { parseBuildingInsights } from '@/lib/buildingInsights'
 
+/**
+ * Defines the DecodedRoofMask type
+ */
 export type DecodedRoofMask = {
   width: number
   height: number
@@ -22,6 +25,11 @@ function decodeBase64(dataBase64: string): Uint8Array {
   return bytes
 }
 
+/**
+ * Provides the workbenchData hook
+ * @param {string | undefined} projectId - Project identifier
+ * @returns {Object} Hook state for workbench data
+ */
 export function useWorkbenchData(projectId: string | undefined) {
   const projectQuery = useQuery({
     queryKey: ['project', projectId],

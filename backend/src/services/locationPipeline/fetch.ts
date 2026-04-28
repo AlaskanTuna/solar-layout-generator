@@ -18,14 +18,23 @@ const LAYER_FILENAMES = {
   monthlyFluxUrl: 'monthly_flux.tif'
 } as const
 
+/**
+ * Solar API layer keys downloaded by the pipeline
+ */
 export type SolarLayerKey = keyof typeof LAYER_FILENAMES
 
+/**
+ * One downloaded Solar API layer
+ */
 export type DownloadedLayer = {
   field: SolarLayerKey
   filename: (typeof LAYER_FILENAMES)[SolarLayerKey]
   buffer: Buffer
 }
 
+/**
+ * Solar API inputs fetched for the location pipeline
+ */
 export type PipelineFetchResult = {
   buildingInsights: BuildingInsightsApiResponse
   buildingInsightsJson: BuildingInsightsApiResponse
@@ -48,6 +57,14 @@ async function downloadLayer(url: string, field: SolarLayerKey): Promise<Downloa
   }
 }
 
+/**
+ * Fetches building insights and downloadable layer assets
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @param {ImageryQuality} requiredQuality - Value used for required quality
+ * @param {boolean} expandedCoverage - Whether expanded coverage
+ * @returns {Promise<PipelineFetchResult>} A promise resolving to the resulting value
+ */
 export async function fetchLocationPipelineInputs(
   lat: number,
   lng: number,

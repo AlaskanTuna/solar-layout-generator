@@ -2,23 +2,38 @@ import { env } from '../config/env.js'
 
 const BASE_URL = 'https://solar.googleapis.com/v1'
 
+/**
+ * Solar API imagery quality levels
+ */
 export type ImageryQuality = 'HIGH' | 'BASE'
 
+/**
+ * Solar API options for quality and coverage
+ */
 export type SolarApiOpts = {
   requiredQuality?: ImageryQuality
   expandedCoverage?: boolean
 }
 
+/**
+ * Latitude and longitude pair used by Solar API payloads
+ */
 export type SolarCoordinate = {
   latitude: number
   longitude: number
 }
 
+/**
+ * Bounding box returned by Solar API
+ */
 export type SolarBoundingBox = {
   sw: SolarCoordinate
   ne: SolarCoordinate
 }
 
+/**
+ * Building insights payload returned by Solar API
+ */
 export type BuildingInsightsApiResponse = {
   boundingBox?: SolarBoundingBox
   solarPotential?: {
@@ -28,6 +43,9 @@ export type BuildingInsightsApiResponse = {
   [key: string]: unknown
 }
 
+/**
+ * Data layer URLs returned by Solar API
+ */
 export type DataLayersApiResponse = {
   dsmUrl?: string
   rgbUrl?: string
@@ -53,7 +71,13 @@ function buildSolarParams(lat: number, lng: number, opts: SolarApiOpts = {}): UR
   return params
 }
 
-/** Fetch the closest Solar API building insights record */
+/**
+ * Fetches the closest Solar API building insights record
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @param {SolarApiOpts} opts - Value used for opts
+ * @returns {Promise<BuildingInsightsApiResponse>} A promise resolving to the resulting value
+ */
 export async function fetchBuildingInsights(
   lat: number,
   lng: number,
@@ -71,7 +95,14 @@ export async function fetchBuildingInsights(
   return json
 }
 
-/** Fetch Solar API raster layer URLs for a location */
+/**
+ * Fetches Solar API raster layer URLs for a location
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @param {number} radiusMeters - Value used for radius meters
+ * @param {SolarApiOpts} opts - Value used for opts
+ * @returns {Promise<DataLayersApiResponse>} A promise resolving to the resulting value
+ */
 export async function fetchDataLayers(
   lat: number,
   lng: number,
@@ -106,20 +137,12 @@ export async function fetchDataLayers(
   }
 }
 
-// Probe a coordinate end-to-end at three tiers in priority order:
-//   1. HIGH (no expansion) — best quality, focused radius
-//   2. BASE (no expansion) — sometimes works, more focused than expanded
-//   3. BASE + EXPANDED_COVERAGE — widest fallback, last resort
-//
-// Each probe checks BOTH buildingInsights AND dataLayers because the matrix
-// (tests/smoke/m2-klang-matrix.ts) showed that buildingInsights can return 200
-// while dataLayers 404s for the same coords. Probing only buildingInsights
-// produced false positives that broke pipelines downstream (M-2 root cause)
-//
-// Note: EXPANDED_COVERAGE is rejected (400) by Solar API at HIGH and MEDIUM —
-// it's only valid with BASE. Failed Solar API calls don't count toward the
-// free quota, so the exhaustive probe is cheap
-/** Available imagery quality options for a probed location */
+// Probe in priority order: HIGH, then BASE, then BASE with EXPANDED_COVERAGE
+// Check both endpoints because buildingInsights can succeed while dataLayers fails
+// EXPANDED_COVERAGE only works with BASE, and failed calls do not count toward quota
+/**
+ * Available imagery quality options for a probed location
+ */
 export type ProbeResult = {
   availableQualities: ImageryQuality[]
   bestQuality: ImageryQuality | null
@@ -128,7 +151,12 @@ export type ProbeResult = {
 
 const PROBE_RADIUS_METERS = 100
 
-/** Probe the best Solar API quality available for a coordinate */
+/**
+ * Probes the best Solar API quality available for a coordinate
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @returns {Promise<ProbeResult>} A promise resolving to the resulting value
+ */
 export async function findBestQualityForLocation(lat: number, lng: number): Promise<ProbeResult> {
   const available: ImageryQuality[] = []
   let bestQuality: ImageryQuality | null = null
@@ -185,7 +213,11 @@ async function probeEndpoint(
   }
 }
 
-/** Derive a conservative data-layer radius from a bounding box */
+/**
+ * Derive a conservative data-layer radius from a bounding box
+ * @param {SolarBoundingBox} bbox - Value used for bbox
+ * @returns {number} The resulting calculate radius value
+ */
 export function calculateRadius(bbox: SolarBoundingBox): number {
   const diameter = haversineDistance(bbox.sw.latitude, bbox.sw.longitude, bbox.ne.latitude, bbox.ne.longitude)
   return Math.ceil(diameter / 2) + 10
@@ -201,7 +233,11 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-/** Attach stable panel ids to a building insights payload */
+/**
+ * Attach stable panel ids to a building insights payload
+ * @param {BuildingInsightsApiResponse} insights - Value used for insights
+ * @returns {BuildingInsightsApiResponse} The resulting enrich building insights value
+ */
 export function enrichBuildingInsights(insights: BuildingInsightsApiResponse): BuildingInsightsApiResponse {
   const solarPotential = isRecord(insights.solarPotential) ? insights.solarPotential : {}
   const panels = Array.isArray(solarPotential.solarPanels)

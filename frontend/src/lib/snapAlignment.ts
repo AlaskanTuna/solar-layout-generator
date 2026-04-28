@@ -6,6 +6,9 @@ import {
   obbsOverlapWithMinSeparation
 } from './canvasTransforms'
 
+/**
+ * Defines the SnapGuide type
+ */
 export type SnapGuide = {
   orientation: 'horizontal' | 'vertical'
   position: number
@@ -13,12 +16,18 @@ export type SnapGuide = {
   end: number
 }
 
+/**
+ * Defines the SnapResult type
+ */
 export type SnapResult = {
   x: number
   y: number
   guides: SnapGuide[]
 }
 
+/**
+ * Defines the OverlapSnapResult type
+ */
 export type OverlapSnapResult = { snapped: true; x: number; y: number } | { snapped: false }
 
 type Pose = {
@@ -32,6 +41,9 @@ type Translation = {
   y: number
 }
 
+/**
+ * Defines the OverlapEscapeResult type
+ */
 export type OverlapEscapeResult = {
   x: number
   y: number
@@ -60,7 +72,16 @@ const SNAP_CONFIG: {
   overlapEscapeEpsilon: 1e-6
 }
 
-/** Compute snapped position and guide lines for a dragged panel using local-axis projection */
+/**
+ * Computes snapped position and guide lines for a dragged panel Uses local-axis projection to snap to nearby edges or alignment lines
+ * @param {Object} dragged - Dragged value
+ * @param {PanelInfo[]} others - Collection of others values
+ * @param {number} panelWidth - Value used for panel width
+ * @param {number} panelHeight - Value used for panel height
+ * @param {number} stageWidth - Value used for stage width
+ * @param {number} stageHeight - Value used for stage height
+ * @returns {SnapResult} The computed snap
+ */
 export function computeSnap(
   dragged: { x: number; y: number; rotation: number; id: string },
   others: PanelInfo[],
@@ -136,18 +157,12 @@ export function computeSnap(
 }
 
 /**
- * Overlap-as-snap-intent correction.
- *
- * Called at drag-end when the naive placement already overlaps a neighbor. The dragged
- * panel is auto-corrected along the SAT minimum-separation axis so it sits with zero
- * overlap — regardless of how deep the overlap is or whether the rotations match.
- *
- * For same-rotation panels the SAT axis lands the dragged panel edge-to-edge; for
- * mismatched rotations it lands at the closest valid non-overlapping position along
- * the smallest separation axis. Either way overlap is eliminated, never rejected.
- *
- * Returns { snapped: true, x, y } when a separation push was applied, or { snapped: false }
- * when the shapes aren't actually overlapping (caller's convergence signal).
+ * Correct an overlap by pushing the dragged panel along the SAT minimum-separation axis Returns a snapped position when a push-out is applied, otherwise reports no snap
+ * @param {Object} dragged - Value used for dragged
+ * @param {Object} neighbor - Value used for neighbor
+ * @param {number} panelWidth - Value used for panel width
+ * @param {number} panelHeight - Value used for panel height
+ * @returns {OverlapSnapResult} The computed overlap snap
  */
 export function computeOverlapSnap(
   dragged: { x: number; y: number; rotation: number },
@@ -161,8 +176,8 @@ export function computeOverlapSnap(
   const result = obbsOverlapWithMinSeparation(draggedPoly, neighborPoly)
   if (!result) return { snapped: false } // shapes not actually overlapping
 
-  // Push dragged center along the SAT axis by the penetration depth — lands edge-to-edge
-  // Add a tiny epsilon so FP slop can't leave the strict-> obbsOverlap check reporting overlap
+  // Push the dragged center along the SAT axis by the penetration depth
+  // Add a tiny epsilon so FP slop cannot leave a false overlap behind
   const pushDistance = result.penetration + 0.01
   return {
     snapped: true,
@@ -408,6 +423,15 @@ function resolveOverlapTranslation(
   return { x: current.x, y: current.y, iterations: maxIterations, resolved }
 }
 
+/**
+ * Defines the resolveOverlapEscape function
+ * @param {Pose} dragged - Value used for dragged
+ * @param {Pose[]} neighbors - Collection of neighbors values
+ * @param {number} panelWidth - Value used for panel width
+ * @param {number} panelHeight - Value used for panel height
+ * @param {Object} options - Value used for options
+ * @returns {OverlapEscapeResult} The resolved overlap escape
+ */
 export function resolveOverlapEscape(
   dragged: Pose,
   neighbors: Pose[],
@@ -430,6 +454,16 @@ export function resolveOverlapEscape(
   return { ...result, x: dragged.x + result.x, y: dragged.y + result.y }
 }
 
+/**
+ * Defines the resolveGroupOverlapEscape function
+ * @param {Pose[]} movingPanels - Collection of moving panels values
+ * @param {Pose[]} staticPanels - Collection of static panels values
+ * @param {Translation} translation - Value used for translation
+ * @param {number} panelWidth - Value used for panel width
+ * @param {number} panelHeight - Value used for panel height
+ * @param {Object} options - Value used for options
+ * @returns {OverlapEscapeResult} The resolved group overlap escape
+ */
 export function resolveGroupOverlapEscape(
   movingPanels: Pose[],
   staticPanels: Pose[],

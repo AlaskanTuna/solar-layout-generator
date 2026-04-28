@@ -23,6 +23,10 @@ type PanelModelDrawerProps = {
   disabled?: boolean
 }
 
+/**
+ * Renders the PanelModelDrawer component
+ * @param {PanelModelDrawerProps} props - Props for the component
+ */
 export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }: PanelModelDrawerProps) {
   const { t } = useTranslation('workbench')
   const [open, setOpen] = useState(false)

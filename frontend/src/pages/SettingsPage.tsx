@@ -55,6 +55,9 @@ function useNotifications() {
   return notifications
 }
 
+/**
+ * Renders the settings page
+ */
 export function SettingsPage() {
   const { t } = useTranslation('settings')
   const { user } = useAuth()
@@ -94,6 +97,7 @@ export function SettingsPage() {
 
   return (
     <PageContainer>
+      {/* Header */}
       <PageHeaderCard artSrc="/dashboard/settings.webp">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex items-center gap-3">
@@ -114,6 +118,7 @@ export function SettingsPage() {
         </div>
       </PageHeaderCard>
 
+      {/* Settings grid */}
       <div className="mt-6 grid gap-4 xl:grid-cols-[1fr_1fr]">
         <SettingCard
           icon={UserRound}

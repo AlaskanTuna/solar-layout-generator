@@ -7,6 +7,10 @@ type Props = {
   pageBreak?: boolean
 }
 
+/**
+ * Renders a single PDF page shell with consistent chrome
+ * @param {Props} props - Props for the component
+ */
 export function PdfPageShell({ sectionLabel, context, children, pageBreak = true }: Props) {
   return (
     <section className={`pdf-page flex flex-col ${pageBreak ? 'pdf-page-break' : ''}`}>

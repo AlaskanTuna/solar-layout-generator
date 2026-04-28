@@ -14,6 +14,10 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+/**
+ * Renders the AuthProvider component
+ * @param {Object} props - Props for the component
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = getSupabase()
   const [user, setUser] = useState<User | null>(null)
@@ -66,6 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
+/**
+ * Provides the auth hook
+ * @returns {AuthContextValue} Hook state for auth
+ */
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) {

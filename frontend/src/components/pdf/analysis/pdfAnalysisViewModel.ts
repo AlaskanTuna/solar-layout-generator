@@ -14,6 +14,9 @@ import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 import type { CostBreakdown, RoofType } from '@shared/types'
 
+/**
+ * Defines the PdfAnalysisViewModel type
+ */
 export type PdfAnalysisViewModel = {
   analysisResults: AnalysisResultsRecord
   activePanelCount: number
@@ -44,6 +47,11 @@ export type PdfAnalysisViewModel = {
   breakEvenYear: number | null
 }
 
+/**
+ * Builds the buildpdfanalysis view model
+ * @param {ProjectResponse} project - Project record to process
+ * @returns {PdfAnalysisViewModel} The built pdf analysis view model
+ */
 export function buildPdfAnalysisViewModel(project: ProjectResponse): PdfAnalysisViewModel | null {
   const analysisResults = project.analysisResults
   if (!analysisResults) return null

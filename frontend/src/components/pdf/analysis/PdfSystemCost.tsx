@@ -21,6 +21,10 @@ const SEGMENT_COLORS = {
   installerMargin: '#475569'
 } as const
 
+/**
+ * Renders the PdfSystemCost component
+ * @param {Object} props - Props for the component
+ */
 export function PdfSystemCost({
   costBreakdown,
   activePanelCount,

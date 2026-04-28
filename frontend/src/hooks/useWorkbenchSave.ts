@@ -15,6 +15,11 @@ type UseWorkbenchSaveOptions = {
   updatePanelEnergy: (panelId: string, monthlyEnergyDcKwh: number[]) => void
 }
 
+/**
+ * Provides the workbenchSave hook
+ * @param {UseWorkbenchSaveOptions} options - Value used for options
+ * @returns {Function} Hook state for workbench save
+ */
 export function useWorkbenchSave({
   projectId,
   locationId,

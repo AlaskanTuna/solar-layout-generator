@@ -22,9 +22,20 @@ const buildingInsightsSchema = z.object({
   solarPotential: solarPotentialSchema
 }).passthrough()
 
+/**
+ * Solar potential subset used to size and recompute panels
+ */
 export type PanelSpecs = z.infer<typeof solarPotentialSchema>
+/**
+ * Building insights payload validated for downstream use
+ */
 export type BuildingInsightsDto = z.infer<typeof buildingInsightsSchema>
 
+/**
+ * Parses a building insights payload
+ * @param {unknown} buildingInsights - Value used for building insights
+ * @returns {Object} The parsed building insights
+ */
 export function parseBuildingInsights(buildingInsights: unknown): BuildingInsightsDto | null {
   const result = buildingInsightsSchema.safeParse(buildingInsights)
   if (!result.success) {
@@ -33,6 +44,11 @@ export function parseBuildingInsights(buildingInsights: unknown): BuildingInsigh
   return result.data
 }
 
+/**
+ * Parses just the panel sizing fields from building insights
+ * @param {unknown} buildingInsights - Value used for building insights
+ * @returns {Object} The parsed panel specs
+ */
 export function parsePanelSpecs(buildingInsights: unknown): PanelSpecs | null {
   const result = z.object({ solarPotential: solarPotentialSchema }).safeParse(buildingInsights)
   if (!result.success) {

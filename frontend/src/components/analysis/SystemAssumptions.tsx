@@ -12,6 +12,10 @@ type SystemAssumptionsProps = {
   layoutOrientation: LayoutOrientationSummary | null
 }
 
+/**
+ * Renders the SystemAssumptions component
+ * @param {SystemAssumptionsProps} props - Props for the component
+ */
 export function SystemAssumptions({
   performanceRatio,
   assumedLosses,

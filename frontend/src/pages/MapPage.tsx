@@ -23,6 +23,9 @@ const PROCESSING_TIMEOUT_MS = 120_000
 
 const MALAYSIA_CENTER = { lat: 3.14, lng: 101.69 }
 
+/**
+ * Renders the map flow for location search, confirmation, and processing
+ */
 export function MapPage() {
   const { t } = useTranslation('map')
   const { projectId } = useParams<{ projectId: string }>()
@@ -330,9 +333,11 @@ export function MapPage() {
   return (
     <AppLayout>
       <div className="relative flex w-full flex-col overflow-hidden p-4" style={{ height: 'calc(100vh - 3.5rem)' }}>
+        {/* Map canvas */}
         <div className="relative flex-1 overflow-hidden rounded-2xl border border-border shadow-sm">
           <div ref={mapRef} className="h-full w-full" />
 
+          {/* Search and placement controls */}
           <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex flex-col items-center px-4">
             <div className="pointer-events-auto w-full max-w-md">
               <div
@@ -405,6 +410,7 @@ export function MapPage() {
             </div>
           </div>
 
+          {/* Read-only project card */}
           {isReadonly && existingProject && (
             <div className="absolute left-4 top-1/2 z-10 -translate-y-1/2 animate-fade-in">
               <div className="glass-card w-64 p-4">
@@ -442,6 +448,7 @@ export function MapPage() {
 
           {!isLoaded && <LoadingOverlay hints={[t('loading.loadingMaps'), t('loading.preparingMap')]} />}
 
+          {/* Confirmation prompt */}
           {phase === 'confirm' && selectedPlace && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
               <div className="glass-card w-96 p-5">
@@ -470,6 +477,7 @@ export function MapPage() {
             </div>
           )}
 
+          {/* Processing state */}
           {phase === 'processing' && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
               <div className="glass-card flex w-96 items-center gap-3 p-5">
@@ -484,6 +492,7 @@ export function MapPage() {
             </div>
           )}
 
+          {/* Failure state */}
           {phase === 'failed' && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
               <div className="glass-card w-96 p-5">

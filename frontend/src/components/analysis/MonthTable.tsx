@@ -12,6 +12,10 @@ type MonthTableProps = {
   onToggle: () => void
 }
 
+/**
+ * Renders the MonthTable component
+ * @param {MonthTableProps} props - Props for the component
+ */
 export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
   const { t } = useTranslation('analysis')
 

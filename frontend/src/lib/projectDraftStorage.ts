@@ -1,3 +1,6 @@
+/**
+ * Defines the NewProjectDraft type
+ */
 export type NewProjectDraft = {
   projectName: string
   locationId?: string
@@ -10,6 +13,10 @@ function canUseSessionStorage(): boolean {
   return typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined'
 }
 
+/**
+ * Defines the readNewProjectDraft function
+ * @returns {NewProjectDraft} The resulting read new project draft value
+ */
 export function readNewProjectDraft(): NewProjectDraft | null {
   if (!canUseSessionStorage()) return null
 
@@ -32,6 +39,10 @@ export function readNewProjectDraft(): NewProjectDraft | null {
   }
 }
 
+/**
+ * Defines the writeNewProjectDraft function
+ * @param {NewProjectDraft} draft - Value used for draft
+ */
 export function writeNewProjectDraft(draft: NewProjectDraft) {
   if (!canUseSessionStorage()) return
 
@@ -46,6 +57,9 @@ export function writeNewProjectDraft(draft: NewProjectDraft) {
   window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
 }
 
+/**
+ * Defines the clearNewProjectDraft function
+ */
 export function clearNewProjectDraft() {
   if (!canUseSessionStorage()) return
   window.sessionStorage.removeItem(STORAGE_KEY)

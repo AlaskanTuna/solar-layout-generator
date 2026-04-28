@@ -71,14 +71,29 @@ const layoutPreferencesSchema = z
   })
   .strict()
 
+/**
+ * Analysis config DTO used by project view models
+ */
 export type AnalysisConfigDto = z.infer<typeof analysisConfigSchema>
+/**
+ * Analysis results DTO used by project view models
+ */
 export type AnalysisResultsDto = z.infer<typeof analysisResultsSchema>
+/**
+ * Partial layout preferences DTO used by project view models
+ */
 export type LayoutPreferencesDto = Partial<LayoutPreferences>
+/**
+ * Projects shape containing JSON-backed fields
+ */
 export type JsonFieldsProject = {
   analysisConfig: Prisma.JsonValue | null
   analysisResults: Prisma.JsonValue | null
   layoutPreferences: Prisma.JsonValue | null
 }
+/**
+ * Projects payload enriched for PDF
+ */
 export type PdfProjectResponse<TProject extends JsonFieldsProject> = TProject & {
   rgbSignedUrl: string | null
   imageGeoTransform: ImageGeoTransform | null
@@ -93,19 +108,40 @@ function parseWithSchema<T>(value: unknown, schema: z.ZodType<T>): T | null {
   return parsed.success ? parsed.data : null
 }
 
+/**
+ * Parses analysis config JSON
+ * @param {unknown} value - Value to process
+ * @returns {Object} The parsed analysis config
+ */
 export function parseAnalysisConfig(value: unknown): AnalysisConfigDto | null {
   return parseWithSchema(value, analysisConfigSchema)
 }
 
+/**
+ * Parses analysis results JSON
+ * @param {unknown} value - Value to process
+ * @returns {Object} The parsed analysis results
+ */
 export function parseAnalysisResults(value: unknown): AnalysisResultsDto | null {
   return parseWithSchema(value, analysisResultsSchema)
 }
 
+/**
+ * Parses layout preferences JSON
+ * @param {unknown} value - Value to process
+ * @returns {Object} The parsed layout preferences
+ */
 export function parseLayoutPreferences(value: unknown): LayoutPreferencesDto {
   const parsed = parseWithSchema(value, layoutPreferencesSchema)
   return parsed ?? {}
 }
 
+/**
+ * Merges analysis config updates into stored JSON
+ * @param {unknown} existingValue - Value used for existing value
+ * @param {AnalysisConfigDto} nextValue - Value used for next value
+ * @returns {Object} The merged analysis config
+ */
 export function mergeAnalysisConfig(
   existingValue: unknown,
   nextValue: AnalysisConfigDto
@@ -114,6 +150,12 @@ export function mergeAnalysisConfig(
   return existing ? { ...existing, ...nextValue } : nextValue
 }
 
+/**
+ * Merges layout preference updates into stored JSON
+ * @param {unknown} existingValue - Value used for existing value
+ * @param {LayoutPreferencesDto} partial - Partial values to merge into the record
+ * @returns {Object} The merged layout preferences
+ */
 export function mergeLayoutPreferences(
   existingValue: unknown,
   partial: LayoutPreferencesDto
@@ -121,10 +163,20 @@ export function mergeLayoutPreferences(
   return { ...parseLayoutPreferences(existingValue), ...partial }
 }
 
+/**
+ * Serializes a value for Prisma JSON columns
+ * @param {unknown} value - Value to process
+ * @returns {InputJsonValue} The serialized json value
+ */
 export function serializeJsonValue(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue
 }
 
+/**
+ * Normalizes a project row before returning it to callers
+ * @param {TProject} project - Project record to process
+ * @returns {TProject} The normalized project response
+ */
 export function normalizeProjectResponse<TProject extends JsonFieldsProject>(project: TProject): TProject {
   const analysisConfig = isJsonObject(project.analysisConfig) ? project.analysisConfig : project.analysisConfig
   const analysisResults = isJsonObject(project.analysisResults) ? project.analysisResults : project.analysisResults
@@ -140,6 +192,13 @@ export function normalizeProjectResponse<TProject extends JsonFieldsProject>(pro
   }
 }
 
+/**
+ * Builds a PDF-ready project payload
+ * @param {JsonFieldsProject} project - Project record to process
+ * @param {string | null} rgbSignedUrl - Rgb signed url value
+ * @param {ImageGeoTransform | null} imageGeoTransform - Value used for image geo transform
+ * @returns {PdfProjectResponse<JsonFieldsProject>} The built pdf project response
+ */
 export function buildPdfProjectResponse(
   project: JsonFieldsProject,
   rgbSignedUrl: string | null,

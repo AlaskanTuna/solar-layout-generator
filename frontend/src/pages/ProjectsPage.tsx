@@ -40,6 +40,9 @@ function formatResetTime(resetsAt: string): string {
   return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
+/**
+ * Renders the project catalog and creation flow
+ */
 export function ProjectsPage() {
   const { t } = useTranslation('projects')
   const navigate = useNavigate()
@@ -125,6 +128,7 @@ export function ProjectsPage() {
   return (
     <>
       <PageContainer>
+        {/* Header */}
         <PageHeaderCard artSrc="/dashboard/projects.webp">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -140,8 +144,10 @@ export function ProjectsPage() {
           </div>
         </PageHeaderCard>
 
+        {/* Project list and workflow sidebar */}
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem]">
           <div className="flex flex-col">
+            {/* Summary stats */}
             <div className="grid grid-cols-3 gap-4 animate-fade-in-up">
               <div className="glass-card flex items-center gap-3 p-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -174,6 +180,7 @@ export function ProjectsPage() {
               </div>
             </div>
 
+            {/* Filter bar */}
             <div className="mt-6 flex w-fit gap-1 rounded-lg bg-muted/50 p-1">
               {(['all', 'completed', 'in-progress'] as const).map((f) => (
                 <button
@@ -192,6 +199,7 @@ export function ProjectsPage() {
               ))}
             </div>
 
+            {/* Project grid */}
             <div className="mt-6">
               {isLoading ? (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -236,6 +244,7 @@ export function ProjectsPage() {
             </div>
           </div>
 
+          {/* Workflow guide */}
           <aside className="hidden lg:block animate-fade-in">
             <div className="glass-card flex flex-col overflow-hidden">
               <div className="border-b border-border bg-muted/30 px-4 py-3">
@@ -260,6 +269,7 @@ export function ProjectsPage() {
         </div>
       </PageContainer>
 
+      {/* Create project dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <form onSubmit={handleCreateProject}>

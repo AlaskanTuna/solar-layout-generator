@@ -1,5 +1,8 @@
 import type { TariffRates, TariffThresholds } from '@shared/types'
 
+/**
+ * Defines the BillBreakdown interface
+ */
 export interface BillBreakdown {
   kwh: number
   energy: number
@@ -14,6 +17,9 @@ export interface BillBreakdown {
   total: number
 }
 
+/**
+ * Defines the NemMonthResult interface
+ */
 export interface NemMonthResult {
   month: number
   consumptionKwh: number
@@ -27,6 +33,9 @@ export interface NemMonthResult {
   savingsRm: number
 }
 
+/**
+ * Defines the AnnualSimulationResult interface
+ */
 export interface AnnualSimulationResult {
   months: NemMonthResult[]
   totalConsumptionKwh: number
@@ -37,6 +46,9 @@ export interface AnnualSimulationResult {
   totalCreditsForfeited: number
 }
 
+/**
+ * Defines the BillingConfig interface
+ */
 export interface BillingConfig {
   rates: TariffRates
   thresholds: TariffThresholds
@@ -52,7 +64,12 @@ function round5sen(n: number): number {
   return Math.round(n * 20) / 20
 }
 
-/** Look up EEI rebate rate for a consumption level */
+/**
+ * Looks up EEI rebate rate for a consumption level
+ * @param {number} consumptionKwh - Value used for consumption kwh
+ * @param {[number, number][]} eeiTable - Collection of eei table values
+ * @returns {number} The resulting lookup eei rebate value
+ */
 export function lookupEeiRebate(consumptionKwh: number, eeiTable: [number, number][]): number {
   if (consumptionKwh <= 0) return 0
   for (const [upperBound, rebateSen] of eeiTable) {
@@ -61,7 +78,12 @@ export function lookupEeiRebate(consumptionKwh: number, eeiTable: [number, numbe
   return 0
 }
 
-/** Compute a monthly TNB domestic bill under RP4 tariff */
+/**
+ * Computes a monthly TNB domestic bill under RP4 tariff
+ * @param {number} kwh - Value used for kwh
+ * @param {BillingConfig} config - Value used for config
+ * @returns {BillBreakdown} The computed bill
+ */
 export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
   if (kwh <= 0) {
     return {
@@ -126,7 +148,15 @@ export function computeBill(kwh: number, config: BillingConfig): BillBreakdown {
   }
 }
 
-/** Compute one month of NEM billing with credit carry-forward */
+/**
+ * Computes one month of NEM billing with credit carry-forward
+ * @param {number} consumptionKwh - Value used for consumption kwh
+ * @param {number} generationKwh - Value used for generation kwh
+ * @param {number} creditBalance - Value used for credit balance
+ * @param {BillingConfig} config - Value used for config
+ * @param {number} month - Month value to render
+ * @returns {NemMonthResult} The computed nem month
+ */
 export function computeNemMonth(
   consumptionKwh: number,
   generationKwh: number,
@@ -175,7 +205,13 @@ export function computeNemMonth(
   }
 }
 
-/** Run a 12-month NEM billing simulation with credit carry-forward */
+/**
+ * Run a 12-month NEM billing simulation with credit carry-forward
+ * @param {number | number[]} monthlyConsumption - Collection of monthly consumption values
+ * @param {number[]} monthlyGeneration - Collection of monthly generation values
+ * @param {BillingConfig} config - Value used for config
+ * @returns {AnnualSimulationResult} The resulting run annual simulation value
+ */
 export function runAnnualSimulation(
   monthlyConsumption: number | number[],
   monthlyGeneration: number[],

@@ -9,6 +9,10 @@ type UseWorkbenchKeyboardOptions = {
   onSpaceUp: () => void
 }
 
+/**
+ * Provides the workbenchKeyboard hook
+ * @param {UseWorkbenchKeyboardOptions} options - Value used for options
+ */
 export function useWorkbenchKeyboard({
   undo,
   redo,

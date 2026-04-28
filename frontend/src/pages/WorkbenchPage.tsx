@@ -40,6 +40,9 @@ function getPanelAnnualEnergy(monthlyEnergyDcKwh: number[], yearlyEnergyDcKwh: n
   return monthlyEnergyDcKwh.length > 0 ? annualEnergyFromMonthly(monthlyEnergyDcKwh) : yearlyEnergyDcKwh
 }
 
+/**
+ * Renders the panel layout workbench
+ */
 export function WorkbenchPage() {
   const { t } = useTranslation('workbench')
   const { projectId } = useParams<{ projectId: string }>()
@@ -268,6 +271,7 @@ export function WorkbenchPage() {
     <AppLayout>
       <GuidedTour storageKey="slg-tour-workbench" steps={getWorkbenchTourSteps(t)} />
       <PageContainer variant="mvp">
+        {/* Workbench sidebar */}
         <WorkbenchSidebar
           projectName={project.name}
           imageryQuality={project.location?.imageryQuality ?? null}
@@ -298,6 +302,7 @@ export function WorkbenchPage() {
           onSave={handleSave}
         />
 
+        {/* Canvas workspace */}
         <section
           className={
             canvasExpanded
@@ -305,6 +310,7 @@ export function WorkbenchPage() {
               : 'flex min-h-[60vh] min-w-0 flex-1 flex-col xl:min-h-0'
           }
         >
+          {/* Stage viewport */}
           <Card data-tour="canvas" className="flex flex-1 flex-col overflow-hidden border-border bg-card/90 shadow-sm">
             <CardHeader className="border-b border-border bg-muted/50">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -326,6 +332,7 @@ export function WorkbenchPage() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col overflow-hidden p-4">
+              {/* Panel canvas */}
               <div
                 ref={containerRef}
                 className="relative flex flex-1 items-center justify-center rounded-2xl border border-dashed border-border p-8"
@@ -500,6 +507,7 @@ export function WorkbenchPage() {
                 )}
               </div>
 
+              {/* Monthly irradiance slider */}
               <div className="mt-3 flex items-center gap-3">
                 <span className="w-8 text-xs font-medium text-amber-600">{MONTH_LABELS[irradianceMonth]}</span>
                 <Slider

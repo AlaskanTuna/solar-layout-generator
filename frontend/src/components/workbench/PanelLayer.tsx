@@ -39,11 +39,8 @@ function panelAnnualEnergy(panel: WorkbenchPanelState): number {
     : panel.yearlyEnergyDcKwh
 }
 
-// Rank-based color: instead of mapping raw kWh to a 0..1 ratio (which collapses
-// when yields cluster — e.g. 66% of BASE-tier panels share the top yield decile),
-// each panel's color comes from its rank within the visible set. Lowest yield = 0,
-// highest = 1, evenly distributed regardless of value spread. Guarantees every
-// panel gets a visually distinguishable shade even on tight-spread API responses.
+// Rank-based color keeps clustered yields readable by mapping each panel to its visible-set rank
+// Lowest yield becomes 0 and highest becomes 1, so every panel still gets a distinct shade
 function getPanelColorByRatio(ratio: number): string {
   const r = Math.max(0, Math.min(1, ratio))
   const red = Math.round(29 + r * (147 - 29))
@@ -52,6 +49,10 @@ function getPanelColorByRatio(ratio: number): string {
   return `rgba(${red}, ${green}, ${blue}, 0.82)`
 }
 
+/**
+ * Renders the PanelLayer component
+ * @param {PanelLayerProps} props - Props for the component
+ */
 export function PanelLayer({
   panels,
   panelWidth,
@@ -72,9 +73,8 @@ export function PanelLayer({
   onGroupRotateEnd,
   freeRotate
 }: PanelLayerProps) {
-  // Compute each panel's rank by yield (ascending). Ties resolve by id so the
-  // mapping is stable across re-renders. Result: panel id → rank-normalized
-  // ratio in [0, 1] used directly as color input.
+  // Compute each panel's rank by yield, breaking ties by id so the mapping stays stable
+  // The resulting ratio in [0, 1] feeds the panel color directly
   const yieldRatios = useMemo(() => {
     const sorted = [...panels].sort((a, b) => {
       const dy = panelAnnualEnergy(a.panel) - panelAnnualEnergy(b.panel)

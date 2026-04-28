@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+/**
+ * Zod schema for a saved panel edit
+ */
 export const panelEditSchema = z
   .object({
     id: z.string(),
@@ -13,8 +16,14 @@ export const panelEditSchema = z
   })
   .strict()
 
+/**
+ * Panel edit payload shared between backend and frontend
+ */
 export type PanelEdit = z.infer<typeof panelEditSchema>
 
+/**
+ * Canonical panel model metadata
+ */
 export interface PanelModel {
   id: string
   name: string

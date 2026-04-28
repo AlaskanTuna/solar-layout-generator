@@ -17,6 +17,12 @@ function extractToken(req: Request): string | null {
   return null
 }
 
+/**
+ * Verify the PDF export token and attach its claims
+ * @param {Request} req - Incoming Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express middleware continuation callback
+ */
 export function requirePdfToken(req: Request, res: Response, next: NextFunction) {
   const token = extractToken(req)
   if (!token) {

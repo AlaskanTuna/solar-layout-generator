@@ -22,6 +22,10 @@ function ensureLoaded(): Promise<void> {
   return loadPromise
 }
 
+/**
+ * Provides the googleMaps hook
+ * @returns {Object} Hook state for google maps
+ */
 export function useGoogleMaps() {
   const [isLoaded, setIsLoaded] = useState(loaded)
   const [error, setError] = useState<string | null>(loadError)

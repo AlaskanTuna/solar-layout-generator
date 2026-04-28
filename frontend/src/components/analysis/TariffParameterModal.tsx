@@ -48,6 +48,10 @@ function parseInputToRate(text: string, unit: TariffField['unit']): number | nul
   return unit === '%' ? parsed / 100 : parsed
 }
 
+/**
+ * Renders the tariffparameter modal
+ * @param {TariffParameterModalProps} props - Props for the component
+ */
 export function TariffParameterModal({ open, onOpenChange, defaults, override, onSave }: TariffParameterModalProps) {
   const [draft, setDraft] = useState<Record<string, string>>({})
 

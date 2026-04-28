@@ -11,6 +11,10 @@ type AppLayoutProps = {
 
 const SIDEBAR_W = 64
 
+/**
+ * Renders the AppLayout component
+ * @param {AppLayoutProps} props - Props for the component
+ */
 export function AppLayout({ children, minimalNav }: AppLayoutProps) {
   return (
     <div className="relative flex min-h-screen flex-col">

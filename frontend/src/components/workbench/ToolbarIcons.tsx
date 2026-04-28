@@ -9,6 +9,9 @@ const svgProps = {
   strokeLinejoin: 'round' as const
 }
 
+/**
+ * Renders the CollapseIcon component
+ */
 export function CollapseIcon() {
   return (
     <svg {...svgProps}>
@@ -20,6 +23,9 @@ export function CollapseIcon() {
   )
 }
 
+/**
+ * Renders the ExpandIcon component
+ */
 export function ExpandIcon() {
   return (
     <svg {...svgProps}>
@@ -31,6 +37,9 @@ export function ExpandIcon() {
   )
 }
 
+/**
+ * Renders the UndoIcon component
+ */
 export function UndoIcon() {
   return (
     <svg {...svgProps}>
@@ -40,6 +49,9 @@ export function UndoIcon() {
   )
 }
 
+/**
+ * Renders the RedoIcon component
+ */
 export function RedoIcon() {
   return (
     <svg {...svgProps}>
@@ -49,6 +61,9 @@ export function RedoIcon() {
   )
 }
 
+/**
+ * Renders the MarqueeIcon component
+ */
 export function MarqueeIcon() {
   return (
     <svg {...svgProps}>
@@ -72,6 +87,9 @@ export function MarqueeIcon() {
   )
 }
 
+/**
+ * Renders the SnapIcon component
+ */
 export function SnapIcon() {
   return (
     <svg {...svgProps}>
@@ -84,6 +102,9 @@ export function SnapIcon() {
   )
 }
 
+/**
+ * Renders the DeleteIcon component
+ */
 export function DeleteIcon() {
   return (
     <svg {...svgProps}>
@@ -94,6 +115,9 @@ export function DeleteIcon() {
   )
 }
 
+/**
+ * Renders the RotateIcon component
+ */
 export function RotateIcon() {
   return (
     <svg {...svgProps}>
@@ -103,6 +127,9 @@ export function RotateIcon() {
   )
 }
 
+/**
+ * Renders the LayersIcon component
+ */
 export function LayersIcon() {
   return (
     <svg {...svgProps}>

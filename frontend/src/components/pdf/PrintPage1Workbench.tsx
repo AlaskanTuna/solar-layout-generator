@@ -10,6 +10,10 @@ type Props = {
   project: ProjectResponse
 }
 
+/**
+ * Renders the workbench page of the PDF report
+ * @param {Props} props - Props for the component
+ */
 export function PrintPage1Workbench({ project }: Props) {
   const { t } = useTranslation('pdf')
   const activePanels = parsePanelEdits(project.editedLayout).filter((p) => p.status !== 'deleted')
@@ -42,6 +46,7 @@ export function PrintPage1Workbench({ project }: Props) {
       sectionLabel={t('page1.sectionLabel')}
       context={t('page1.context')}
     >
+      {/* Rooftop preview */}
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         <div className="flex min-h-0 flex-1 justify-center">
           {project.rgbSignedUrl && (
@@ -82,6 +87,7 @@ export function PrintPage1Workbench({ project }: Props) {
           )}
         </div>
 
+        {/* Summary tiles */}
         <div className="grid grid-cols-4 gap-2">
           <StatTile
             label={t('page1.stats.activePanels.label')}

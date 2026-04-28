@@ -1,7 +1,16 @@
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export type TooltipState = { label: string | null; pinned: boolean }
+/**
+ * Defines the TooltipState type
+ */
+export type TooltipState = { label: string | null; pinned: boolean }/**
+ * Defines the ToolButtonProps type
+ */
+/**
+ * Defines the ToolButtonProps type
+ */
+
 
 export type ToolButtonProps = {
   onClick: () => void
@@ -14,6 +23,10 @@ export type ToolButtonProps = {
   children: React.ReactNode
 }
 
+/**
+ * Renders the tool button
+ * @param {ToolButtonProps} props - Props for the component
+ */
 export function ToolButton({
   onClick,
   disabled,
@@ -66,6 +79,9 @@ export function ToolButton({
   )
 }
 
+/**
+ * Defines the SwatchButtonProps type
+ */
 export type SwatchButtonProps = {
   active: boolean
   background: string
@@ -75,6 +91,10 @@ export type SwatchButtonProps = {
   setTooltipState: React.Dispatch<React.SetStateAction<TooltipState>>
 }
 
+/**
+ * Renders the swatch button
+ * @param {SwatchButtonProps} props - Props for the component
+ */
 export function SwatchButton({ active, background, label, onClick, tooltipState, setTooltipState }: SwatchButtonProps) {
   const isTooltipOpen = tooltipState.label === label
 

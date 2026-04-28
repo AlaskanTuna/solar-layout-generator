@@ -69,6 +69,10 @@ type TariffControlsProps = {
   lifecycleControls?: React.ReactNode
 }
 
+/**
+ * Renders the TariffControls component
+ * @param {TariffControlsProps} props - Props for the component
+ */
 export function TariffControls({
   formState,
   setFormState,

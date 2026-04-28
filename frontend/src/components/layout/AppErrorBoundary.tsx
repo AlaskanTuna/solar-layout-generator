@@ -10,6 +10,9 @@ type AppErrorBoundaryState = {
   hasError: boolean
 }
 
+/**
+ * Defines the AppErrorBoundary class
+ */
 export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
   state: AppErrorBoundaryState = {
     hasError: false

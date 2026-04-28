@@ -1,15 +1,24 @@
 import type { PanelEdit } from '@shared/types'
 
+/**
+ * Defines the BoundingBox type
+ */
 export type BoundingBox = {
   sw: { latitude: number; longitude: number }
   ne: { latitude: number; longitude: number }
 }
 
+/**
+ * Defines the RoofSegment type
+ */
 export type RoofSegment = {
   azimuthDegrees: number
   pitchDegrees: number
 }
 
+/**
+ * Defines the SolarPanel type
+ */
 export type SolarPanel = {
   id: string
   center: { lat: number; lng: number }
@@ -18,6 +27,9 @@ export type SolarPanel = {
   segmentIndex: number
 }
 
+/**
+ * Defines the ParsedBuildingInsights type
+ */
 export type ParsedBuildingInsights = {
   boundingBox: BoundingBox
   solarPotential: {
@@ -73,6 +85,11 @@ function getPanelCenter(raw: unknown): { lat: number; lng: number } | null {
   return { lat: latitude, lng: longitude }
 }
 
+/**
+ * Defines the parseBuildingInsights function
+ * @param {unknown} raw - Value used for raw
+ * @returns {ParsedBuildingInsights} The parsed building insights
+ */
 export function parseBuildingInsights(raw: unknown): ParsedBuildingInsights | null {
   if (!isRecord(raw)) return null
 
@@ -146,6 +163,11 @@ export function parseBuildingInsights(raw: unknown): ParsedBuildingInsights | nu
   }
 }
 
+/**
+ * Defines the parsePanelEdits function
+ * @param {unknown} raw - Value used for raw
+ * @returns {Array} The parsed panel edits
+ */
 export function parsePanelEdits(raw: unknown): PanelEdit[] {
   if (!Array.isArray(raw)) return []
 
@@ -176,11 +198,22 @@ export function parsePanelEdits(raw: unknown): PanelEdit[] {
     .filter((item): item is PanelEdit => item !== null)
 }
 
+/**
+ * Defines the normalizeRotation function
+ * @param {number} rotation - Value used for rotation
+ * @returns {number} The normalized rotation
+ */
 export function normalizeRotation(rotation: number): number {
   const normalized = rotation % 360
   return normalized < 0 ? normalized + 360 : normalized
 }
 
+/**
+ * Computes the initial panel rotation value
+ * @param {SolarPanel} panel - Value used for panel
+ * @param {RoofSegment[]} roofSegments - Collection of roof segments values
+ * @returns {number} The requested initial panel rotation
+ */
 export function getInitialPanelRotation(panel: SolarPanel, roofSegments: RoofSegment[]): number {
   const orientationDegrees = panel.orientation === 'PORTRAIT' ? 90 : 0
   const azimuthDegrees = roofSegments[panel.segmentIndex]?.azimuthDegrees ?? 0
@@ -189,6 +222,11 @@ export function getInitialPanelRotation(panel: SolarPanel, roofSegments: RoofSeg
   return normalizeRotation(azimuthDegrees + orientationDegrees - 90)
 }
 
+/**
+ * Defines the annualEnergyFromMonthly function
+ * @param {number[]} monthlyEnergyDcKwh - Collection of monthly energy dc kwh values
+ * @returns {number} The resulting annual energy from monthly value
+ */
 export function annualEnergyFromMonthly(monthlyEnergyDcKwh: number[]): number {
   return monthlyEnergyDcKwh.reduce((sum, value) => sum + value, 0)
 }

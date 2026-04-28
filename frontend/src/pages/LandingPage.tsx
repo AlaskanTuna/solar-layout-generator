@@ -24,6 +24,9 @@ import {
   BookOpen
 } from 'lucide-react'
 
+/**
+ * Renders the marketing landing page
+ */
 export function LandingPage() {
   const { t } = useTranslation('landing')
   const { session, loading } = useAuth()
@@ -73,6 +76,7 @@ export function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background font-body">
+      {/* Top navigation */}
       <nav
         className={`fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 ${
           navScrolled ? 'glass-nav' : 'border-b border-transparent bg-transparent'
@@ -99,6 +103,7 @@ export function LandingPage() {
         </div>
       </nav>
 
+      {/* Hero */}
       <section className="relative h-screen snap-start overflow-hidden">
         <div className="absolute inset-0">
           <img
@@ -259,6 +264,7 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Trust band */}
       <section
         aria-label="Trust signals"
         className="snap-start overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
@@ -287,8 +293,10 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Pipeline section */}
       <PipelineSection />
 
+      {/* Features */}
       <section id="features" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
@@ -343,6 +351,7 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing */}
       <section id="pricing" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
@@ -385,6 +394,7 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
       <section id="faq" className="snap-start bg-card px-6 py-24">
         <div className="mx-auto max-w-3xl">
           <div className="mb-14 text-center">
@@ -424,6 +434,7 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Footer */}
       <div className="snap-end">
         <AppFooter />
       </div>

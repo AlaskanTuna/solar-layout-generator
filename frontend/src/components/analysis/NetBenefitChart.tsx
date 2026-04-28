@@ -40,6 +40,10 @@ type NetBenefitChartProps = {
 const YEAR_RANGES = [5, 10, 15, 20, 25] as const
 type YearRange = (typeof YEAR_RANGES)[number]
 
+/**
+ * Renders the netbenefit chart
+ * @param {NetBenefitChartProps} props - Props for the component
+ */
 export function NetBenefitChart({
   year1Savings,
   degradationRate,

@@ -96,6 +96,10 @@ function PanelMesh({
   )
 }
 
+/**
+ * Renders the PanelPreview3D component
+ * @param {PanelPreview3DProps} props - Props for the component
+ */
 export default function PanelPreview3D({ widthM, heightM, cellColor }: PanelPreview3DProps) {
   return (
     <Canvas camera={{ position: [0, 0, 3], fov: 35 }} style={{ width: '100%', height: '100%' }}>

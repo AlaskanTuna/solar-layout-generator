@@ -1,5 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card'
 
+/**
+ * Renders the SummaryTile component
+ * @param {Object} props - Props for the component
+ */
 export function SummaryTile({
   label,
   value,
@@ -18,6 +22,10 @@ export function SummaryTile({
   )
 }
 
+/**
+ * Renders the summary card
+ * @param {Object} props - Props for the component
+ */
 export function SummaryCard({
   title,
   tiles,

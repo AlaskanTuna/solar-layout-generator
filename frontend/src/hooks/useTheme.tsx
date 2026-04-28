@@ -19,6 +19,10 @@ function resolveTheme(theme: Theme): 'light' | 'dark' {
   return theme === 'system' ? getSystemTheme() : theme
 }
 
+/**
+ * Renders the ThemeProvider component
+ * @param {Object} props - Props for the component
+ */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = localStorage.getItem('theme') as Theme | null
@@ -68,6 +72,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return <ThemeContext.Provider value={{ theme, resolved, setTheme, toggle }}>{children}</ThemeContext.Provider>
 }
 
+/**
+ * Provides the theme hook
+ * @returns {ThemeContextValue} Hook state for theme
+ */
 export function useTheme() {
   const context = useContext(ThemeContext)
   if (!context) {

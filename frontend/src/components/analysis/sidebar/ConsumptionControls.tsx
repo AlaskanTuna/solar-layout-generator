@@ -13,6 +13,10 @@ type ConsumptionControlsProps = {
   setFormState: React.Dispatch<React.SetStateAction<AnalysisFormState | null>>
 }
 
+/**
+ * Renders the ConsumptionControls component
+ * @param {ConsumptionControlsProps} props - Props for the component
+ */
 export function ConsumptionControls({ formState, setFormState }: ConsumptionControlsProps) {
   const { t } = useTranslation('analysis')
   const [billImageOpen, setBillImageOpen] = useState(false)

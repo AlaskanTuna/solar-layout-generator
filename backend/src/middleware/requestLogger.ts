@@ -1,5 +1,11 @@
 import type { RequestHandler } from 'express'
 
+/**
+ * Log inbound and completed HTTP requests
+ * @param {Object} req - Incoming Express request object
+ * @param {Response<any, Record<string, any>, number>} res - Express response object
+ * @param {NextFunction} next - Express middleware continuation callback
+ */
 export const requestLogger: RequestHandler = (req, res, next) => {
   const startedAt = Date.now()
 

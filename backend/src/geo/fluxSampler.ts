@@ -1,5 +1,11 @@
 import type { GeoTIFFImage } from 'geotiff'
 
+/**
+ * Test whether a point lies inside a polygon
+ * @param {number} x - Value used for x
+ * @param {number} y - Value used for y
+ * @param {[number, number][]} polygon - Collection of polygon values
+ */
 export function pointInPolygon(x: number, y: number, polygon: [number, number][]): boolean {
   const n = polygon.length
   let inside = false
@@ -23,6 +29,14 @@ export function pointInPolygon(x: number, y: number, polygon: [number, number][]
   return inside
 }
 
+/**
+ * Average flux values for pixels inside a panel polygon
+ * @param {[number, number][]} corners - Collection of corners values
+ * @param {ArrayLike<number>} fluxData - Value used for flux data
+ * @param {number} width - Value used for width
+ * @param {number} height - Value used for height
+ * @returns {number} The resulting calculate average flux value
+ */
 export function calculateAverageFlux(
   corners: [number, number][],
   fluxData: ArrayLike<number>,
@@ -53,6 +67,13 @@ export function calculateAverageFlux(
   return fluxValues.reduce((sum, v) => sum + v, 0) / fluxValues.length
 }
 
+/**
+ * Computes monthly DC energy directly from a GeoTIFF image
+ * @param {GeoTIFFImage} image - Value used for image
+ * @param {[number, number][]} corners - Collection of corners values
+ * @param {number} panelCapacityWatts - Value used for panel capacity watts
+ * @returns {Promise<number[]>} A promise resolving to the resulting value
+ */
 export async function computeMonthlyEnergy(
   image: GeoTIFFImage,
   corners: [number, number][],
@@ -73,12 +94,20 @@ export async function computeMonthlyEnergy(
   return monthlyEnergyDcKwh
 }
 
+/**
+ * Preloaded flux rasters for repeated monthly sampling
+ */
 export interface PreloadedFluxRasters {
   bands: ArrayLike<number>[]
   width: number
   height: number
 }
 
+/**
+ * Read all monthly flux bands into memory
+ * @param {GeoTIFFImage} image - Value used for image
+ * @returns {Promise<PreloadedFluxRasters>} A promise resolving to the resulting value
+ */
 export async function preloadFluxRasters(image: GeoTIFFImage): Promise<PreloadedFluxRasters> {
   const width = image.getWidth()
   const height = image.getHeight()
@@ -92,6 +121,13 @@ export async function preloadFluxRasters(image: GeoTIFFImage): Promise<Preloaded
   return { bands, width, height }
 }
 
+/**
+ * Computes monthly DC energy from preloaded rasters
+ * @param {PreloadedFluxRasters} rasters - Value used for rasters
+ * @param {[number, number][]} corners - Collection of corners values
+ * @param {number} panelCapacityWatts - Value used for panel capacity watts
+ * @returns {number[]} The computed monthly energy from rasters
+ */
 export function computeMonthlyEnergyFromRasters(
   rasters: PreloadedFluxRasters,
   corners: [number, number][],

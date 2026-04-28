@@ -1,18 +1,50 @@
 import type { RoofType, TariffRates } from '@shared/types'
 
-export type ConnectionPhase = 'single' | 'three'
+/**
+ * Defines the ConnectionPhase type
+ */
+export type ConnectionPhase = 'single' | 'three'/**
+ * Defines the AnalysisMode type
+ */
+/**
+ * Defines the AnalysisMode type
+ */
+
 
 export type AnalysisMode = 'simple' | 'lifecycle'
 
-export type ConsumptionProfile = 'flat' | 'seasonal'
+/**
+ * Defines the ConsumptionProfile type
+ */
+export type ConsumptionProfile = 'flat' | 'seasonal'/**
+ * Defines the InverterReplacement type
+ */
+/**
+ * Defines the InverterReplacement type
+ */
+
 
 export type InverterReplacement = {
   year: number
   costRm: number
 }
 
-export const DEFAULT_ANNUAL_MAINTENANCE_RM = 500
-export const DEFAULT_INVERTER_REPLACEMENT: InverterReplacement = { year: 12, costRm: 4500 }
+/**
+ * Defines the DEFAULT_ANNUAL_MAINTENANCE_RM constant
+ */
+export const DEFAULT_ANNUAL_MAINTENANCE_RM = 500/**
+ * Defines the DEFAULT_INVERTER_REPLACEMENT constant
+ */
+/**
+ * Defines the DEFAULT_INVERTER_REPLACEMENT constant
+ */
+export const DEFAULT_INVERTER_REPLACEMENT: InverterReplacement = { year: 12, costRm: 4500 }/**
+ * Defines the AnalysisConfig type
+ */
+/**
+ * Defines the AnalysisConfig type
+ */
+
 
 export type AnalysisConfig = {
   monthlyConsumptionKwh: number
@@ -108,6 +140,11 @@ function parseInverterReplacements(
   return null
 }
 
+/**
+ * Defines the parseSavedAnalysisConfig function
+ * @param {unknown} raw - Value used for raw
+ * @returns {Partial<AnalysisConfig>} The parsed saved analysis config
+ */
 export function parseSavedAnalysisConfig(raw: unknown): Partial<AnalysisConfig> | null {
   if (!isRecord(raw)) return null
 

@@ -1,6 +1,9 @@
 import proj4 from 'proj4'
 import type { LocationImageGeoTransform } from '@/api/locations'
 
+/**
+ * Defines the CanvasGeo type
+ */
 export type CanvasGeo = LocationImageGeoTransform & {
   displayWidth: number
   displayHeight: number
@@ -8,11 +11,17 @@ export type CanvasGeo = LocationImageGeoTransform & {
   scaleY: number
 }
 
+/**
+ * Defines the PixelPoint type
+ */
 export type PixelPoint = {
   x: number
   y: number
 }
 
+/**
+ * Defines the RectAabb type
+ */
 export type RectAabb = {
   minX: number
   maxX: number
@@ -20,12 +29,22 @@ export type RectAabb = {
   maxY: number
 }
 
+/**
+ * Defines the RasterMask type
+ */
 export type RasterMask = {
   width: number
   height: number
   pixels: Uint8Array
 }
 
+/**
+ * Defines the createCanvasGeo function
+ * @param {LocationImageGeoTransform} imageGeoTransform - Value used for image geo transform
+ * @param {number} displayWidth - Value used for display width
+ * @param {number} displayHeight - Value used for display height
+ * @returns {any} The resulting canvas geo value
+ */
 export function createCanvasGeo(
   imageGeoTransform: LocationImageGeoTransform,
   displayWidth: number,
@@ -40,6 +59,13 @@ export function createCanvasGeo(
   }
 }
 
+/**
+ * Defines the latLngToPixel function
+ * @param {number} lat - Value used for lat
+ * @param {number} lng - Value used for lng
+ * @param {CanvasGeo} geo - Value used for geo
+ * @returns {PixelPoint} The resulting lat lng to pixel value
+ */
 export function latLngToPixel(lat: number, lng: number, geo: CanvasGeo): PixelPoint {
   const [projX, projY] = proj4(geo.fromCRS, geo.toCRS, [lng, lat])
   const imageX = (projX - geo.originX) / geo.resX
@@ -51,6 +77,13 @@ export function latLngToPixel(lat: number, lng: number, geo: CanvasGeo): PixelPo
   }
 }
 
+/**
+ * Defines the pixelToLatLng function
+ * @param {number} x - Value used for x
+ * @param {number} y - Value used for y
+ * @param {CanvasGeo} geo - Value used for geo
+ * @returns {Object} The resulting structured value
+ */
 export function pixelToLatLng(x: number, y: number, geo: CanvasGeo): { lat: number; lng: number } {
   const imageX = x / geo.scaleX
   const imageY = y / geo.scaleY
@@ -62,6 +95,13 @@ export function pixelToLatLng(x: number, y: number, geo: CanvasGeo): { lat: numb
   return { lat, lng }
 }
 
+/**
+ * Defines the panelMetersToPixels function
+ * @param {number} panelWidthMeters - Value used for panel width meters
+ * @param {number} panelHeightMeters - Value used for panel height meters
+ * @param {CanvasGeo} geo - Value used for geo
+ * @returns {Object} The resulting structured value
+ */
 export function panelMetersToPixels(
   panelWidthMeters: number,
   panelHeightMeters: number,
@@ -73,6 +113,15 @@ export function panelMetersToPixels(
   }
 }
 
+/**
+ * Computes the rotated rect points value
+ * @param {number} centerX - Value used for center x
+ * @param {number} centerY - Value used for center y
+ * @param {number} width - Value used for width
+ * @param {number} height - Value used for height
+ * @param {number} rotationDeg - Value used for rotation deg
+ * @returns {PixelPoint[]} The requested rotated rect points
+ */
 export function getRotatedRectPoints(
   centerX: number,
   centerY: number,
@@ -99,6 +148,11 @@ export function getRotatedRectPoints(
   }))
 }
 
+/**
+ * Computes the rect aabb value
+ * @param {PixelPoint[]} points - Collection of points values
+ * @returns {RectAabb} The requested rect aabb
+ */
 export function getRectAabb(points: PixelPoint[]): RectAabb {
   return {
     minX: Math.min(...points.map((point) => point.x)),
@@ -108,13 +162,17 @@ export function getRectAabb(points: PixelPoint[]): RectAabb {
   }
 }
 
+/**
+ * Defines the aabbsOverlap function
+ * @param {RectAabb} a - Value used for a
+ * @param {RectAabb} b - Value used for b
+ */
 export function aabbsOverlap(a: RectAabb, b: RectAabb): boolean {
   return a.minX < b.maxX && a.maxX > b.minX && a.minY < b.maxY && a.maxY > b.minY
 }
 
-/**
- * SAT (Separating Axis Theorem) overlap test for two convex polygons
- * Returns true only when the shapes actually intersect — no false positives from AABB inflation
+/** SAT overlap test for two convex polygons
+ * Returns true only when the shapes actually intersect, with no AABB inflation false positives
  */
 function satProjectionsOverlap(axis: PixelPoint, polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
   let minA = Infinity
@@ -147,6 +205,11 @@ function getEdgeNormals(poly: PixelPoint[]): PixelPoint[] {
   return normals
 }
 
+/**
+ * Defines the obbsOverlap function
+ * @param {PixelPoint[]} polyA - Collection of poly a values
+ * @param {PixelPoint[]} polyB - Collection of poly b values
+ */
 export function obbsOverlap(polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
   const axes = [...getEdgeNormals(polyA), ...getEdgeNormals(polyB)]
   for (const axis of axes) {
@@ -155,6 +218,9 @@ export function obbsOverlap(polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
   return true
 }
 
+/**
+ * Defines the MinSeparationResult type
+ */
 export type MinSeparationResult = {
   /** Signed penetration depth (positive = overlap, negative = gap) */
   penetration: number
@@ -163,10 +229,10 @@ export type MinSeparationResult = {
 }
 
 /**
- * SAT overlap test that also returns the minimum-separation axis and penetration depth
- * Returns null when the shapes are separated (no overlap)
- * When the shapes overlap the returned penetration depth is the smallest push-out distance,
- * and axis points in the direction that moves polyA out of polyB
+ * SAT overlap test that also returns the minimum-separation axis and penetration depth Returns null when the shapes are separated, otherwise returns the smallest push-out distance and axis
+ * @param {PixelPoint[]} polyA - Collection of poly a values
+ * @param {PixelPoint[]} polyB - Collection of poly b values
+ * @returns {MinSeparationResult} The resulting obbs overlap with min separation value
  */
 export function obbsOverlapWithMinSeparation(polyA: PixelPoint[], polyB: PixelPoint[]): MinSeparationResult | null {
   const axes = [...getEdgeNormals(polyA), ...getEdgeNormals(polyB)]
@@ -206,10 +272,22 @@ export function obbsOverlapWithMinSeparation(polyA: PixelPoint[], polyB: PixelPo
   return { penetration: minPenetration, axis: minAxis }
 }
 
+/**
+ * Defines the isAabbInsideStage function
+ * @param {RectAabb} aabb - Value used for aabb
+ * @param {number} stageWidth - Value used for stage width
+ * @param {number} stageHeight - Value used for stage height
+ */
 export function isAabbInsideStage(aabb: RectAabb, stageWidth: number, stageHeight: number): boolean {
   return aabb.minX >= 0 && aabb.maxX <= stageWidth && aabb.minY >= 0 && aabb.maxY <= stageHeight
 }
 
+/**
+ * Defines the pointInPolygon function
+ * @param {number} x - Value used for x
+ * @param {number} y - Value used for y
+ * @param {PixelPoint[]} polygon - Collection of polygon values
+ */
 export function pointInPolygon(x: number, y: number, polygon: PixelPoint[]): boolean {
   let inside = false
 
@@ -228,6 +306,11 @@ export function pointInPolygon(x: number, y: number, polygon: PixelPoint[]): boo
   return inside
 }
 
+/**
+ * Defines the isPolygonInsideRasterMask function
+ * @param {PixelPoint[]} polygon - Collection of polygon values
+ * @param {RasterMask} mask - Value used for mask
+ */
 export function isPolygonInsideRasterMask(polygon: PixelPoint[], mask: RasterMask): boolean {
   if (polygon.length < 3 || mask.pixels.length !== mask.width * mask.height) {
     return false
