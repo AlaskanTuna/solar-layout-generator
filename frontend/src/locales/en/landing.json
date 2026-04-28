@@ -112,12 +112,7 @@
         "name": "Free",
         "price": "RM 0",
         "description": "For homeowners exploring solar.",
-        "features": [
-          "5 projects per day",
-          "Auto-layout + manual edit",
-          "NEM bill simulation",
-          "Standard PDF export"
-        ],
+        "features": ["5 projects per day", "Auto-layout + manual edit", "NEM bill simulation", "Standard PDF export"],
         "cta": "Get started"
       },
       "pro": {
@@ -152,7 +147,7 @@
     "title": "Things people ask before",
     "titleMuted": "signing up.",
     "disclaimer": "Results are preliminary estimates and do not replace a professional on-site assessment. Financial projections use published RP4 + NEM Rakyat 3.0 rates as of 2025.",
-    "asteriskNote": "* At the time of research, NEM Rakyat 3.0 was the most well-documented residential incentive in Malaysia, so the financial model targets it. The calculations will migrate to SolarATAP once that programme's tariff and metering details are public.",
+    "asteriskNote": "* At the time of research, NEM Rakyat 3.0 was the most well-documented residential incentive in Malaysia, so the financial model targets it. The calculations will migrate to SolarATAP once that programme's tariff and metering details are mature in the future.",
     "questions": {
       "replaceInstaller": {
         "question": "Does this replace an installer's site visit?",

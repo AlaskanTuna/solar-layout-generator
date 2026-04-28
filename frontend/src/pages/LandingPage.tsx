@@ -306,7 +306,9 @@ export function LandingPage() {
       <section id="features" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
-            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('features.eyebrow')}</div>
+            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">
+              {t('features.eyebrow')}
+            </div>
             <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl">
               {t('features.title')}
               <br />
@@ -417,10 +419,7 @@ export function LandingPage() {
               defaultOpen
               first
             />
-            <FaqItem
-              question={t('faq.questions.accuracy.question')}
-              answer={t('faq.questions.accuracy.answer')}
-            />
+            <FaqItem question={t('faq.questions.accuracy.question')} answer={t('faq.questions.accuracy.answer')} />
             <FaqItem
               question={t('faq.questions.addressNotFound.question')}
               answer={t('faq.questions.addressNotFound.answer')}
@@ -434,10 +433,6 @@ export function LandingPage() {
               answer={t('faq.questions.dataPrivacy.answer')}
             />
           </div>
-
-          <p className="mt-8 text-center text-xs text-muted-foreground">
-            {t('faq.disclaimer')}
-          </p>
 
           <p className="mx-auto mt-3 max-w-3xl text-center text-[11px] leading-relaxed text-muted-foreground/80">
             {t('faq.asteriskNote')}
