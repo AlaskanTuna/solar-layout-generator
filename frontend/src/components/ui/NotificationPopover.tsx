@@ -60,7 +60,7 @@ export function NotificationPopover() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 z-50 mt-2 w-80 max-h-[400px] overflow-x-hidden overflow-y-auto rounded-xl border border-border bg-card shadow-xl"
+            className="absolute right-0 z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] max-h-[400px] overflow-x-hidden overflow-y-auto rounded-xl border border-border bg-card shadow-xl"
           >
             <div className="flex items-center justify-between border-b border-border p-4">
               <h3 className="text-sm font-semibold">Notifications</h3>
@@ -101,7 +101,7 @@ export function NotificationPopover() {
                     </div>
                     <button
                       type="button"
-                      className="absolute right-3 top-3 rounded-md p-0.5 text-muted-foreground/50 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                      className="absolute right-3 top-3 rounded-md p-0.5 text-muted-foreground/50 opacity-100 transition-opacity hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation()
                         notificationStore.dismiss(notification.id)

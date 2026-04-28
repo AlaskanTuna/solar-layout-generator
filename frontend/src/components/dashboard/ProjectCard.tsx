@@ -45,7 +45,7 @@ export function ProjectCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+            className="h-7 w-7 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation()
               onDelete()
@@ -110,7 +110,7 @@ export function ProjectCard({
 
       {/* Open link */}
       <div className="mt-2 flex items-center justify-end">
-        <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           Open project
           <ArrowRight className="h-3 w-3" />
         </span>

@@ -148,7 +148,7 @@ export function ProjectsPage() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem]">
           <div className="flex flex-col">
             {/* Summary stats */}
-            <div className="grid grid-cols-3 gap-4 animate-fade-in-up">
+            <div className="grid grid-cols-1 gap-4 animate-fade-in-up sm:grid-cols-3">
               <div className="glass-card flex items-center gap-3 p-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <FolderOpen className="h-5 w-5" />

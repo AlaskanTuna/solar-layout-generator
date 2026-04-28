@@ -454,7 +454,7 @@ export function MapPage() {
           {/* Confirmation prompt */}
           {phase === 'confirm' && selectedPlace && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
-              <div className="glass-card w-96 p-5">
+              <div className="glass-card w-[calc(100vw-2rem)] max-w-sm p-5 sm:w-96 sm:max-w-none">
                 <p className="text-sm font-medium">{t('confirm.question')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
                 <div className="mt-3 flex gap-2">
@@ -483,7 +483,7 @@ export function MapPage() {
           {/* Processing state */}
           {phase === 'processing' && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
-              <div className="glass-card flex w-96 items-center gap-3 p-5">
+              <div className="glass-card flex w-[calc(100vw-2rem)] max-w-sm items-center gap-3 p-5 sm:w-96 sm:max-w-none">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 <div>
                   <p className="text-sm font-medium">{t('processing.title')}</p>
@@ -496,7 +496,7 @@ export function MapPage() {
           {/* Failure state */}
           {phase === 'failed' && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
-              <div className="glass-card w-96 p-5">
+              <div className="glass-card w-[calc(100vw-2rem)] max-w-sm p-5 sm:w-96 sm:max-w-none">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                   <p className="text-sm text-destructive">{errorMessage}</p>

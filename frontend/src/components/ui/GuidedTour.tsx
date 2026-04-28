@@ -97,7 +97,7 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
   return (
     <>
       <div className="fixed inset-0 z-[60] bg-black/10" onClick={onClose} />
-      <div className="glass-card z-[61] w-80 p-4 shadow-xl" style={style}>
+      <div className="glass-card z-[61] w-[min(20rem,calc(100vw-2rem))] p-4 shadow-xl" style={style}>
         <div className="mb-3 flex items-start justify-between">
           <h3 className="text-sm font-semibold text-foreground">{step.title}</h3>
           <button

@@ -16,7 +16,7 @@ export function PageHeaderCard({ children, className, artSrc, artAlt = '' }: Pag
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-8 shadow-[0_1px_3px_rgba(234,88,12,0.06),0_8px_24px_rgba(234,88,12,0.05)] dark:border-primary/10 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20 dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] animate-fade-in',
+        'relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-solar-100/50 to-solar-200/30 p-6 shadow-[0_1px_3px_rgba(234,88,12,0.06),0_8px_24px_rgba(234,88,12,0.05)] dark:border-primary/10 dark:from-primary/5 dark:via-solar-950/30 dark:to-solar-900/20 dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] animate-fade-in sm:p-8',
         className
       )}
     >
