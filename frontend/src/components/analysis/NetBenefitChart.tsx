@@ -16,7 +16,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { COLORS, getChartTooltipStyle } from '@/lib/constants'
 import { ChartTooltipContent } from './ChartTooltipContent'
 import { formatCurrency } from './formatters'
-import { computeDegradedSavings, normalizeInverterReplacements, type InverterReplacement } from '@/lib/analysis'
+import { buildNetBenefitSeries, type InverterReplacement } from '@/lib/analysis'
 
 type NetBenefitChartProps = {
   year1Savings: number
@@ -40,8 +40,6 @@ type NetBenefitChartProps = {
 const YEAR_RANGES = [5, 10, 15, 20, 25] as const
 type YearRange = (typeof YEAR_RANGES)[number]
 
-const round2 = (v: number) => Math.round(v * 100) / 100
-
 export function NetBenefitChart({
   year1Savings,
   degradationRate,
@@ -59,26 +57,23 @@ export function NetBenefitChart({
   const chartTooltipStyle = getChartTooltipStyle(resolved)
   const [yearRange, setYearRange] = useState<YearRange>(defaultYearRange)
 
-  const replacements = useMemo(
-    () => normalizeInverterReplacements(inverterReplacements, inverterReplacementCostRm, inverterReplacementYear),
-    [inverterReplacements, inverterReplacementCostRm, inverterReplacementYear]
-  )
-
   const netBenefitData = useMemo(
     () =>
-      Array.from({ length: yearRange }, (_, i) => {
-        const yr = i + 1
-        const grossSavings = computeDegradedSavings(year1Savings, degradationRate, yr, tariffEscalationRate)
-        const maintenanceCost = analysisMode === 'lifecycle' ? annualMaintenanceRm * yr : 0
-        const inverterCost =
-          analysisMode === 'lifecycle'
-            ? replacements.filter((r) => r.year <= yr).reduce((sum, r) => sum + r.costRm, 0)
-            : 0
-        return {
-          year: t('netBenefit.yearLabel', { year: yr }),
-          value: round2(grossSavings - systemCostRm - maintenanceCost - inverterCost)
-        }
-      }),
+      buildNetBenefitSeries({
+        year1Savings,
+        degradationRate,
+        years: yearRange,
+        systemCostRm,
+        tariffEscalationRate,
+        analysisMode,
+        annualMaintenanceRm,
+        inverterReplacements,
+        inverterReplacementCostRm,
+        inverterReplacementYear
+      }).map((point) => ({
+        year: t('netBenefit.yearLabel', { year: point.year }),
+        value: point.netBenefit
+      })),
     [
       year1Savings,
       degradationRate,
@@ -87,7 +82,9 @@ export function NetBenefitChart({
       yearRange,
       analysisMode,
       annualMaintenanceRm,
-      replacements,
+      inverterReplacements,
+      inverterReplacementCostRm,
+      inverterReplacementYear,
       t
     ]
   )

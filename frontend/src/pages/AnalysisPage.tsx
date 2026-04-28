@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ANALYSIS_DISCLAIMER_KEYS,
-  computeDegradedSavings,
+  buildNetBenefitSeries,
   type AnalysisConfig,
   type AnalysisResultsRecord
 } from '@/lib/analysis'
@@ -207,11 +207,17 @@ export function AnalysisPage() {
     )
   }
 
-  const paybackProjections: Array<{ years: number; netBenefit: number }> = [1, 5, 10].map((years) => ({
-    years,
-    netBenefit:
-      computeDegradedSavings(simulation.totalSavingsRm, formState.degradationRate, years) - formState.systemCostRm
-  }))
+  const paybackProjections = buildNetBenefitSeries({
+    year1Savings: simulation.totalSavingsRm,
+    degradationRate: formState.degradationRate,
+    years: 10,
+    systemCostRm: formState.systemCostRm
+  })
+    .filter((projection) => projection.year === 1 || projection.year === 5 || projection.year === 10)
+    .map((projection) => ({
+      years: projection.year,
+      netBenefit: projection.netBenefit
+    }))
   const paybackTooltip = (
     <div className="space-y-2">
       <p>{t('page.paybackTooltip.intro')}</p>

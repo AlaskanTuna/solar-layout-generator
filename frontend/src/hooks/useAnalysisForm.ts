@@ -4,9 +4,9 @@ import { getLocationData } from '@/api/locations'
 import { getProject } from '@/api/projects'
 import { getTariffConfig } from '@/api/tariff'
 import {
-  MONTH_LABELS,
   aggregateMonthlyGeneration,
   applyPerformanceRatio,
+  buildMonthlyBillChartData,
   applySeasonalProfile,
   buildAnalysisResults,
   buildThresholdWarnings,
@@ -14,7 +14,7 @@ import {
   type AnalysisConfig
 } from '@/lib/analysis'
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
-import { runAnnualSimulation, type AnnualSimulationResult } from '@/lib/billingEngine'
+import { runAnnualSimulation } from '@/lib/billingEngine'
 import {
   BILL_RANGE_TO_KWH_PER_MONTH,
   computeSystemCost,
@@ -28,20 +28,6 @@ export type ChartDataPoint = {
   baselineBill: number
   nemBill: number
   cumulativeSavings: number
-}
-
-function buildChartData(simulation: AnnualSimulationResult): ChartDataPoint[] {
-  let cumulativeSavings = 0
-
-  return simulation.months.map((month, index) => {
-    cumulativeSavings += month.savingsRm
-    return {
-      month: MONTH_LABELS[index],
-      baselineBill: month.baselineBill.total,
-      nemBill: month.nemBill.total,
-      cumulativeSavings: Math.round(cumulativeSavings * 100) / 100
-    }
-  })
 }
 
 export function useAnalysisForm(projectId: string | undefined) {
@@ -226,7 +212,7 @@ export function useAnalysisForm(projectId: string | undefined) {
     })
   }, [activePanels.length, carbonOffsetFactorKgPerMwh, formState, simulation])
 
-  const chartData = useMemo(() => (simulation ? buildChartData(simulation) : []), [simulation])
+  const chartData = useMemo(() => (simulation ? buildMonthlyBillChartData(simulation.months) : []), [simulation])
   const selectedMonth = useMemo(() => simulation?.months[selectedMonthIndex] ?? null, [simulation, selectedMonthIndex])
   const thresholdWarnings = useMemo(() => {
     if (!selectedMonth || !tariffQuery.data) return []
