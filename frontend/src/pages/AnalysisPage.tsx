@@ -141,21 +141,43 @@ export function AnalysisPage() {
   }, [projectQuery.data?.id, projectQuery.data?.status])
 
   const saveMutation = useMutation({
-    mutationFn: (payload: ReturnType<typeof buildSavePayload>) => saveAnalysis(projectId!, payload),
-    onSuccess: (updatedProject) => {
-      queryClient.setQueryData(['project', projectId], updatedProject)
-      void queryClient.invalidateQueries({ queryKey: ['projects'] })
-      notify.success(t('page.toast.saved'))
-      navigate('/dashboard/projects')
-    },
-    onError: (error) => {
-      notify.error(error instanceof Error ? error.message : t('page.toast.saveFailed'))
-    }
+    mutationFn: (payload: ReturnType<typeof buildSavePayload>) => saveAnalysis(projectId!, payload)
   })
 
-  async function handleSaveAnalysis() {
+  async function persistAnalysis({
+    navigateOnSuccess,
+    notifyOnSuccess,
+    notifyOnError
+  }: {
+    navigateOnSuccess: boolean
+    notifyOnSuccess: boolean
+    notifyOnError: boolean
+  }) {
     if (!formState || !analysisResults) return
-    await saveMutation.mutateAsync(buildSavePayload(formState, systemKwp, analysisResults))
+    try {
+      const updatedProject = await saveMutation.mutateAsync(buildSavePayload(formState, systemKwp, analysisResults))
+      queryClient.setQueryData(['project', projectId], updatedProject)
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+      if (notifyOnSuccess) {
+        notify.success(t('page.toast.saved'))
+      }
+      if (navigateOnSuccess) {
+        navigate('/dashboard/projects')
+      }
+    } catch (error) {
+      if (notifyOnError) {
+        notify.error(error instanceof Error ? error.message : t('page.toast.saveFailed'))
+      }
+      throw error
+    }
+  }
+
+  async function handleSaveAnalysis() {
+    await persistAnalysis({
+      navigateOnSuccess: true,
+      notifyOnSuccess: true,
+      notifyOnError: true
+    })
   }
 
   if (projectQuery.isLoading || tariffQuery.isLoading || locationQuery.isLoading || !formState || !buildingInsights) {
@@ -249,7 +271,15 @@ export function AnalysisPage() {
           viewMode={viewMode}
           isExporting={isExporting}
           isSaving={saveMutation.isPending}
-          onExportPdf={() => void handleExportPdf(projectId!, projectQuery.data.name)}
+          onExportPdf={() =>
+            void handleExportPdf(projectId!, projectQuery.data.name, async () => {
+              await persistAnalysis({
+                navigateOnSuccess: false,
+                notifyOnSuccess: false,
+                notifyOnError: false
+              })
+            })
+          }
           onSaveAnalysis={() => void handleSaveAnalysis()}
           tariffRatesDefaults={tariffQuery.data.rates}
           tariffEffectiveDate={tariffQuery.data.effectiveDate}

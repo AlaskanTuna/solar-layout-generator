@@ -33,7 +33,7 @@ export function useAnalysisPdf() {
   const { resolved: resolvedTheme } = useTheme()
   const { locale } = useLocale()
 
-  async function handleExportPdf(projectId: string, projectName: string) {
+  async function handleExportPdf(projectId: string, projectName: string, beforeExport?: () => Promise<void>) {
     const exportUrl = import.meta.env.VITE_PDF_EXPORT_URL
     if (!exportUrl) {
       notify.error('PDF export service is not configured')
@@ -50,6 +50,7 @@ export function useAnalysisPdf() {
 
     setIsExporting(true)
     try {
+      await beforeExport?.()
       const { token } = await requestPdfExportToken(projectId)
       const previewUrl = new URL(`/project/${projectId}/pdf-preview`, window.location.origin)
       previewUrl.searchParams.set('token', token)
