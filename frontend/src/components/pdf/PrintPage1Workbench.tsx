@@ -42,7 +42,7 @@ export function PrintPage1Workbench({ project }: Props) {
       sectionLabel={t('page1.sectionLabel')}
       context={t('page1.context')}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
         <div className="flex min-h-0 flex-1 justify-center">
           {project.rgbSignedUrl && (
             <div className="relative inline-flex max-h-full overflow-hidden rounded-lg border border-border">
@@ -50,7 +50,7 @@ export function PrintPage1Workbench({ project }: Props) {
                 src={project.rgbSignedUrl}
                 alt={t('page1.imageAlt')}
                 className="block max-h-full w-auto"
-                style={{ maxHeight: '140mm' }}
+                style={{ maxHeight: '136mm' }}
                 onLoad={(e) => {
                   const img = e.currentTarget
                   setImgSize({ w: img.naturalWidth, h: img.naturalHeight })
