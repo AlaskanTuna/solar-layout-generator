@@ -25,13 +25,44 @@ import {
 export function LandingPage() {
   const { session, loading } = useAuth()
   const ticker = useHeroTicker()
+  const heroImageRef = useRef<HTMLImageElement>(null)
   const scrollY = useScrollY()
   const navScrolled = scrollY > 24
-  const heroBlur = Math.min(14, scrollY / 40)
 
   useEffect(() => {
     document.documentElement.classList.add('landing-snap')
     return () => document.documentElement.classList.remove('landing-snap')
+  }, [])
+
+  useEffect(() => {
+    let raf = 0
+    let lastBlur = -1
+
+    const updateHeroBlur = () => {
+      raf = 0
+      const image = heroImageRef.current
+      if (!image) return
+
+      const nextBlur = Math.min(14, window.scrollY / 40)
+      if (Math.abs(nextBlur - lastBlur) < 0.1) return
+
+      lastBlur = nextBlur
+      image.style.filter = `blur(${nextBlur.toFixed(1)}px)`
+      image.style.transform = nextBlur > 0 ? 'scale(1.04)' : 'scale(1)'
+    }
+
+    const requestHeroBlur = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(updateHeroBlur)
+    }
+
+    updateHeroBlur()
+    window.addEventListener('scroll', requestHeroBlur, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', requestHeroBlur)
+      if (raf) window.cancelAnimationFrame(raf)
+    }
   }, [])
 
   if (loading) return null
@@ -57,16 +88,9 @@ export function LandingPage() {
                 <Button size="sm">Go to Dashboard</Button>
               </Link>
             ) : (
-              <>
-                <Link to="/sign-in">
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/sign-up">
-                  <Button size="sm">Get Started</Button>
-                </Link>
-              </>
+              <Link to="/sign-up">
+                <Button size="sm">Get Started</Button>
+              </Link>
             )}
           </div>
         </div>
@@ -77,11 +101,12 @@ export function LandingPage() {
         {/* Background image — blurs progressively on scroll */}
         <div className="absolute inset-0">
           <img
+            ref={heroImageRef}
             src="/landing/landing-hero.webp"
             alt=""
             aria-hidden="true"
             className="h-full w-full object-cover object-[right_center] will-change-[filter]"
-            style={{ filter: `blur(${heroBlur}px)`, transform: heroBlur > 0 ? 'scale(1.04)' : 'scale(1)' }}
+            style={{ filter: 'blur(0px)', transform: 'scale(1)' }}
           />
           {/* Light-mode left-to-right warm wash */}
           <div
@@ -247,24 +272,24 @@ export function LandingPage() {
         <div className="flex w-max animate-marquee items-center gap-12 px-6 font-mono text-sm uppercase tracking-[0.18em] text-stone-400">
           <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 compliant" />
+          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 bill simulation" />
           <span className="text-stone-700">·</span>
           <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label="Aligned with UN SDG 7" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Peninsular Malaysia tariff" />
+          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Drag-and-drop panel workbench" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Independent of installers" />
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Installer-ready PDF reports" />
           <span className="text-stone-700">·</span>
           {/* Duplicated for seamless loop */}
           <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 compliant" />
+          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 bill simulation" />
           <span className="text-stone-700">·</span>
           <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label="Aligned with UN SDG 7" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Peninsular Malaysia tariff" />
+          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="RP4 tariff savings analysis" />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Independent of installers" />
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Installer-ready PDF reports" />
           <span className="text-stone-700">·</span>
         </div>
       </section>
@@ -450,11 +475,32 @@ export function LandingPage() {
 
 function useScrollY() {
   const [y, setY] = useState(0)
+  const yRef = useRef(0)
+
   useEffect(() => {
-    const onScroll = () => setY(window.scrollY)
+    let raf = 0
+    const shouldPublish = (previous: number, next: number) =>
+      previous === 0 || previous <= 24 !== next <= 24 || previous <= 400 !== next <= 400
+
+    const update = () => {
+      raf = 0
+      const next = window.scrollY
+      const previous = yRef.current
+      yRef.current = next
+      if (shouldPublish(previous, next)) setY(next)
+    }
+
+    const onScroll = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(update)
+    }
+
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (raf) window.cancelAnimationFrame(raf)
+    }
   }, [])
   return y
 }

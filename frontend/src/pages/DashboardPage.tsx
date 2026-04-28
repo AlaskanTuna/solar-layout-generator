@@ -100,8 +100,11 @@ export function DashboardPage() {
   const actionCardClass =
     'glass-card group relative flex min-h-[168px] w-full flex-col items-start justify-between overflow-hidden p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:min-h-[176px]'
 
-  const cardArtClass =
-    'pointer-events-none absolute -right-2 top-1/2 h-[118%] max-h-60 w-auto -translate-y-1/2 object-contain opacity-80 transition-all duration-300 [mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.14)_24%,black_58%)] group-hover:scale-105 group-hover:opacity-95 dark:opacity-70'
+  const cardArtFrameClass =
+    'pointer-events-none absolute -right-2 top-1/2 h-[118%] max-h-60 w-[58%] -translate-y-1/2 overflow-hidden opacity-80 transition-all duration-300 [mask-image:linear-gradient(to_bottom,black_0%,black_46%,rgba(0,0,0,0.5)_68%,transparent_100%)] group-hover:scale-105 group-hover:opacity-95 dark:opacity-70'
+
+  const cardArtImageClass =
+    'h-full w-full object-contain object-right [mask-image:linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.14)_24%,black_58%)]'
 
   const newProjectTile = (
     <button
@@ -113,7 +116,9 @@ export function DashboardPage() {
         quotaReached ? 'cursor-not-allowed opacity-60' : 'text-foreground hover:text-foreground'
       }`}
     >
-      <img src="/dashboard/new-project.webp" alt="" aria-hidden="true" className={cardArtClass} />
+      <div aria-hidden="true" className={cardArtFrameClass}>
+        <img src="/dashboard/new-project.webp" alt="" className={cardArtImageClass} />
+      </div>
       <div className="relative z-10 flex w-full items-start justify-between gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <MapPin className="h-5 w-5" />
@@ -164,7 +169,9 @@ export function DashboardPage() {
 
             {QUICK_ACTIONS.map((action) => (
               <Link key={action.to} to={action.to} className={actionCardClass}>
-                <img src={action.art} alt="" aria-hidden="true" className={cardArtClass} />
+                <div aria-hidden="true" className={cardArtFrameClass}>
+                  <img src={action.art} alt="" className={cardArtImageClass} />
+                </div>
                 <div className="relative z-10 flex w-full items-start justify-between gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
                     <action.icon className="h-5 w-5" />
@@ -207,7 +214,7 @@ export function DashboardPage() {
                         key={project.id}
                         type="button"
                         onClick={() => navigate(projectRoute(project))}
-                        className="group w-full rounded-xl border border-border bg-muted/30 p-3 text-left transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        className="glass group w-full rounded-xl p-3 text-left transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
