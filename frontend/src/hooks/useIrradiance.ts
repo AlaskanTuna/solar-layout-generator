@@ -15,10 +15,10 @@ export function useIrradiance() {
     const rad = (azimuth * Math.PI) / 180
     const gx = 50 + Math.sin(rad) * 50
     const gy = 50 - Math.cos(rad) * 50
-    const alpha = intensity * 0.18
+    const alpha = intensity * 0.34
     // Directional amber glow from sun position
     return {
-      backgroundImage: `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(255,184,0,${alpha.toFixed(2)}) 0%, rgba(255,200,50,${(alpha * 0.2).toFixed(3)}) 50%, transparent 55%), linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%)`
+      backgroundImage: `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(255,176,0,${alpha.toFixed(2)}) 0%, rgba(255,200,50,${(alpha * 0.55).toFixed(3)}) 35%, rgba(255,215,90,${(alpha * 0.18).toFixed(3)}) 60%, transparent 78%), linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%)`
     }
   }, [irradianceMonth])
 
