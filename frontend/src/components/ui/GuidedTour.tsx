@@ -158,7 +158,7 @@ export function GuidedTour({ storageKey, steps }: { storageKey: string; steps: T
 
       <button
         type="button"
-        className="fixed bottom-5 right-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black text-white shadow-lg transition-colors hover:bg-neutral-800 dark:border-black/15 dark:bg-white dark:text-black dark:hover:bg-neutral-100"
+        className="fixed bottom-5 right-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 text-foreground shadow-[0_8px_24px_rgba(234,88,12,0.18)] backdrop-blur-xl transition-colors duration-300 hover:bg-white/60 dark:border-white/10 dark:bg-stone-900/55 dark:hover:bg-stone-900/75"
         onClick={openTour}
         title="Show guided tour"
       >
