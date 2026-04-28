@@ -232,7 +232,7 @@
           "good": "Baik:",
           "goodDetail": "Kebanyakan penjanaan mengimbangi bil anda sendiri, dengan sangat sedikit kredit yang tersisa.",
           "moderate": "Sederhana:",
-          "moderateDetail": "Terdapat sedikit pengumpulan kredit. Anda akan mengeksport lebih banyak daripada yang anda guna dalam beberapa bulan dan bergantung pada kredit yang disimpan sebelumnya dalam bulan lain.",
+          "moderateDetail": "Masih ada pergantungan grid atau sedikit pengumpulan kredit. Susun atur ini berfungsi, tetapi belum dipadankan rapat dengan penggunaan.",
           "oversized": "Terlalu Besar:",
           "oversizedDetail": "Pengumpulan kredit yang banyak. Kredit berlebihan bukan wang tunai dan akan dilucutkan pada hujung tahun jika tidak digunakan.",
           "importRate": "Kadar Import:",

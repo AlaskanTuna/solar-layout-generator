@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { formatCurrency, formatNumber } from './formatters'
 import { getRoiCondition } from './roiVerdict'
-import { classifyNemFit, type AnalysisResultsRecord } from '@/lib/analysis'
+import { classifyNemFit, computeNemFitMetrics, type AnalysisResultsRecord } from '@/lib/analysis'
 
 type SolarVerdictProps = {
   analysisResults: AnalysisResultsRecord
@@ -40,17 +40,10 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
     })
   }
 
-  const nemFit = classifyNemFit({
-    totalConsumptionKwh: annualTotals.totalConsumptionKwh,
-    totalGenerationKwh: annualTotals.totalGenerationKwh,
-    totalCreditsForfeitedKwh: annualTotals.totalCreditsForfeitedKwh
-  })
-  const totalImportKwh = monthlyBreakdown.reduce((sum, m) => sum + Math.max(0, m.consumptionKwh - m.generationKwh), 0)
-  const totalExportKwh = monthlyBreakdown.reduce((sum, m) => sum + Math.max(0, m.generationKwh - m.consumptionKwh), 0)
-  const importRatePct =
-    annualTotals.totalConsumptionKwh > 0 ? Math.round((totalImportKwh / annualTotals.totalConsumptionKwh) * 100) : 0
-  const exportRatePct =
-    annualTotals.totalGenerationKwh > 0 ? Math.round((totalExportKwh / annualTotals.totalGenerationKwh) * 100) : 0
+  const nemFitMetrics = computeNemFitMetrics(monthlyBreakdown)
+  const nemFit = classifyNemFit(nemFitMetrics)
+  const importRatePct = Math.round(nemFitMetrics.billableImportRate * 100)
+  const exportRatePct = Math.round(nemFitMetrics.monthlyExportRate * 100)
 
   const nemFitLabel = t(`verdict.metrics.nemFit.labels.${nemFit.fit}`)
 

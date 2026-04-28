@@ -31,9 +31,11 @@ export {
   buildAnalysisResults,
   buildThresholdWarnings,
   classifyNemFit,
+  computeNemFitMetrics,
   type AnalysisResultsRecord,
   type NemFit,
-  type NemFitClassification
+  type NemFitClassification,
+  type NemFitMetrics
 } from './analysis/results'
 
 export const ANALYSIS_DISCLAIMER_KEYS = [

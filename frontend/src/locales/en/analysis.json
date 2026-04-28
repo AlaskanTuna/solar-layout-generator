@@ -232,7 +232,7 @@
           "good": "Good:",
           "goodDetail": "Most generation offsets your own bill, with very few credits left over.",
           "moderate": "Moderate:",
-          "moderateDetail": "Some credit buildup. You will export more than you use in a few months and rely on previously banked credits in others.",
+          "moderateDetail": "Some grid reliance or credit buildup. The layout works, but it is not yet tightly matched to usage.",
           "oversized": "Oversized:",
           "oversizedDetail": "Heavy credit buildup. Excess credits are not cash and are forfeited at year-end if unused.",
           "importRate": "Import Rate:",

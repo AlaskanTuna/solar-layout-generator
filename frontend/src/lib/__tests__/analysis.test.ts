@@ -5,6 +5,7 @@ import {
   buildAnalysisResults,
   buildThresholdWarnings,
   classifyNemFit,
+  computeNemFitMetrics,
   computeDegradedSavings,
   parseSavedAnalysisConfig,
   summarizeLayoutOrientation
@@ -108,83 +109,86 @@ describe('applyPerformanceRatio', () => {
 })
 
 describe('classifyNemFit', () => {
-  it('returns Good when generation ratio ≤ 0.9 and forfeiture rate ≤ 5%', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 10000,
-      totalGenerationKwh: 8000, // ratio = 0.8
-      totalCreditsForfeitedKwh: 200 // forfeiture = 2.5%
-    })
+  const nemMonth = (overrides: Partial<NemMonthResult>): NemMonthResult => ({
+    ...monthResult,
+    baselineBill: { ...monthResult.baselineBill },
+    nemBill: { ...monthResult.nemBill },
+    ...overrides
+  })
+
+  it('computes import from billable kWh after carried credits are used', () => {
+    const metrics = computeNemFitMetrics([
+      nemMonth({ month: 1, consumptionKwh: 800, generationKwh: 1000, billableKwh: 0, creditBalance: 200 }),
+      nemMonth({ month: 2, consumptionKwh: 800, generationKwh: 600, billableKwh: 0, creditUsed: 200, creditBalance: 0 })
+    ])
+
+    expect(metrics.totalConsumptionKwh).toBe(1600)
+    expect(metrics.totalGenerationKwh).toBe(1600)
+    expect(metrics.totalBillableImportKwh).toBe(0)
+    expect(metrics.totalMonthlyExportKwh).toBe(200)
+    expect(metrics.billableImportRate).toBe(0)
+    expect(metrics.monthlyExportRate).toBeCloseTo(0.125, 4)
+  })
+
+  it('returns Good for a well-matched layout with low import, low export, and low forfeiture', () => {
+    const metrics = computeNemFitMetrics(
+      Array.from({ length: 12 }, (_, index) =>
+        nemMonth({ month: index + 1, consumptionKwh: 800, generationKwh: 800, billableKwh: 0 })
+      )
+    )
+    const result = classifyNemFit(metrics)
+
     expect(result.fit).toBe('good')
     expect(result.detail).toBe('Low unused credits')
-    expect(result.generationRatio).toBeCloseTo(0.8, 4)
-    expect(result.forfeitureRate).toBeCloseTo(0.025, 4)
+    expect(result.billableImportRate).toBe(0)
+    expect(result.monthlyExportRate).toBe(0)
+    expect(result.forfeitureRate).toBe(0)
   })
 
-  it('returns Moderate when ratio is 0.9-1.1 and forfeiture is moderate', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 10000,
-      totalGenerationKwh: 10500, // ratio = 1.05
-      totalCreditsForfeitedKwh: 1000 // forfeiture ≈ 9.5%
-    })
+  it('returns Moderate for a clean but undersized layout that still imports a lot from the grid', () => {
+    const metrics = computeNemFitMetrics(
+      Array.from({ length: 12 }, (_, index) =>
+        nemMonth({ month: index + 1, consumptionKwh: 800, generationKwh: 480, billableKwh: 320 })
+      )
+    )
+    const result = classifyNemFit(metrics)
+
     expect(result.fit).toBe('moderate')
-    expect(result.detail).toBe('Some credit buildup')
+    expect(result.detail).toBe('Still imports from grid')
+    expect(result.billableImportRate).toBeCloseTo(0.4, 4)
+    expect(result.monthlyExportRate).toBe(0)
   })
 
-  it('returns Oversized when generation ratio > 1.1', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 10000,
-      totalGenerationKwh: 12000, // ratio = 1.2
-      totalCreditsForfeitedKwh: 0
-    })
+  it('returns Oversized when a large share of generation is exported within months', () => {
+    const metrics = computeNemFitMetrics(
+      Array.from({ length: 12 }, (_, index) =>
+        nemMonth({ month: index + 1, consumptionKwh: 400, generationKwh: 800, billableKwh: 0 })
+      )
+    )
+    const result = classifyNemFit(metrics)
+
     expect(result.fit).toBe('oversized')
     expect(result.detail).toBe('Excess credits likely')
+    expect(result.monthlyExportRate).toBeCloseTo(0.5, 4)
   })
 
-  it('returns Oversized when forfeiture rate > 15%, even at low ratio', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 10000,
-      totalGenerationKwh: 8000,
-      totalCreditsForfeitedKwh: 1500 // 18.75%
-    })
+  it('returns Oversized when forfeited credits exceed the yearly threshold', () => {
+    const metrics = computeNemFitMetrics([
+      nemMonth({ month: 12, consumptionKwh: 1000, generationKwh: 10000, billableKwh: 0, creditForfeited: 2000 })
+    ])
+    const result = classifyNemFit(metrics)
+
     expect(result.fit).toBe('oversized')
+    expect(result.forfeitureRate).toBeCloseTo(0.2, 4)
   })
 
-  it('boundary: ratio exactly 0.9 + forfeiture 5% classifies Good', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 10000,
-      totalGenerationKwh: 9000,
-      totalCreditsForfeitedKwh: 450
-    })
-    expect(result.fit).toBe('good')
-  })
+  it('handles zero consumption and zero generation without invalid rates', () => {
+    const metrics = computeNemFitMetrics([nemMonth({ consumptionKwh: 0, generationKwh: 0, billableKwh: 0 })])
+    const result = classifyNemFit(metrics)
 
-  it('boundary: ratio exactly 1.1 + forfeiture 15% classifies Moderate', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 10000,
-      totalGenerationKwh: 11000,
-      totalCreditsForfeitedKwh: 1650
-    })
-    expect(result.fit).toBe('moderate')
-  })
-
-  it('handles zero consumption gracefully (ratio=0)', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 0,
-      totalGenerationKwh: 5000,
-      totalCreditsForfeitedKwh: 0
-    })
-    expect(result.generationRatio).toBe(0)
-    expect(result.fit).toBe('good')
-  })
-
-  it('handles zero generation gracefully (forfeiture=0)', () => {
-    const result = classifyNemFit({
-      totalConsumptionKwh: 10000,
-      totalGenerationKwh: 0,
-      totalCreditsForfeitedKwh: 0
-    })
-    expect(result.forfeitureRate).toBe(0)
-    expect(result.generationRatio).toBe(0)
+    expect(metrics.billableImportRate).toBe(0)
+    expect(metrics.monthlyExportRate).toBe(0)
+    expect(metrics.forfeitureRate).toBe(0)
     expect(result.fit).toBe('good')
   })
 })

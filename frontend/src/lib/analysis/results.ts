@@ -33,7 +33,19 @@ export type NemFit = 'good' | 'moderate' | 'oversized'
 export type NemFitClassification = {
   fit: NemFit
   detail: string
-  generationRatio: number
+  billableImportRate: number
+  monthlyExportRate: number
+  forfeitureRate: number
+}
+
+export type NemFitMetrics = {
+  totalConsumptionKwh: number
+  totalGenerationKwh: number
+  totalBillableImportKwh: number
+  totalMonthlyExportKwh: number
+  totalCreditsForfeitedKwh: number
+  billableImportRate: number
+  monthlyExportRate: number
   forfeitureRate: number
 }
 
@@ -41,31 +53,50 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100
 }
 
-export function classifyNemFit(input: {
-  totalConsumptionKwh: number
-  totalGenerationKwh: number
-  totalCreditsForfeitedKwh: number
-}): NemFitClassification {
-  const { totalConsumptionKwh, totalGenerationKwh, totalCreditsForfeitedKwh } = input
+export function computeNemFitMetrics(monthlyBreakdown: NemMonthResult[]): NemFitMetrics {
+  const totalConsumptionKwh = monthlyBreakdown.reduce((sum, month) => sum + month.consumptionKwh, 0)
+  const totalGenerationKwh = monthlyBreakdown.reduce((sum, month) => sum + month.generationKwh, 0)
+  const totalBillableImportKwh = monthlyBreakdown.reduce((sum, month) => sum + month.billableKwh, 0)
+  const totalMonthlyExportKwh = monthlyBreakdown.reduce(
+    (sum, month) => sum + Math.max(0, month.generationKwh - month.consumptionKwh),
+    0
+  )
+  const totalCreditsForfeitedKwh = monthlyBreakdown.reduce((sum, month) => sum + month.creditForfeited, 0)
 
-  const generationRatio = totalConsumptionKwh > 0 ? totalGenerationKwh / totalConsumptionKwh : 0
+  const billableImportRate = totalConsumptionKwh > 0 ? totalBillableImportKwh / totalConsumptionKwh : 0
+  const monthlyExportRate = totalGenerationKwh > 0 ? totalMonthlyExportKwh / totalGenerationKwh : 0
   const forfeitureRate = totalGenerationKwh > 0 ? totalCreditsForfeitedKwh / totalGenerationKwh : 0
+
+  return {
+    totalConsumptionKwh: round2(totalConsumptionKwh),
+    totalGenerationKwh: round2(totalGenerationKwh),
+    totalBillableImportKwh: round2(totalBillableImportKwh),
+    totalMonthlyExportKwh: round2(totalMonthlyExportKwh),
+    totalCreditsForfeitedKwh: round2(totalCreditsForfeitedKwh),
+    billableImportRate,
+    monthlyExportRate,
+    forfeitureRate
+  }
+}
+
+export function classifyNemFit(metrics: NemFitMetrics): NemFitClassification {
+  const { billableImportRate, monthlyExportRate, forfeitureRate } = metrics
 
   let fit: NemFit
   let detail: string
 
-  if (generationRatio <= 0.9 && forfeitureRate <= 0.05) {
-    fit = 'good'
-    detail = 'Low unused credits'
-  } else if (generationRatio <= 1.1 && forfeitureRate <= 0.15) {
-    fit = 'moderate'
-    detail = 'Some credit buildup'
-  } else {
+  if (forfeitureRate > 0.15 || monthlyExportRate > 0.35) {
     fit = 'oversized'
     detail = 'Excess credits likely'
+  } else if (billableImportRate <= 0.25 && monthlyExportRate <= 0.2 && forfeitureRate <= 0.05) {
+    fit = 'good'
+    detail = 'Low unused credits'
+  } else {
+    fit = 'moderate'
+    detail = billableImportRate > 0.25 ? 'Still imports from grid' : 'Some credit buildup'
   }
 
-  return { fit, detail, generationRatio, forfeitureRate }
+  return { fit, detail, billableImportRate, monthlyExportRate, forfeitureRate }
 }
 
 function computeSimplePaybackYears(
