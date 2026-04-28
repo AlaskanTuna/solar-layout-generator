@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Circle, Group, Line, Path } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
+import { ROTATION_HANDLE_METRICS } from '@/lib/workbench/handleMetrics'
 
 type RotationHandleProps = {
   panelId: string
@@ -12,9 +13,6 @@ type RotationHandleProps = {
   snapDegrees?: number
   onRotate: (panelId: string, rotation: number) => void
 }
-
-const HANDLE_DISTANCE = 24
-const HANDLE_RADIUS = 8
 
 export function RotationHandle({
   panelId,
@@ -30,7 +28,7 @@ export function RotationHandle({
 
   // Compute handle position in stage coords (above the panel, accounting for rotation)
   const rad = (rotation * Math.PI) / 180
-  const dist = panelHeight / 2 + HANDLE_DISTANCE
+  const dist = panelHeight / 2 + ROTATION_HANDLE_METRICS.distance
   // "Above" the panel in its local space = negative Y, rotated into stage space
   const handleX = panelX + -dist * Math.sin(-rad)
   const handleY = panelY + -dist * Math.cos(-rad)
@@ -73,7 +71,7 @@ export function RotationHandle({
       <Circle
         x={handleX}
         y={handleY}
-        radius={HANDLE_RADIUS}
+        radius={ROTATION_HANDLE_METRICS.radius}
         fill={isRotating ? '#ea580c' : '#ffffff'}
         stroke={isRotating ? '#ffffff' : '#ea580c'}
         strokeWidth={1.5}

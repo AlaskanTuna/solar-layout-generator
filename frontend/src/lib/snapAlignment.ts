@@ -46,12 +46,19 @@ type PanelInfo = {
   rotation: number
 }
 
-const SNAP_THRESHOLD = 14
-/** Rotation difference (degrees) within which two panels are treated as same-orientation. */
-const ROTATION_TOLERANCE = 5
-const OVERLAP_ESCAPE_MAX_ITERATIONS = 30
-const OVERLAP_ESCAPE_STEP_RATIO = 4
-const OVERLAP_ESCAPE_EPSILON = 1e-6
+const SNAP_CONFIG: {
+  threshold: number
+  rotationToleranceDegrees: number
+  overlapEscapeMaxIterations: number
+  overlapEscapeStepRatio: number
+  overlapEscapeEpsilon: number
+} = {
+  threshold: 14,
+  rotationToleranceDegrees: 5,
+  overlapEscapeMaxIterations: 30,
+  overlapEscapeStepRatio: 4,
+  overlapEscapeEpsilon: 1e-6
+}
 
 /** Compute snapped position and guide lines for a dragged panel using local-axis projection */
 export function computeSnap(
@@ -73,14 +80,14 @@ export function computeSnap(
 
   // Track best snap along panel's local U (width) and V (height) axes
   let bestU: { correction: number; otherX: number; otherY: number } | null = null
-  let bestUDist = SNAP_THRESHOLD + 1
+  let bestUDist = SNAP_CONFIG.threshold + 1
   let bestV: { correction: number; otherX: number; otherY: number } | null = null
-  let bestVDist = SNAP_THRESHOLD + 1
+  let bestVDist = SNAP_CONFIG.threshold + 1
 
   for (const other of others) {
     if (other.id === dragged.id) continue
     const rotDiff = Math.abs(((dragged.rotation - other.rotation + 180) % 360) - 180)
-    if (rotDiff > ROTATION_TOLERANCE) continue
+    if (rotDiff > SNAP_CONFIG.rotationToleranceDegrees) continue
 
     // Delta from dragged center to other center, in global coords
     const dx = other.x - x
@@ -113,13 +120,13 @@ export function computeSnap(
   }
 
   // Apply corrections (convert local axis corrections to global X/Y deltas)
-  if (bestU && bestUDist <= SNAP_THRESHOLD) {
+  if (bestU && bestUDist <= SNAP_CONFIG.threshold) {
     x += bestU.correction * cosR
     y += bestU.correction * sinR
     guides.push({ orientation: 'vertical', position: bestU.otherX, start: 0, end: stageHeight })
   }
 
-  if (bestV && bestVDist <= SNAP_THRESHOLD) {
+  if (bestV && bestVDist <= SNAP_CONFIG.threshold) {
     x += bestV.correction * -sinR
     y += bestV.correction * cosR
     guides.push({ orientation: 'horizontal', position: bestV.otherY, start: 0, end: stageWidth })
@@ -166,7 +173,7 @@ export function computeOverlapSnap(
 
 function normalizeVector(x: number, y: number): Translation | null {
   const length = Math.hypot(x, y)
-  if (length <= OVERLAP_ESCAPE_EPSILON) return null
+  if (length <= SNAP_CONFIG.overlapEscapeEpsilon) return null
   return { x: x / length, y: y / length }
 }
 
@@ -354,8 +361,8 @@ function resolveOverlapTranslation(
   translation: Translation,
   panelWidth: number,
   panelHeight: number,
-  maxIterations = OVERLAP_ESCAPE_MAX_ITERATIONS,
-  stepSize = panelWidth / OVERLAP_ESCAPE_STEP_RATIO,
+  maxIterations = SNAP_CONFIG.overlapEscapeMaxIterations,
+  stepSize = panelWidth / SNAP_CONFIG.overlapEscapeStepRatio,
   strategy: 'sum' | 'worst' = 'sum',
   stageWidth = Infinity,
   stageHeight = Infinity

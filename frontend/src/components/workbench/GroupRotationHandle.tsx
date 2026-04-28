@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Circle, Group, Line, Path } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
+import { GROUP_ROTATION_HANDLE_METRICS } from '@/lib/workbench/handleMetrics'
 
 type GroupPanel = {
   id: string
@@ -18,9 +19,6 @@ type GroupRotationHandleProps = {
   onRotateMove: (pointerX: number, pointerY: number, snapDegrees: number) => void
   onRotateEnd: () => void
 }
-
-const HANDLE_DISTANCE = 24
-const HANDLE_RADIUS = 9
 
 export function GroupRotationHandle({
   panels,
@@ -46,14 +44,14 @@ export function GroupRotationHandle({
 
   const maxPanelDist = Math.max(...panels.map((p) => Math.hypot(p.x - cx, p.y - cy)))
   const panelHalfDiag = Math.hypot(panelWidth, panelHeight) / 2
-  const dist = maxPanelDist + panelHalfDiag + HANDLE_DISTANCE
+  const dist = maxPanelDist + panelHalfDiag + GROUP_ROTATION_HANDLE_METRICS.distance
 
   const rotation = panels[0]!.rotation
   const rad = (rotation * Math.PI) / 180
   const handleX = cx + -dist * Math.sin(-rad)
   const handleY = cy + -dist * Math.cos(-rad)
 
-  const edgeDist = dist - HANDLE_DISTANCE
+  const edgeDist = dist - GROUP_ROTATION_HANDLE_METRICS.distance
   const edgeX = cx + -edgeDist * Math.sin(-rad)
   const edgeY = cy + -edgeDist * Math.cos(-rad)
 
@@ -92,7 +90,7 @@ export function GroupRotationHandle({
       <Circle
         x={handleX}
         y={handleY}
-        radius={HANDLE_RADIUS}
+        radius={GROUP_ROTATION_HANDLE_METRICS.radius}
         fill={isRotating ? '#ea580c' : '#ffffff'}
         stroke={isRotating ? '#ffffff' : '#ea580c'}
         strokeWidth={1.5}

@@ -5,6 +5,7 @@ import {
   type RoofDirection,
   type SizingGoal
 } from '@shared/types'
+import { azimuthMatchesRoofDirection } from '@/lib/workbench/roofDirection'
 
 export type PanelYieldEntry = {
   yearlyEnergyDcKwh: number
@@ -26,15 +27,6 @@ const SIZING_GOAL_OFFSET: Record<Exclude<SizingGoal, 'custom'>, number> = {
   maximum: Number.POSITIVE_INFINITY
 }
 
-// Compass-bearing windows (0=N, 90=E, 180=S, 270=W). South is widest because
-// most Malaysian roofs lean toward the equator-facing aspect.
-const DIRECTION_WINDOWS: Record<Exclude<RoofDirection, 'any'>, (azimuth: number) => boolean> = {
-  south: (a) => a >= 135 && a <= 225,
-  east: (a) => a >= 45 && a < 135,
-  west: (a) => a > 225 && a <= 315,
-  north: (a) => a < 45 || a > 315
-}
-
 // Convert a bill range bucket to an estimated annual kWh consumption target.
 export function billRangeToAnnualKwh(billRange: BillRange | undefined): number {
   const monthly = BILL_RANGE_TO_KWH_PER_MONTH[billRange ?? 'unknown']
@@ -47,13 +39,11 @@ function filterByDirection(
   direction: RoofDirection | undefined
 ): PanelYieldEntry[] {
   if (!direction || direction === 'any' || !segments || segments.length === 0) return panels
-  const inWindow = DIRECTION_WINDOWS[direction]
-  if (!inWindow) return panels
   const filtered = panels.filter((p) => {
     if (typeof p.segmentIndex !== 'number') return false
     const seg = segments[p.segmentIndex]
     if (!seg) return false
-    return inWindow(seg.azimuthDegrees)
+    return azimuthMatchesRoofDirection(seg.azimuthDegrees, direction)
   })
   // If the roof has no panels in the chosen direction, fall back to the full set
   // rather than show zero panels — keeps the preset graceful for funky roof shapes.

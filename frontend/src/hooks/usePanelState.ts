@@ -9,33 +9,8 @@ import {
   type RoofSegment,
   type SolarPanel
 } from '@/lib/buildingInsights'
+import { segmentMatchesRoofDirection } from '@/lib/workbench/roofDirection'
 import { useUndoRedo } from './useUndoRedo'
-
-// Compass-bearing windows for roof-direction sort priority. Matches
-// frontend/src/lib/layoutPreset.ts so the modal preview and runtime layout
-// agree on what counts as "south", "east", etc.
-function panelMatchesDirection(
-  segmentIndex: number,
-  segments: RoofSegment[],
-  direction: RoofDirection | undefined
-): boolean {
-  if (!direction || direction === 'any') return true
-  const seg = segments[segmentIndex]
-  if (!seg) return false
-  const a = seg.azimuthDegrees
-  switch (direction) {
-    case 'south':
-      return a >= 135 && a <= 225
-    case 'east':
-      return a >= 45 && a < 135
-    case 'west':
-      return a > 225 && a <= 315
-    case 'north':
-      return a < 45 || a > 315
-    default:
-      return true
-  }
-}
 
 type UndoRedoSnapshot = {
   panels: WorkbenchPanelState[]
@@ -70,13 +45,39 @@ type UsePanelStateArgs = {
   onBatchRecomputeStatusChange?: (status: BatchRecomputeStatus) => void
 }
 
-const POSITION_EPSILON = 1e-8
-const ROTATION_EPSILON = 1e-3
+const WORKBENCH_CONFIG = {
+  positionEpsilon: 1e-8,
+  rotationEpsilon: 1e-3,
+  undoHistoryDepth: 30,
+  defaultVisiblePanelFloor: 4
+} as const
 
-function getPanelAnnualEnergy(panel: WorkbenchPanelState): number {
+export function getPanelAnnualEnergy(panel: Pick<WorkbenchPanelState, 'monthlyEnergyDcKwh' | 'yearlyEnergyDcKwh'>) {
   return panel.monthlyEnergyDcKwh.length > 0
     ? annualEnergyFromMonthly(panel.monthlyEnergyDcKwh)
     : panel.yearlyEnergyDcKwh
+}
+
+function getSortedPanelIds(
+  panels: WorkbenchPanelState[],
+  solarPanels: SolarPanel[],
+  roofSegments: RoofSegment[],
+  roofDirection: RoofDirection | undefined
+) {
+  const segmentIndexByPanelId = new Map(solarPanels.map((panel) => [panel.id, panel.segmentIndex]))
+
+  return [...panels]
+    .sort((a, b) => {
+      const aSegmentIndex = segmentIndexByPanelId.get(a.id)
+      const bSegmentIndex = segmentIndexByPanelId.get(b.id)
+      const aMatch =
+        typeof aSegmentIndex === 'number' && segmentMatchesRoofDirection(aSegmentIndex, roofSegments, roofDirection)
+      const bMatch =
+        typeof bSegmentIndex === 'number' && segmentMatchesRoofDirection(bSegmentIndex, roofSegments, roofDirection)
+      if (aMatch !== bMatch) return aMatch ? -1 : 1
+      return getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a)
+    })
+    .map((panel) => panel.id)
 }
 
 export function usePanelState({
@@ -108,7 +109,7 @@ export function usePanelState({
     visibleCountRef.current = visibleCount
   }, [visibleCount])
 
-  const undoRedo = useUndoRedo<UndoRedoSnapshot>({ maxHistory: 30 })
+  const undoRedo = useUndoRedo<UndoRedoSnapshot>({ maxHistory: WORKBENCH_CONFIG.undoHistoryDepth })
 
   const pushSnapshot = useCallback(() => {
     undoRedo.push({ panels: panelsRef.current, visibleCount: visibleCountRef.current })
@@ -116,7 +117,8 @@ export function usePanelState({
 
   const parsedEdits = useMemo(() => parsePanelEdits(editedLayout), [editedLayout])
 
-  const minVisibleCount = solarPanels.length === 0 ? 0 : Math.min(4, solarPanels.length)
+  const minVisibleCount =
+    solarPanels.length === 0 ? 0 : Math.min(WORKBENCH_CONFIG.defaultVisiblePanelFloor, solarPanels.length)
   const maxVisibleCount = Math.min(maxArrayPanelsCount, solarPanels.length)
 
   useEffect(() => {
@@ -157,15 +159,7 @@ export function usePanelState({
     // them before fallbacks. When user picks "south", south-facing panels rank
     // ahead of east/west/north regardless of yield, but within each match group
     // we still rank by yield so visibleCount keeps semantic "top-N highest yield".
-    const sorted = [...nextPanels].sort((a, b) => {
-      const aPanel = solarPanels.find((p) => p.id === a.id)
-      const bPanel = solarPanels.find((p) => p.id === b.id)
-      const aMatch = aPanel ? panelMatchesDirection(aPanel.segmentIndex, roofSegments, roofDirection) : false
-      const bMatch = bPanel ? panelMatchesDirection(bPanel.segmentIndex, roofSegments, roofDirection) : false
-      if (aMatch !== bMatch) return aMatch ? -1 : 1
-      return getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a)
-    })
-    stableOrderRef.current = sorted.map((p) => p.id)
+    stableOrderRef.current = getSortedPanelIds(nextPanels, solarPanels, roofSegments, roofDirection)
 
     const savedActiveCount =
       parsedEdits.length > 0 ? nextPanels.filter((panel) => !panel.deleted).length : maxVisibleCount
@@ -185,15 +179,7 @@ export function usePanelState({
     if (lastSortedDirectionRef.current === roofDirection) return
     lastSortedDirectionRef.current = roofDirection
     if (panelsRef.current.length === 0) return
-    const sorted = [...panelsRef.current].sort((a, b) => {
-      const aPanel = solarPanels.find((p) => p.id === a.id)
-      const bPanel = solarPanels.find((p) => p.id === b.id)
-      const aMatch = aPanel ? panelMatchesDirection(aPanel.segmentIndex, roofSegments, roofDirection) : false
-      const bMatch = bPanel ? panelMatchesDirection(bPanel.segmentIndex, roofSegments, roofDirection) : false
-      if (aMatch !== bMatch) return aMatch ? -1 : 1
-      return getPanelAnnualEnergy(b) - getPanelAnnualEnergy(a)
-    })
-    stableOrderRef.current = sorted.map((p) => p.id)
+    stableOrderRef.current = getSortedPanelIds(panelsRef.current, solarPanels, roofSegments, roofDirection)
     // Force re-render by replacing panels array reference (panels themselves unchanged)
     setPanels((prev) => [...prev])
   }, [projectId, roofDirection, solarPanels, roofSegments])
@@ -377,9 +363,9 @@ export function usePanelState({
     return panels.map((panel) => {
       const isActive = activePanelIds.has(panel.id)
       const moved =
-        Math.abs(panel.center.lat - panel.originalCenter.lat) > POSITION_EPSILON ||
-        Math.abs(panel.center.lng - panel.originalCenter.lng) > POSITION_EPSILON ||
-        Math.abs(panel.rotation - panel.originalRotation) > ROTATION_EPSILON
+        Math.abs(panel.center.lat - panel.originalCenter.lat) > WORKBENCH_CONFIG.positionEpsilon ||
+        Math.abs(panel.center.lng - panel.originalCenter.lng) > WORKBENCH_CONFIG.positionEpsilon ||
+        Math.abs(panel.rotation - panel.originalRotation) > WORKBENCH_CONFIG.rotationEpsilon
 
       return {
         id: panel.id,
