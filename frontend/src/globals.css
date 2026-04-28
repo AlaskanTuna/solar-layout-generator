@@ -368,9 +368,12 @@ select:focus-visible,
 }
 
 @utility hero-glass {
-  background: linear-gradient(135deg, rgba(255, 247, 237, 0.5), rgba(255, 247, 237, 0.2));
-  backdrop-filter: blur(14px) saturate(140%);
+  /* Order matters: Lightning CSS strips a trailing `backdrop-filter` when the prefixed
+     variant comes after it. Declare `-webkit-backdrop-filter` first so production builds
+     keep both properties (matches `.glass` / `.glass-card` / `.glass-nav` ordering). */
   -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.5), rgba(255, 247, 237, 0.2));
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow:
     0 30px 60px -20px rgba(80, 25, 5, 0.35),
