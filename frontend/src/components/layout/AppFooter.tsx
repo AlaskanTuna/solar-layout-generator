@@ -17,21 +17,21 @@ export function AppFooter() {
   ]
 
   return (
-    <footer className="border-t border-border bg-muted/30 px-6 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+    <footer className="border-t border-border bg-muted/30 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:gap-x-5">
           {NAV_LINKS.map((l) => (
             <a key={l.href} href={l.href} className="transition-colors hover:text-foreground">
               {l.label}
             </a>
           ))}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Leaf className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
             {t('footer.sdg')}
           </div>
-          <div className="h-3 w-px bg-border" />
+          <div className="hidden h-3 w-px bg-border sm:block" />
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
               <Logo className="h-6 w-6" />

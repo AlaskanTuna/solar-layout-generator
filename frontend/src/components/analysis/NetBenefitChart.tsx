@@ -145,7 +145,9 @@ export function NetBenefitChart({
       <CardContent className="space-y-4">
         <div className="rounded-lg bg-muted p-4 text-center">
           <p className="text-sm text-muted-foreground">{t('netBenefit.netBenefitLabel', { years: yearRange })}</p>
-          <p className={`text-3xl font-semibold ${finalYearBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+          <p
+            className={`text-2xl font-semibold sm:text-3xl ${finalYearBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}
+          >
             {formatCurrency(finalYearBenefit)}
           </p>
         </div>

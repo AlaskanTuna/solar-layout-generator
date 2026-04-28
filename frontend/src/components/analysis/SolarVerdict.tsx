@@ -109,7 +109,7 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 </InfoTooltip>
               </span>
             </div>
-            <p className="text-xl font-semibold tabular-nums">{formatCurrency(averageMonthlySavingsRm)}</p>
+            <p className="text-lg font-semibold tabular-nums sm:text-xl">{formatCurrency(averageMonthlySavingsRm)}</p>
             <p className="text-xs text-muted-foreground">
               {t('verdict.metrics.monthlySavings.detail', { pct: formatNumber(averageMonthlySavingsPct, '') })}
             </p>
@@ -127,7 +127,7 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 </InfoTooltip>
               </span>
             </div>
-            <p className="text-xl font-semibold tabular-nums">{formatCurrency(annualTotals.totalSavingsRm)}</p>
+            <p className="text-lg font-semibold tabular-nums sm:text-xl">{formatCurrency(annualTotals.totalSavingsRm)}</p>
             <p className="text-xs text-muted-foreground">
               {t('verdict.metrics.annualSavings.baseline', { amount: formatCurrency(annualTotals.totalBaselineRm) })}
             </p>
@@ -142,7 +142,7 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 <InfoTooltip>{paybackTooltip}</InfoTooltip>
               </span>
             </div>
-            <p className="text-xl font-semibold tabular-nums">{formatNumber(paybackYears, 'years')}</p>
+            <p className="text-lg font-semibold tabular-nums sm:text-xl">{formatNumber(paybackYears, 'years')}</p>
             <p className="text-xs text-muted-foreground">{condition.description}</p>
           </div>
           <div className="space-y-1">
@@ -183,7 +183,7 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 </InfoTooltip>
               </span>
             </div>
-            <p className="text-xl font-semibold">{nemFitLabel}</p>
+            <p className="text-lg font-semibold sm:text-xl">{nemFitLabel}</p>
             <p className="text-xs text-muted-foreground">{nemFit.detail}</p>
           </div>
         </div>

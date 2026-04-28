@@ -133,7 +133,9 @@ export function SystemCostCard({
             <CardDescription>{t('systemCost.description')}</CardDescription>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-semibold text-foreground tabular-nums">{formatCurrency(costBreakdown.total)}</p>
+            <p className="text-2xl font-semibold text-foreground tabular-nums sm:text-3xl">
+              {formatCurrency(costBreakdown.total)}
+            </p>
             <p className="text-xs text-muted-foreground">{t('systemCost.quoteVariance')}</p>
           </div>
         </div>

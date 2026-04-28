@@ -11,6 +11,25 @@ import { App } from './App'
 import './lib/i18n'
 import './globals.css'
 
+// Recharts' ResponsiveContainer + Radix dropdown's pointer-event tracking
+// occasionally surface benign ResizeObserver loop warnings and null-reason
+// rejections during dropdown open/close. They're harmless but get caught
+// by MetaMask's SES lockdown logger and spam the console as
+// `SES_UNCAUGHT_EXCEPTION: null`. Filter them at the source.
+window.addEventListener('error', (event) => {
+  if (event.message?.includes('ResizeObserver loop')) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+  }
+})
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason
+  const message = typeof reason?.message === 'string' ? reason.message : ''
+  if (reason == null || message.includes('ResizeObserver loop')) {
+    event.preventDefault()
+  }
+})
+
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
