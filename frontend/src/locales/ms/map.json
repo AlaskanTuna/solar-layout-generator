@@ -1,0 +1,67 @@
+{
+  "errorState": {
+    "failedToLoadMaps": "Gagal memuatkan Google Maps",
+    "reloadPage": "Muat Semula Halaman",
+    "dashboard": "Papan Pemuka"
+  },
+  "loading": {
+    "loadingMaps": "Memuatkan Google Maps...",
+    "preparingMap": "Menyediakan paparan peta..."
+  },
+  "search": {
+    "placeholder": "Cari alamat anda...",
+    "readonlyHint": "Sila buat",
+    "readonlyHintLink": "projek baharu",
+    "readonlyHintSuffix": "di papan pemuka untuk lokasi baharu.",
+    "manualToggleHide": "Sembunyikan entri manual",
+    "manualToggleShow": "Atau masukkan koordinat secara manual",
+    "manualForm": {
+      "latitudePlaceholder": "Latitud",
+      "longitudePlaceholder": "Longitud",
+      "submitButton": "Guna koordinat ini",
+      "errorInvalidCoords": "Masukkan latitud dan longitud yang sah",
+      "errorOutOfBounds": "Koordinat mesti dalam Malaysia (lat 0.85–7.4, lng 99.6–119.3)"
+    }
+  },
+  "readonlyCard": {
+    "viewingSavedLocation": "Melihat lokasi yang disimpan",
+    "backToDashboard": "Kembali ke Papan Pemuka",
+    "proceedToWorkbench": "Terus ke Meja Kerja"
+  },
+  "confirm": {
+    "question": "Adakah ini bangunan anda?",
+    "confirmButton": "Sahkan Lokasi",
+    "checkingImagery": "Menyemak imej...",
+    "searchAgain": "Cari Semula"
+  },
+  "processing": {
+    "title": "Menganalisis bumbung anda...",
+    "description": "Mengambil data satelit dan potensi solar. Ini biasanya mengambil masa 15–30 saat."
+  },
+  "error": {
+    "noImagery": "Tiada imej solar tersedia untuk lokasi ini. Cuba alamat yang berhampiran.",
+    "checkImageryFailed": "Gagal menyemak ketersediaan imej",
+    "resolveLocationFailed": "Gagal menyelesaikan lokasi",
+    "rooftopAnalysisFailed": "Analisis data solar gagal untuk lokasi ini. Sila cuba bangunan yang lain.",
+    "checkStatusFailed": "Gagal menyemak status analisis bumbung",
+    "timeout": "Analisis bumbung mengambil masa lebih lama daripada yang dijangkakan. Google Solar API mungkin lambat atau lokasi ini mungkin tidak mempunyai data yang mencukupi. Sila cuba lagi atau cuba alamat yang berbeza.",
+    "tryAnotherLocation": "Cuba Lokasi Lain"
+  },
+  "consentModal": {
+    "title": "Imej Resolusi Lebih Rendah",
+    "description": "Data satelit berkualiti tinggi tidak tersedia untuk alamat ini. Kami boleh meneruskan dengan imej peringkat BASE dan liputan yang diperluaskan, tetapi ketepatan akan lebih rendah.",
+    "bullet1": "Kedudukan panel yang dicadangkan mungkin memerlukan lebih banyak pelarasan manual.",
+    "bullet2": "Anggaran fluks dan sinaran matahari adalah pada resolusi yang lebih kasar.",
+    "bullet3": "Liputan mungkin sedikit melebihi garisan bangunan.",
+    "cancel": "Batal",
+    "proceed": "Teruskan"
+  },
+  "tour": {
+    "step1Title": "Selamat Datang ke SolarSim",
+    "step1Body": "Alat ini membantu anda menganggarkan berapa banyak yang boleh anda jimat pada bil elektrik dengan memasang panel solar. Mari mulakan dengan mencari rumah anda.",
+    "step2Title": "Cari Alamat Anda",
+    "step2Body": "Taip alamat rumah penuh atau poskod anda di sini. Peta akan zum ke bangunan anda dan menunjukkan garisannya.",
+    "step3Title": "Sahkan Bangunan Anda",
+    "step3Body": "Selepas memilih alamat, anda akan melihat bangunan anda diserlahkan. Klik \"Analisis Lokasi Ini\" untuk mengambil data solar satelit — ini biasanya mengambil masa 15–30 saat."
+  }
+}

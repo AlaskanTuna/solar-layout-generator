@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
 import {
   BILL_RANGE_TO_KWH_PER_MONTH,
@@ -34,48 +35,7 @@ function billLabel(value: BillRange, base: string): string {
   return `${base} (~${BILL_RANGE_TO_KWH_PER_MONTH[value]} kWh)`
 }
 
-const BILL_OPTIONS: { value: BillRange; label: string }[] = [
-  { value: '<100', label: billLabel('<100', 'Less than RM 100') },
-  { value: '100-200', label: billLabel('100-200', 'RM 100 – 200') },
-  { value: '200-400', label: billLabel('200-400', 'RM 200 – 400') },
-  { value: '400-600', label: billLabel('400-600', 'RM 400 – 600') },
-  { value: '600+', label: billLabel('600+', 'More Than RM 600') },
-  { value: 'unknown', label: billLabel('unknown', 'Not Sure') }
-]
-
-const ROOF_DIRECTION_OPTIONS: { value: RoofDirection; label: string }[] = [
-  { value: 'any', label: 'Best Available (Yield-Sorted)' },
-  { value: 'south', label: 'South-Facing' },
-  { value: 'east', label: 'East-Facing' },
-  { value: 'west', label: 'West-Facing' },
-  { value: 'north', label: 'North-Facing' }
-]
-
 type Goal = Exclude<SizingGoal, 'custom'>
-
-const SIZING_OPTIONS: { value: Goal; title: string; description: string }[] = [
-  {
-    value: 'conservative',
-    title: 'Economy',
-    description: 'Smallest viable system. Lowest upfront cost, longer payback. Good if budget is the priority.'
-  },
-  {
-    value: 'balanced',
-    title: 'Self-Consumption',
-    description:
-      'Sized to match your typical daytime usage. Most cost-efficient, minimizes generation that goes to waste from overnight export.'
-  },
-  {
-    value: 'maximum',
-    title: 'Maximum',
-    description:
-      'Every panel that fits. Largest investment, biggest absolute savings, useful for installers or future-proofing.'
-  }
-]
-
-const labelForBill = (v: BillRange) => BILL_OPTIONS.find((o) => o.value === v)?.label ?? 'Not Sure'
-const labelForDirection = (v: RoofDirection) =>
-  ROOF_DIRECTION_OPTIONS.find((o) => o.value === v)?.label ?? 'Best Available (Yield-Sorted)'
 
 type LayoutPresetModalProps = {
   open: boolean
@@ -86,6 +46,48 @@ type LayoutPresetModalProps = {
 }
 
 export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }: LayoutPresetModalProps) {
+  const { t } = useTranslation('workbench')
+
+  const BILL_OPTIONS: { value: BillRange; label: string }[] = [
+    { value: '<100', label: billLabel('<100', t('layoutPresetModal.monthlyBill.options.lessThan100')) },
+    { value: '100-200', label: billLabel('100-200', t('layoutPresetModal.monthlyBill.options.100to200')) },
+    { value: '200-400', label: billLabel('200-400', t('layoutPresetModal.monthlyBill.options.200to400')) },
+    { value: '400-600', label: billLabel('400-600', t('layoutPresetModal.monthlyBill.options.400to600')) },
+    { value: '600+', label: billLabel('600+', t('layoutPresetModal.monthlyBill.options.600plus')) },
+    { value: 'unknown', label: billLabel('unknown', t('layoutPresetModal.monthlyBill.options.notSure')) }
+  ]
+
+  const ROOF_DIRECTION_OPTIONS: { value: RoofDirection; label: string }[] = [
+    { value: 'any', label: t('layoutPresetModal.roofDirection.options.any') },
+    { value: 'south', label: t('layoutPresetModal.roofDirection.options.south') },
+    { value: 'east', label: t('layoutPresetModal.roofDirection.options.east') },
+    { value: 'west', label: t('layoutPresetModal.roofDirection.options.west') },
+    { value: 'north', label: t('layoutPresetModal.roofDirection.options.north') }
+  ]
+
+  const SIZING_OPTIONS: { value: Goal; title: string; description: string }[] = [
+    {
+      value: 'conservative',
+      title: t('layoutPresetModal.sizingGoal.options.conservative.title'),
+      description: t('layoutPresetModal.sizingGoal.options.conservative.description')
+    },
+    {
+      value: 'balanced',
+      title: t('layoutPresetModal.sizingGoal.options.balanced.title'),
+      description: t('layoutPresetModal.sizingGoal.options.balanced.description')
+    },
+    {
+      value: 'maximum',
+      title: t('layoutPresetModal.sizingGoal.options.maximum.title'),
+      description: t('layoutPresetModal.sizingGoal.options.maximum.description')
+    }
+  ]
+
+  const labelForBill = (v: BillRange) =>
+    BILL_OPTIONS.find((o) => o.value === v)?.label ?? t('layoutPresetModal.monthlyBill.options.notSure')
+  const labelForDirection = (v: RoofDirection) =>
+    ROOF_DIRECTION_OPTIONS.find((o) => o.value === v)?.label ?? t('layoutPresetModal.roofDirection.options.any')
+
   const [billRange, setBillRange] = useState<BillRange>('unknown')
   const [sizingGoal, setSizingGoal] = useState<Goal>('balanced')
   const [roofDirection, setRoofDirection] = useState<RoofDirection>('any')
@@ -167,30 +169,28 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Layout Preset</DialogTitle>
+          <DialogTitle>{t('layoutPresetModal.title')}</DialogTitle>
           <DialogDescription>
-            Help us right-size your system. Presets only adjust how many panels are active — they don&apos;t move panel
-            positions. Skip to keep the maximum-coverage default.
+            {t('layoutPresetModal.description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
           <div className="space-y-2">
             <Label className="flex items-center text-sm font-medium">
-              Monthly Electricity Bill
+              {t('layoutPresetModal.monthlyBill.label')}
               <InfoTooltip open={tooltipOpen}>
                 <div className="space-y-1.5">
                   <p>
-                    Find this on your TNB bill. We translate it to kWh using the average TNB tariff to size your
-                    system. Look for "Purata Penggunaan" on your bill:
+                    {t('layoutPresetModal.monthlyBill.tooltip')}
                   </p>
                   <ImagePopup
                     src={tnbBillImg}
-                    alt="TNB bill showing average kWh usage"
+                    alt={t('layoutPresetModal.monthlyBill.tnbBillAlt')}
                     className="w-full rounded"
                     onOpenChange={handleBillImageOpenChange}
                   />
-                  <p className="text-[10px]">Click image to enlarge</p>
+                  <p className="text-[10px]">{t('layoutPresetModal.monthlyBill.clickToEnlarge')}</p>
                 </div>
               </InfoTooltip>
             </Label>
@@ -215,8 +215,8 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
 
           <div className="space-y-2">
             <Label className="flex items-center text-sm font-medium">
-              Roof Direction
-              <InfoTooltip text='Limit panels to a specific roof aspect. "Best Available" places panels on the highest-yield roof faces (typically south for Malaysia).' />
+              {t('layoutPresetModal.roofDirection.label')}
+              <InfoTooltip text={t('layoutPresetModal.roofDirection.tooltip')} />
             </Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -242,8 +242,8 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
 
           <div className="space-y-2">
             <Label className="flex items-center text-sm font-medium">
-              Sizing Goal
-              <InfoTooltip text="Economy keeps the system small for fastest budget recovery. Self-Consumption sizes the array to match your typical daytime usage. Maximum fills every available panel slot." />
+              {t('layoutPresetModal.sizingGoal.label')}
+              <InfoTooltip text={t('layoutPresetModal.sizingGoal.tooltip')} />
             </Label>
             <div className="grid gap-2">
               {SIZING_OPTIONS.map((opt) => {
@@ -283,10 +283,10 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
 
         <DialogFooter className="gap-2 sm:gap-2">
           <Button type="button" variant="outline" size="sm" onClick={handleSkip} className="sm:min-w-[100px]">
-            Skip
+            {t('layoutPresetModal.actions.skip')}
           </Button>
           <Button type="button" size="sm" onClick={handleSave} className="sm:min-w-[100px]">
-            Save
+            {t('layoutPresetModal.actions.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

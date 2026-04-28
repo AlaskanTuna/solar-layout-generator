@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Sliders } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -81,6 +82,7 @@ export function WorkbenchSidebar({
   layoutPresetLabel,
   onOpenLayoutPreset
 }: WorkbenchSidebarProps) {
+  const { t } = useTranslation('workbench')
   const { projectId } = useParams<{ projectId: string }>()
 
   return (
@@ -90,12 +92,12 @@ export function WorkbenchSidebar({
           <div className="flex items-start justify-between gap-3">
             <div>
               <CardTitle className="text-xl">{projectName}</CardTitle>
-              <CardDescription>Adjust the suggested layout before moving to financial analysis.</CardDescription>
+              <CardDescription>{t('sidebar.description')}</CardDescription>
             </div>
             {imageryQuality === 'BASE' && (
               <span className="inline-flex shrink-0 items-center rounded-md border border-amber-300/60 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
-                Imagery: BASE
-                <InfoTooltip text="High-resolution satellite imagery was unavailable for this address. Panel positions and flux estimates are approximate." />
+                {t('sidebar.imageryBase')}
+                <InfoTooltip text={t('sidebar.imageryBaseTooltip')} />
               </span>
             )}
           </div>
@@ -110,7 +112,7 @@ export function WorkbenchSidebar({
                 <Sliders className="h-3.5 w-3.5" />
               </span>
               <div>
-                <p className="text-xs font-medium">Layout Preset</p>
+                <p className="text-xs font-medium">{t('sidebar.layoutPreset.label')}</p>
                 <p className="text-xs text-muted-foreground">{layoutPresetLabel}</p>
               </div>
             </div>
@@ -119,16 +121,16 @@ export function WorkbenchSidebar({
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-lg bg-muted p-3">
               <p className="text-muted-foreground">
-                Annual Yield
-                <InfoTooltip text="Total estimated electricity your panels will generate in a year." />
+                {t('sidebar.stats.annualYield')}
+                <InfoTooltip text={t('sidebar.stats.annualYieldTooltip')} />
               </p>
               <p className="mt-1 text-lg font-semibold">{formatNumber(totalAnnualYield)} kWh</p>
             </div>
             <div className="rounded-lg bg-muted p-3">
               <p className="text-muted-foreground">
-                CO₂ Offset
+                {t('sidebar.stats.co2Offset')}
                 <InfoTooltip
-                  text={`Estimated using a factor of ${carbonOffsetFactorKgPerMwh} kg/MWh based on the grid emission factor for this region.`}
+                  text={t('sidebar.stats.co2OffsetTooltip', { factor: carbonOffsetFactorKgPerMwh })}
                 />
               </p>
               <p className="mt-1 text-lg font-semibold">{formatNumber(totalCarbonOffsetKg)} kg</p>
@@ -144,30 +146,32 @@ export function WorkbenchSidebar({
           </div>
           <details className="rounded-lg border border-border bg-muted/50 text-sm">
             <summary className="cursor-pointer px-3 py-2 font-medium text-foreground select-none">
-              Panel Specifications
+              {t('sidebar.panelSpecs.summary')}
             </summary>
             <div className="space-y-1 border-t border-border px-3 py-2 text-muted-foreground">
               <p>
-                Dimensions: {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
+                {t('sidebar.panelSpecs.dimensions', { height: selectedPanelModel.heightM, width: selectedPanelModel.widthM })}
               </p>
-              <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
-              <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
-              {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
-              <p>Max Panels: {maxArrayPanelsCount}</p>
-              {panelLifetimeYears != null && <p>Lifespan: {panelLifetimeYears} years</p>}
+              <p>{t('sidebar.panelSpecs.capacity', { capacityWp: selectedPanelModel.capacityWp })}</p>
+              <p>{t('sidebar.panelSpecs.efficiency', { efficiency: (selectedPanelModel.efficiency * 100).toFixed(1) })}</p>
+              {selectedPanelModel.costPerWp > 0 && (
+                <p>{t('sidebar.panelSpecs.cost', { costPerWp: selectedPanelModel.costPerWp.toFixed(2) })}</p>
+              )}
+              <p>{t('sidebar.panelSpecs.maxPanels', { count: maxArrayPanelsCount })}</p>
+              {panelLifetimeYears != null && <p>{t('sidebar.panelSpecs.lifespan', { years: panelLifetimeYears })}</p>}
             </div>
           </details>
         </CardHeader>
         <CardContent className="space-y-6">
           {initialBatchStatus === 'loading' && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
-              Computing monthly energy data for all panels...
+              {t('sidebar.batchStatus.loading')}
             </div>
           )}
 
           {initialBatchStatus === 'error' && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-              Could not compute monthly energy breakdown. Annual estimates will be used instead.
+              {t('sidebar.batchStatus.error')}
             </div>
           )}
 
@@ -187,8 +191,8 @@ export function WorkbenchSidebar({
           <div data-tour="panel-count" className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>
-                Panel Quantity
-                <InfoTooltip text="Adjust how many panels to include. Higher-yield panels are kept first when you reduce the count." />
+                {t('sidebar.panelQuantity.label')}
+                <InfoTooltip text={t('sidebar.panelQuantity.tooltip')} />
               </Label>
               <span className="text-sm text-muted-foreground">
                 {visiblePanelCount} / {maxVisibleCount}
@@ -208,8 +212,7 @@ export function WorkbenchSidebar({
               disabled={maxVisibleCount <= minVisibleCount}
             />
             <p className="text-xs text-muted-foreground">
-              Higher-yield panels are kept visible first. Lowering the slider removes lower-ranked panels from the saved
-              layout.
+              {t('sidebar.panelQuantity.hint')}
             </p>
           </div>
 
@@ -218,38 +221,40 @@ export function WorkbenchSidebar({
           <div className="space-y-3 rounded-xl border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <Label>
-                Selected Panel
-                <InfoTooltip text="Click any panel on the canvas to select it. Hold Shift to select multiple. You can then rotate or delete them." />
+                {t('sidebar.selectedPanel.label')}
+                <InfoTooltip text={t('sidebar.selectedPanel.tooltip')} />
               </Label>
               <span className="text-sm font-medium">
-                {selectedPanelIds.size > 1 ? `${selectedPanelIds.size} panels` : (selectedPanel?.id ?? 'None')}
+                {selectedPanelIds.size > 1
+                  ? t('sidebar.selectedPanel.multiSelected', { count: selectedPanelIds.size })
+                  : (selectedPanel?.id ?? t('sidebar.selectedPanel.none'))}
               </span>
             </div>
 
             {selectedPanelIds.size > 1 ? (
               <div className="text-sm text-muted-foreground">
-                <p className="font-medium">{selectedPanelIds.size} panels selected</p>
+                <p className="font-medium">{t('sidebar.selectedPanel.multiSelectedTitle', { count: selectedPanelIds.size })}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Use the rotation slider to rotate all selected panels. Press Delete to remove them.
+                  {t('sidebar.selectedPanel.multiSelectedHint')}
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-muted-foreground">Annual Yield</p>
+                  <p className="text-xs text-muted-foreground">{t('sidebar.selectedPanel.annualYield')}</p>
                   <p className="text-sm font-semibold">
                     {selectedAnnualEnergy !== null ? `${formatNumber(selectedAnnualEnergy)} kWh` : '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Rotation</p>
+                  <p className="text-xs text-muted-foreground">{t('sidebar.selectedPanel.rotation')}</p>
                   <p className="text-sm font-semibold">
                     {selectedPanel ? `${Math.round(selectedPanel.rotation)}°` : '—'}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    Avg Monthly Yield
+                    {t('sidebar.selectedPanel.avgMonthlyYield')}
                     <InfoTooltip
                       text={
                         selectedPanel && selectedPanel.monthlyEnergyDcKwh.length > 0
@@ -258,7 +263,7 @@ export function WorkbenchSidebar({
                                 (month, i) => `${month}: ${formatNumber(selectedPanel.monthlyEnergyDcKwh[i] ?? 0)} kWh`
                               )
                               .join('\n')
-                          : 'Monthly data not yet computed'
+                          : t('sidebar.selectedPanel.monthlyDataPending')
                       }
                     />
                   </p>
@@ -274,10 +279,10 @@ export function WorkbenchSidebar({
 
           <div className="grid gap-2">
             <Button variant="outline" size="sm" asChild className="w-full">
-              <Link to={`/project/${projectId}/map?view=readonly`}>Back to Map</Link>
+              <Link to={`/project/${projectId}/map?view=readonly`}>{t('sidebar.actions.backToMap')}</Link>
             </Button>
             <Button variant="outline" size="sm" asChild className="w-full">
-              <Link to="/dashboard">Back to Dashboard</Link>
+              <Link to="/dashboard">{t('sidebar.actions.backToDashboard')}</Link>
             </Button>
             <Button
               data-tour="save-continue"
@@ -285,7 +290,11 @@ export function WorkbenchSidebar({
               onClick={onSave}
               disabled={isSaving || pendingPanelId !== null}
             >
-              {isBatchRecomputing ? 'Recomputing Layout...' : isSaving ? 'Saving...' : 'Save & Continue'}
+              {isBatchRecomputing
+                ? t('sidebar.actions.recomputing')
+                : isSaving
+                  ? t('sidebar.actions.saving')
+                  : t('sidebar.actions.saveAndContinue')}
             </Button>
           </div>
         </CardContent>

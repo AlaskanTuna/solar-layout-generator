@@ -1,0 +1,161 @@
+{
+  "header": {
+    "reportTitle": "太阳能安装报告",
+    "generatedAt": "{{projectName}} · 生成于 {{date}}"
+  },
+  "footer": {
+    "sdg": "联合国可持续发展目标 7：经济实惠的清洁能源",
+    "imageryBase": "影像：BASE（低分辨率）",
+    "year": "· 2026"
+  },
+  "page1": {
+    "sectionLabel": "安装概览",
+    "context": "工作台配置的太阳能板布局及硬件选型。蓝色矩形表示卫星影像上的活跃太阳能板。",
+    "imageAlt": "附有太阳能板布局的屋顶卫星视图",
+    "stats": {
+      "activePanels": {
+        "label": "活跃太阳能板",
+        "suffix": "块"
+      },
+      "systemSize": {
+        "label": "系统规模",
+        "suffix": "kWp"
+      },
+      "panelModel": {
+        "label": "太阳能板型号",
+        "na": "不适用"
+      },
+      "roofType": {
+        "label": "屋顶类型",
+        "na": "不适用",
+        "labels": {
+          "tile": "瓦片",
+          "metal": "金属",
+          "flat": "平屋顶"
+        }
+      }
+    }
+  },
+  "page2": {
+    "sectionLabel": "太阳能评估结论与账单对比",
+    "context": "核心节省数据一览，以及有无太阳能的预估月度账单对比。详细每月费用请参阅逐月明细。",
+    "paybackTooltip": "累计节省金额收回系统成本的预计时间。"
+  },
+  "page3": {
+    "sectionLabel": "逐月明细",
+    "context": "全年 12 个日历月的月用电量、太阳能发电量、已应用 NEM 积分及账单节省结果。"
+  },
+  "page4": {
+    "sectionLabel": "累计节省",
+    "context": "通过 NEM 积分抵消逐月累计的账单节省总额，曲线越陡表示节省速度越快。",
+    "summary": {
+      "title": "摘要",
+      "peakMonthSavings": "峰值月节省",
+      "averageMonthSavings": "平均月节省",
+      "averageMonthSavingsDetail": "12 个月平均",
+      "year1TotalSavings": "第 1 年总节省",
+      "year1TotalSavingsDetail": "累计"
+    },
+    "billComparison": {
+      "title": "月度账单对比",
+      "description": "每月无太阳能（基准）与有太阳能的预估账单对比。",
+      "withoutSolar": "无太阳能",
+      "withSolar": "有太阳能"
+    },
+    "cumulativeSavings": {
+      "title": "累计节省",
+      "description": "全年逐月累计的节省总额。",
+      "seriesName": "累计节省"
+    }
+  },
+  "page5": {
+    "sectionLabel": "系统成本与假设",
+    "context": "自下而上的交钥匙成本，以及用于计算节省预测的技术参数。",
+    "noCostBreakdown": "请在工作台添加太阳能板以查看安装成本明细。",
+    "systemCost": {
+      "title": "系统成本",
+      "description": "预计总交钥匙安装成本。",
+      "quoteVariance": "±10% 典型报价浮动",
+      "pricingNote": "马来西亚中端市场定价（2026年）。实际安装商报价通常在此数字的 ±10% 范围内。",
+      "segments": {
+        "panels": "太阳能板",
+        "inverter": "逆变器",
+        "mounting": "支架",
+        "electricalBos": "电气 BOS",
+        "electricalBosDetail": "线路、保护装置",
+        "scaffolding": "脚手架",
+        "scaffoldingDetail": "仅限瓦片屋顶",
+        "permit": "报批费",
+        "permitCcc": "含 CCC 费用",
+        "permitSeda": "SEDA 注册",
+        "labour": "人工",
+        "labourDetail": "+18% 硬件成本",
+        "installerMargin": "安装商利润",
+        "installerMarginDetail": "+15% 硬件 + 人工"
+      },
+      "roofLabels": {
+        "tile": "瓦片",
+        "metal": "金属",
+        "flat": "平屋顶"
+      }
+    },
+    "assumptions": {
+      "sectionTitle": "系统假设",
+      "financialMode": "财务模式",
+      "financialModeSimple": "简单",
+      "financialModeLifecycle": "全生命周期",
+      "financialModeSimpleDetail": "仅前期成本",
+      "financialModeLifecycleDetail": "含维护 + 逆变器",
+      "perfRatio": "性能比",
+      "perfRatioDetail": "马来西亚住宅",
+      "losses": "损耗",
+      "lossesDetail": "积尘 / 线路",
+      "degradation": "衰减率",
+      "degradationDetail": "年度",
+      "tariffEscalation": "电价涨幅",
+      "tariffEscalationDetail": "复利",
+      "dcAcRatio": "DC/AC 比",
+      "dcAcRatioDetail": "逆变器配置",
+      "maintenance": "维护费",
+      "maintenanceDetail": "已扣除",
+      "inverterSwap": "逆变器更换",
+      "inverterSwapNumbered": "第 {{index}} 次逆变器更换",
+      "inverterSwapDetail": "第 {{year}} 年",
+      "panelLifetime": "太阳能板寿命",
+      "panelLifetimeSuffix": "年",
+      "panelLifetimeDetail": "Solar API",
+      "azimuthPitch": "方位角 / 倾斜角",
+      "azimuthPitchMultiSegment": "{{compass}} · {{count}} 个分区",
+      "azimuthPitchOneSegment": "{{compass}} · {{count}} 块",
+      "tariffVerified": "电价已核实",
+      "tariffVerifiedDetail": "TNB RP4 + AFA"
+    }
+  },
+  "page6": {
+    "sectionLabel": "净收益预测",
+    "contextSimple": "25 年内太阳能累计节省减去前期系统成本。绿色柱形表示回本后处于净盈利状态的年份。",
+    "contextLifecycle": "25 年内太阳能累计节省减去前期系统成本、年度维护费及计划逆变器更换费。绿色柱形表示回本后处于净盈利状态的年份。",
+    "summary": {
+      "title": "摘要",
+      "breakEven": "回本点",
+      "breakEvenDetail": "回本期",
+      "breakEvenNA": "不适用",
+      "year25NetBenefit": "第 25 年净收益",
+      "year25NetBenefitDetail": "扣除成本后",
+      "year25GrossSavings": "第 25 年总节省",
+      "year25GrossSavingsDetail": "含衰减"
+    }
+  },
+  "page7": {
+    "sectionLabel": "财务路线图",
+    "context": "系统预计 25 年使用寿命内的关键财务里程碑。"
+  },
+  "page8": {
+    "sectionLabel": "假设与免责声明",
+    "title": "假设与免责声明"
+  },
+  "analysisError": {
+    "title": "分析未保存",
+    "description": "请在导出 PDF 前先保存本项目的分析结果。"
+  }
+}

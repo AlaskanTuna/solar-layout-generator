@@ -1,0 +1,161 @@
+{
+  "header": {
+    "reportTitle": "Laporan Pemasangan Solar",
+    "generatedAt": "{{projectName}} · Dijana {{date}}"
+  },
+  "footer": {
+    "sdg": "UN SDG 7: Tenaga Mampu Milik dan Bersih",
+    "imageryBase": "Imej: BASE (resolusi lebih rendah)",
+    "year": "· 2026"
+  },
+  "page1": {
+    "sectionLabel": "Gambaran Keseluruhan Pemasangan",
+    "context": "Susun atur panel dan pemilihan perkakasan dari konfigurasi Meja Kerja anda. Segiempat biru menunjukkan panel aktif di atas imej satelit.",
+    "imageAlt": "Pandangan satelit bumbung dengan susun atur panel",
+    "stats": {
+      "activePanels": {
+        "label": "Panel aktif",
+        "suffix": "panel"
+      },
+      "systemSize": {
+        "label": "Saiz sistem",
+        "suffix": "kWp"
+      },
+      "panelModel": {
+        "label": "Model panel",
+        "na": "T/B"
+      },
+      "roofType": {
+        "label": "Jenis bumbung",
+        "na": "T/B",
+        "labels": {
+          "tile": "Jubin",
+          "metal": "Logam",
+          "flat": "Rata"
+        }
+      }
+    }
+  },
+  "page2": {
+    "sectionLabel": "Keputusan Solar & Perbandingan Bil",
+    "context": "Penjimatan utama sekilas pandang, ditambah anggaran bil bulanan anda dengan dan tanpa solar. Rujuk Pecahan Bulan demi Bulan untuk butiran kos setiap bulan.",
+    "paybackTooltip": "Anggaran masa untuk penjimatan terkumpul menampung kos sistem."
+  },
+  "page3": {
+    "sectionLabel": "Pecahan Bulan demi Bulan",
+    "context": "Penggunaan bulanan, penjanaan solar, kredit NEM yang digunakan, dan penjimatan bil yang terhasil untuk setiap 12 bulan kalendar."
+  },
+  "page4": {
+    "sectionLabel": "Penjimatan Terkumpul",
+    "context": "Jumlah penjimatan bil yang terkumpul bulan demi bulan daripada offset kredit NEM. Garis yang lebih curam menunjukkan penjimatan yang lebih cepat.",
+    "summary": {
+      "title": "Ringkasan",
+      "peakMonthSavings": "Penjimatan bulan puncak",
+      "averageMonthSavings": "Purata penjimatan bulanan",
+      "averageMonthSavingsDetail": "sepanjang 12 bulan",
+      "year1TotalSavings": "Jumlah penjimatan Tahun 1",
+      "year1TotalSavingsDetail": "terkumpul"
+    },
+    "billComparison": {
+      "title": "Perbandingan Bil Bulanan",
+      "description": "Anggaran bil bulanan anda tanpa solar (asas) berbanding dengan solar untuk setiap bulan.",
+      "withoutSolar": "Tanpa Solar",
+      "withSolar": "Dengan Solar"
+    },
+    "cumulativeSavings": {
+      "title": "Penjimatan Terkumpul",
+      "description": "Jumlah penjimatan terkumpul bulan demi bulan sepanjang tahun.",
+      "seriesName": "Penjimatan Terkumpul"
+    }
+  },
+  "page5": {
+    "sectionLabel": "Kos Sistem & Andaian",
+    "context": "Kos turnkey bawah ke atas ditambah parameter teknikal yang digunakan untuk mengira unjuran penjimatan anda.",
+    "noCostBreakdown": "Tambah panel di Meja Kerja untuk melihat pecahan kos pemasangan.",
+    "systemCost": {
+      "title": "Kos Sistem",
+      "description": "Anggaran jumlah kos pemasangan turnkey.",
+      "quoteVariance": "±10% Varians Sebut Harga Biasa",
+      "pricingNote": "Harga pasaran Malaysia peringkat pertengahan (2026). Sebut harga pemasang sebenar biasanya jatuh dalam julat ±10% daripada angka ini.",
+      "segments": {
+        "panels": "Panel",
+        "inverter": "Penyongsang",
+        "mounting": "Pemasangan",
+        "electricalBos": "BOS Elektrik",
+        "electricalBosDetail": "Pendawaian, Perlindungan",
+        "scaffolding": "Perancah",
+        "scaffoldingDetail": "Bumbung Jubin Sahaja",
+        "permit": "Permit",
+        "permitCcc": "Termasuk Fi CCC",
+        "permitSeda": "Pendaftaran SEDA",
+        "labour": "Buruh",
+        "labourDetail": "+18% daripada Perkakasan",
+        "installerMargin": "Margin pemasang",
+        "installerMarginDetail": "+15% daripada Perkakasan + Buruh"
+      },
+      "roofLabels": {
+        "tile": "Jubin",
+        "metal": "Logam",
+        "flat": "Rata"
+      }
+    },
+    "assumptions": {
+      "sectionTitle": "Andaian Sistem",
+      "financialMode": "Mod kewangan",
+      "financialModeSimple": "Mudah",
+      "financialModeLifecycle": "Kitaran Hayat",
+      "financialModeSimpleDetail": "kos pendahuluan sahaja",
+      "financialModeLifecycleDetail": "termasuk penyelenggaraan + penyongsang",
+      "perfRatio": "Nisbah prestasi",
+      "perfRatioDetail": "kediaman Malaysia",
+      "losses": "Kerugian",
+      "lossesDetail": "pengotoran/pendawaian",
+      "degradation": "Degradasi",
+      "degradationDetail": "tahunan",
+      "tariffEscalation": "Eskalasi tarif",
+      "tariffEscalationDetail": "bergabung",
+      "dcAcRatio": "Nisbah DC/AT",
+      "dcAcRatioDetail": "pensaizan penyongsang",
+      "maintenance": "Penyelenggaraan",
+      "maintenanceDetail": "ditolak",
+      "inverterSwap": "Tukar penyongsang",
+      "inverterSwapNumbered": "Tukar penyongsang #{{index}}",
+      "inverterSwapDetail": "pada tahun {{year}}",
+      "panelLifetime": "Jangka hayat panel",
+      "panelLifetimeSuffix": "thn",
+      "panelLifetimeDetail": "Solar API",
+      "azimuthPitch": "Azimut/kecondongan",
+      "azimuthPitchMultiSegment": "{{compass}} · {{count}} segmen",
+      "azimuthPitchOneSegment": "{{compass}} · {{count}} panel",
+      "tariffVerified": "Tarif disahkan",
+      "tariffVerifiedDetail": "TNB RP4 + AFA"
+    }
+  },
+  "page6": {
+    "sectionLabel": "Unjuran Manfaat Bersih",
+    "contextSimple": "Penjimatan solar terkumpul tolak kos sistem pendahuluan anda selama 25 tahun. Bar hijau menunjukkan tahun di mana anda berada dalam keuntungan bersih selepas pulang modal.",
+    "contextLifecycle": "Penjimatan solar terkumpul tolak kos sistem pendahuluan, penyelenggaraan tahunan, dan sebarang penggantian penyongsang yang dijadualkan, selama 25 tahun. Bar hijau menunjukkan tahun di mana anda berada dalam keuntungan bersih selepas pulang modal.",
+    "summary": {
+      "title": "Ringkasan",
+      "breakEven": "Pulang modal",
+      "breakEvenDetail": "tempoh bayar balik",
+      "breakEvenNA": "T/B",
+      "year25NetBenefit": "Manfaat bersih Tahun 25",
+      "year25NetBenefitDetail": "selepas menolak kos",
+      "year25GrossSavings": "Penjimatan kasar Tahun 25",
+      "year25GrossSavingsDetail": "dengan degradasi"
+    }
+  },
+  "page7": {
+    "sectionLabel": "Peta Jalan Kewangan",
+    "context": "Pencapaian kewangan utama sepanjang jangka hayat sistem 25 tahun yang dijangkakan."
+  },
+  "page8": {
+    "sectionLabel": "Andaian & Penafian",
+    "title": "Andaian & Penafian"
+  },
+  "analysisError": {
+    "title": "Analisis tidak disimpan",
+    "description": "Simpan analisis pada projek ini sebelum mengeksport PDF."
+  }
+}

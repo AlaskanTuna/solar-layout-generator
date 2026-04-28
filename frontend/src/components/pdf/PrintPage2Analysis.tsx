@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Bar,
   BarChart,
@@ -17,7 +18,7 @@ import {
 import type { ProjectResponse } from '@/api/projects'
 import type { AnalysisResultsRecord } from '@/lib/analysis'
 import {
-  ANALYSIS_DISCLAIMERS,
+  ANALYSIS_DISCLAIMER_KEYS,
   MONTH_LABELS,
   computeDegradedSavings,
   normalizeInverterReplacements,
@@ -44,8 +45,6 @@ type Props = {
   /** ISO date string for when the seeded AFA / tariff was last verified. Null when not seeded. */
   tariffEffectiveDate?: string | null
 }
-
-const ROOF_LABEL: Record<RoofType, string> = { tile: 'Tile', metal: 'Metal', flat: 'Flat' }
 
 const SEGMENT_COLORS = {
   panels: '#16a34a',
@@ -112,18 +111,21 @@ function SummaryCard({
 
 function CompactBillComparison({
   chartData,
-  tooltipStyle
+  tooltipStyle,
+  withoutSolarLabel,
+  withSolarLabel
 }: {
   chartData: ChartDataPoint[]
   tooltipStyle: ReturnType<typeof getChartTooltipStyle>
+  withoutSolarLabel: string
+  withSolarLabel: string
 }) {
+  const { t } = useTranslation('pdf')
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Monthly Bill Comparison</CardTitle>
-        <CardDescription className="text-xs">
-          Your estimated monthly bill without solar (baseline) versus with solar for each month.
-        </CardDescription>
+        <CardTitle className="text-sm">{t('page4.billComparison.title')}</CardTitle>
+        <CardDescription className="text-xs">{t('page4.billComparison.description')}</CardDescription>
       </CardHeader>
       <CardContent className="h-[200px] pb-2">
         <ResponsiveContainer width="100%" height="100%">
@@ -149,8 +151,8 @@ function CompactBillComparison({
             />
             <Tooltip cursor={tooltipStyle.cursor} contentStyle={tooltipStyle.contentStyle} labelStyle={tooltipStyle.labelStyle} content={<ChartTooltipContent />} />
             <Legend iconType="circle" wrapperStyle={{ paddingTop: '6px', fontSize: '10px' }} />
-            <Bar dataKey="baselineBill" name="Without Solar" fill="url(#pdfBillBaseline)" stroke={COLORS.chartBaseline} strokeWidth={1.5} radius={[2, 2, 0, 0]} />
-            <Bar dataKey="nemBill" name="With Solar" fill="url(#pdfBillNem)" stroke={COLORS.chartSolar} strokeWidth={1.5} radius={[2, 2, 0, 0]} />
+            <Bar dataKey="baselineBill" name={withoutSolarLabel} fill="url(#pdfBillBaseline)" stroke={COLORS.chartBaseline} strokeWidth={1.5} radius={[2, 2, 0, 0]} />
+            <Bar dataKey="nemBill" name={withSolarLabel} fill="url(#pdfBillNem)" stroke={COLORS.chartSolar} strokeWidth={1.5} radius={[2, 2, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
@@ -165,11 +167,12 @@ function CompactCumulativeSavings({
   chartData: ChartDataPoint[]
   tooltipStyle: ReturnType<typeof getChartTooltipStyle>
 }) {
+  const { t } = useTranslation('pdf')
   return (
     <Card className="h-full border-border bg-card/90 shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Cumulative Savings</CardTitle>
-        <CardDescription className="text-xs">Total savings accumulated month by month over the year.</CardDescription>
+        <CardTitle className="text-sm">{t('page4.cumulativeSavings.title')}</CardTitle>
+        <CardDescription className="text-xs">{t('page4.cumulativeSavings.description')}</CardDescription>
       </CardHeader>
       <CardContent className="h-[210px] pb-2">
         <ResponsiveContainer width="100%" height="100%">
@@ -178,7 +181,7 @@ function CompactCumulativeSavings({
             <XAxis dataKey="month" tick={{ fontSize: 10 }} />
             <YAxis width={60} tickFormatter={(v) => `RM${v}`} tick={{ fontSize: 10 }} />
             <Tooltip cursor={tooltipStyle.cursor} contentStyle={tooltipStyle.contentStyle} labelStyle={tooltipStyle.labelStyle} content={<ChartTooltipContent />} />
-            <Line type="monotone" dataKey="cumulativeSavings" name="Cumulative Savings" stroke="#ca8a04" strokeWidth={3} dot={{ r: 3 }} />
+            <Line type="monotone" dataKey="cumulativeSavings" name={t('page4.cumulativeSavings.seriesName')} stroke="#ca8a04" strokeWidth={3} dot={{ r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
@@ -205,51 +208,85 @@ function CompactSystemCostWithAssumptions({
   tooltipStyle: ReturnType<typeof getChartTooltipStyle>
   assumptionTiles: { label: string; value: string; detail?: string }[]
 }) {
+  const { t } = useTranslation('pdf')
   const segments = useMemo<Segment[]>(() => {
+    const roofLabel = t(`page5.systemCost.roofLabels.${roofType}` as const) ?? roofType
     const items: Segment[] = [
       {
         key: 'panels',
-        name: 'Panels',
+        name: t('page5.systemCost.segments.panels'),
         detail: `${activePanelCount} × ${panelCapacityWp} Wp @ RM ${panelCostPerWp.toFixed(2)}/Wp`,
         value: costBreakdown.panels,
         color: SEGMENT_COLORS.panels
       },
       {
         key: 'inverter',
-        name: 'Inverter',
+        name: t('page5.systemCost.segments.inverter'),
         detail: `${costBreakdown.inverterSku} · ${costBreakdown.inverterKwac} kWac`,
         value: costBreakdown.inverter,
         color: SEGMENT_COLORS.inverter
       },
-      { key: 'mounting', name: 'Mounting', detail: `${ROOF_LABEL[roofType]} Roof`, value: costBreakdown.mounting, color: SEGMENT_COLORS.mounting },
-      { key: 'electricalBos', name: 'Electrical BOS', detail: 'Wiring, Protection', value: costBreakdown.electricalBos, color: SEGMENT_COLORS.electricalBos }
+      {
+        key: 'mounting',
+        name: t('page5.systemCost.segments.mounting'),
+        detail: `${roofLabel} Roof`,
+        value: costBreakdown.mounting,
+        color: SEGMENT_COLORS.mounting
+      },
+      {
+        key: 'electricalBos',
+        name: t('page5.systemCost.segments.electricalBos'),
+        detail: t('page5.systemCost.segments.electricalBosDetail'),
+        value: costBreakdown.electricalBos,
+        color: SEGMENT_COLORS.electricalBos
+      }
     ]
     if (costBreakdown.scaffolding > 0) {
-      items.push({ key: 'scaffolding', name: 'Scaffolding', detail: 'Tile Roof Only', value: costBreakdown.scaffolding, color: SEGMENT_COLORS.scaffolding })
+      items.push({
+        key: 'scaffolding',
+        name: t('page5.systemCost.segments.scaffolding'),
+        detail: t('page5.systemCost.segments.scaffoldingDetail'),
+        value: costBreakdown.scaffolding,
+        color: SEGMENT_COLORS.scaffolding
+      })
     }
     items.push({
       key: 'permit',
-      name: 'Permit',
-      detail: costBreakdown.cccFeeTriggered ? 'Incl. CCC Fee' : 'SEDA Registration',
+      name: t('page5.systemCost.segments.permit'),
+      detail: costBreakdown.cccFeeTriggered
+        ? t('page5.systemCost.segments.permitCcc')
+        : t('page5.systemCost.segments.permitSeda'),
       value: costBreakdown.permit,
       color: SEGMENT_COLORS.permit
     })
-    items.push({ key: 'labour', name: 'Labour', detail: '+18% of Hardware', value: costBreakdown.labour, color: SEGMENT_COLORS.labour })
-    items.push({ key: 'installerMargin', name: 'Installer margin', detail: '+15% of Hardware + Labour', value: costBreakdown.installerMargin, color: SEGMENT_COLORS.installerMargin })
+    items.push({
+      key: 'labour',
+      name: t('page5.systemCost.segments.labour'),
+      detail: t('page5.systemCost.segments.labourDetail'),
+      value: costBreakdown.labour,
+      color: SEGMENT_COLORS.labour
+    })
+    items.push({
+      key: 'installerMargin',
+      name: t('page5.systemCost.segments.installerMargin'),
+      detail: t('page5.systemCost.segments.installerMarginDetail'),
+      value: costBreakdown.installerMargin,
+      color: SEGMENT_COLORS.installerMargin
+    })
     return items
-  }, [costBreakdown, activePanelCount, panelCapacityWp, panelCostPerWp, roofType])
+  }, [costBreakdown, activePanelCount, panelCapacityWp, panelCostPerWp, roofType, t])
 
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <CardTitle className="text-sm">System Cost</CardTitle>
-            <CardDescription className="text-xs">Estimated total turnkey installation cost.</CardDescription>
+            <CardTitle className="text-sm">{t('page5.systemCost.title')}</CardTitle>
+            <CardDescription className="text-xs">{t('page5.systemCost.description')}</CardDescription>
           </div>
           <div className="text-right">
             <p className="text-xl font-semibold text-foreground tabular-nums">{formatCurrency(costBreakdown.total)}</p>
-            <p className="text-[9px] text-muted-foreground">±10% Typical Quote Variance</p>
+            <p className="text-[9px] text-muted-foreground">{t('page5.systemCost.quoteVariance')}</p>
           </div>
         </div>
       </CardHeader>
@@ -297,11 +334,11 @@ function CompactSystemCostWithAssumptions({
             })}
           </ul>
         </div>
-        <p className="text-[9px] text-muted-foreground">
-          Mid-tier Malaysian market pricing (2026). Actual installer quotes typically land within ±10% of this figure.
-        </p>
+        <p className="text-[9px] text-muted-foreground">{t('page5.systemCost.pricingNote')}</p>
         <div className="border-t border-border pt-2">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">System Assumptions</p>
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t('page5.assumptions.sectionTitle')}
+          </p>
           <div className="grid grid-cols-6 gap-1.5">
             {assumptionTiles.map((tile) => (
               <SummaryTile key={tile.label} {...tile} />
@@ -314,6 +351,7 @@ function CompactSystemCostWithAssumptions({
 }
 
 export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Props) {
+  const { t } = useTranslation('pdf')
   const { resolved } = useTheme()
   const tooltipStyle = getChartTooltipStyle(resolved)
   const analysisResults = project.analysisResults
@@ -322,8 +360,8 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
     return (
       <PdfPageShell sectionLabel="Analysis" pageBreak={false}>
         <div className="rounded-lg border border-destructive bg-destructive/5 p-6 text-sm text-destructive">
-          <p className="font-semibold">Analysis not saved</p>
-          <p className="mt-2">Save the analysis on this project before exporting the PDF.</p>
+          <p className="font-semibold">{t('analysisError.title')}</p>
+          <p className="mt-2">{t('analysisError.description')}</p>
         </div>
       </PdfPageShell>
     )
@@ -402,71 +440,93 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
   const lifecycleActive = analysisMode === 'lifecycle'
   const assumptionTiles = [
     {
-      label: 'Financial mode',
-      value: lifecycleActive ? 'Lifecycle' : 'Simple',
-      detail: lifecycleActive ? 'incl. maint. + inverter' : 'upfront cost only'
+      label: t('page5.assumptions.financialMode'),
+      value: lifecycleActive ? t('page5.assumptions.financialModeLifecycle') : t('page5.assumptions.financialModeSimple'),
+      detail: lifecycleActive ? t('page5.assumptions.financialModeLifecycleDetail') : t('page5.assumptions.financialModeSimpleDetail')
     },
-    { label: 'Perf. ratio', value: `${Math.round(performanceRatio * 100)}%`, detail: 'MY residential' },
-    { label: 'Losses', value: `${Math.round(assumedLosses * 100)}%`, detail: 'soiling/wiring' },
-    { label: 'Degradation', value: `${(degradationRate * 100).toFixed(1)}%/yr`, detail: 'annual' },
+    { label: t('page5.assumptions.perfRatio'), value: `${Math.round(performanceRatio * 100)}%`, detail: t('page5.assumptions.perfRatioDetail') },
+    { label: t('page5.assumptions.losses'), value: `${Math.round(assumedLosses * 100)}%`, detail: t('page5.assumptions.lossesDetail') },
+    { label: t('page5.assumptions.degradation'), value: `${(degradationRate * 100).toFixed(1)}%/yr`, detail: t('page5.assumptions.degradationDetail') },
     tariffEscalationRate > 0
-      ? { label: 'Tariff escalation', value: `${(tariffEscalationRate * 100).toFixed(1)}%/yr`, detail: 'compounding' }
+      ? { label: t('page5.assumptions.tariffEscalation'), value: `${(tariffEscalationRate * 100).toFixed(1)}%/yr`, detail: t('page5.assumptions.tariffEscalationDetail') }
       : null,
-    { label: 'DC/AC ratio', value: String(dcAcRatio), detail: 'inverter sizing' },
+    { label: t('page5.assumptions.dcAcRatio'), value: String(dcAcRatio), detail: t('page5.assumptions.dcAcRatioDetail') },
     lifecycleActive && annualMaintenanceRm > 0
-      ? { label: 'Maintenance', value: `${formatCurrency(annualMaintenanceRm)}/yr`, detail: 'subtracted' }
+      ? { label: t('page5.assumptions.maintenance'), value: `${formatCurrency(annualMaintenanceRm)}/yr`, detail: t('page5.assumptions.maintenanceDetail') }
       : null,
     ...(lifecycleActive
       ? inverterReplacements.map((r, idx) => ({
-          label: inverterReplacements.length === 1 ? 'Inverter swap' : `Inverter swap #${idx + 1}`,
+          label: inverterReplacements.length === 1
+            ? t('page5.assumptions.inverterSwap')
+            : t('page5.assumptions.inverterSwapNumbered', { index: idx + 1 }),
           value: formatCurrency(r.costRm),
-          detail: `at year ${r.year}`
+          detail: t('page5.assumptions.inverterSwapDetail', { year: r.year })
         }))
       : []),
-    panelLifetimeYears != null ? { label: 'Panel lifetime', value: `${panelLifetimeYears} yrs`, detail: 'Solar API' } : null,
+    panelLifetimeYears != null
+      ? {
+          label: t('page5.assumptions.panelLifetime'),
+          value: `${panelLifetimeYears} ${t('page5.assumptions.panelLifetimeSuffix')}`,
+          detail: t('page5.assumptions.panelLifetimeDetail')
+        }
+      : null,
     layoutOrientation
       ? {
-          label: 'Azimuth/pitch',
+          label: t('page5.assumptions.azimuthPitch'),
           value: `${Math.round(layoutOrientation.azimuthDegrees)}° / ${Math.round(layoutOrientation.pitchDegrees)}°`,
           detail:
             layoutOrientation.segmentCount > 1
-              ? `${azimuthToCompass(layoutOrientation.azimuthDegrees)} · ${layoutOrientation.segmentCount} segments`
-              : `${azimuthToCompass(layoutOrientation.azimuthDegrees)} · ${layoutOrientation.panelCount} panels`
+              ? t('page5.assumptions.azimuthPitchMultiSegment', {
+                  compass: azimuthToCompass(layoutOrientation.azimuthDegrees),
+                  count: layoutOrientation.segmentCount
+                })
+              : t('page5.assumptions.azimuthPitchOneSegment', {
+                  compass: azimuthToCompass(layoutOrientation.azimuthDegrees),
+                  count: layoutOrientation.panelCount
+                })
         }
       : null,
     tariffEffectiveDate
       ? {
-          label: 'Tariff verified',
+          label: t('page5.assumptions.tariffVerified'),
           value: new Date(tariffEffectiveDate).toLocaleDateString('en-MY', { year: 'numeric', month: 'short' }),
-          detail: 'TNB RP4 + AFA'
+          detail: t('page5.assumptions.tariffVerifiedDetail')
         }
       : null
-  ].filter((t) => t !== null) as { label: string; value: string; detail?: string }[]
+  ].filter((tile) => tile !== null) as { label: string; value: string; detail?: string }[]
+
+  const withoutSolarLabel = t('page4.billComparison.withoutSolar')
+  const withSolarLabel = t('page4.billComparison.withSolar')
 
   return (
     <>
       {/* Page 2: Solar Verdict + Bill Comparison */}
       <PdfPageShell
-        sectionLabel="Solar Verdict & Bill Comparison"
-        context="Headline savings at a glance, plus your estimated monthly bill with and without solar. Refer to the Month-by-Month Breakdown for detailed per-month cost detail."
+        sectionLabel={t('page2.sectionLabel')}
+        context={t('page2.context')}
       >
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="pdf-card-break">
             <SolarVerdict
               analysisResults={analysisResults}
-              paybackTooltip="Estimated time for accumulated savings to recover the system cost."
+              paybackTooltip={t('page2.paybackTooltip')}
             />
           </div>
           <div className="pdf-card-break">
-            <CompactBillComparison chartData={chartData} tooltipStyle={tooltipStyle} />
+            <CompactBillComparison
+              chartData={chartData}
+              tooltipStyle={tooltipStyle}
+              withoutSolarLabel={withoutSolarLabel}
+              withSolarLabel={withSolarLabel}
+            />
           </div>
         </div>
       </PdfPageShell>
 
       {/* Page 3: Month-by-Month Breakdown */}
       <PdfPageShell
-        sectionLabel="Month-by-Month Breakdown"
-        context="Monthly consumption, solar generation, NEM credits applied, and resulting bill savings for each of the 12 calendar months."
+        sectionLabel={t('page3.sectionLabel')}
+        context={t('page3.context')}
       >
         <div className="min-h-0 flex-1">
           <MonthTable simulation={simulation} isOpen={true} onToggle={() => {}} />
@@ -475,8 +535,8 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
 
       {/* Page 4: Cumulative Savings + Summary */}
       <PdfPageShell
-        sectionLabel="Cumulative Savings"
-        context="Running total of bill savings accumulated month-by-month from NEM credit offsets. Steeper lines indicate faster savings."
+        sectionLabel={t('page4.sectionLabel')}
+        context={t('page4.context')}
       >
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="pdf-card-break min-h-0 flex-1">
@@ -484,11 +544,23 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
           </div>
           <div className="pdf-card-break">
             <SummaryCard
-              title="Summary"
+              title={t('page4.summary.title')}
               tiles={[
-                { label: 'Peak month savings', value: formatCurrency(peakMonthly), detail: MONTH_LABELS[peakMonthlyIdx] },
-                { label: 'Average month savings', value: formatCurrency(avgMonthly), detail: 'over 12 months' },
-                { label: 'Year 1 total savings', value: formatCurrency(year1Savings), detail: 'cumulative' }
+                {
+                  label: t('page4.summary.peakMonthSavings'),
+                  value: formatCurrency(peakMonthly),
+                  detail: MONTH_LABELS[peakMonthlyIdx]
+                },
+                {
+                  label: t('page4.summary.averageMonthSavings'),
+                  value: formatCurrency(avgMonthly),
+                  detail: t('page4.summary.averageMonthSavingsDetail')
+                },
+                {
+                  label: t('page4.summary.year1TotalSavings'),
+                  value: formatCurrency(year1Savings),
+                  detail: t('page4.summary.year1TotalSavingsDetail')
+                }
               ]}
             />
           </div>
@@ -497,8 +569,8 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
 
       {/* Page 5: System Cost with nested Assumptions */}
       <PdfPageShell
-        sectionLabel="System Cost & Assumptions"
-        context="Bottom-up turnkey cost plus the technical parameters used to compute your savings projection."
+        sectionLabel={t('page5.sectionLabel')}
+        context={t('page5.context')}
       >
         <div className="min-h-0 flex-1">
           {costBreakdown ? (
@@ -514,7 +586,7 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
           ) : (
             <Card className="border-border bg-card/90 shadow-sm">
               <CardContent className="p-4 text-sm text-muted-foreground">
-                Add panels on the Workbench to see installation cost breakdown.
+                {t('page5.noCostBreakdown')}
               </CardContent>
             </Card>
           )}
@@ -523,12 +595,8 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
 
       {/* Page 6: Net Benefit Projection + Summary */}
       <PdfPageShell
-        sectionLabel="Net Benefit Projection"
-        context={
-          lifecycleActive
-            ? 'Cumulative solar savings minus your upfront system cost, yearly maintenance, and any scheduled inverter replacements, over 25 years. Green bars indicate years where you are in net profit after break-even.'
-            : 'Cumulative solar savings minus your upfront system cost over 25 years. Green bars indicate years where you are in net profit after break-even.'
-        }
+        sectionLabel={t('page6.sectionLabel')}
+        context={lifecycleActive ? t('page6.contextLifecycle') : t('page6.contextSimple')}
       >
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="pdf-card-break min-h-0 flex-1">
@@ -545,22 +613,22 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
           </div>
           <div className="pdf-card-break">
             <SummaryCard
-              title="Summary"
+              title={t('page6.summary.title')}
               tiles={[
                 {
-                  label: 'Break-even',
-                  value: breakEvenYear !== null ? `${breakEvenYear.toFixed(1)} yrs` : 'N/A',
-                  detail: 'payback period'
+                  label: t('page6.summary.breakEven'),
+                  value: breakEvenYear !== null ? `${breakEvenYear.toFixed(1)} yrs` : t('page6.summary.breakEvenNA'),
+                  detail: t('page6.summary.breakEvenDetail')
                 },
                 {
-                  label: 'Year 25 net benefit',
+                  label: t('page6.summary.year25NetBenefit'),
                   value: formatCurrency(year25NetBenefit),
-                  detail: 'after subtracting cost'
+                  detail: t('page6.summary.year25NetBenefitDetail')
                 },
                 {
-                  label: 'Year 25 gross savings',
+                  label: t('page6.summary.year25GrossSavings'),
                   value: formatCurrency(year25DegradedCumulative),
-                  detail: 'with degradation'
+                  detail: t('page6.summary.year25GrossSavingsDetail')
                 }
               ]}
             />
@@ -570,8 +638,8 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
 
       {/* Page 7: Financial Roadmap */}
       <PdfPageShell
-        sectionLabel="Financial Roadmap"
-        context="Key financial milestones over your system's expected 25-year lifetime."
+        sectionLabel={t('page7.sectionLabel')}
+        context={t('page7.context')}
       >
         <div className="min-h-0 flex-1">
           <FinancialRoadmap
@@ -589,12 +657,12 @@ export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Prop
       </PdfPageShell>
 
       {/* Page 8: Disclaimers (natural height, no stretch) */}
-      <PdfPageShell sectionLabel="Assumptions & Disclaimers" pageBreak={false}>
+      <PdfPageShell sectionLabel={t('page8.sectionLabel')} pageBreak={false}>
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-[11px] leading-relaxed text-muted-foreground">
-          <p className="mb-2 text-sm font-semibold text-foreground">Assumptions &amp; Disclaimers</p>
+          <p className="mb-2 text-sm font-semibold text-foreground">{t('page8.title')}</p>
           <ul className="space-y-2">
-            {ANALYSIS_DISCLAIMERS.map((line, i) => (
-              <li key={i}>&middot; {line}</li>
+            {ANALYSIS_DISCLAIMER_KEYS.map((key) => (
+              <li key={key}>&middot; {t(`page8.disclaimers.${key}` as const)}</li>
             ))}
           </ul>
         </div>

@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { LanguageToggle } from '@/components/layout/LanguageToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +14,7 @@ import { Logo } from '@/components/ui/Logo'
 const REMEMBER_EMAIL_KEY = 'slg-remember-email'
 
 export function SignInPage() {
+  const { t } = useTranslation('auth')
   const { session, loading, signIn } = useAuth()
   const navigate = useNavigate()
   const rememberedEmail = typeof window !== 'undefined' ? (window.localStorage.getItem(REMEMBER_EMAIL_KEY) ?? '') : ''
@@ -61,15 +64,14 @@ export function SignInPage() {
 
         <div className="relative">
           <h2 className="font-heading text-3xl font-bold leading-tight text-primary-foreground">
-            Your rooftop solar journey starts here
+            {t('signIn.panelHeading')}
           </h2>
           <p className="mt-3 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
-            Get a data-driven assessment of your solar potential using real satellite imagery and Malaysian NEM tariff
-            rates.
+            {t('signIn.panelSubtitle')}
           </p>
         </div>
 
-        <p className="relative text-xs text-primary-foreground/40">2026 SolarSim</p>
+        <p className="relative text-xs text-primary-foreground/40">{t('branding.tagline2026')}</p>
       </div>
 
       {/* Right panel — form */}
@@ -79,7 +81,8 @@ export function SignInPage() {
             <Logo className="h-7 w-7" />
             <span className="font-heading text-base font-semibold">SolarSim</span>
           </Link>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>
@@ -87,25 +90,25 @@ export function SignInPage() {
         <div className="flex flex-1 items-center justify-center px-6 pb-12">
           <div className="w-full max-w-sm animate-fade-in">
             <div className="mb-8">
-              <h1 className="font-heading text-2xl font-bold tracking-tight">Welcome back</h1>
-              <p className="mt-1 text-sm text-muted-foreground">Enter your credentials to access your projects</p>
+              <h1 className="font-heading text-2xl font-bold tracking-tight">{t('signIn.title')}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{t('signIn.subtitle')}</p>
             </div>
 
-            <GoogleSignInButton label="Sign in with Google" onError={setError} />
+            <GoogleSignInButton label={t('signIn.googleButton')} onError={setError} />
 
             <div className="my-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">Or continue with email</span>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">{t('signIn.orDivider')}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('signIn.emailLabel')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t('signIn.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -113,7 +116,7 @@ export function SignInPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('signIn.passwordLabel')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -147,7 +150,7 @@ export function SignInPage() {
                     <path d="M3 8.5l3.5 3.5L13 5" />
                   </svg>
                 </span>
-                Remember my email
+                {t('signIn.rememberEmail')}
               </label>
 
               {error && (
@@ -160,18 +163,18 @@ export function SignInPage() {
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing in...
+                    {t('signIn.submitting')}
                   </>
                 ) : (
-                  'Sign In'
+                  t('signIn.submitButton')
                 )}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{' '}
+              {t('signIn.noAccount')}{' '}
               <Link to="/sign-up" className="font-medium text-primary transition-colors hover:text-primary/80">
-                Sign Up
+                {t('signIn.signUpLink')}
               </Link>
             </p>
           </div>

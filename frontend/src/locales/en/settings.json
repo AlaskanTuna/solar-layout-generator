@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "Settings",
+    "subtitle": "Manage your app preferences and lightweight local data."
+  },
+  "account": {
+    "title": "Account",
+    "description": "Your signed-in profile and current project quota plan.",
+    "emailLabel": "Email",
+    "emailFallback": "Signed-in user",
+    "planLabel": "Plan",
+    "loadingPlan": "Loading plan..."
+  },
+  "appearance": {
+    "title": "Appearance",
+    "description": "Choose the interface theme. Current resolved theme is {{resolved}}.",
+    "themeSet": "Theme set to {{label}}.",
+    "options": {
+      "system": {
+        "label": "System",
+        "detail": "Match your device"
+      },
+      "light": {
+        "label": "Light",
+        "detail": "Bright interface"
+      },
+      "dark": {
+        "label": "Dark",
+        "detail": "Low-light interface"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Review and clear the local notification history shown from the top navigation bell.",
+    "saved": "{{count}} saved notifications",
+    "unread": "{{count}} unread",
+    "clearButton": "Clear notifications",
+    "clearStatus": "Notification history cleared."
+  },
+  "guidedTours": {
+    "title": "Guided Tours",
+    "description": "Reset onboarding hints for Map, Workbench, and Analysis so they can be replayed.",
+    "resetButton": "Reset guided tours",
+    "resetStatus": "Guided tours will appear again when you open Map, Workbench, or Analysis."
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "description": "Clear the local recent-project activity cache used to order familiar work.",
+    "clearButton": "Clear recent activity",
+    "clearStatus": "Recent project activity cache cleared."
+  },
+  "planLabel": "{{tier}} plan"
+}

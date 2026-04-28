@@ -1,0 +1,63 @@
+{
+  "actions": {
+    "cancel": "取消",
+    "close": "关闭",
+    "confirm": "确认",
+    "continue": "继续",
+    "delete": "删除",
+    "discard": "放弃",
+    "download": "下载",
+    "edit": "编辑",
+    "next": "下一步",
+    "ok": "好的",
+    "previous": "上一步",
+    "retry": "重试",
+    "save": "保存",
+    "saving": "保存中…",
+    "search": "搜索",
+    "skip": "跳过",
+    "submit": "提交",
+    "tryAgain": "重试",
+    "viewAll": "查看全部"
+  },
+  "states": {
+    "loading": "加载中…",
+    "error": "出错了",
+    "empty": "暂无内容",
+    "noResults": "无结果"
+  },
+  "units": {
+    "kw": "kW",
+    "kwh": "kWh",
+    "kwhPerMonth": "kWh / 月",
+    "kwhPerYear": "kWh / 年",
+    "kwhPerKwp": "kWh / kWp",
+    "kwp": "kWp",
+    "myr": "RM",
+    "panels": "块",
+    "percent": "%",
+    "year": "年",
+    "years": "年",
+    "month": "个月",
+    "months": "个月",
+    "ton": "t",
+    "kg": "kg"
+  },
+  "language": {
+    "label": "语言",
+    "toggleAria": "切换语言"
+  },
+  "theme": {
+    "label": "主题",
+    "toggleAria": "切换主题",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
+  "branding": {
+    "appName": "SolarSim",
+    "tagline": "经济实惠的清洁能源",
+    "footerYear": "2026",
+    "sdg": "联合国可持续发展目标 7：经济实惠的清洁能源"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "sections": {
+    "overview": "概览",
+    "insights": "洞察",
+    "help": "帮助"
+  },
+  "items": {
+    "dashboard": "仪表板",
+    "projects": "项目",
+    "analytics": "分析",
+    "faq": "常见问题",
+    "settings": "设置",
+    "signOut": "退出",
+    "home": "首页",
+    "summary": "摘要",
+    "map": "地图",
+    "workbench": "工作台",
+    "analysis": "分析",
+    "howItWorks": "使用指南",
+    "features": "功能",
+    "pricing": "价格"
+  },
+  "menu": {
+    "loadingPlan": "加载套餐中…",
+    "planLabel": "{{tier}} 套餐",
+    "settingsLink": "设置"
+  },
+  "footer": {
+    "sdg": "联合国可持续发展目标 7：经济实惠的清洁能源",
+    "year": "2026"
+  },
+  "notFound": {
+    "title": "页面未找到",
+    "subtitle": "您访问的页面不存在或已被移动，我们来帮您重新找回方向。",
+    "backHome": "返回首页",
+    "goToDashboard": "前往仪表板"
+  },
+  "analytics": {
+    "title": "分析",
+    "subtitle": "所有项目的性能洞察",
+    "subtitleWithCount": "{{count}} 个已完成项目的汇总性能",
+    "subtitleWithCount_plural": "{{count}} 个已完成项目的汇总性能",
+    "noData": {
+      "title": "暂无数据",
+      "subtitle": "请完成至少一次太阳能分析，以在此处查看汇总性能指标。"
+    },
+    "stats": {
+      "totalMonthlySavings": "每月总节省",
+      "totalAnnualEnergy": "年度总发电量",
+      "totalCo2Offset": "CO2 总抵消量",
+      "totalPanels": "太阳能板总数"
+    },
+    "averages": {
+      "heading": "各项目平均值",
+      "avgMonthlySavings": "平均每月节省",
+      "avgPanels": "每项目平均太阳能板数",
+      "completionRate": "完成率"
+    },
+    "breakdown": {
+      "heading": "项目明细",
+      "colProject": "项目",
+      "colSavings": "节省 / 月",
+      "colPayback": "回本期"
+    }
+  }
+}

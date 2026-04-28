@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { resolveLocation, getLocationStatus, probeLocation } from '@/api/locations'
 import { LowerResolutionConsentModal } from '@/components/map/LowerResolutionConsentModal'
@@ -16,27 +17,6 @@ import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-re
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 import { GuidedTour, type TourStep } from '@/components/ui/GuidedTour'
 
-const MAP_TOUR_STEPS: TourStep[] = [
-  {
-    title: 'Welcome to SolarSim',
-    description:
-      "This tool helps you estimate how much you could save on your electricity bill by installing solar panels. Let's start by finding your home."
-  },
-  {
-    target: '[data-tour="search-box"]',
-    title: 'Search for Your Address',
-    description:
-      'Type your full home address or postcode here. The map will zoom to your building and show its outline.',
-    placement: 'below' as const
-  },
-  {
-    title: 'Confirm Your Building',
-    description:
-      'After selecting an address, you\'ll see your building highlighted. Click "Analyze This Location" to fetch satellite solar data — this usually takes 15–30 seconds.',
-    placement: 'center-bottom' as const
-  }
-]
-
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
 
 const PROCESSING_TIMEOUT_MS = 120_000
@@ -44,6 +24,7 @@ const PROCESSING_TIMEOUT_MS = 120_000
 const MALAYSIA_CENTER = { lat: 3.14, lng: 101.69 }
 
 export function MapPage() {
+  const { t } = useTranslation('map')
   const { projectId } = useParams<{ projectId: string }>()
   const location = useLocation()
   const navigate = useNavigate()
@@ -120,16 +101,14 @@ export function MapPage() {
 
   useEffect(() => {
     if (!statusError || phase !== 'processing') return
-    setErrorMessage(statusError instanceof Error ? statusError.message : 'Failed to check rooftop analysis status')
+    setErrorMessage(statusError instanceof Error ? statusError.message : t('error.checkStatusFailed'))
     setPhase('failed')
   }, [phase, statusError])
 
   useEffect(() => {
     if (phase !== 'processing') return
     const timeout = window.setTimeout(() => {
-      setErrorMessage(
-        'Rooftop analysis is taking longer than expected. The Google Solar API may be slow or this location may not have sufficient data. Please try again or try a different address.'
-      )
+      setErrorMessage(t('error.timeout'))
       setPhase('failed')
     }, PROCESSING_TIMEOUT_MS)
     return () => window.clearTimeout(timeout)
@@ -149,7 +128,7 @@ export function MapPage() {
           notify.warning(err.message)
           void queryClient.invalidateQueries({ queryKey: ['quota'] })
         }
-        setErrorMessage(err instanceof Error ? err.message : 'Failed to create project')
+        setErrorMessage(err instanceof Error ? err.message : t('error.resolveLocationFailed'))
         setPhase('failed')
       }
     },
@@ -165,7 +144,7 @@ export function MapPage() {
         navigate(`/project/${projectId}/workbench`, { replace: true })
       }
     } else if (statusData.status === 'failed') {
-      setErrorMessage('Solar data analysis failed for this location. Please try a different building.')
+      setErrorMessage(t('error.rooftopAnalysisFailed'))
       setPhase('failed')
     }
   }, [statusData, phase, isNewProject, projectName, locationId, projectId, navigate, finalizeNewProject])
@@ -190,7 +169,7 @@ export function MapPage() {
 
     const input = document.createElement('input')
     input.type = 'text'
-    input.placeholder = 'Search for your address...'
+    input.placeholder = t('search.placeholder')
     input.disabled = isReadonly
     input.className =
       'h-12 w-full rounded-xl border-0 bg-transparent px-4 text-center text-base text-foreground outline-none placeholder:text-center placeholder:text-muted-foreground disabled:cursor-not-allowed'
@@ -243,7 +222,7 @@ export function MapPage() {
     try {
       const probe = await probeLocation(selectedPlace.lat, selectedPlace.lng)
       if (!probe.bestQuality) {
-        setErrorMessage('No solar imagery is available for this location. Try a nearby address.')
+        setErrorMessage(t('error.noImagery'))
         setPhase('failed')
         return
       }
@@ -256,7 +235,7 @@ export function MapPage() {
       }
       await runResolveLocation('HIGH', false)
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to check imagery availability')
+      setErrorMessage(err instanceof Error ? err.message : t('error.checkImageryFailed'))
       setPhase('failed')
     } finally {
       setProbeInFlight(false)
@@ -291,7 +270,7 @@ export function MapPage() {
         }
       }
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to resolve location')
+      setErrorMessage(err instanceof Error ? err.message : t('error.resolveLocationFailed'))
       setPhase('failed')
     }
   }
@@ -302,12 +281,12 @@ export function MapPage() {
     const lat = parseFloat(manualLat)
     const lng = parseFloat(manualLng)
     if (Number.isNaN(lat) || Number.isNaN(lng)) {
-      setManualError('Enter valid latitude and longitude')
+      setManualError(t('search.manualForm.errorInvalidCoords'))
       return
     }
     // Malaysia bounds (approximate, includes Sabah/Sarawak)
     if (lat < 0.85 || lat > 7.4 || lng < 99.6 || lng > 119.3) {
-      setManualError('Coordinates must be within Malaysia (lat 0.85–7.4, lng 99.6–119.3)')
+      setManualError(t('search.manualForm.errorOutOfBounds'))
       return
     }
     handleSelectedPlace(lat, lng, `${lat.toFixed(6)}, ${lng.toFixed(6)}`)
@@ -330,16 +309,16 @@ export function MapPage() {
       <div className="flex h-screen items-center justify-center px-4">
         <div className="glass-card w-full max-w-md space-y-4 p-8 text-center">
           <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
-          <p className="font-medium">Failed to load Google Maps</p>
+          <p className="font-medium">{t('errorState.failedToLoadMaps')}</p>
           <p className="text-sm text-muted-foreground">{mapsError}</p>
           <div className="flex justify-center gap-2">
             <Button variant="outline" onClick={() => window.location.reload()}>
-              Reload Page
+              {t('errorState.reloadPage')}
             </Button>
             <Button variant="outline" asChild>
               <Link to="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Dashboard
+                {t('errorState.dashboard')}
               </Link>
             </Button>
           </div>
@@ -370,11 +349,11 @@ export function MapPage() {
               {isReadonly && (
                 <div className="mt-2 rounded-lg bg-card/95 px-3 py-1.5 shadow-md backdrop-blur-sm border border-border">
                   <p className="text-center text-xs text-muted-foreground">
-                    Please create{' '}
+                    {t('search.readonlyHint')}{' '}
                     <Link to="/dashboard" className="font-medium text-primary underline underline-offset-2">
-                      new project
+                      {t('search.readonlyHintLink')}
                     </Link>{' '}
-                    in dashboard for new location.
+                    {t('search.readonlyHintSuffix')}
                   </p>
                 </div>
               )}
@@ -389,7 +368,7 @@ export function MapPage() {
                       }}
                       className="text-xs text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {manualOpen ? 'Hide manual entry' : 'Or enter coordinates manually'}
+                      {manualOpen ? t('search.manualToggleHide') : t('search.manualToggleShow')}
                     </button>
                   </div>
                   {manualOpen && (
@@ -402,7 +381,7 @@ export function MapPage() {
                           type="text"
                           inputMode="decimal"
                           autoFocus
-                          placeholder="Latitude"
+                          placeholder={t('search.manualForm.latitudePlaceholder')}
                           value={manualLat}
                           onChange={(e) => setManualLat(e.target.value)}
                           className="h-9 rounded-md border border-input bg-background px-2 text-center text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -410,7 +389,7 @@ export function MapPage() {
                         <input
                           type="text"
                           inputMode="decimal"
-                          placeholder="Longitude"
+                          placeholder={t('search.manualForm.longitudePlaceholder')}
                           value={manualLng}
                           onChange={(e) => setManualLng(e.target.value)}
                           className="h-9 rounded-md border border-input bg-background px-2 text-center text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -419,7 +398,7 @@ export function MapPage() {
                       {manualError && <p className="text-xs text-destructive">{manualError}</p>}
                       <Button type="submit" size="sm" className="w-full gap-2">
                         <MapPin className="h-3.5 w-3.5" />
-                        Use these coordinates
+                        {t('search.manualForm.submitButton')}
                       </Button>
                     </form>
                   )}
@@ -433,28 +412,44 @@ export function MapPage() {
             <div className="absolute left-4 top-1/2 z-10 -translate-y-1/2 animate-fade-in">
               <div className="glass-card w-64 p-4">
                 <p className="font-heading text-sm font-semibold">{existingProject.name}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Viewing saved location</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t('readonlyCard.viewingSavedLocation')}</p>
                 <div className="mt-3 flex flex-col gap-2">
                   <Button variant="outline" size="sm" className="w-full justify-center gap-2" asChild>
-                    <Link to="/dashboard">Back to Dashboard</Link>
+                    <Link to="/dashboard">{t('readonlyCard.backToDashboard')}</Link>
                   </Button>
                   <Button size="sm" className="w-full justify-center gap-2" asChild>
-                    <Link to={`/project/${existingProject.id}/workbench`}>Proceed to Workbench</Link>
+                    <Link to={`/project/${existingProject.id}/workbench`}>{t('readonlyCard.proceedToWorkbench')}</Link>
                   </Button>
                 </div>
               </div>
             </div>
           )}
 
-          <GuidedTour storageKey="slg-tour-map" steps={MAP_TOUR_STEPS} />
+          <GuidedTour storageKey="slg-tour-map" steps={[
+            {
+              title: t('tour.step1Title'),
+              description: t('tour.step1Body')
+            },
+            {
+              target: '[data-tour="search-box"]',
+              title: t('tour.step2Title'),
+              description: t('tour.step2Body'),
+              placement: 'below' as const
+            },
+            {
+              title: t('tour.step3Title'),
+              description: t('tour.step3Body'),
+              placement: 'center-bottom' as const
+            }
+          ]} />
 
-          {!isLoaded && <LoadingOverlay hints={['Loading Google Maps...', 'Preparing the map view...']} />}
+          {!isLoaded && <LoadingOverlay hints={[t('loading.loadingMaps'), t('loading.preparingMap')]} />}
 
           {/* Confirm panel */}
           {phase === 'confirm' && selectedPlace && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
               <div className="glass-card w-96 p-5">
-                <p className="text-sm font-medium">Is this your building?</p>
+                <p className="text-sm font-medium">{t('confirm.question')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{selectedPlace.address}</p>
                 <div className="mt-3 flex gap-2">
                   <Button
@@ -465,14 +460,14 @@ export function MapPage() {
                     {probeInFlight ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Checking imagery...
+                        {t('confirm.checkingImagery')}
                       </>
                     ) : (
-                      'Confirm Location'
+                      t('confirm.confirmButton')
                     )}
                   </Button>
                   <Button variant="outline" onClick={handleRetry} className="flex-1">
-                    Search Again
+                    {t('confirm.searchAgain')}
                   </Button>
                 </div>
               </div>
@@ -485,9 +480,9 @@ export function MapPage() {
               <div className="glass-card flex w-96 items-center gap-3 p-5">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 <div>
-                  <p className="text-sm font-medium">Analyzing your rooftop...</p>
+                  <p className="text-sm font-medium">{t('processing.title')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Fetching satellite data and solar potential. This usually takes 15–30 seconds.
+                    {t('processing.description')}
                   </p>
                 </div>
               </div>
@@ -505,7 +500,7 @@ export function MapPage() {
                 <div className="mt-3 flex justify-center">
                   <Button variant="outline" onClick={handleRetry}>
                     <MapPin className="mr-2 h-4 w-4" />
-                    Try Another Location
+                    {t('error.tryAnotherLocation')}
                   </Button>
                 </div>
               </div>

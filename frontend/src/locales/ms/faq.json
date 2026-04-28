@@ -1,0 +1,154 @@
+{
+  "header": {
+    "title": "Soalan Lazim",
+    "subtitle": "Jawapan dalam bahasa biasa untuk pemilik rumah, dengan konteks teknikal yang mencukupi untuk menyokong keputusan solar yang lebih mendalam."
+  },
+  "search": {
+    "placeholder": "Apa yang ingin anda tahu?"
+  },
+  "categories": {
+    "all": "Semua",
+    "using-app": "Menggunakan Aplikasi",
+    "solar-basics": "Asas Solar",
+    "savings-payback": "Penjimatan & Bayar Balik",
+    "nem-billing": "NEM & Pengebilan",
+    "reports": "Laporan"
+  },
+  "card": {
+    "showMore": "Tunjukkan lebih",
+    "showLess": "Tunjukkan kurang"
+  },
+  "empty": {
+    "title": "Tiada jawapan yang sepadan",
+    "subtitle": "Cuba istilah carian yang berbeza atau tukar penapis ke Semua."
+  },
+  "pagination": {
+    "ariaLabel": "Halaman soalan lazim"
+  },
+  "items": {
+    "start-project": {
+      "question": "Bagaimana saya memulakan penilaian solar?",
+      "answer": "Buat projek baharu dari papan pemuka, cari lokasi rumah, sahkan bangunan di peta, kemudian teruskan ke Meja Kerja. Aplikasi menggunakan data bumbung untuk menjana susun atur panel awal yang boleh anda laraskan sebelum menjalankan analisis penjimatan."
+    },
+    "monthly-kwh": {
+      "question": "Mengapa aplikasi meminta penggunaan elektrik bulanan dalam kWh?",
+      "answer": "Penjimatan solar bergantung pada penggunaan tenaga, bukan hanya jumlah RM pada bil. Memasukkan kWh bulanan membolehkan aplikasi membandingkan bil TNB biasa anda dengan bil selepas penjanaan solar dan kredit NEM digunakan."
+    },
+    "workbench-purpose": {
+      "question": "Apakah kegunaan Meja Kerja?",
+      "answer": "Meja Kerja adalah tempat anda menyemak dan mengedit susun atur bumbung yang dicadangkan. Anda boleh mengekalkan, mengeluarkan, mengalihkan, atau memutar panel supaya susun atur akhir lebih sepadan dengan ruang bumbung sebelum aplikasi menganggarkan penjanaan dan penjimatan."
+    },
+    "layout-edits": {
+      "question": "Mengapa mengalihkan atau memutar panel mempengaruhi keputusan?",
+      "answer": "Kedudukan dan putaran panel mempengaruhi berapa banyak cahaya matahari yang diterima panel. Apabila panel dialihkan atau diputar, aplikasi boleh mengira semula penjanaan bulanan daripada data sinaran matahari supaya analisis mencerminkan susun atur yang diedit dan bukan cadangan asal."
+    },
+    "save-export": {
+      "question": "Mengapa saya perlu menyimpan analisis sebelum mengeksport PDF?",
+      "answer": "Eksport PDF membaca data projek yang disimpan. Menyimpan dahulu memastikan laporan menggunakan andaian penggunaan terkini, model panel yang dipilih, kos sistem, edit susun atur, dan keputusan analisis."
+    },
+    "change-assumptions": {
+      "question": "Bolehkah saya mengubah andaian tarif atau kewangan?",
+      "answer": "Ya. Kawalan analisis Lanjutan membolehkan anda melaraskan andaian terpilih seperti AFA, parameter tarif, degradasi, dan input sistem. Kawalan ini berguna apabila anda mahukan anggaran sepadan dengan bil tertentu, sebut harga pemasang, atau senario penyelidikan."
+    },
+    "missing-energy": {
+      "question": "Apakah maksudnya jika panel tiada data tenaga bulanan?",
+      "answer": "Ini bermakna aplikasi belum mempunyai nilai penjanaan bulan demi bulan penuh untuk panel yang diedit tersebut. Simpan semula susun atur dari Meja Kerja supaya aplikasi boleh mengira semula tenaga untuk panel yang dialihkan atau diputar sebelum analisis akhir."
+    },
+    "compare-projects": {
+      "question": "Bolehkah saya membandingkan susun atur atau andaian yang berbeza?",
+      "answer": "Anda boleh membuat berbilang projek atau menyimpan susun atur alternatif sebagai versi projek berasingan. Ini adalah cara paling selamat untuk membandingkan bilangan panel, pilihan bumbung, andaian penggunaan bulanan, dan hasil kewangan tanpa menimpa senario sebelumnya."
+    },
+    "why-login": {
+      "question": "Mengapa saya perlu akaun?",
+      "answer": "Akaun membolehkan aplikasi menyimpan projek, susun atur, tetapan analisis, dan keputusan sedia PDF. Ia juga menjadikan sejarah projek tersedia merentas sesi supaya anda boleh kembali ke susun atur selepas melaraskan andaian atau membincangkannya dengan pemasang."
+    },
+    "kwp": {
+      "question": "Apakah maksud kWp?",
+      "answer": "kWp bermaksud kilowatt-peak. Ia adalah kuasa DC rated maksimum susunan solar di bawah keadaan ujian standard. Sistem 4.4 kWp secara teorinya boleh menghasilkan 4.4 kW pada keadaan puncak, tetapi output sebenar berbeza dengan cuaca, orientasi bumbung, haba, kehilangan, dan masa dalam sehari."
+    },
+    "panel-count": {
+      "question": "Adakah lebih banyak panel sentiasa bermaksud sistem solar yang lebih baik?",
+      "answer": "Tidak semestinya. Lebih banyak panel meningkatkan penjanaan, tetapi ia juga meningkatkan kos pemasangan. Keputusan kewangan terbaik biasanya datang daripada susun atur yang mengimbangi penggunaan elektrik anda sendiri tanpa mencipta terlalu banyak kredit lebihan yang memberikan sedikit tambahan bayar balik."
+    },
+    "performance-ratio": {
+      "question": "Apakah nisbah prestasi?",
+      "answer": "Nisbah prestasi adalah faktor penurunan praktikal untuk kehilangan dunia sebenar seperti penukaran penyongsang, pendawaian, haba, habuk, dan ketidakpadanan antara panel. Nisbah prestasi yang lebih tinggi bermakna lebih banyak tenaga solar teori menjadi elektrik yang boleh digunakan."
+    },
+    "degradation": {
+      "question": "Mengapa degradasi panel penting?",
+      "answer": "Panel solar perlahan-lahan kehilangan output dari masa ke masa. Kadar degradasi tahunan 0.5% bermakna sistem menghasilkan sedikit lebih sedikit setiap tahun, yang mengurangkan penjimatan jangka panjang dan boleh memanjangkan bayar balik berbanding mengandaikan output tahun pertama selama-lamanya."
+    },
+    "roof-azimuth-pitch": {
+      "question": "Apakah azimut dan kecondongan bumbung?",
+      "answer": "Azimut adalah arah kompas yang bumbung hadap, manakala kecondongan adalah cerun bumbung. Ini mempengaruhi pendedahan cahaya matahari. Dalam aplikasi ini, azimut dan kecondongan bumbung adalah berdasarkan data segmen bumbung Solar API, manakala putaran panel yang diedit di Meja Kerja mungkin berbeza."
+    },
+    "dc-ac-ratio": {
+      "question": "Apakah nisbah DC/AT?",
+      "answer": "Nisbah DC/AT membandingkan kapasiti panel solar dengan kapasiti penyongsang. Nisbah melebihi 1 bermakna panel dirated lebih tinggi daripada penyongsang, yang biasa kerana panel jarang menghasilkan output puncak sepanjang hari. Oversizing yang munasabah boleh meningkatkan hasil tenaga harian tanpa memerlukan penyongsang yang lebih besar."
+    },
+    "payback": {
+      "question": "Apakah maksud bayar balik mudah?",
+      "answer": "Bayar balik mudah menganggarkan berapa tahun penjimatan bil elektrik diperlukan untuk mendapatkan semula kos pemasangan solar pendahuluan. Sebagai contoh, sistem RM 20,000 yang menjimatkan RM 4,000 setahun mempunyai bayar balik mudah kira-kira lima tahun sebelum kos penyelenggaraan atau penggantian."
+    },
+    "net-benefit": {
+      "question": "Apakah manfaat bersih?",
+      "answer": "Manfaat bersih adalah penjimatan solar terkumpul tolak kos sistem. Jika sistem berharga RM 20,000 dan menghasilkan RM 60,000 penjimatan bil terkumpul sepanjang hayatnya, manfaat bersih adalah RM 40,000 sebelum sebarang kos kitaran hayat tambahan."
+    },
+    "higher-usage": {
+      "question": "Mengapa rumah penggunaan lebih tinggi sering mendapat bayar balik yang lebih baik?",
+      "answer": "Rumah penggunaan lebih tinggi mempunyai bil yang lebih besar, jadi susun atur solar yang sama boleh mengimbangi lebih banyak elektrik grid yang bernilai. Di bawah struktur tarif dengan ambang, solar juga boleh memindahkan penggunaan boleh bil di bawah titik caj tertentu, meningkatkan penjimatan RM melebihi tenaga panel sahaja."
+    },
+    "right-sizing": {
+      "question": "Apakah maksud pensaizan betul susun atur solar?",
+      "answer": "Pensaizan betul bermakna memilih panel yang mencukupi untuk mencipta penjimatan bermakna tanpa membina sistem yang terlalu besar. Susun atur yang terlalu kecil menjimatkan terlalu sedikit, manakala susun atur yang terlalu besar boleh menelan kos lebih tanpa menghasilkan penjimatan bil yang boleh digunakan yang mencukupi."
+    },
+    "star-rating": {
+      "question": "Apakah maksud penarafan bintang dalam Keputusan Solar Anda?",
+      "answer": "Penarafan bintang terutamanya adalah isyarat bayar balik. Bayar balik yang lebih cepat menerima penarafan yang lebih kukuh kerana kos pemasangan dipulihkan lebih awal. Penarafan yang lebih rendah tidak selalu bermakna bumbung itu buruk; ia mungkin bermakna susun atur terlalu besar, penggunaan rendah, atau penjimatan sederhana berbanding kos."
+    },
+    "maintenance-costs": {
+      "question": "Adakah penyelenggaraan dan penggantian penyongsang mempengaruhi ROI?",
+      "answer": "Ya. Pembersihan, pemeriksaan, pembaikan, dan penggantian penyongsang akhirnya boleh mengurangkan manfaat bersih sepanjang hayat. Aplikasi memisahkan bayar balik mudah daripada kos kitaran hayat yang lebih mendalam supaya pengguna dapat memahami ekonomi asas sebelum menambah andaian penyelenggaraan jangka panjang."
+    },
+    "nem": {
+      "question": "Apakah NEM?",
+      "answer": "NEM bermaksud Net Energy Metering (Penghitung Tenaga Bersih). Dalam aplikasi ini, penjanaan solar mengimbangi penggunaan elektrik isi rumah, dan penjanaan berlebihan boleh menjadi kredit yang mengurangkan bil kemudian. Aplikasi menggunakan NEM Rakyat 3.0 sebagai asas projek."
+    },
+    "self-consumption": {
+      "question": "Mengapa penggunaan sendiri penting?",
+      "answer": "Penggunaan sendiri bermakna penjanaan solar anda berguna terhadap bil elektrik anda sendiri. Susun atur yang baik bukan sekadar yang menghasilkan banyak kWh; ia adalah yang di mana tenaga yang dijana mengimbangi penggunaan boleh bil dengan cekap dan mengelakkan terlalu banyak lebihan yang bernilai rendah."
+    },
+    "credits-forfeited": {
+      "question": "Apakah baki kredit dan kredit dilucutkan?",
+      "answer": "Baki kredit adalah kredit solar yang tidak digunakan yang dibawa ke bulan hadapan. Kredit dilucutkan adalah kredit yang tidak digunakan yang tamat tempoh pada hujung tahun. Kredit yang dilucutkan penting kerana ia mewakili penjanaan solar yang tidak menjadi wang tunai atau penjimatan bil masa hadapan."
+    },
+    "tariff-thresholds": {
+      "question": "Mengapa ambang tarif mempengaruhi penjimatan?",
+      "answer": "Sesetengah komponen bil bergantung pada kWh boleh bil bulanan. Jika solar mengurangkan penggunaan boleh bil di bawah ambang, caj tertentu mungkin berkurang atau hilang. Inilah sebabnya dua rumah dengan panel yang sama boleh melihat penjimatan RM yang berbeza."
+    },
+    "nem-fit": {
+      "question": "Apakah padanan NEM?",
+      "answer": "Padanan NEM menggambarkan sama ada susun atur solar sepadan baik dengan penggunaan rumah. Padanan yang baik mengimbangi bil isi rumah dengan cekap. Padanan yang terlalu besar mungkin mencipta kredit berlebihan yang tidak menjadi wang tunai dan mungkin tidak meningkatkan bayar balik cukup untuk membenarkan panel tambahan."
+    },
+    "why-same-layout-different-savings": {
+      "question": "Mengapa susun atur yang sama boleh menjimatkan jumlah berbeza untuk rumah yang berbeza?",
+      "answer": "Panel yang sama boleh mempunyai nilai kewangan yang berbeza kerana setiap rumah mempunyai penggunaan bulanan, ambang tarif, dan penggunaan kredit yang berbeza. Rumah penggunaan tinggi mungkin menggunakan lebih banyak penjanaan solar terhadap kWh boleh bil yang mahal, manakala rumah penggunaan rendah mungkin mencipta nilai lebihan yang lebih lemah."
+    },
+    "estimate-vs-quote": {
+      "question": "Mengapa anggaran kos sistem mungkin berbeza daripada sebut harga pemasang?",
+      "answer": "Aplikasi menggunakan anggaran bawah ke atas untuk panel, penyongsang, pemasangan, komponen elektrik, perancah, permit, buruh, dan margin pemasang. Sebut harga sebenar boleh berbeza kerana akses bumbung, peringkat pemasang, jenama peralatan, syarat waranti, kekangan tapak, dan harga pasaran."
+    },
+    "pdf-meaning": {
+      "question": "Untuk apakah saya gunakan laporan PDF?",
+      "answer": "Gunakan PDF sebagai dokumen perancangan dan perbandingan. Ia meringkaskan susun atur, penjanaan anggaran, penjimatan bil, bayar balik, manfaat bersih, kos, dan andaian. Ia bukan sebut harga pemasang akhir atau pensijilan kejuruteraan."
+    },
+    "estimate-accuracy": {
+      "question": "Seberapa tepat anggaran penjimatan?",
+      "answer": "Anggaran berguna untuk membuat keputusan awal, tetapi penjimatan sebenar boleh berbeza dengan cuaca, teduhan, keadaan bumbung, perubahan tarif, penyelenggaraan, prestasi penyongsang, tarikh kitaran pengebilan, dan reka bentuk pemasang akhir. Anggap laporan sebagai anggaran berstruktur dan bukan jaminan."
+    },
+    "installer-check": {
+      "question": "Apakah yang masih perlu disahkan oleh pemasang?",
+      "answer": "Pemasang perlu mengesahkan struktur bumbung, kalis air, perlindungan elektrik, penempatan penyongsang, laluan kabel, keperluan meter, kertas kerja pihak berkuasa, pematuhan keselamatan, dan ketersediaan peralatan akhir. Aplikasi membantu dengan susun atur awal dan penaakulan kewangan, bukan kelulusan kejuruteraan akhir."
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "Tetapan",
+    "subtitle": "Urus keutamaan aplikasi dan data tempatan anda."
+  },
+  "account": {
+    "title": "Akaun",
+    "description": "Profil log masuk anda dan pelan kuota projek semasa.",
+    "emailLabel": "E-mel",
+    "emailFallback": "Pengguna log masuk",
+    "planLabel": "Pelan",
+    "loadingPlan": "Memuatkan pelan..."
+  },
+  "appearance": {
+    "title": "Penampilan",
+    "description": "Pilih tema antara muka. Tema semasa yang diselesaikan ialah {{resolved}}.",
+    "themeSet": "Tema ditetapkan kepada {{label}}.",
+    "options": {
+      "system": {
+        "label": "Sistem",
+        "detail": "Padankan peranti anda"
+      },
+      "light": {
+        "label": "Cerah",
+        "detail": "Antara muka terang"
+      },
+      "dark": {
+        "label": "Gelap",
+        "detail": "Antara muka cahaya rendah"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Pemberitahuan",
+    "description": "Semak dan kosongkan sejarah pemberitahuan tempatan yang ditunjukkan dari loceng navigasi atas.",
+    "saved": "{{count}} pemberitahuan disimpan",
+    "unread": "{{count}} belum dibaca",
+    "clearButton": "Kosongkan pemberitahuan",
+    "clearStatus": "Sejarah pemberitahuan dikosongkan."
+  },
+  "guidedTours": {
+    "title": "Lawatan Berpandu",
+    "description": "Tetapkan semula petunjuk orientasi untuk Peta, Meja Kerja, dan Analisis supaya boleh dimainkan semula.",
+    "resetButton": "Tetapkan semula lawatan berpandu",
+    "resetStatus": "Lawatan berpandu akan muncul semula apabila anda membuka Peta, Meja Kerja, atau Analisis."
+  },
+  "recentActivity": {
+    "title": "Aktiviti Terkini",
+    "description": "Kosongkan cache aktiviti projek terkini tempatan yang digunakan untuk menyusun kerja yang biasa.",
+    "clearButton": "Kosongkan aktiviti terkini",
+    "clearStatus": "Cache aktiviti projek terkini dikosongkan."
+  },
+  "planLabel": "Pelan {{tier}}"
+}

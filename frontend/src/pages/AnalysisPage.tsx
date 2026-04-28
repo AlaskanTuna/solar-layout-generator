@@ -1,13 +1,14 @@
 import { useEffect, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { notify } from '@/components/ui/toastConfig'
 import { saveAnalysis } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  ANALYSIS_DISCLAIMERS,
+  ANALYSIS_DISCLAIMER_KEYS,
   computeDegradedSavings,
   type AnalysisConfig,
   type AnalysisResultsRecord
@@ -36,44 +37,6 @@ import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
 import { summarizeLayoutOrientation } from '@/lib/analysis'
 import { markProjectVisited } from '@/lib/recentProjectActivity'
 
-const ANALYSIS_TOUR_STEPS: TourStep[] = [
-  {
-    title: 'Your Solar Savings Analysis',
-    description:
-      'This page calculates how much you could save on your TNB electricity bill with solar panels. All numbers update live as you change the inputs on the left.'
-  },
-  {
-    target: '[data-tour="consumption-input"]',
-    title: 'Enter Your Electricity Usage',
-    description:
-      'This is the most important input. Find your average monthly kWh on your TNB bill (look for "Purata Penggunaan") and enter it here. Tap the info icon to see an example bill.'
-  },
-  {
-    target: '[data-tour="view-toggle"]',
-    title: 'Simple vs Advanced',
-    description:
-      'Start with Simple view for a quick summary. Switch to Advanced when you want detailed tariff breakdowns, bill components and system assumptions you can customise.'
-  },
-  {
-    target: '[data-tour="hero-cards"]',
-    title: 'Key Numbers at a Glance',
-    description:
-      "These four metrics tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself and how much CO2 you're offsetting."
-  },
-  {
-    target: '[data-tour="monthly-chart"]',
-    title: 'Monthly Bill Comparison',
-    description:
-      "This chart compares what you'd pay without solar (orange) to what you'd pay with solar (green) for each month. The difference is your savings."
-  },
-  {
-    target: '[data-tour="export-pdf"]',
-    title: 'Export & Save',
-    description:
-      'When you\'re happy with the results, click "Save Analysis" to store your settings, or "Export PDF" to download a report you can share with solar installers or your family.'
-  }
-]
-
 function buildSavePayload(formState: AnalysisFormState, systemKwp: number, analysisResults: AnalysisResultsRecord) {
   return {
     analysisConfig: {
@@ -90,6 +53,39 @@ export function AnalysisPage() {
   const queryClient = useQueryClient()
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
+  const { t } = useTranslation('analysis')
+
+  const ANALYSIS_TOUR_STEPS: TourStep[] = [
+    {
+      title: t('tour.overview.title'),
+      description: t('tour.overview.description')
+    },
+    {
+      target: '[data-tour="consumption-input"]',
+      title: t('tour.consumption.title'),
+      description: t('tour.consumption.description')
+    },
+    {
+      target: '[data-tour="view-toggle"]',
+      title: t('tour.viewToggle.title'),
+      description: t('tour.viewToggle.description')
+    },
+    {
+      target: '[data-tour="hero-cards"]',
+      title: t('tour.heroCards.title'),
+      description: t('tour.heroCards.description')
+    },
+    {
+      target: '[data-tour="monthly-chart"]',
+      title: t('tour.monthlyChart.title'),
+      description: t('tour.monthlyChart.description')
+    },
+    {
+      target: '[data-tour="export-pdf"]',
+      title: t('tour.exportSave.title'),
+      description: t('tour.exportSave.description')
+    }
+  ]
 
   const {
     projectQuery,
@@ -153,11 +149,11 @@ export function AnalysisPage() {
     onSuccess: (updatedProject) => {
       queryClient.setQueryData(['project', projectId], updatedProject)
       void queryClient.invalidateQueries({ queryKey: ['projects'] })
-      notify.success('Analysis saved to your project')
+      notify.success(t('page.toast.saved'))
       navigate('/dashboard/projects')
     },
     onError: (error) => {
-      notify.error(error instanceof Error ? error.message : 'Failed to save the analysis')
+      notify.error(error instanceof Error ? error.message : t('page.toast.saveFailed'))
     }
   })
 
@@ -170,9 +166,9 @@ export function AnalysisPage() {
     return (
       <LoadingOverlay
         hints={[
-          'Loading your analysis...',
-          'Preparing tariff data...',
-          'Crunching the numbers for your solar savings...'
+          t('page.loadingHints.loading'),
+          t('page.loadingHints.tariff'),
+          t('page.loadingHints.crunching')
         ]}
       />
     )
@@ -191,19 +187,19 @@ export function AnalysisPage() {
       projectQuery.error ??
       tariffQuery.error ??
       locationQuery.error ??
-      new Error('The analysis data is incomplete. Return to the workbench and save the layout again.')
+      new Error(t('page.error.incompleteData'))
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
         <Card className="w-full max-w-lg">
           <CardHeader>
-            <CardTitle>Analysis Unavailable</CardTitle>
-            <CardDescription>We couldn&apos;t prepare the billing simulation for this project.</CardDescription>
+            <CardTitle>{t('page.error.title')}</CardTitle>
+            <CardDescription>{t('page.error.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
+            <p className="text-sm text-destructive">{error instanceof Error ? error.message : t('page.error.unknown')}</p>
             <Button asChild variant="outline" size="sm" className="w-full justify-center gap-2">
-              <Link to={`/project/${projectId}/workbench`}>Back to Workbench</Link>
+              <Link to={`/project/${projectId}/workbench`}>{t('page.error.backToWorkbench')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -218,12 +214,12 @@ export function AnalysisPage() {
   }))
   const paybackTooltip = (
     <div className="space-y-2">
-      <p>How many years until your savings cover the cost of installing the system.</p>
+      <p>{t('page.paybackTooltip.intro')}</p>
       <div className="space-y-0.5 border-t border-primary-foreground/20 pt-2">
-        <p className="text-primary-foreground/80">Net benefit projection:</p>
+        <p className="text-primary-foreground/80">{t('page.paybackTooltip.netBenefitProjection')}</p>
         {paybackProjections.map((p) => (
           <div key={p.years} className="flex justify-between gap-4 tabular-nums">
-            <span className="text-primary-foreground/80">{p.years}-Year</span>
+            <span className="text-primary-foreground/80">{t('page.paybackTooltip.yearLabel', { count: p.years })}</span>
             <span className={`font-semibold ${p.netBenefit >= 0 ? '' : 'text-amber-300'}`}>
               {formatCurrency(p.netBenefit)}
             </span>
@@ -265,19 +261,17 @@ export function AnalysisPage() {
               className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'simple' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setViewMode('simple')}
             >
-              Simple
+              {t('page.viewToggle.simple')}
             </button>
             <button
               type="button"
               className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${viewMode === 'advanced' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setViewMode('advanced')}
             >
-              Advanced
+              {t('page.viewToggle.advanced')}
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Simple shows key savings figures. Advanced adds tariff breakdowns, projections and system details.
-          </p>
+          <p className="text-xs text-muted-foreground">{t('page.viewToggle.hint')}</p>
 
           <SortableCardContainer
             cards={[
@@ -326,10 +320,10 @@ export function AnalysisPage() {
                         <Card className="border-border bg-card/90 shadow-sm">
                           <CardHeader>
                             <CardTitle>
-                              Cumulative Savings
-                              <InfoTooltip text="Your running total of savings as the year progresses. A steeper line means you are saving money faster." />
+                              {t('page.cumulativeSavings.title')}
+                              <InfoTooltip text={t('page.cumulativeSavings.titleTooltip')} />
                             </CardTitle>
-                            <CardDescription>Total savings accumulated month by month over the year.</CardDescription>
+                            <CardDescription>{t('page.cumulativeSavings.description')}</CardDescription>
                           </CardHeader>
                           <CardContent className="h-[340px]">
                             <ResponsiveContainer width="100%" height="100%">
@@ -344,7 +338,7 @@ export function AnalysisPage() {
                                   content={
                                     <ChartTooltipContent
                                       getItemClassName={(entry) =>
-                                        entry.name === 'Cumulative Savings'
+                                        entry.name === t('page.cumulativeSavings.seriesName')
                                           ? 'font-bold text-yellow-600 dark:text-yellow-400'
                                           : 'font-semibold text-foreground'
                                       }
@@ -354,7 +348,7 @@ export function AnalysisPage() {
                                 <Line
                                   type="monotone"
                                   dataKey="cumulativeSavings"
-                                  name="Cumulative Savings"
+                                  name={t('page.cumulativeSavings.seriesName')}
                                   stroke="#ca8a04"
                                   strokeWidth={3}
                                   dot={{ r: 3 }}
@@ -431,12 +425,12 @@ export function AnalysisPage() {
                 node: (
                   <Card className="border-border bg-card/90 shadow-sm">
                     <CardHeader>
-                      <CardTitle>Financial Disclaimers</CardTitle>
-                      <CardDescription>All bill and savings figures should be treated as estimates.</CardDescription>
+                      <CardTitle>{t('page.disclaimers.title')}</CardTitle>
+                      <CardDescription>{t('page.disclaimers.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm text-muted-foreground">
-                      {ANALYSIS_DISCLAIMERS.map((disclaimer) => (
-                        <p key={disclaimer}>{disclaimer}</p>
+                      {ANALYSIS_DISCLAIMER_KEYS.map((key) => (
+                        <p key={key}>{t(`disclaimers.${key}`)}</p>
                       ))}
                     </CardContent>
                   </Card>

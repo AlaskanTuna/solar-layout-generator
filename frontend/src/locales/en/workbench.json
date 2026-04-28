@@ -1,0 +1,201 @@
+{
+  "errorState": {
+    "title": "Workbench Unavailable",
+    "description": "We couldn't load the project layout data for this rooftop.",
+    "unknownError": "Unknown error",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "loading": {
+    "rooftopImage": "Loading your rooftop image...",
+    "mappingPanels": "Mapping solar panels to your roof...",
+    "preparingWorkbench": "Preparing the layout workbench..."
+  },
+  "canvas": {
+    "title": "Roof Layout Workbench",
+    "titleTooltip": "Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it. Hold spacebar to pan the view",
+    "preparingCanvas": "Preparing the canvas...",
+    "loadingOverlay": "Loading overlay...",
+    "recalculating": "Recalculating energy for new panel dimensions...",
+    "sunDirection": {
+      "tooltip": "Approximate sun direction for this month in Malaysia. The amber glow on the canvas shows where sunlight hits your roof."
+    },
+    "compass": {
+      "n": "N",
+      "ne": "NE",
+      "e": "E",
+      "se": "SE",
+      "s": "S",
+      "sw": "SW",
+      "w": "W",
+      "nw": "NW"
+    }
+  },
+  "badge": {
+    "batchRecompute": "Batch Recompute",
+    "computingMonthly": "Computing Monthly Data",
+    "recomputing": "Recomputing"
+  },
+  "sidebar": {
+    "description": "Adjust the suggested layout before moving to financial analysis.",
+    "imageryBase": "Imagery: BASE",
+    "imageryBaseTooltip": "High-resolution satellite imagery was unavailable for this address. Panel positions and flux estimates are approximate.",
+    "layoutPreset": {
+      "label": "Layout Preset"
+    },
+    "stats": {
+      "annualYield": "Annual Yield",
+      "annualYieldTooltip": "Total estimated electricity your panels will generate in a year.",
+      "co2Offset": "CO₂ Offset",
+      "co2OffsetTooltip": "Estimated using a factor of {{factor}} kg/MWh based on the grid emission factor for this region."
+    },
+    "panelSpecs": {
+      "summary": "Panel Specifications",
+      "dimensions": "Dimensions: {{height}} × {{width}} m",
+      "capacity": "Capacity: {{capacityWp}} Wp",
+      "efficiency": "Efficiency: {{efficiency}}%",
+      "cost": "Cost: RM {{costPerWp}} / Wp",
+      "maxPanels": "Max Panels: {{count}}",
+      "lifespan": "Lifespan: {{years}} years"
+    },
+    "batchStatus": {
+      "loading": "Computing monthly energy data for all panels...",
+      "error": "Could not compute monthly energy breakdown. Annual estimates will be used instead."
+    },
+    "panelQuantity": {
+      "label": "Panel Quantity",
+      "tooltip": "Adjust how many panels to include. Higher-yield panels are kept first when you reduce the count.",
+      "hint": "Higher-yield panels are kept visible first. Lowering the slider removes lower-ranked panels from the saved layout."
+    },
+    "selectedPanel": {
+      "label": "Selected Panel",
+      "tooltip": "Click any panel on the canvas to select it. Hold Shift to select multiple. You can then rotate or delete them.",
+      "none": "None",
+      "multiSelected": "{{count}} panels",
+      "multiSelectedTitle": "{{count}} panels selected",
+      "multiSelectedHint": "Use the rotation slider to rotate all selected panels. Press Delete to remove them.",
+      "annualYield": "Annual Yield",
+      "rotation": "Rotation",
+      "avgMonthlyYield": "Avg Monthly Yield",
+      "monthlyDataPending": "Monthly data not yet computed"
+    },
+    "actions": {
+      "backToMap": "Back to Map",
+      "backToDashboard": "Back to Dashboard",
+      "saveAndContinue": "Save & Continue",
+      "saving": "Saving...",
+      "recomputing": "Recomputing Layout..."
+    }
+  },
+  "controls": {
+    "sectionTools": "Tools",
+    "sectionView": "View",
+    "sectionLayers": "Layers",
+    "expandView": "Expand View",
+    "collapseView": "Collapse View",
+    "undo": "Undo",
+    "redo": "Redo",
+    "marqueeOn": "Marquee: ON",
+    "marquee": "Marquee",
+    "snapOn": "Snap: ON",
+    "snap": "Snap",
+    "deleteSelected": "Delete Selected",
+    "freeRotateOn": "Free Rotate: ON",
+    "freeRotate": "Free Rotate",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Reset zoom",
+    "hideOverlays": "Hide overlays",
+    "overlays": "Overlays",
+    "overlayRgb": "RGB",
+    "overlayFlux": "Flux",
+    "overlayDsm": "DSM",
+    "overlayMask": "Mask",
+    "overlaySegments": "Segments"
+  },
+  "legends": {
+    "roofSegments": "Roof Segments",
+    "segmentLabel": "Seg {{index}}: {{azimuth}}° / {{pitch}}° ({{count}} panels)",
+    "mask": {
+      "roof": "Roof",
+      "offRoof": "Off-roof"
+    },
+    "flux": {
+      "high": "Sunny",
+      "low": "Shady"
+    },
+    "dsm": {
+      "high": "High",
+      "low": "Low"
+    }
+  },
+  "panelDrawer": {
+    "choosePanelHint": "Choose a Solar Panel",
+    "drawerTitle": "Choose a Solar Panel",
+    "drawerDescription": "The model selection changes the size and energy output of all panels on your roof.",
+    "selected": "Selected",
+    "efficiencySuffix": "eff."
+  },
+  "layoutPresetModal": {
+    "title": "Layout Preset",
+    "description": "Help us right-size your system. Presets only adjust how many panels are active — they don't move panel positions. Skip to keep the maximum-coverage default.",
+    "monthlyBill": {
+      "label": "Monthly Electricity Bill",
+      "tooltip": "Find this on your TNB bill. We translate it to kWh using the average TNB tariff to size your system. Look for \"Purata Penggunaan\" on your bill:",
+      "tnbBillAlt": "TNB bill showing average kWh usage",
+      "clickToEnlarge": "Click image to enlarge",
+      "options": {
+        "lessThan100": "Less than RM 100",
+        "100to200": "RM 100 – 200",
+        "200to400": "RM 200 – 400",
+        "400to600": "RM 400 – 600",
+        "600plus": "More Than RM 600",
+        "notSure": "Not Sure"
+      }
+    },
+    "roofDirection": {
+      "label": "Roof Direction",
+      "tooltip": "Limit panels to a specific roof aspect. \"Best Available\" places panels on the highest-yield roof faces (typically south for Malaysia).",
+      "options": {
+        "any": "Best Available (Yield-Sorted)",
+        "south": "South-Facing",
+        "east": "East-Facing",
+        "west": "West-Facing",
+        "north": "North-Facing"
+      }
+    },
+    "sizingGoal": {
+      "label": "Sizing Goal",
+      "tooltip": "Economy keeps the system small for fastest budget recovery. Self-Consumption sizes the array to match your typical daytime usage. Maximum fills every available panel slot.",
+      "options": {
+        "conservative": {
+          "title": "Economy",
+          "description": "Smallest viable system. Lowest upfront cost, longer payback. Good if budget is the priority."
+        },
+        "balanced": {
+          "title": "Self-Consumption",
+          "description": "Sized to match your typical daytime usage. Most cost-efficient, minimizes generation that goes to waste from overnight export."
+        },
+        "maximum": {
+          "title": "Maximum",
+          "description": "Every panel that fits. Largest investment, biggest absolute savings, useful for installers or future-proofing."
+        }
+      }
+    },
+    "actions": {
+      "skip": "Skip",
+      "save": "Save"
+    }
+  },
+  "tour": {
+    "step1Title": "Your Roof Layout",
+    "step1Body": "The blue rectangles are solar panels placed on your roof by satellite analysis. You can tweak this layout before calculating your savings. Hover the info icons beside each control for deeper detail.",
+    "step2Title": "Layout Preset",
+    "step2Body": "Tell us your monthly bill and savings goal — we'll right-size the layout for you. You can re-open this anytime, or skip to keep the maximum-coverage default.",
+    "step3Title": "Shape the Layout",
+    "step3Body": "Pick a panel model and count from the sidebar, then click any panel on the canvas to drag, rotate or delete it.",
+    "step4Title": "Canvas Tools",
+    "step4Body": "The toolbar handles the rest: undo/redo, marquee select to edit groups of panels at once, snap alignment for clean edges, zoom, and layer toggles for flux and satellite overlays.",
+    "step5Title": "Save & Continue",
+    "step5Body": "Happy with the layout? Click \"Save & Continue\" to move on to the savings analysis. You can always come back to adjust."
+  }
+}

@@ -1,35 +1,38 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { useQuota } from '@/hooks/useQuota'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { LanguageToggle } from '@/components/layout/LanguageToggle'
 import { NotificationPopover } from '@/components/ui/NotificationPopover'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, LogOut, ChevronRight, Home, Settings } from 'lucide-react'
+import { LogOut, ChevronRight, Home, Settings } from 'lucide-react'
 
 type Crumb = { label: string; to?: string; icon?: React.ReactNode }
 
 function useBreadcrumbs(): Crumb[] {
+  const { t } = useTranslation('nav')
   const { pathname } = useLocation()
   const { projectId } = useParams()
 
   const crumbs: Crumb[] = [
-    { label: 'Home', to: '/', icon: <Home className="h-3.5 w-3.5" /> },
-    { label: 'Dashboard', to: '/dashboard' }
+    { label: t('items.home'), to: '/', icon: <Home className="h-3.5 w-3.5" /> },
+    { label: t('items.dashboard'), to: '/dashboard' }
   ]
 
   if (pathname === '/settings') {
-    return [{ label: 'Home', to: '/', icon: <Home className="h-3.5 w-3.5" /> }, { label: 'Settings' }]
+    return [{ label: t('items.home'), to: '/', icon: <Home className="h-3.5 w-3.5" /> }, { label: t('items.settings') }]
   }
 
   // Dashboard sub-pages
   if (pathname.startsWith('/dashboard/')) {
     const sub = pathname.split('/')[2]
-    if (sub === 'summary') crumbs.push({ label: 'Summary' })
-    else if (sub === 'projects') crumbs.push({ label: 'Projects' })
-    else if (sub === 'analytics') crumbs.push({ label: 'Analytics' })
-    else if (sub === 'faq') crumbs.push({ label: 'FAQ' })
+    if (sub === 'summary') crumbs.push({ label: t('items.summary') })
+    else if (sub === 'projects') crumbs.push({ label: t('items.projects') })
+    else if (sub === 'analytics') crumbs.push({ label: t('items.analytics') })
+    else if (sub === 'faq') crumbs.push({ label: t('items.faq') })
     return crumbs
   }
 
@@ -42,36 +45,37 @@ function useBreadcrumbs(): Crumb[] {
 
   // Map — always shown when inside a project
   if (onMap) {
-    crumbs.push({ label: 'Map' })
+    crumbs.push({ label: t('items.map') })
   } else {
-    crumbs.push({ label: 'Map', to: `/project/${projectId}/map?view=readonly` })
+    crumbs.push({ label: t('items.map'), to: `/project/${projectId}/map?view=readonly` })
   }
 
   // Workbench — shown when on workbench or analysis
   if (onWorkbench || onAnalysis) {
     if (onWorkbench) {
-      crumbs.push({ label: 'Workbench' })
+      crumbs.push({ label: t('items.workbench') })
     } else {
-      crumbs.push({ label: 'Workbench', to: `/project/${projectId}/workbench` })
+      crumbs.push({ label: t('items.workbench'), to: `/project/${projectId}/workbench` })
     }
   }
 
   // Analysis — shown when on analysis
   if (onAnalysis) {
-    crumbs.push({ label: 'Analysis' })
+    crumbs.push({ label: t('items.analysis') })
   }
 
   return crumbs
 }
 
 export function AppNav({ minimal }: { minimal?: boolean } = {}) {
+  const { t } = useTranslation('nav')
   const { user, signOut } = useAuth()
   const crumbs = useBreadcrumbs()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const quotaQuery = useQuota()
   const tier = quotaQuery.data?.tier
-  const planLabel = tier ? `${tier.charAt(0) + tier.slice(1).toLowerCase()} plan` : 'Loading plan…'
+  const planLabel = tier ? t('menu.planLabel', { tier: tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() }) : t('menu.loadingPlan')
 
   useEffect(() => {
     if (!userMenuOpen) return
@@ -116,6 +120,7 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
 
         {/* Right — Theme + Notifications + User */}
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <ThemeToggle />
           <NotificationPopover />
 
@@ -147,7 +152,7 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                     >
                       <Settings className="h-4 w-4" />
-                      Settings
+                      {t('menu.settingsLink')}
                     </Link>
                   </div>
                   <div className="border-t border-border p-1">
@@ -159,7 +164,7 @@ export function AppNav({ minimal }: { minimal?: boolean } = {}) {
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
                     >
                       <LogOut className="h-4 w-4" />
-                      Sign Out
+                      {t('items.signOut')}
                     </button>
                   </div>
                 </motion.div>

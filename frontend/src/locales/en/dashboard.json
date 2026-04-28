@@ -1,0 +1,44 @@
+{
+  "greeting": {
+    "fallback": "Welcome back",
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "header": {
+    "subtitle": "Here's your workspace at a glance."
+  },
+  "newProject": {
+    "title": "New Project",
+    "description": "Search for a building, generate a rooftop layout, and start a new solar assessment.",
+    "quotaTooltip": "Daily limit reached - resets at {{time}}"
+  },
+  "quickActions": {
+    "projects": {
+      "label": "Projects",
+      "desc": "Open saved layouts, continue drafts, and manage project history."
+    },
+    "analytics": {
+      "label": "Analytics",
+      "desc": "Compare performance signals and savings across your solar work."
+    },
+    "faq": {
+      "label": "FAQ",
+      "desc": "Find answers about Solar API data, NEM tariffs, and how to use the workbench."
+    }
+  },
+  "recents": {
+    "title": "Continue Where You Left Off",
+    "subtitle": "Resume your latest saved project.",
+    "loading": "Loading...",
+    "empty": "None",
+    "continue": "Continue"
+  },
+  "dialog": {
+    "title": "Create New Project",
+    "description": "Give your solar assessment project a name, then search for your building.",
+    "nameLabel": "Project Name",
+    "namePlaceholder": "e.g. My Home Solar",
+    "submit": "Continue"
+  }
+}

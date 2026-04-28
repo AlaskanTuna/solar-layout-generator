@@ -6,7 +6,9 @@ import { Toaster } from 'react-hot-toast'
 import { AppErrorBoundary } from './components/layout/AppErrorBoundary'
 import { AuthProvider } from './hooks/useAuth'
 import { ThemeProvider } from './hooks/useTheme'
+import { LocaleProvider } from './hooks/useLocale'
 import { App } from './App'
+import './lib/i18n'
 import './globals.css'
 
 const queryClient = new QueryClient()
@@ -18,8 +20,10 @@ createRoot(document.getElementById('root')!).render(
         <BrowserRouter>
           <ThemeProvider>
             <AuthProvider>
-              <App />
-              <Toaster position="bottom-center" toastOptions={{ duration: 4000 }} />
+              <LocaleProvider>
+                <App />
+                <Toaster position="bottom-center" toastOptions={{ duration: 4000 }} />
+              </LocaleProvider>
             </AuthProvider>
           </ThemeProvider>
         </BrowserRouter>

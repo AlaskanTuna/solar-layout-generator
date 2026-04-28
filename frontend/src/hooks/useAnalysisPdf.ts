@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { requestPdfExportToken } from '@/api/projects'
 import { notify } from '@/components/ui/toastConfig'
 import { useTheme } from '@/hooks/useTheme'
+import { useLocale } from '@/hooks/useLocale'
 
 function sanitizeFileName(value: string) {
   return value
@@ -29,6 +30,7 @@ function triggerDownload(blob: Blob, filename: string) {
 export function useAnalysisPdf() {
   const [isExporting, setIsExporting] = useState(false)
   const { resolved: resolvedTheme } = useTheme()
+  const { locale } = useLocale()
 
   async function handleExportPdf(projectId: string, projectName: string) {
     const exportUrl = import.meta.env.VITE_PDF_EXPORT_URL
@@ -54,6 +56,7 @@ export function useAnalysisPdf() {
       const previewUrl = new URL(`/project/${projectId}/pdf-preview`, window.location.origin)
       previewUrl.searchParams.set('token', token)
       previewUrl.searchParams.set('theme', resolvedTheme)
+      previewUrl.searchParams.set('locale', locale)
       if (import.meta.env.DEV) console.info('[PDF] previewUrl:', previewUrl.toString())
 
       const filename = buildPdfFileName(projectName)

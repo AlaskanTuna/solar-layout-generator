@@ -1,0 +1,60 @@
+{
+  "header": {
+    "title": "Projects",
+    "subtitle": "Manage all your solar assessment projects"
+  },
+  "quota": {
+    "unlimited": "Unlimited projects today",
+    "limited": "{{used}} / {{limit}} projects today · resets at {{time}}"
+  },
+  "stats": {
+    "total": "Total Projects",
+    "completed": "Completed",
+    "inProgress": "In Progress"
+  },
+  "filter": {
+    "all": "All ({{count}})",
+    "completed": "Completed",
+    "inProgress": "In Progress"
+  },
+  "empty": {
+    "noProjects": "No projects yet. Create one to get started.",
+    "noFiltered": "No {{filter}} projects."
+  },
+  "newProjectButton": "New Project",
+  "howItWorks": {
+    "title": "How it works",
+    "step1": {
+      "title": "Search Location",
+      "desc": "Find your building on the satellite map"
+    },
+    "step2": {
+      "title": "Generate & Adjust Layout",
+      "desc": "Drag, rotate, add or remove panels"
+    },
+    "step3": {
+      "title": "Analyze Savings",
+      "desc": "View projections and export PDF"
+    }
+  },
+  "dialog": {
+    "create": {
+      "title": "Create New Project",
+      "description": "Give your solar assessment project a name, then search for your building.",
+      "nameLabel": "Project Name",
+      "namePlaceholder": "e.g. My Home Solar",
+      "submit": "Continue"
+    },
+    "delete": {
+      "title": "Delete Project",
+      "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    }
+  },
+  "toast": {
+    "deleted": "\"{{name}}\" has been deleted.",
+    "deleteFailed": "Failed to delete project."
+  }
+}

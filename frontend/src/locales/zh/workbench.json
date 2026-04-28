@@ -1,0 +1,201 @@
+{
+  "errorState": {
+    "title": "工作台不可用",
+    "description": "无法加载该屋顶的项目布局数据。",
+    "unknownError": "未知错误",
+    "backToDashboard": "返回仪表板"
+  },
+  "loading": {
+    "rooftopImage": "正在加载屋顶影像...",
+    "mappingPanels": "正在将太阳能板映射至屋顶...",
+    "preparingWorkbench": "正在准备布局工作台..."
+  },
+  "canvas": {
+    "title": "屋顶布局工作台",
+    "titleTooltip": "使用滑块添加或移除太阳能板。在画布上点击太阳能板以选中，然后旋转或删除。按住空格键可平移视图",
+    "preparingCanvas": "正在准备画布...",
+    "loadingOverlay": "正在加载叠加层...",
+    "recalculating": "正在为新板块尺寸重新计算发电量...",
+    "sunDirection": {
+      "tooltip": "马来西亚本月的近似阳光方向。画布上的琥珀色光晕显示阳光照射您屋顶的位置。"
+    },
+    "compass": {
+      "n": "北",
+      "ne": "东北",
+      "e": "东",
+      "se": "东南",
+      "s": "南",
+      "sw": "西南",
+      "w": "西",
+      "nw": "西北"
+    }
+  },
+  "badge": {
+    "batchRecompute": "批量重新计算",
+    "computingMonthly": "计算月度数据中",
+    "recomputing": "重新计算中"
+  },
+  "sidebar": {
+    "description": "在进行财务分析前，请先调整建议的布局。",
+    "imageryBase": "影像：BASE",
+    "imageryBaseTooltip": "该地址无法获取高分辨率卫星影像，太阳能板位置和辐照度估算为近似值。",
+    "layoutPreset": {
+      "label": "布局预设"
+    },
+    "stats": {
+      "annualYield": "年发电量",
+      "annualYieldTooltip": "您的太阳能板在一年内预计产生的总电量。",
+      "co2Offset": "CO₂ 抵消量",
+      "co2OffsetTooltip": "基于该地区电网排放因子 {{factor}} kg/MWh 估算。"
+    },
+    "panelSpecs": {
+      "summary": "太阳能板规格",
+      "dimensions": "尺寸：{{height}} × {{width}} m",
+      "capacity": "功率：{{capacityWp}} Wp",
+      "efficiency": "效率：{{efficiency}}%",
+      "cost": "价格：RM {{costPerWp}} / Wp",
+      "maxPanels": "最大块数：{{count}}",
+      "lifespan": "使用寿命：{{years}} 年"
+    },
+    "batchStatus": {
+      "loading": "正在计算所有太阳能板的月度发电数据...",
+      "error": "无法计算月度发电明细，将改用年度估算。"
+    },
+    "panelQuantity": {
+      "label": "太阳能板数量",
+      "tooltip": "调整要包含的太阳能板数量，减少数量时优先保留发电量较高的板块。",
+      "hint": "发电量较高的板块优先显示，降低滑块将从保存的布局中移除排名较低的板块。"
+    },
+    "selectedPanel": {
+      "label": "已选太阳能板",
+      "tooltip": "点击画布上的任意太阳能板以选中。按住 Shift 可多选，然后旋转或删除。",
+      "none": "未选择",
+      "multiSelected": "已选 {{count}} 块",
+      "multiSelectedTitle": "已选 {{count}} 块太阳能板",
+      "multiSelectedHint": "使用旋转滑块旋转所有已选板块，按 Delete 键删除。",
+      "annualYield": "年发电量",
+      "rotation": "旋转角度",
+      "avgMonthlyYield": "平均月发电量",
+      "monthlyDataPending": "月度数据尚未计算"
+    },
+    "actions": {
+      "backToMap": "返回地图",
+      "backToDashboard": "返回仪表板",
+      "saveAndContinue": "保存并继续",
+      "saving": "保存中...",
+      "recomputing": "重新计算布局中..."
+    }
+  },
+  "controls": {
+    "sectionTools": "工具",
+    "sectionView": "视图",
+    "sectionLayers": "图层",
+    "expandView": "展开视图",
+    "collapseView": "收起视图",
+    "undo": "撤销",
+    "redo": "重做",
+    "marqueeOn": "框选：开启",
+    "marquee": "框选",
+    "snapOn": "对齐：开启",
+    "snap": "对齐",
+    "deleteSelected": "删除选中",
+    "freeRotateOn": "自由旋转：开启",
+    "freeRotate": "自由旋转",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "zoomReset": "重置缩放",
+    "hideOverlays": "隐藏叠加层",
+    "overlays": "叠加层",
+    "overlayRgb": "RGB",
+    "overlayFlux": "辐照度",
+    "overlayDsm": "DSM",
+    "overlayMask": "遮罩",
+    "overlaySegments": "屋顶分区"
+  },
+  "legends": {
+    "roofSegments": "屋顶分区",
+    "segmentLabel": "分区 {{index}}：{{azimuth}}° / {{pitch}}°（{{count}} 块）",
+    "mask": {
+      "roof": "屋顶",
+      "offRoof": "屋顶外"
+    },
+    "flux": {
+      "high": "充足阳光",
+      "low": "阴影较多"
+    },
+    "dsm": {
+      "high": "高",
+      "low": "低"
+    }
+  },
+  "panelDrawer": {
+    "choosePanelHint": "选择太阳能板型号",
+    "drawerTitle": "选择太阳能板型号",
+    "drawerDescription": "选择型号将更改屋顶上所有太阳能板的尺寸和发电量。",
+    "selected": "已选",
+    "efficiencySuffix": "效率"
+  },
+  "layoutPresetModal": {
+    "title": "布局预设",
+    "description": "帮助我们为您的系统选择合适规模。预设仅调整活跃太阳能板的数量，不移动板块位置。跳过则保持最大覆盖范围的默认设置。",
+    "monthlyBill": {
+      "label": "每月电费",
+      "tooltip": "请查看您的 TNB 账单，我们将根据平均电价将其换算为 kWh 以确定系统规模。请在账单上找「Purata Penggunaan」：",
+      "tnbBillAlt": "显示平均 kWh 用量的 TNB 账单",
+      "clickToEnlarge": "点击图片放大",
+      "options": {
+        "lessThan100": "低于 RM 100",
+        "100to200": "RM 100 – 200",
+        "200to400": "RM 200 – 400",
+        "400to600": "RM 400 – 600",
+        "600plus": "超过 RM 600",
+        "notSure": "不确定"
+      }
+    },
+    "roofDirection": {
+      "label": "屋顶朝向",
+      "tooltip": "将太阳能板限制在特定屋顶朝向。「最佳可用」将板块放置在发电量最高的屋顶面（马来西亚通常为南向）。",
+      "options": {
+        "any": "最佳可用（按发电量排序）",
+        "south": "朝南",
+        "east": "朝东",
+        "west": "朝西",
+        "north": "朝北"
+      }
+    },
+    "sizingGoal": {
+      "label": "规模目标",
+      "tooltip": "经济型保持系统较小规模以尽快回本。自用型将阵列调整为匹配您的典型日间用电量。最大型则填满所有可用板块槽位。",
+      "options": {
+        "conservative": {
+          "title": "经济型",
+          "description": "最小可行系统，前期成本最低，回本期较长，适合预算优先的用户。"
+        },
+        "balanced": {
+          "title": "自用型",
+          "description": "规模匹配您的典型日间用电量，性价比最高，减少夜间输出造成的浪费。"
+        },
+        "maximum": {
+          "title": "最大型",
+          "description": "填满所有可用板块，投资最大，绝对节省金额最多，适合安装商或希望面向未来的用户。"
+        }
+      }
+    },
+    "actions": {
+      "skip": "跳过",
+      "save": "保存"
+    }
+  },
+  "tour": {
+    "step1Title": "您的屋顶布局",
+    "step1Body": "蓝色矩形是通过卫星分析放置在屋顶上的太阳能板。在计算节省金额前，您可以调整此布局。将鼠标悬停在各控件旁的信息图标上可查看详细说明。",
+    "step2Title": "布局预设",
+    "step2Body": "告诉我们您的每月电费和节省目标——我们将为您选择合适的布局规模。您可以随时重新打开，或跳过以保持最大覆盖范围的默认设置。",
+    "step3Title": "调整布局",
+    "step3Body": "从侧边栏选择太阳能板型号和数量，然后点击画布上的任意太阳能板进行拖动、旋转或删除。",
+    "step4Title": "画布工具",
+    "step4Body": "工具栏提供其余功能：撤销/重做、框选以批量编辑太阳能板、对齐以保持整齐边缘、缩放，以及辐照度和卫星叠加层切换。",
+    "step5Title": "保存并继续",
+    "step5Body": "对布局满意了吗？点击「保存并继续」进入节省分析。您随时可以返回调整。"
+  }
+}

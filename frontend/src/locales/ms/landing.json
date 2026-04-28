@@ -1,0 +1,179 @@
+{
+  "nav": {
+    "goToDashboard": "Pergi ke Papan Pemuka",
+    "getStarted": "Mulakan"
+  },
+  "hero": {
+    "badge": "Dibina untuk bumbung Malaysia",
+    "title1": "Lihat solar di",
+    "title2": "bumbung anda —",
+    "titleHighlight": "sebelum anda komited.",
+    "subtitle": "SolarSim meletakkan panel solar sebenar di atas bumbung anda menggunakan data satelit, kemudian mengira angka di bawah NEM Rakyat 3.0 Malaysia — supaya anda masuk ke dalam sebut harga pemasang dengan jawapan yang sudah ada.",
+    "metaFreeToStart": "Percuma untuk bermula",
+    "metaNoCall": "Tiada panggilan pemasang",
+    "metaResults": "Keputusan dalam 90 saat",
+    "card": {
+      "sampleReport": "Laporan contoh · {{location}}",
+      "live": "LANGSUNG",
+      "systemSize": "Saiz sistem",
+      "yearlySavings": "Penjimatan tahunan",
+      "payback": "Bayar balik",
+      "monthlyYield": "Hasil bulanan (kWh)",
+      "sdgLabel": "SDG 7",
+      "sdgTitle": "Tenaga bersih"
+    }
+  },
+  "trust": {
+    "googleSolarApi": "Dikuasakan oleh Google Solar API",
+    "nemSimulation": "Simulasi bil NEM Rakyat 3.0",
+    "sdg7": "Sejajar dengan UN SDG 7",
+    "dragDrop": "Meja kerja panel seret-dan-lepas",
+    "pdfReports": "Laporan PDF sedia untuk pemasang",
+    "rp4Tariff": "Analisis penjimatan tarif RP4"
+  },
+  "pipeline": {
+    "eyebrow": "★ Alur Kerja",
+    "title": "Dari alamat ke jawapan",
+    "titleMuted": "dalam tiga langkah.",
+    "steps": {
+      "step1": {
+        "num": "LANGKAH 01",
+        "label": "CARI LOKASI",
+        "title": "Cari bumbung anda di peta.",
+        "body": "Taip alamat anda. Kami akan menumpu pada bangunan anda, mengambil geometri bumbung Google Solar API, dan menunjukkan kepada anda dengan tepat struktur yang akan dianalisis — supaya tiada kekeliruan antara rumah anda dan rumah jiran.",
+        "tagGoogleMaps": "Google Maps",
+        "tagSolarApi": "Solar API",
+        "mockHost": "solarsim.app/locate",
+        "mockHeadline": "142 m²",
+        "mockSub": "Kawasan bumbung dikesan"
+      },
+      "step2": {
+        "num": "LANGKAH 02",
+        "label": "SUSUN ATUR",
+        "title": "Letak, seret, putar panel.",
+        "body": "Kami akan meletakkan susunan yang dioptimumkan untuk hasil di bumbung anda secara automatik. Tidak suka? Seret panel, putar, atau padam yang jatuh dalam kawasan teduhan. Jumlah tenaga dan penjimatan dikemas kini pada setiap pergerakan — tanpa butang kira semula.",
+        "tagCanvas": "Kanvas interaktif",
+        "tagLiveYield": "Hasil langsung",
+        "mockHost": "solarsim.app/workbench",
+        "mockHeadline": "26 panel · 10.4 kWp",
+        "mockSub": "+2.1% berbanding susun atur automatik"
+      },
+      "step3": {
+        "num": "LANGKAH 03",
+        "label": "ANALISIS",
+        "title": "Lihat bil anda, dua belas bulan ke hadapan.",
+        "body": "Kami akan model bil bulanan anda berdasarkan tarif RP4 selepas Julai 2025, rebat EEI, AFA, SST dan Dana RE — bulan demi bulan. Eksport kesemuanya sebagai PDF untuk dibawa kepada pemasang anda.",
+        "tagRp4": "Tarif RP4",
+        "tagPdf": "Eksport PDF",
+        "mockHost": "solarsim.app/analysis",
+        "mockHeadline": "RM 5,840",
+        "mockSub": "penjimatan tahunan · bayar balik 5.7 tahun"
+      }
+    }
+  },
+  "features": {
+    "eyebrow": "★ Apa yang ada di dalam",
+    "title": "Dibina seperti seorang jurutera.",
+    "titleMuted": "Direka untuk semua orang.",
+    "cards": {
+      "satellite": {
+        "title": "Satelit sebenar, bukan anggaran",
+        "description": "Setiap panel diletakkan di atas geometri bumbung sebenar dari Google Solar API. Kami tidak meminta anda ukuran yang tidak anda miliki."
+      },
+      "workbench": {
+        "title": "Meja kerja seret-untuk-edit",
+        "description": "Tidak suka susun atur automatik? Alih, putar, atau padam mana-mana panel. Hasil dikira semula sebaik anda melepaskannya."
+      },
+      "billing": {
+        "title": "RP4 + NEM, baris demi baris",
+        "description": "Bil dimodelkan dengan tarif RP4 selepas Julai 2025, rebat EEI, AFA, SST, Dana RE — setiap caj boleh ditelusuri ke satu baris."
+      },
+      "pdf": {
+        "title": "PDF sedia untuk pemasang",
+        "description": "Eksport laporan satu klik dengan ringkasan sistem, pecahan bulanan, dan unjuran 25 tahun. Masuk ke dalam sebut harga dengan maklumat penuh."
+      },
+      "seasonal": {
+        "title": "Profil penggunaan bermusim",
+        "description": "Beritahu kami bagaimana penggunaan anda berubah semasa cuti sekolah, bulan puasa, dan hujung tahun. Kami akan modelkannya bulan demi bulan."
+      },
+      "citations": {
+        "title": "Rujukan pada setiap angka",
+        "description": "Setiap kWh, setiap ringgit boleh ditelusuri kembali ke sumber yang diterbitkan — helaian tarif TNB, gazet ST, rekod Google Solar API."
+      }
+    }
+  },
+  "pricing": {
+    "eyebrow": "★ Harga",
+    "title": "Percuma untuk bermula.",
+    "titleMuted": "Bayar hanya apabila anda perlukan lebih.",
+    "mostPopular": "Paling popular",
+    "tiers": {
+      "free": {
+        "name": "Percuma",
+        "price": "RM 0",
+        "description": "Untuk pemilik rumah yang meneroka solar.",
+        "features": [
+          "5 projek sehari",
+          "Susun atur automatik + edit manual",
+          "Simulasi bil NEM",
+          "Eksport PDF standard"
+        ],
+        "cta": "Mulakan"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "RM 29",
+        "period": "/bulan",
+        "description": "Untuk perancang solar yang serius.",
+        "features": [
+          "20 projek sehari",
+          "Profil penggunaan bermusim",
+          "PDF terperinci + unjuran 25 tahun",
+          "Sokongan e-mel · SLA 24 jam"
+        ],
+        "cta": "Akan datang"
+      },
+      "enterprise": {
+        "name": "Perusahaan",
+        "price": "Harga khas",
+        "description": "Untuk pemasang dan perunding.",
+        "features": [
+          "Projek tanpa had",
+          "Kolaborasi pasukan + klien",
+          "Laporan PDF label putih",
+          "Akses API · sokongan khusus"
+        ],
+        "cta": "Hubungi jualan"
+      }
+    }
+  },
+  "faq": {
+    "eyebrow": "★ Soalan biasa",
+    "title": "Perkara yang orang tanya sebelum",
+    "titleMuted": "mendaftar.",
+    "disclaimer": "Keputusan adalah anggaran awal dan tidak menggantikan penilaian profesional di tapak. Unjuran kewangan menggunakan kadar RP4 + NEM Rakyat 3.0 yang diterbitkan setakat 2025.",
+    "questions": {
+      "replaceInstaller": {
+        "question": "Adakah ini menggantikan lawatan tapak pemasang?",
+        "answer": "Tidak — dan kami tidak berpura-pura begitu. SolarSim memberikan anda anggaran awal yang kukuh supaya anda masuk ke dalam perbualan dengan pemasang dengan pengetahuan yang cukup. Saiz akhir, penilaian struktur, dan pemilihan penyongsang masih memerlukan pemasang bertauliah di tapak."
+      },
+      "accuracy": {
+        "question": "Seberapa tepat unjuran penjimatan?",
+        "answer": "Dalam julat ±8% daripada hasil sebenar dalam ujian pembangunan. Angka sebenar anda bergantung pada teduhan yang tidak dapat kami lihat (pokok yang terjulur, bangunan baru jiran), kehilangan penyongsang, dan bagaimana penggunaan anda berubah selepas pemasangan."
+      },
+      "addressNotFound": {
+        "question": "Bagaimana jika saya tidak dapat mencari alamat saya?",
+        "answer": "Liputan di Semenanjung Malaysia adalah baik tetapi tidak menyeluruh. Jika kami tidak dapat mengambil data bumbung anda, kami akan beralih kepada alur koordinat manual di mana anda menggariskan bumbung sendiri — pengiraan yang sama di hilir."
+      },
+      "eastMalaysia": {
+        "question": "Adakah ini berfungsi untuk Malaysia Timur?",
+        "answer": "Pengiraan potensi solar berfungsi di mana sahaja terdapat liputan API. Model tarif kami kini hanya untuk Semenanjung Malaysia (TNB RP4 + NEM Rakyat 3.0). Tarif Sabah Electricity dan SESB ada dalam peta jalan untuk akhir 2026."
+      },
+      "dataPrivacy": {
+        "question": "Adakah anda menjual alamat atau data penggunaan saya?",
+        "answer": "Tidak. Data projek anda kekal dalam akaun anda. Kami tidak menjalankan program afiliasi pemasang atau memberikan butiran anda kepada pihak ketiga. Jika anda mahukan sebut harga, anda memintanya sendiri — mengikut syarat anda."
+      }
+    }
+  },
+  "scrollToTop": "Tatal ke atas"
+}

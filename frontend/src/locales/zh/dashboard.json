@@ -1,0 +1,44 @@
+{
+  "greeting": {
+    "fallback": "欢迎回来",
+    "morning": "早上好",
+    "afternoon": "下午好",
+    "evening": "晚上好"
+  },
+  "header": {
+    "subtitle": "一览您的工作空间。"
+  },
+  "newProject": {
+    "title": "新建项目",
+    "description": "搜索建筑物，生成屋顶布局，开始新的太阳能评估。",
+    "quotaTooltip": "已达每日上限，将于 {{time}} 重置"
+  },
+  "quickActions": {
+    "projects": {
+      "label": "项目",
+      "desc": "打开已保存的布局，继续草稿，管理项目历史记录。"
+    },
+    "analytics": {
+      "label": "分析",
+      "desc": "比较您所有太阳能项目的性能指标与节省金额。"
+    },
+    "faq": {
+      "label": "常见问题",
+      "desc": "查找有关 Solar API 数据、NEM 电价及工作台使用方法的解答。"
+    }
+  },
+  "recents": {
+    "title": "继续上次的进度",
+    "subtitle": "恢复您最近保存的项目。",
+    "loading": "加载中...",
+    "empty": "暂无记录",
+    "continue": "继续"
+  },
+  "dialog": {
+    "title": "新建项目",
+    "description": "为您的太阳能评估项目命名，然后搜索您的建筑物。",
+    "nameLabel": "项目名称",
+    "namePlaceholder": "例如：我家的太阳能",
+    "submit": "继续"
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "nav": {
+    "goToDashboard": "前往仪表板",
+    "getStarted": "立即开始"
+  },
+  "hero": {
+    "badge": "专为马来西亚屋顶打造",
+    "title1": "在您的屋顶上",
+    "title2": "看到太阳能——",
+    "titleHighlight": "在决定之前。",
+    "subtitle": "SolarSim 利用卫星数据将真实太阳能板叠加在您的屋顶上，并依据马来西亚 NEM Rakyat 3.0 进行计算——让您在接触安装商前已心中有数。",
+    "metaFreeToStart": "免费开始",
+    "metaNoCall": "无需联系安装商",
+    "metaResults": "90 秒出结果",
+    "card": {
+      "sampleReport": "样本报告 · {{location}}",
+      "live": "实时",
+      "systemSize": "系统规模",
+      "yearlySavings": "年度节省",
+      "payback": "回本期",
+      "monthlyYield": "月发电量（kWh）",
+      "sdgLabel": "SDG 7",
+      "sdgTitle": "清洁能源"
+    }
+  },
+  "trust": {
+    "googleSolarApi": "由 Google Solar API 驱动",
+    "nemSimulation": "NEM Rakyat 3.0 账单模拟",
+    "sdg7": "符合联合国可持续发展目标 7",
+    "dragDrop": "拖放式太阳能板工作台",
+    "pdfReports": "安装商可用的 PDF 报告",
+    "rp4Tariff": "RP4 电价节省分析"
+  },
+  "pipeline": {
+    "eyebrow": "★ 完整流程",
+    "title": "从地址到答案",
+    "titleMuted": "三步完成。",
+    "steps": {
+      "step1": {
+        "num": "第 01 步",
+        "label": "定位",
+        "title": "在地图上找到您的屋顶。",
+        "body": "输入您的地址，我们将定位到您的建筑物，提取 Google Solar API 屋顶几何数据，并精确显示我们将分析的结构——确保不会与邻居混淆。",
+        "tagGoogleMaps": "Google 地图",
+        "tagSolarApi": "Solar API",
+        "mockHost": "solarsim.app/locate",
+        "mockHeadline": "142 m²",
+        "mockSub": "检测到屋顶面积"
+      },
+      "step2": {
+        "num": "第 02 步",
+        "label": "布局",
+        "title": "放置、拖动、旋转太阳能板。",
+        "body": "我们会在您的屋顶上自动排列发电量最优的太阳能板阵列。不满意？拖动太阳能板、旋转方向、删除遮阴位置的板块。每次移动后，总发电量和节省金额实时更新——无需重新计算。",
+        "tagCanvas": "交互式画布",
+        "tagLiveYield": "实时发电量",
+        "mockHost": "solarsim.app/workbench",
+        "mockHeadline": "26 块 · 10.4 kWp",
+        "mockSub": "+2.1% 优于自动布局"
+      },
+      "step3": {
+        "num": "第 03 步",
+        "label": "分析",
+        "title": "查看未来 12 个月的账单。",
+        "body": "我们依据 2025 年 7 月后的 RP4 电价、EEI 回扣、AFA、SST 及可再生能源基金，逐月模拟您的账单。将完整报告导出为 PDF，带给您的安装商参考。",
+        "tagRp4": "RP4 电价",
+        "tagPdf": "PDF 导出",
+        "mockHost": "solarsim.app/analysis",
+        "mockHeadline": "RM 5,840",
+        "mockSub": "年度节省 · 回本期 5.7 年"
+      }
+    }
+  },
+  "features": {
+    "eyebrow": "★ 功能亮点",
+    "title": "工程师级别的精准。",
+    "titleMuted": "人人都能轻松使用。",
+    "cards": {
+      "satellite": {
+        "title": "真实卫星数据，非估算",
+        "description": "每块太阳能板都基于 Google Solar API 提供的实际屋顶几何数据放置，我们不需要您提供任何测量数据。"
+      },
+      "workbench": {
+        "title": "拖放编辑工作台",
+        "description": "不满意自动布局？移动、旋转、删除任意太阳能板，松手即刻重新计算发电量。"
+      },
+      "billing": {
+        "title": "RP4 + NEM 逐行计费",
+        "description": "账单依据 2025 年 7 月后的 RP4 电价建模，包含 EEI 回扣、AFA、SST、可再生能源基金——每项费用清晰可追溯。"
+      },
+      "pdf": {
+        "title": "安装商可用的 PDF",
+        "description": "一键导出报告，包含系统摘要、逐月明细及 25 年预测。带着完整数据去询价。"
+      },
+      "seasonal": {
+        "title": "季节性用电量档案",
+        "description": "告诉我们您在学校假期、斋戒月、年末的用电变化，我们将逐月建模。"
+      },
+      "citations": {
+        "title": "每个数字均有依据",
+        "description": "每一 kWh、每一令吉均可追溯至公开来源——TNB 电价表、ST 公报、Google Solar API 记录。"
+      }
+    }
+  },
+  "pricing": {
+    "eyebrow": "★ 价格",
+    "title": "免费开始。",
+    "titleMuted": "按需付费。",
+    "mostPopular": "最受欢迎",
+    "tiers": {
+      "free": {
+        "name": "免费版",
+        "price": "RM 0",
+        "description": "适合正在探索太阳能的屋主。",
+        "features": [
+          "每日 5 个项目",
+          "自动布局 + 手动编辑",
+          "NEM 账单模拟",
+          "标准 PDF 导出"
+        ],
+        "cta": "立即开始"
+      },
+      "pro": {
+        "name": "专业版",
+        "price": "RM 29",
+        "period": " / 月",
+        "description": "适合认真规划太阳能的用户。",
+        "features": [
+          "每日 20 个项目",
+          "季节性用电量档案",
+          "详细 PDF + 25 年预测",
+          "邮件支持 · 24 小时响应"
+        ],
+        "cta": "即将推出"
+      },
+      "enterprise": {
+        "name": "企业版",
+        "price": "定制",
+        "description": "适合安装商和顾问。",
+        "features": [
+          "无限项目",
+          "团队与客户协作",
+          "白标 PDF 报告",
+          "API 访问 · 专属支持"
+        ],
+        "cta": "联系销售"
+      }
+    }
+  },
+  "faq": {
+    "eyebrow": "★ 常见问题",
+    "title": "注册前大家常问的",
+    "titleMuted": "问题。",
+    "disclaimer": "结果为初步估算，不能替代专业现场评估。财务预测使用截至 2025 年的已发布 RP4 + NEM Rakyat 3.0 费率。",
+    "questions": {
+      "replaceInstaller": {
+        "question": "这能替代安装商的现场勘查吗？",
+        "answer": "不能——我们也不会假装可以。SolarSim 提供可靠的初步估算，让您在与安装商沟通时心中有数。最终的系统规模、结构评估和逆变器选型仍需合资质的安装商现场确认。"
+      },
+      "accuracy": {
+        "question": "节省预测的准确度如何？",
+        "answer": "在开发测试中，误差在实际发电量的 ±8% 以内。您的实际数据取决于我们无法看到的遮阴情况（悬垂树木、邻居新建建筑）、逆变器损耗，以及安装后用电习惯的变化。"
+      },
+      "addressNotFound": {
+        "question": "如果找不到我的地址怎么办？",
+        "answer": "半岛马来西亚的覆盖范围较广但并非全面。若无法获取您的屋顶数据，系统将切换为手动坐标输入流程，让您自行勾勒屋顶轮廓——后续计算方式相同。"
+      },
+      "eastMalaysia": {
+        "question": "东马来西亚也适用吗？",
+        "answer": "凡有 API 覆盖的地区均可进行太阳能潜力计算。我们目前的电价模型仅适用于半岛马来西亚（TNB RP4 + NEM Rakyat 3.0）。沙巴电力公司和 SESB 电价计划于 2026 年底纳入路线图。"
+      },
+      "dataPrivacy": {
+        "question": "您们会出售我的地址或用电数据吗？",
+        "answer": "不会。您的项目数据保存在您的账号中，我们不运营安装商联盟计划，也不会将您的信息提供给第三方。如果您想询价，由您主动决定——完全由您掌控。"
+      }
+    }
+  },
+  "scrollToTop": "返回顶部"
+}

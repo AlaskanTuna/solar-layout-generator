@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
@@ -16,10 +17,6 @@ type SystemCostCardProps = {
   roofType: RoofType
 }
 
-const ROOF_LABEL: Record<RoofType, string> = { tile: 'Tile', metal: 'Metal', flat: 'Flat' }
-
-type Segment = { key: string; name: string; detail: string; value: number; color: string }
-
 const SEGMENT_COLORS = {
   panels: '#16a34a',
   inverter: '#2563eb',
@@ -31,6 +28,8 @@ const SEGMENT_COLORS = {
   installerMargin: '#475569'
 } as const
 
+type Segment = { key: string; name: string; detail: string; value: number; color: string }
+
 export function SystemCostCard({
   costBreakdown,
   activePanelCount,
@@ -38,6 +37,7 @@ export function SystemCostCard({
   panelCostPerWp,
   roofType
 }: SystemCostCardProps) {
+  const { t } = useTranslation('analysis')
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
 
@@ -46,29 +46,29 @@ export function SystemCostCard({
     const items: Segment[] = [
       {
         key: 'panels',
-        name: 'Panels',
+        name: t('systemCost.segments.panels'),
         detail: `${activePanelCount} × ${panelCapacityWp} Wp @ RM ${panelCostPerWp.toFixed(2)}/Wp`,
         value: costBreakdown.panels,
         color: SEGMENT_COLORS.panels
       },
       {
         key: 'inverter',
-        name: 'Inverter',
+        name: t('systemCost.segments.inverter'),
         detail: `${costBreakdown.inverterSku} · ${costBreakdown.inverterKwac} kWac`,
         value: costBreakdown.inverter,
         color: SEGMENT_COLORS.inverter
       },
       {
         key: 'mounting',
-        name: 'Mounting',
-        detail: `${ROOF_LABEL[roofType]} Roof`,
+        name: t('systemCost.segments.mounting'),
+        detail: `${t(`systemCost.roofLabels.${roofType}`)} Roof`,
         value: costBreakdown.mounting,
         color: SEGMENT_COLORS.mounting
       },
       {
         key: 'electricalBos',
-        name: 'Electrical BOS',
-        detail: 'Wiring, Protection',
+        name: t('systemCost.segments.electricalBos'),
+        detail: t('systemCost.segments.electricalBosDetail'),
         value: costBreakdown.electricalBos,
         color: SEGMENT_COLORS.electricalBos
       }
@@ -76,42 +76,44 @@ export function SystemCostCard({
     if (costBreakdown.scaffolding > 0) {
       items.push({
         key: 'scaffolding',
-        name: 'Scaffolding',
-        detail: 'Tile Roof Only',
+        name: t('systemCost.segments.scaffolding'),
+        detail: t('systemCost.segments.scaffoldingDetail'),
         value: costBreakdown.scaffolding,
         color: SEGMENT_COLORS.scaffolding
       })
     }
     items.push({
       key: 'permit',
-      name: 'Permit',
-      detail: costBreakdown.cccFeeTriggered ? 'Incl. CCC Fee' : 'SEDA Registration',
+      name: t('systemCost.segments.permit'),
+      detail: costBreakdown.cccFeeTriggered
+        ? t('systemCost.segments.permitCcc')
+        : t('systemCost.segments.permitSeda'),
       value: costBreakdown.permit,
       color: SEGMENT_COLORS.permit
     })
     items.push({
       key: 'labour',
-      name: 'Labour',
-      detail: '+18% of Hardware',
+      name: t('systemCost.segments.labour'),
+      detail: t('systemCost.segments.labourDetail'),
       value: costBreakdown.labour,
       color: SEGMENT_COLORS.labour
     })
     items.push({
       key: 'installerMargin',
-      name: 'Installer margin',
-      detail: '+15% of Hardware + Labour',
+      name: t('systemCost.segments.installerMargin'),
+      detail: t('systemCost.segments.installerMarginDetail'),
       value: costBreakdown.installerMargin,
       color: SEGMENT_COLORS.installerMargin
     })
     return items
-  }, [costBreakdown, activePanelCount, panelCapacityWp, panelCostPerWp, roofType])
+  }, [costBreakdown, activePanelCount, panelCapacityWp, panelCostPerWp, roofType, t])
 
   if (!costBreakdown) {
     return (
       <Card className="border-border bg-card/90 shadow-sm">
         <CardHeader>
-          <CardTitle>System Cost</CardTitle>
-          <CardDescription>Add panels on the Workbench to estimate installation cost.</CardDescription>
+          <CardTitle>{t('systemCost.titleEmpty')}</CardTitle>
+          <CardDescription>{t('systemCost.descriptionEmpty')}</CardDescription>
         </CardHeader>
       </Card>
     )
@@ -123,14 +125,14 @@ export function SystemCostCard({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <CardTitle>
-              System Cost
-              <InfoTooltip text="A bottom-up turnkey estimate based on typical Malaysian residential solar costs. Covers panels, inverter, mounting, wiring, permits, labour, and installer margin." />
+              {t('systemCost.title')}
+              <InfoTooltip text={t('systemCost.titleTooltip')} />
             </CardTitle>
-            <CardDescription>Estimated total turnkey installation cost.</CardDescription>
+            <CardDescription>{t('systemCost.description')}</CardDescription>
           </div>
           <div className="text-right">
             <p className="text-3xl font-semibold text-foreground tabular-nums">{formatCurrency(costBreakdown.total)}</p>
-            <p className="text-xs text-muted-foreground">±10% Typical Quote Variance</p>
+            <p className="text-xs text-muted-foreground">{t('systemCost.quoteVariance')}</p>
           </div>
         </div>
       </CardHeader>
@@ -227,9 +229,7 @@ export function SystemCostCard({
             })}
           </ul>
         </div>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Mid-tier Malaysian market pricing (2026). Actual installer quotes typically land within ±10% of this figure.
-        </p>
+        <p className="mt-4 text-xs text-muted-foreground">{t('systemCost.pricingNote')}</p>
       </CardContent>
     </Card>
   )

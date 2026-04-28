@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
@@ -10,19 +11,21 @@ type BillComparisonChartProps = {
 }
 
 export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
+  const { t } = useTranslation('analysis')
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
+
+  const withoutSolar = t('billComparison.withoutSolar')
+  const withSolar = t('billComparison.withSolar')
 
   return (
     <Card data-tour="monthly-chart" className="border-border bg-card/90 shadow-sm">
       <CardHeader>
         <CardTitle>
-          Monthly Bill Comparison
-          <InfoTooltip text="Compares your estimated TNB bill with and without solar for each month. Orange bars show what you would normally pay. Green bars show what you would pay after NEM solar credits are applied." />
+          {t('billComparison.title')}
+          <InfoTooltip text={t('billComparison.titleTooltip')} />
         </CardTitle>
-        <CardDescription>
-          Your estimated monthly bill without solar (baseline) versus with solar for each month.
-        </CardDescription>
+        <CardDescription>{t('billComparison.description')}</CardDescription>
       </CardHeader>
       <CardContent className="h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -59,11 +62,11 @@ export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
               content={
                 <ChartTooltipContent
                   getItemClassName={(entry) => {
-                    if (entry.name === 'With Solar') {
+                    if (entry.name === withSolar) {
                       return 'font-bold text-orange-600 dark:text-orange-400'
                     }
 
-                    if (entry.name === 'Without Solar') {
+                    if (entry.name === withoutSolar) {
                       return 'font-bold text-emerald-600 dark:text-emerald-400'
                     }
 
@@ -75,7 +78,7 @@ export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
             <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
             <Bar
               dataKey="baselineBill"
-              name="Without Solar"
+              name={withoutSolar}
               fill="url(#colorBaseline)"
               stroke={COLORS.chartBaseline}
               strokeWidth={2}
@@ -83,7 +86,7 @@ export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
             />
             <Bar
               dataKey="nemBill"
-              name="With Solar"
+              name={withSolar}
               fill="url(#colorNem)"
               stroke={COLORS.chartSolar}
               strokeWidth={2}

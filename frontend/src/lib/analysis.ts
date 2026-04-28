@@ -95,6 +95,26 @@ export function applySeasonalProfile(baseKwh: number): number[] {
   return SEASONAL_MULTIPLIERS.map((m) => round2(baseKwh * m))
 }
 
+/**
+ * Keys for ANALYSIS_DISCLAIMERS. Consumers call t(`disclaimers.${key}`) from the 'analysis' namespace.
+ * Chosen over passing `t` into a function so callers can iterate keys without importing i18n everywhere.
+ */
+export const ANALYSIS_DISCLAIMER_KEYS = [
+  'tnbTariff',
+  'afaRate',
+  'eeiRebate',
+  'solarGeneration',
+  'creditForfeiture',
+  'systemCost',
+  'paybackProjections'
+] as const
+
+export type AnalysisDisclaimerKey = (typeof ANALYSIS_DISCLAIMER_KEYS)[number]
+
+/**
+ * @deprecated Use ANALYSIS_DISCLAIMER_KEYS + t(`disclaimers.${key}`) instead.
+ * Kept temporarily so non-i18n callers (e.g. tests) don't break before migration.
+ */
 export const ANALYSIS_DISCLAIMERS = [
   'Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and NEM Rakyat 3.0 rules by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in "Advanced" view as needed.',
   'The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes.',

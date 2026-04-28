@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { listProjects } from '@/api/projects'
 import { StatCard } from '@/components/dashboard/StatCard'
@@ -8,6 +9,7 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
 export function AnalyticsPage() {
+  const { t } = useTranslation('nav')
   const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: listProjects })
 
   const totalProjects = projects?.length ?? 0
@@ -23,17 +25,15 @@ export function AnalyticsPage() {
               <PieChart className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
-              <p className="mt-1 max-w-lg text-muted-foreground">Performance insights across all your projects</p>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">{t('analytics.title')}</h1>
+              <p className="mt-1 max-w-lg text-muted-foreground">{t('analytics.subtitle')}</p>
             </div>
           </div>
         </PageHeaderCard>
         <div className="mt-6 glass-card flex flex-col items-center py-16 text-center">
           <PieChart className="h-12 w-12 text-muted-foreground/30" />
-          <h2 className="mt-4 font-heading text-lg font-semibold">No data yet</h2>
-          <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-            Complete at least one solar analysis to see aggregated performance metrics here.
-          </p>
+          <h2 className="mt-4 font-heading text-lg font-semibold">{t('analytics.noData.title')}</h2>
+          <p className="mt-2 max-w-sm text-sm text-muted-foreground">{t('analytics.noData.subtitle')}</p>
         </div>
       </PageContainer>
     )
@@ -57,9 +57,9 @@ export function AnalyticsPage() {
             <PieChart className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-heading text-3xl font-bold tracking-tight">Analytics</h1>
+            <h1 className="font-heading text-3xl font-bold tracking-tight">{t('analytics.title')}</h1>
             <p className="mt-1 max-w-lg text-muted-foreground">
-              Aggregated performance across {completedProjects} completed project{completedProjects !== 1 ? 's' : ''}
+              {t('analytics.subtitleWithCount', { count: completedProjects })}
             </p>
           </div>
         </div>
@@ -68,63 +68,63 @@ export function AnalyticsPage() {
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
           icon={<Receipt className="h-5 w-5" />}
-          label="Total Monthly Savings"
+          label={t('analytics.stats.totalMonthlySavings')}
           value={`RM ${stats.totalSavingsRm.toFixed(0)}`}
           accent="text-green-600 dark:text-green-400"
           bg="bg-green-500/10 dark:bg-green-500/20"
         />
         <StatCard
           icon={<Zap className="h-5 w-5" />}
-          label="Total Annual Energy"
+          label={t('analytics.stats.totalAnnualEnergy')}
           value={`${(stats.totalEnergyKwh / 1000).toFixed(1)} MWh`}
           accent="text-primary"
           bg="bg-primary/10"
         />
         <StatCard
           icon={<Leaf className="h-5 w-5" />}
-          label="Total CO2 Offset"
+          label={t('analytics.stats.totalCo2Offset')}
           value={`${(stats.totalCarbonKg / 1000).toFixed(1)} t/yr`}
           accent="text-emerald-600 dark:text-emerald-400"
           bg="bg-emerald-500/10 dark:bg-emerald-500/20"
         />
         <StatCard
           icon={<Sun className="h-5 w-5" />}
-          label="Total Panels"
+          label={t('analytics.stats.totalPanels')}
           value={`${stats.totalPanels}`}
           accent="text-amber-600 dark:text-amber-400"
           bg="bg-amber-500/10 dark:bg-amber-500/20"
         />
       </div>
 
-      <h2 className="mt-8 font-heading text-lg font-semibold">Averages per Project</h2>
+      <h2 className="mt-8 font-heading text-lg font-semibold">{t('analytics.averages.heading')}</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div className="glass-card p-5">
-          <p className="text-xs text-muted-foreground">Avg. Monthly Savings</p>
+          <p className="text-xs text-muted-foreground">{t('analytics.averages.avgMonthlySavings')}</p>
           <p className="mt-1 font-heading text-xl font-bold text-green-600 dark:text-green-400">
             RM {avgSavings.toFixed(0)}
           </p>
         </div>
         <div className="glass-card p-5">
-          <p className="text-xs text-muted-foreground">Avg. Panels per Project</p>
+          <p className="text-xs text-muted-foreground">{t('analytics.averages.avgPanels')}</p>
           <p className="mt-1 font-heading text-xl font-bold">{avgPanels.toFixed(0)}</p>
         </div>
         <div className="glass-card p-5">
-          <p className="text-xs text-muted-foreground">Completion Rate</p>
+          <p className="text-xs text-muted-foreground">{t('analytics.averages.completionRate')}</p>
           <p className="mt-1 font-heading text-xl font-bold text-primary">
             {totalProjects > 0 ? ((completedProjects / totalProjects) * 100).toFixed(0) : 0}%
           </p>
         </div>
       </div>
 
-      <h2 className="mt-8 font-heading text-lg font-semibold">Project Breakdown</h2>
+      <h2 className="mt-8 font-heading text-lg font-semibold">{t('analytics.breakdown.heading')}</h2>
       <div className="mt-4 glass-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="px-4 py-3 font-medium text-muted-foreground">Project</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Savings/mo</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Payback</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">{t('analytics.breakdown.colProject')}</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">{t('analytics.breakdown.colSavings')}</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">{t('analytics.breakdown.colPayback')}</th>
               </tr>
             </thead>
             <tbody>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Image as KonvaImage, Layer, Line as KonvaLine, Rect as KonvaRect, Stage } from 'react-konva'
 import { MONTHLY_AZIMUTH, MONTH_LABELS } from '@/components/workbench/IrradianceGlow'
 import { PanelLayer } from '@/components/workbench/PanelLayer'
@@ -19,7 +20,7 @@ import { useCanvasInteractions } from '@/hooks/useCanvasInteractions'
 import { useStageSize } from '@/hooks/useStageSize'
 import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
 import { COLORS } from '@/lib/constants'
-import { WORKBENCH_TOUR_STEPS } from '@/lib/workbenchTour'
+import { getWorkbenchTourSteps } from '@/lib/workbenchTour'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
@@ -40,6 +41,7 @@ function getPanelAnnualEnergy(monthlyEnergyDcKwh: number[], yearlyEnergyDcKwh: n
 }
 
 export function WorkbenchPage() {
+  const { t } = useTranslation('workbench')
   const { projectId } = useParams<{ projectId: string }>()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -242,13 +244,13 @@ export function WorkbenchPage() {
       <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f5f5f4_0%,#fafaf9_100%)] px-4">
         <Card className="w-full max-w-lg">
           <CardHeader>
-            <CardTitle>Workbench Unavailable</CardTitle>
-            <CardDescription>We couldn&apos;t load the project layout data for this rooftop.</CardDescription>
+            <CardTitle>{t('errorState.title')}</CardTitle>
+            <CardDescription>{t('errorState.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
+            <p className="text-sm text-destructive">{error instanceof Error ? error.message : t('errorState.unknownError')}</p>
             <Button asChild variant="outline" size="sm" className="w-full justify-center gap-2">
-              <Link to="/dashboard">Back to Dashboard</Link>
+              <Link to="/dashboard">{t('errorState.backToDashboard')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -260,9 +262,9 @@ export function WorkbenchPage() {
     return (
       <LoadingOverlay
         hints={[
-          'Loading your rooftop image...',
-          'Mapping solar panels to your roof...',
-          'Preparing the layout workbench...'
+          t('loading.rooftopImage'),
+          t('loading.mappingPanels'),
+          t('loading.preparingWorkbench')
         ]}
       />
     )
@@ -274,7 +276,7 @@ export function WorkbenchPage() {
 
   return (
     <AppLayout>
-      <GuidedTour storageKey="slg-tour-workbench" steps={WORKBENCH_TOUR_STEPS} />
+      <GuidedTour storageKey="slg-tour-workbench" steps={getWorkbenchTourSteps(t)} />
       <PageContainer variant="mvp">
         <WorkbenchSidebar
           projectName={project.name}
@@ -318,17 +320,17 @@ export function WorkbenchPage() {
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle data-tour="canvas-title">
-                    Roof Layout Workbench
-                    <InfoTooltip text="Use the slider to add or remove panels. Click a panel on the canvas to select it, then rotate or delete it. Hold spacebar to pan the view" />
+                    {t('canvas.title')}
+                    <InfoTooltip text={t('canvas.titleTooltip')} />
                   </CardTitle>
                 </div>
                 {(interactions.pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
                   <Badge className="bg-amber-600 text-white hover:bg-amber-600">
                     {isBatchRecomputing
-                      ? 'Batch Recompute'
+                      ? t('badge.batchRecompute')
                       : initialBatchStatus === 'loading'
-                        ? 'Computing Monthly Data'
-                        : 'Recomputing'}
+                        ? t('badge.computingMonthly')
+                        : t('badge.recomputing')}
                   </Badge>
                 )}
               </div>
@@ -488,7 +490,7 @@ export function WorkbenchPage() {
                       <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-background/60 backdrop-blur-[1px]">
                         <div className="glass flex items-center gap-3 rounded-lg px-5 py-3 text-sm font-medium">
                           <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
-                          {isOverlayLoading ? 'Loading overlay...' : 'Recalculating energy for new panel dimensions...'}
+                          {isOverlayLoading ? t('canvas.loadingOverlay') : t('canvas.recalculating')}
                         </div>
                       </div>
                     )}
@@ -503,7 +505,7 @@ export function WorkbenchPage() {
                 ) : (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
-                    Preparing the canvas...
+                    {t('canvas.preparingCanvas')}
                   </div>
                 )}
               </div>
@@ -524,16 +526,16 @@ export function WorkbenchPage() {
                   ☀️ {MONTHLY_AZIMUTH[irradianceMonth]}°{' '}
                   {(() => {
                     const a = MONTHLY_AZIMUTH[irradianceMonth] ?? 180
-                    if (a >= 337.5 || a < 22.5) return 'N'
-                    if (a < 67.5) return 'NE'
-                    if (a < 112.5) return 'E'
-                    if (a < 157.5) return 'SE'
-                    if (a < 202.5) return 'S'
-                    if (a < 247.5) return 'SW'
-                    if (a < 292.5) return 'W'
-                    return 'NW'
+                    if (a >= 337.5 || a < 22.5) return t('canvas.compass.n')
+                    if (a < 67.5) return t('canvas.compass.ne')
+                    if (a < 112.5) return t('canvas.compass.e')
+                    if (a < 157.5) return t('canvas.compass.se')
+                    if (a < 202.5) return t('canvas.compass.s')
+                    if (a < 247.5) return t('canvas.compass.sw')
+                    if (a < 292.5) return t('canvas.compass.w')
+                    return t('canvas.compass.nw')
                   })()}
-                  <InfoTooltip text="Approximate sun direction for this month in Malaysia. The amber glow on the canvas shows where sunlight hits your roof." />
+                  <InfoTooltip text={t('canvas.sunDirection.tooltip')} />
                 </span>
               </div>
             </CardContent>

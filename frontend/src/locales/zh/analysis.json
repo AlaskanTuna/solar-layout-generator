@@ -1,0 +1,449 @@
+{
+  "page": {
+    "loadingHints": {
+      "loading": "正在加载分析结果...",
+      "tariff": "正在准备电价数据...",
+      "crunching": "正在计算您的太阳能节省金额..."
+    },
+    "error": {
+      "title": "分析不可用",
+      "description": "无法为该项目准备账单模拟。",
+      "incompleteData": "分析数据不完整，请返回工作台并重新保存布局。",
+      "unknown": "未知错误",
+      "backToWorkbench": "返回工作台"
+    },
+    "viewToggle": {
+      "simple": "简洁",
+      "advanced": "高级",
+      "hint": "简洁模式显示主要节省数据，高级模式增加电价明细、预测及系统详情。"
+    },
+    "cumulativeSavings": {
+      "title": "累计节省",
+      "titleTooltip": "随年度进展的累计节省总额，曲线越陡表示节省速度越快。",
+      "description": "全年逐月累计的节省总额。",
+      "seriesName": "累计节省"
+    },
+    "disclaimers": {
+      "title": "财务免责声明",
+      "description": "所有账单和节省数据均为估算值。"
+    },
+    "toast": {
+      "saved": "分析已保存至项目",
+      "saveFailed": "分析保存失败"
+    },
+    "paybackTooltip": {
+      "intro": "节省金额覆盖系统安装成本所需的年数。",
+      "netBenefitProjection": "净收益预测：",
+      "yearLabel": "{{count}} 年"
+    }
+  },
+  "tour": {
+    "overview": {
+      "title": "您的太阳能节省分析",
+      "description": "本页面计算安装太阳能板后可节省的 TNB 电费。左侧输入变更后，所有数据实时更新。"
+    },
+    "consumption": {
+      "title": "输入您的用电量",
+      "description": "这是最重要的输入项。请在 TNB 账单上找到平均月用电量（kWh）（查看「Purata Penggunaan」）并在此输入。点击信息图标可查看账单示例。"
+    },
+    "viewToggle": {
+      "title": "简洁与高级模式",
+      "description": "先使用简洁模式快速了解摘要，需要详细电价明细、账单组成及可自定义系统假设时，切换至高级模式。"
+    },
+    "heroCards": {
+      "title": "一览关键数据",
+      "description": "这四项指标告诉您最重要的信息：每月节省多少、每年节省多少、系统多久回本，以及抵消了多少 CO2 排放。"
+    },
+    "monthlyChart": {
+      "title": "月度账单对比",
+      "description": "此图表对比每月无太阳能时的账单（橙色）与有太阳能时的账单（绿色），差额即为您的节省金额。"
+    },
+    "exportSave": {
+      "title": "导出与保存",
+      "description": "对结果满意后，点击「保存分析」以存储设置，或点击「导出 PDF」下载可分享给安装商或家人的报告。"
+    }
+  },
+  "sidebar": {
+    "systemSize": {
+      "label": "系统规模",
+      "tooltip": "太阳能系统在理想日照条件下的最大发电功率，以千瓦峰值（kWp）计量。"
+    },
+    "activePanels": "活跃太阳能板",
+    "panelModel": "太阳能板型号",
+    "panelSpecs": {
+      "summary": "太阳能板规格",
+      "dimensions": "尺寸：",
+      "capacity": "功率：",
+      "efficiency": "效率：",
+      "cost": "价格：",
+      "maxPanels": "最大块数：",
+      "lifespan": "使用寿命："
+    },
+    "adjustHint": "请调整假设条件并检查 NEM 计费结果后再保存。",
+    "missingEnergy": "{{count}} 块太阳能板缺少月度重新计算数据，在从工作台重新保存布局前，将被视为 0 kWh。",
+    "phaseCapExceeded": "当前阵列规模超过 {{phase}} 相 NEM 接入的 {{cap}} kW 上限。",
+    "consumption": {
+      "label": "月用电量（kWh）",
+      "tooltipText": "您的平均月用电量（kWh）。请在 TNB 账单上找到「Purata Penggunaan」：",
+      "imageAlt": "显示平均 kWh 用量的 TNB 账单",
+      "imageHint": "点击图片放大",
+      "subtext": "请输入 TNB 账单上的 kWh 数值，而非 RM 金额。",
+      "placeholder": "例如：600",
+      "profileLabel": "档案：",
+      "profileFlat": "固定",
+      "profileSeasonal": "季节性",
+      "profileTooltip": "固定模式假设每月用电量相同。季节性模式应用马来西亚典型变化规律，炎热月份用电较高，季风季节较低。",
+      "seasonalRange": "月度范围：{{min}} 至 {{max}} kWh"
+    },
+    "connectionPhase": {
+      "label": "接入相数",
+      "tooltip": {
+        "intro": "电网电力接入您家的方式。您可在 TNB 账单的「Jenis Fasa」项下或电表箱标签上查看。",
+        "single": "单相：",
+        "singleDetail": "马来西亚大多数住宅的标准接入方式，TNB NEM 3.0 规定太阳能输出上限为 5 kW。",
+        "three": "三相：",
+        "threeDetail": "常见于较大别墅或使用重型电器的住宅，上限提高至 12.5 kW。",
+        "warning": "若阵列规模超过上限，需在工作台移除太阳能板，或申请升级 TNB 接入后再安装。"
+      },
+      "capacityCap": "所选接入类型的容量上限：{{cap}} kW。",
+      "labels": {
+        "single": "单相",
+        "three": "三相"
+      }
+    },
+    "roofType": {
+      "label": "屋顶类型",
+      "tooltip": "屋顶材料决定安装支架和人工成本。瓦片屋顶需要脚手架和专用挂钩，金属屋顶使用简单的 L 形夹，平屋顶使用配重框架。简洁模式默认瓦片屋顶，这在马来西亚住宅中最为常见。",
+      "subtext": "影响安装成本，瓦片屋顶还涉及脚手架费用。",
+      "labels": {
+        "tile": "瓦片（陶土/混凝土）",
+        "metal": "金属",
+        "flat": "平屋顶（混凝土板）"
+      }
+    },
+    "financialMode": {
+      "label": "财务模式",
+      "tooltip": {
+        "intro": "选择回本期和 25 年节省金额的计算方式。",
+        "simple": "简单：",
+        "simpleDetail": "仅计算前期安装成本，回本数据最简洁、最乐观。",
+        "lifecycle": "全生命周期：",
+        "lifecycleDetail": "同时扣除年度维护费及您计划的逆变器更换费用，回本期较长，但 25 年预测更贴近实际。"
+      },
+      "subtext": "切换至全生命周期模式可获得更真实的长期预测。",
+      "labels": {
+        "simple": "简单",
+        "lifecycle": "全生命周期"
+      },
+      "maintenance": {
+        "label": "年度维护费（RM / 年）"
+      },
+      "inverterReplacements": {
+        "label": "逆变器更换计划",
+        "add": "添加",
+        "empty": "暂无更换计划，点击添加以安排。",
+        "costLabel": "费用（RM）",
+        "yearLabel": "第几年",
+        "removeAriaLabel": "移除第 {{index}} 次更换"
+      }
+    },
+    "afa": {
+      "label": "AFA 费率",
+      "tooltip": "政府设定的每 kWh 用电附加费或回扣，单位为仙/kWh。负值表示回扣，定期更新。",
+      "subtext": "当前自动燃油调整（AFA）费率，单位：仙/kWh。负值表示回扣。",
+      "seededDate": "已于 {{date}} 核实的预设值。",
+      "placeholder": "例如：3.70"
+    },
+    "tariffEscalation": {
+      "label": "电价涨幅",
+      "tooltip": "您预期 TNB 电价每年的涨幅。涨幅越高，回本期越短，长期节省越多。马来西亚 RP4 历次调整约在每年 3 至 5% 左右。若假设电价不变，请设为 0%。",
+      "subtext": "%/年，在预测期内复利计算节省金额。"
+    },
+    "tariffParameters": {
+      "label": "电价参数",
+      "tooltip": "为本项目覆盖各项 TNB RP4 电价字段，包括能源费、容量费、网络费、零售费、SST、可再生能源基金及最低消费。默认值与已发布费率一致。",
+      "subtext": "TNB RP4 基础费率的按项目覆盖，默认为已发布值。",
+      "configure": "配置电价参数",
+      "modified": "已修改 {{count}} 项"
+    },
+    "degradation": {
+      "label": "太阳能板衰减率",
+      "tooltip": "太阳能板每年的输出衰减量。衰减率越高，长期发电量越少，节省金额越低，回本期越长。现代 N 型太阳能板年衰减约 0.5%，旧款 PERC 板约 0.7%。",
+      "subtext": "%/年，影响回本期及 10 年预测。",
+      "placeholder": "例如：0.5"
+    },
+    "systemAssumptions": {
+      "label": "系统假设",
+      "tooltip": "用于精细估算实际发电量的工程参数，大多数屋主可保持默认值。",
+      "pr": "PR（%）",
+      "losses": "损耗（%）",
+      "dcAc": "DC/AC"
+    },
+    "buttons": {
+      "backToWorkbench": "返回工作台",
+      "exportPdf": "导出 PDF",
+      "exporting": "正在导出 PDF...",
+      "saveAnalysis": "保存分析",
+      "saving": "保存分析中..."
+    }
+  },
+  "verdict": {
+    "title": "您的太阳能评估结论",
+    "titleTooltip": {
+      "intro": "您太阳能投资的简明摘要。",
+      "ratingIntro": "星级评分反映系统回本速度：",
+      "star5": "5 星：6 年以内",
+      "star4": "4 星：6 至 12 年",
+      "star3": "3 星：12 至 25 年",
+      "star1": "1 星：超过 25 年"
+    },
+    "description": "核心建议及关键数据一览。",
+    "headline": {
+      "noPanels": "请在工作台添加太阳能板以查看节省金额。",
+      "noPayback": "太阳能每月节省 {{amount}}，但可能无法在 25 年内回本。",
+      "withPayback": "太阳能每月节省 {{amount}}，约 {{years}} 年回本。"
+    },
+    "starAriaLabel": "{{label}}：{{count}} / 5 星",
+    "metrics": {
+      "monthlySavings": {
+        "label": "每月节省",
+        "tooltip": {
+          "line1": "与无太阳能相比，每月账单平均节省金额。",
+          "line2": "按全年 12 个月账单差额的平均值计算。"
+        },
+        "detail": "账单减少 {{pct}}%"
+      },
+      "annualSavings": {
+        "label": "年度节省",
+        "tooltip": {
+          "line1": "全年 12 个月的总节省金额。",
+          "line2": "按无太阳能的年度账单减去有太阳能的年度账单计算。"
+        },
+        "baseline": "基准 {{amount}}"
+      },
+      "payback": {
+        "simpleLabel": "简单回本期",
+        "lifecycleLabel": "全生命周期回本期"
+      },
+      "nemFit": {
+        "label": "NEM 适配度",
+        "tooltip": {
+          "intro": "该布局在当前太阳能激励计划下与您用电量的匹配程度。",
+          "good": "良好：",
+          "goodDetail": "大部分发电量用于抵消自身账单，剩余积分极少。",
+          "moderate": "一般：",
+          "moderateDetail": "存在一定积分累积，部分月份输出超过用量并依赖之前积累的积分。",
+          "oversized": "过大：",
+          "oversizedDetail": "积分大量累积，多余积分不可兑现，年末未使用的积分将失效。",
+          "importRate": "从电网用电比例：",
+          "importRateValue": "{{pct}}% 的用电量来自电网",
+          "importRateSuffix": "的用电量来自电网",
+          "exportRate": "向电网输出比例：",
+          "exportRateValue": "{{pct}}% 的发电量输送回电网",
+          "exportRateSuffix": "的发电量输送回电网"
+        },
+        "labels": {
+          "good": "良好",
+          "moderate": "一般",
+          "oversized": "过大"
+        }
+      }
+    }
+  },
+  "billComparison": {
+    "title": "月度账单对比",
+    "titleTooltip": "对比每月有无太阳能的预估 TNB 账单。橙色柱形显示正常应付金额，绿色柱形显示应用 NEM 太阳能积分后应付金额。",
+    "description": "每月无太阳能（基准）与有太阳能的预估账单对比。",
+    "withoutSolar": "无太阳能",
+    "withSolar": "有太阳能"
+  },
+  "billBreakdown": {
+    "title": "账单组成明细",
+    "titleTooltip": {
+      "intro": "并排对比 TNB 账单上有无太阳能的各项费用，包括能源费、容量费、网络费、AFA、EEI 回扣、可再生能源基金及 SST。",
+      "threshold": "TNB 对月用电量超过 {{threshold}} kWh 的部分叠加多项额外费用。当太阳能积分将应计用电量降至该阈值以下时，相关费用当月将减免。",
+      "retail": "零售费：",
+      "retailDetail": "仅在月用电量超过 600 kWh 时收取的固定 TNB 账单费用。",
+      "afa": "AFA：",
+      "afaDetail": "与燃料价格挂钩的自动燃油调整附加费。",
+      "sst": "SST：",
+      "sstDetail": "仅在月用电量超过 600 kWh 时征收的 8% 销售与服务税。",
+      "tierNote": "若太阳能使您当月进入较低电价档，实际节省金额将大于单纯能源成本所显示的数字。"
+    },
+    "description": "了解您的 TNB 账单计算方式。",
+    "thresholdWarning": {
+      "title": "已进入较低 TNB 电价档"
+    },
+    "withoutSolar": {
+      "title": "无太阳能",
+      "subtitle": "按全额用电量应付金额"
+    },
+    "withSolar": {
+      "title": "有太阳能",
+      "subtitle": "在 NEM 抵消用电后的账单"
+    },
+    "fields": {
+      "energy": "能源费",
+      "capacity": "容量费",
+      "network": "网络费",
+      "retail": "零售费",
+      "afa": "AFA",
+      "eeiRebate": "EEI 回扣",
+      "reFund": "可再生能源基金",
+      "sst": "SST",
+      "total": "合计",
+      "totalTooltipTemplate": "{{baseline}}（无太阳能）− {{savings}}（节省）= {{total}}",
+      "totalTooltipFormula": "能源费 + 容量费 + 网络费 + 零售费 + AFA − EEI 回扣 + 可再生能源基金 + SST",
+      "billableKwh": "应计 kWh",
+      "creditUsed": "已用积分",
+      "creditBalance": "积分余额",
+      "creditForfeited": "已失效积分",
+      "youSave": "本月节省 {{amount}}"
+    }
+  },
+  "monthTable": {
+    "title": "逐月明细",
+    "titleTooltip": "完整的逐月视图，显示用电量、太阳能发电量、从电网净进口量、NEM 积分使用情况及账单节省结果。展开表格可查看全年 12 个月数据。",
+    "description": "月度计费输入、积分及节省金额。",
+    "collapse": "收起",
+    "expand": "展开",
+    "toggleLabel": "{{action}}完整账单表格",
+    "columns": {
+      "month": "月份",
+      "consumption": "用电量",
+      "generation": "发电量",
+      "netImport": "净进口量",
+      "creditUsed": "已用积分",
+      "creditBalance": "积分余额",
+      "baselineBill": "基准账单",
+      "nemSavings": "NEM 节省",
+      "totalBill": "实付账单"
+    }
+  },
+  "netBenefit": {
+    "title": "净收益预测",
+    "titleTooltip": {
+      "simple": "累计节省金额减去前期系统成本，预测 {{years}} 年。柱形变绿表示已回本并进入净盈利阶段，已计入年度太阳能板衰减。",
+      "lifecycle": "累计节省金额减去前期系统成本、年度维护费及计划逆变器更换费，预测 {{years}} 年。柱形变绿表示已回本并进入净盈利阶段，已计入年度太阳能板衰减。"
+    },
+    "description": {
+      "simple": "扣除前期系统成本后的盈亏情况。",
+      "lifecycle": "扣除系统成本、年度维护费及逆变器更换费后的盈亏情况。"
+    },
+    "yearRangeButton": "{{years}} 年",
+    "yearRangeOption": "{{years}} 年",
+    "netBenefitLabel": "{{years}} 年净收益",
+    "seriesName": "净收益",
+    "yearLabel": "第 {{year}} 年"
+  },
+  "financialRoadmap": {
+    "title": "财务路线图",
+    "titleTooltip": "您太阳能投资的关键财务里程碑简明时间线。实际结果会因电价变化、维护情况、天气及设备寿命而有所不同。",
+    "description": "太阳能投资在其使用寿命内的关键里程碑。",
+    "milestones": {
+      "year0": {
+        "label": "第 0 年",
+        "description": "初始投资 {{cost}}，用于 {{kwp}} kWp 交钥匙系统（太阳能板、逆变器、支架、线路、人工及报批费用）。"
+      },
+      "year1": {
+        "label": "第 1 年",
+        "description": "通过 NEM 积分抵消，预计首年电费节省 {{savings}}。"
+      },
+      "breakEven": {
+        "label": "第 {{years}} 年",
+        "description": "回本点。累计电费节省已覆盖系统成本，此后每节省一令吉均为净利润。"
+      },
+      "inverterReplacement": {
+        "single": "逆变器更换",
+        "numbered": "第 {{index}} 次逆变器更换",
+        "description": "{{label}} 约 {{cost}} 从累计节省中扣除，上方回本数据已反映此成本。"
+      },
+      "year25": {
+        "label": "第 25 年",
+        "description": "标准太阳能板质保期届满。以 {{rate}}%/年衰减率计算，系统仍可产出约原始发电量的 {{output}}%。"
+      }
+    },
+    "footer": {
+      "lifecycle": "全生命周期模式每年扣除约 {{maintenance}} 维护费{{replacements}}。",
+      "replacementsSuffix": " 及 {{count}} 次逆变器更换（共约 {{total}}）",
+      "escalationSuffix": " 预测还应用了 {{rate}}%/年的电价涨幅。",
+      "simpleWithEscalation": "预测应用了 {{rate}}%/年的电价涨幅。切换至全生命周期财务模式可同时纳入维护费和逆变器更换费。",
+      "simpleNoEscalation": "切换至全生命周期财务模式可纳入年度维护费和逆变器更换费。"
+    }
+  },
+  "systemCost": {
+    "titleEmpty": "系统成本",
+    "descriptionEmpty": "请在工作台添加太阳能板以估算安装成本。",
+    "title": "系统成本",
+    "titleTooltip": "基于马来西亚典型住宅太阳能成本的自下而上交钥匙估算，涵盖太阳能板、逆变器、支架、线路、报批、人工及安装商利润。",
+    "description": "预计总交钥匙安装成本。",
+    "quoteVariance": "±10% 典型报价浮动",
+    "pricingNote": "马来西亚中端市场定价（2026年）。实际安装商报价通常在此数字的 ±10% 范围内。",
+    "segments": {
+      "panels": "太阳能板",
+      "inverter": "逆变器",
+      "mounting": "支架",
+      "electricalBos": "电气 BOS",
+      "electricalBosDetail": "线路、保护装置",
+      "scaffolding": "脚手架",
+      "scaffoldingDetail": "仅限瓦片屋顶",
+      "permit": "报批费",
+      "permitCcc": "含 CCC 费用",
+      "permitSeda": "SEDA 注册",
+      "labour": "人工",
+      "labourDetail": "+18% 硬件成本",
+      "installerMargin": "安装商利润",
+      "installerMarginDetail": "+15% 硬件 + 人工"
+    },
+    "roofLabels": {
+      "tile": "瓦片",
+      "metal": "金属",
+      "flat": "平屋顶"
+    }
+  },
+  "systemAssumptions": {
+    "title": "系统假设",
+    "titleTooltip": "本分析所用技术输入，部分来自 Google Solar API 针对您屋顶的数据，其余为马来西亚住宅系统的行业标准默认值。",
+    "description": "本分析所用标准行业假设（非现场实测值）。",
+    "performanceRatio": {
+      "label": "性能比",
+      "tooltip": "太阳能板额定输出在现实损耗后实际到达电表的比例，数值越高表示实际性能越好。",
+      "detail": "马来西亚住宅系统的典型值"
+    },
+    "assumedLosses": {
+      "label": "假设损耗",
+      "tooltip": "因灰尘、线路、热量和逆变器转换造成的发电量损耗比例，自动计算为 100% 减去性能比。",
+      "detail": "积尘、线缆、逆变器、温度"
+    },
+    "degradation": {
+      "label": "太阳能板衰减率",
+      "detail": "年输出衰减（N 型 ~0.5%）"
+    },
+    "panelLifetime": {
+      "label": "太阳能板寿命",
+      "tooltip": "太阳能板预计持续发电的年限，回本期应在此时间窗口内才具投资价值。",
+      "detail": "来自 Google Solar API 估算",
+      "value": "{{years}} 年"
+    },
+    "azimuthPitch": {
+      "label": "方位角 / 倾斜角",
+      "tooltip": "活跃太阳能板的平均朝向（方位角）和倾斜角，按各屋顶分区板块数量加权计算，在工作台中添加、移除或移动板块时更新。",
+      "multiSegment": "{{count}} 块分布于 {{segments}} 个屋顶分区",
+      "oneSegment": "{{count}} 块位于单一屋顶分区"
+    },
+    "dcAc": {
+      "label": "DC/AC 比",
+      "tooltip": "太阳能板容量与逆变器容量的比值，大于 1.0 意味着太阳能板略微超配，可在不增加逆变器容量的情况下提升日常发电量。",
+      "detail": "标准住宅逆变器配置"
+    }
+  },
+  "disclaimers": {
+    "tnbTariff": "估算基于监管期 4（RP4；2025 年 7 月 1 日起生效）的已发布 TNB 电价及 NEM Rakyat 3.0 规则。实际账单可能因账单周期长度、电表读数日期及电价调整而有所不同。如需调整，请在「高级」模式中自行修改。",
+    "afaRate": "自动燃油调整（AFA）费率每月变动，估算使用最新已知费率，可能不反映未来变化。",
+    "eeiRebate": "PETRA 已表示 NEM 用户的能源效率激励（EEI）费率可能调整，当前计算使用标准 EEI 费率，待官方正式修订。",
+    "solarGeneration": "太阳能发电量估算基于平均辐照度数据，实际发电量因天气、遮阴、板块朝向、积尘及设备状况而有所不同。",
+    "creditForfeiture": "多余积分在每个日历年末失效，未使用的积分不予现金支付。",
+    "systemCost": "系统成本自下而上估算：经销商太阳能板定价 + 逆变器型号查询 + 因屋顶类型而异的支架费 + 电气 BOS + 报批费 + 人工加成 + 安装商利润。假设中端安装商定价和单层楼安装。马来西亚典型交钥匙报价通常在此数字的 ±10% 范围内，请务必向持牌 SEDA 注册安装商确认。",
+    "paybackProjections": "回本期和节省预测不包含年度维护费（约 RM 500/年）或逆变器更换费（通常在第 10 至 15 年需要，费用约 RM 3,000 至 6,000）。电价涨幅可在高级模式中配置（默认 0%），马来西亚 RP4 历次调整约在每年 3 至 5% 左右，实际长期回报可能有所不同。"
+  }
+}

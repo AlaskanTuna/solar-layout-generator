@@ -1,0 +1,66 @@
+{
+  "sections": {
+    "overview": "Gambaran Keseluruhan",
+    "insights": "Pandangan",
+    "help": "Bantuan"
+  },
+  "items": {
+    "dashboard": "Papan Pemuka",
+    "projects": "Projek",
+    "analytics": "Analitik",
+    "faq": "Soalan Lazim",
+    "settings": "Tetapan",
+    "signOut": "Log Keluar",
+    "home": "Laman Utama",
+    "summary": "Ringkasan",
+    "map": "Peta",
+    "workbench": "Meja Kerja",
+    "analysis": "Analisis",
+    "howItWorks": "Cara Ia Berfungsi",
+    "features": "Ciri-ciri",
+    "pricing": "Harga"
+  },
+  "menu": {
+    "loadingPlan": "Memuatkan pelan…",
+    "planLabel": "Pelan {{tier}}",
+    "settingsLink": "Tetapan"
+  },
+  "footer": {
+    "sdg": "UN SDG 7: Tenaga Mampu Milik dan Bersih",
+    "year": "2026"
+  },
+  "notFound": {
+    "title": "Halaman tidak dijumpai",
+    "subtitle": "Halaman yang anda cari tidak wujud atau telah dialihkan. Jom kami bantu anda kembali ke landasan.",
+    "backHome": "Kembali ke Laman Utama",
+    "goToDashboard": "Pergi ke Papan Pemuka"
+  },
+  "analytics": {
+    "title": "Analitik",
+    "subtitle": "Pandangan prestasi merentas semua projek anda",
+    "subtitleWithCount": "Prestasi agregat merentas {{count}} projek selesai",
+    "subtitleWithCount_plural": "Prestasi agregat merentas {{count}} projek selesai",
+    "noData": {
+      "title": "Tiada data lagi",
+      "subtitle": "Lengkapkan sekurang-kurangnya satu analisis solar untuk melihat metrik prestasi agregat di sini."
+    },
+    "stats": {
+      "totalMonthlySavings": "Jumlah Penjimatan Bulanan",
+      "totalAnnualEnergy": "Jumlah Tenaga Tahunan",
+      "totalCo2Offset": "Jumlah Offset CO2",
+      "totalPanels": "Jumlah Panel"
+    },
+    "averages": {
+      "heading": "Purata setiap Projek",
+      "avgMonthlySavings": "Purata Penjimatan Bulanan",
+      "avgPanels": "Purata Panel setiap Projek",
+      "completionRate": "Kadar Penyiapan"
+    },
+    "breakdown": {
+      "heading": "Pecahan Projek",
+      "colProject": "Projek",
+      "colSavings": "Penjimatan/bulan",
+      "colPayback": "Bayar Balik"
+    }
+  }
+}

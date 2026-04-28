@@ -1,0 +1,201 @@
+{
+  "errorState": {
+    "title": "Meja Kerja Tidak Tersedia",
+    "description": "Kami tidak dapat memuatkan data susun atur projek untuk bumbung ini.",
+    "unknownError": "Ralat tidak diketahui",
+    "backToDashboard": "Kembali ke Papan Pemuka"
+  },
+  "loading": {
+    "rooftopImage": "Memuatkan imej bumbung anda...",
+    "mappingPanels": "Memetakan panel solar ke bumbung anda...",
+    "preparingWorkbench": "Menyediakan meja kerja susun atur..."
+  },
+  "canvas": {
+    "title": "Meja Kerja Susun Atur Bumbung",
+    "titleTooltip": "Gunakan gelangsar untuk menambah atau mengurangkan panel. Klik panel di kanvas untuk memilihnya, kemudian putar atau padamkan. Tahan spacebar untuk menggerakkan pandangan",
+    "preparingCanvas": "Menyediakan kanvas...",
+    "loadingOverlay": "Memuatkan lapisan...",
+    "recalculating": "Mengira semula tenaga untuk dimensi panel baharu...",
+    "sunDirection": {
+      "tooltip": "Arah matahari anggaran untuk bulan ini di Malaysia. Cahaya kuning di kanvas menunjukkan tempat cahaya matahari mengenai bumbung anda."
+    },
+    "compass": {
+      "n": "U",
+      "ne": "TL",
+      "e": "T",
+      "se": "TG",
+      "s": "S",
+      "sw": "BD",
+      "w": "B",
+      "nw": "BL"
+    }
+  },
+  "badge": {
+    "batchRecompute": "Pengiraan Semula Kelompok",
+    "computingMonthly": "Mengira Data Bulanan",
+    "recomputing": "Mengira Semula"
+  },
+  "sidebar": {
+    "description": "Laraskan susun atur yang dicadangkan sebelum beralih ke analisis kewangan.",
+    "imageryBase": "Imej: BASE",
+    "imageryBaseTooltip": "Imej satelit resolusi tinggi tidak tersedia untuk alamat ini. Kedudukan panel dan anggaran fluks adalah anggaran.",
+    "layoutPreset": {
+      "label": "Pratetap Susun Atur"
+    },
+    "stats": {
+      "annualYield": "Hasil Tahunan",
+      "annualYieldTooltip": "Jumlah anggaran elektrik yang akan dijana panel anda dalam setahun.",
+      "co2Offset": "Offset CO₂",
+      "co2OffsetTooltip": "Anggaran menggunakan faktor {{factor}} kg/MWh berdasarkan faktor pelepasan grid untuk rantau ini."
+    },
+    "panelSpecs": {
+      "summary": "Spesifikasi Panel",
+      "dimensions": "Dimensi: {{height}} × {{width}} m",
+      "capacity": "Kapasiti: {{capacityWp}} Wp",
+      "efficiency": "Kecekapan: {{efficiency}}%",
+      "cost": "Kos: RM {{costPerWp}} / Wp",
+      "maxPanels": "Maks Panel: {{count}}",
+      "lifespan": "Jangka Hayat: {{years}} tahun"
+    },
+    "batchStatus": {
+      "loading": "Mengira data tenaga bulanan untuk semua panel...",
+      "error": "Tidak dapat mengira pecahan tenaga bulanan. Anggaran tahunan akan digunakan sebagai ganti."
+    },
+    "panelQuantity": {
+      "label": "Bilangan Panel",
+      "tooltip": "Laraskan bilangan panel yang hendak disertakan. Panel hasil lebih tinggi diutamakan apabila anda mengurangkan bilangan.",
+      "hint": "Panel hasil lebih tinggi dipaparkan dahulu. Menurunkan gelangsar akan mengeluarkan panel berkedudukan lebih rendah daripada susun atur yang disimpan."
+    },
+    "selectedPanel": {
+      "label": "Panel Dipilih",
+      "tooltip": "Klik mana-mana panel di kanvas untuk memilihnya. Tahan Shift untuk memilih berbilang. Anda kemudian boleh memutarnya atau memadamnya.",
+      "none": "Tiada",
+      "multiSelected": "{{count}} panel",
+      "multiSelectedTitle": "{{count}} panel dipilih",
+      "multiSelectedHint": "Gunakan gelangsar putaran untuk memutar semua panel yang dipilih. Tekan Delete untuk membuangnya.",
+      "annualYield": "Hasil Tahunan",
+      "rotation": "Putaran",
+      "avgMonthlyYield": "Purata Hasil Bulanan",
+      "monthlyDataPending": "Data bulanan belum dikira"
+    },
+    "actions": {
+      "backToMap": "Kembali ke Peta",
+      "backToDashboard": "Kembali ke Papan Pemuka",
+      "saveAndContinue": "Simpan & Teruskan",
+      "saving": "Menyimpan...",
+      "recomputing": "Mengira Semula Susun Atur..."
+    }
+  },
+  "controls": {
+    "sectionTools": "Alat",
+    "sectionView": "Paparan",
+    "sectionLayers": "Lapisan",
+    "expandView": "Kembangkan Paparan",
+    "collapseView": "Runtuhkan Paparan",
+    "undo": "Buat Asal",
+    "redo": "Buat Semula",
+    "marqueeOn": "Marquee: HIDUP",
+    "marquee": "Marquee",
+    "snapOn": "Snap: HIDUP",
+    "snap": "Snap",
+    "deleteSelected": "Padam Yang Dipilih",
+    "freeRotateOn": "Putar Bebas: HIDUP",
+    "freeRotate": "Putar Bebas",
+    "zoomIn": "Zum masuk",
+    "zoomOut": "Zum keluar",
+    "zoomReset": "Tetapkan semula zum",
+    "hideOverlays": "Sembunyikan lapisan",
+    "overlays": "Lapisan",
+    "overlayRgb": "RGB",
+    "overlayFlux": "Fluks",
+    "overlayDsm": "DSM",
+    "overlayMask": "Topeng",
+    "overlaySegments": "Segmen"
+  },
+  "legends": {
+    "roofSegments": "Segmen Bumbung",
+    "segmentLabel": "Seg {{index}}: {{azimuth}}° / {{pitch}}° ({{count}} panel)",
+    "mask": {
+      "roof": "Bumbung",
+      "offRoof": "Luar bumbung"
+    },
+    "flux": {
+      "high": "Cerah",
+      "low": "Teduh"
+    },
+    "dsm": {
+      "high": "Tinggi",
+      "low": "Rendah"
+    }
+  },
+  "panelDrawer": {
+    "choosePanelHint": "Pilih Panel Solar",
+    "drawerTitle": "Pilih Panel Solar",
+    "drawerDescription": "Pemilihan model mengubah saiz dan output tenaga semua panel di bumbung anda.",
+    "selected": "Dipilih",
+    "efficiencySuffix": "kecekapan."
+  },
+  "layoutPresetModal": {
+    "title": "Pratetap Susun Atur",
+    "description": "Bantu kami menyaizkan sistem anda dengan betul. Pratetap hanya melaraskan bilangan panel yang aktif — ia tidak mengalihkan kedudukan panel. Langkau untuk kekalkan lalai liputan maksimum.",
+    "monthlyBill": {
+      "label": "Bil Elektrik Bulanan",
+      "tooltip": "Cari ini pada bil TNB anda. Kami menterjemahkannya kepada kWh menggunakan purata tarif TNB untuk menyaizkan sistem anda. Cari \"Purata Penggunaan\" pada bil anda:",
+      "tnbBillAlt": "Bil TNB menunjukkan purata penggunaan kWh",
+      "clickToEnlarge": "Klik imej untuk membesarkan",
+      "options": {
+        "lessThan100": "Kurang daripada RM 100",
+        "100to200": "RM 100 – 200",
+        "200to400": "RM 200 – 400",
+        "400to600": "RM 400 – 600",
+        "600plus": "Lebih daripada RM 600",
+        "notSure": "Tidak Pasti"
+      }
+    },
+    "roofDirection": {
+      "label": "Arah Bumbung",
+      "tooltip": "Hadkan panel kepada aspek bumbung tertentu. \"Terbaik Tersedia\" meletakkan panel di muka bumbung hasil tertinggi (biasanya menghadap selatan untuk Malaysia).",
+      "options": {
+        "any": "Terbaik Tersedia (Susun Hasil)",
+        "south": "Menghadap Selatan",
+        "east": "Menghadap Timur",
+        "west": "Menghadap Barat",
+        "north": "Menghadap Utara"
+      }
+    },
+    "sizingGoal": {
+      "label": "Matlamat Pensaizan",
+      "tooltip": "Ekonomi mengekalkan sistem kecil untuk pemulihan bajet paling cepat. Penggunaan Sendiri menyaizkan susunan untuk memadankan penggunaan siang hari biasa anda. Maksimum mengisi setiap slot panel yang tersedia.",
+      "options": {
+        "conservative": {
+          "title": "Ekonomi",
+          "description": "Sistem minimum yang boleh dilaksanakan. Kos pendahuluan terendah, bayar balik lebih lama. Sesuai jika bajet adalah keutamaan."
+        },
+        "balanced": {
+          "title": "Penggunaan Sendiri",
+          "description": "Disaizkan untuk memadankan penggunaan siang hari biasa anda. Paling cekap dari segi kos, meminimumkan penjanaan yang terbuang akibat eksport malam."
+        },
+        "maximum": {
+          "title": "Maksimum",
+          "description": "Setiap panel yang muat. Pelaburan terbesar, penjimatan mutlak terbesar, berguna untuk pemasang atau persediaan masa hadapan."
+        }
+      }
+    },
+    "actions": {
+      "skip": "Langkau",
+      "save": "Simpan"
+    }
+  },
+  "tour": {
+    "step1Title": "Susun Atur Bumbung Anda",
+    "step1Body": "Segiempat biru adalah panel solar yang diletakkan di bumbung anda melalui analisis satelit. Anda boleh mengubah suai susun atur ini sebelum mengira penjimatan anda. Layangkan kursor pada ikon maklumat di sebelah setiap kawalan untuk butiran lanjut.",
+    "step2Title": "Pratetap Susun Atur",
+    "step2Body": "Beritahu kami bil bulanan dan matlamat penjimatan anda — kami akan menyaizkan susun atur untuk anda. Anda boleh membukanya semula pada bila-bila masa, atau langkau untuk kekalkan lalai liputan maksimum.",
+    "step3Title": "Bentuk Susun Atur",
+    "step3Body": "Pilih model dan bilangan panel dari bar sisi, kemudian klik mana-mana panel di kanvas untuk menyeret, memutar atau memadamnya.",
+    "step4Title": "Alat Kanvas",
+    "step4Body": "Bar alat mengendalikan selebihnya: buat asal/buat semula, pilih marquee untuk mengedit kumpulan panel sekaligus, penjajaran snap untuk tepi yang kemas, zum, dan togol lapisan untuk fluks dan lapisan satelit.",
+    "step5Title": "Simpan & Teruskan",
+    "step5Body": "Berpuas hati dengan susun atur? Klik \"Simpan & Teruskan\" untuk beralih ke analisis penjimatan. Anda sentiasa boleh kembali untuk membuat pelarasan."
+  }
+}

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Drawer } from 'vaul'
 import type { PanelModel } from '@shared/types'
 import { PANEL_MODELS } from '@shared/types'
@@ -23,6 +24,7 @@ type PanelModelDrawerProps = {
 }
 
 export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }: PanelModelDrawerProps) {
+  const { t } = useTranslation('workbench')
   const [open, setOpen] = useState(false)
   const selectedModel = PANEL_MODELS.find((m) => m.id === selectedModelId) ?? PANEL_MODELS[1]!
 
@@ -43,7 +45,7 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-foreground">{selectedModel.name}</p>
-              <p className="text-xs text-muted-foreground">Choose a Solar Panel</p>
+              <p className="text-xs text-muted-foreground">{t('panelDrawer.choosePanelHint')}</p>
             </div>
             <svg
               width="16"
@@ -64,10 +66,10 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
         <Drawer.Content className="fixed inset-x-0 bottom-0 z-[80] mt-24 flex flex-col rounded-t-2xl bg-card animate-in slide-in-from-bottom duration-300">
           <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted" />
           <Drawer.Title className="px-6 pt-4 pb-2 text-lg font-semibold text-foreground">
-            Choose a Solar Panel
+            {t('panelDrawer.drawerTitle')}
           </Drawer.Title>
           <Drawer.Description className="px-6 pb-4 text-sm text-muted-foreground">
-            The model selection changes the size and energy output of all panels on your roof.
+            {t('panelDrawer.drawerDescription')}
           </Drawer.Description>
           {/* Dynamic grid: fills available width, min 160px per card, scrolls if overflow */}
           <div className="overflow-x-auto px-6 pb-8 pt-2">
@@ -94,6 +96,7 @@ export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }
 }
 
 function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelected: boolean; onSelect: () => void }) {
+  const { t } = useTranslation('workbench')
   return (
     <div
       role="button"
@@ -133,7 +136,7 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
       <p className="text-xs text-muted-foreground">{model.manufacturer}</p>
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>{model.capacityWp} Wp</span>
-        <span>{(model.efficiency * 100).toFixed(1)}% eff.</span>
+        <span>{(model.efficiency * 100).toFixed(1)}% {t('panelDrawer.efficiencySuffix')}</span>
         <span>
           {model.heightM} x {model.widthM} m
         </span>
@@ -144,7 +147,7 @@ function ModelCard({ model, isSelected, onSelect }: { model: PanelModel; isSelec
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M20 6 9 17l-5-5" />
           </svg>
-          Selected
+          {t('panelDrawer.selected')}
         </div>
       )}
     </div>

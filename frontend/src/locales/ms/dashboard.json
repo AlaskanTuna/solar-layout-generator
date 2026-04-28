@@ -1,0 +1,44 @@
+{
+  "greeting": {
+    "fallback": "Selamat kembali",
+    "morning": "Selamat pagi",
+    "afternoon": "Selamat tengah hari",
+    "evening": "Selamat petang"
+  },
+  "header": {
+    "subtitle": "Berikut adalah ruang kerja anda secara ringkas."
+  },
+  "newProject": {
+    "title": "Projek Baru",
+    "description": "Cari bangunan, jana susun atur bumbung, dan mulakan penilaian solar baharu.",
+    "quotaTooltip": "Had harian dicapai - ditetapkan semula pada {{time}}"
+  },
+  "quickActions": {
+    "projects": {
+      "label": "Projek",
+      "desc": "Buka susun atur yang disimpan, teruskan draf, dan urus sejarah projek."
+    },
+    "analytics": {
+      "label": "Analitik",
+      "desc": "Bandingkan isyarat prestasi dan penjimatan merentas kerja solar anda."
+    },
+    "faq": {
+      "label": "Soalan Lazim",
+      "desc": "Cari jawapan tentang data Solar API, tarif NEM, dan cara menggunakan meja kerja."
+    }
+  },
+  "recents": {
+    "title": "Teruskan Di Mana Anda Berhenti",
+    "subtitle": "Sambung semula projek terkini yang disimpan.",
+    "loading": "Memuatkan...",
+    "empty": "Tiada",
+    "continue": "Teruskan"
+  },
+  "dialog": {
+    "title": "Buat Projek Baharu",
+    "description": "Beri nama projek penilaian solar anda, kemudian cari bangunan anda.",
+    "nameLabel": "Nama Projek",
+    "namePlaceholder": "cth. Solar Rumah Saya",
+    "submit": "Teruskan"
+  }
+}

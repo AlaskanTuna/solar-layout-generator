@@ -1,0 +1,63 @@
+{
+  "actions": {
+    "cancel": "Batal",
+    "close": "Tutup",
+    "confirm": "Sahkan",
+    "continue": "Teruskan",
+    "delete": "Padam",
+    "discard": "Buang",
+    "download": "Muat Turun",
+    "edit": "Edit",
+    "next": "Seterusnya",
+    "ok": "OK",
+    "previous": "Sebelumnya",
+    "retry": "Cuba Semula",
+    "save": "Simpan",
+    "saving": "Menyimpan…",
+    "search": "Cari",
+    "skip": "Langkau",
+    "submit": "Hantar",
+    "tryAgain": "Cuba lagi",
+    "viewAll": "Lihat semua"
+  },
+  "states": {
+    "loading": "Memuatkan…",
+    "error": "Sesuatu telah berlaku",
+    "empty": "Tiada apa untuk ditunjukkan",
+    "noResults": "Tiada keputusan"
+  },
+  "units": {
+    "kw": "kW",
+    "kwh": "kWh",
+    "kwhPerMonth": "kWh / bulan",
+    "kwhPerYear": "kWh / tahun",
+    "kwhPerKwp": "kWh / kWp",
+    "kwp": "kWp",
+    "myr": "RM",
+    "panels": "panel",
+    "percent": "%",
+    "year": "tahun",
+    "years": "tahun",
+    "month": "bulan",
+    "months": "bulan",
+    "ton": "t",
+    "kg": "kg"
+  },
+  "language": {
+    "label": "Bahasa",
+    "toggleAria": "Tukar bahasa"
+  },
+  "theme": {
+    "label": "Tema",
+    "toggleAria": "Tukar tema",
+    "light": "Cerah",
+    "dark": "Gelap",
+    "system": "Sistem"
+  },
+  "branding": {
+    "appName": "SolarSim",
+    "tagline": "Tenaga Mampu Milik dan Bersih",
+    "footerYear": "2026",
+    "sdg": "UN SDG 7: Tenaga Mampu Milik dan Bersih"
+  }
+}

@@ -1,0 +1,449 @@
+{
+  "page": {
+    "loadingHints": {
+      "loading": "Loading your analysis...",
+      "tariff": "Preparing tariff data...",
+      "crunching": "Crunching the numbers for your solar savings..."
+    },
+    "error": {
+      "title": "Analysis Unavailable",
+      "description": "We couldn't prepare the billing simulation for this project.",
+      "incompleteData": "The analysis data is incomplete. Return to the workbench and save the layout again.",
+      "unknown": "Unknown error",
+      "backToWorkbench": "Back to Workbench"
+    },
+    "viewToggle": {
+      "simple": "Simple",
+      "advanced": "Advanced",
+      "hint": "Simple shows key savings figures. Advanced adds tariff breakdowns, projections and system details."
+    },
+    "cumulativeSavings": {
+      "title": "Cumulative Savings",
+      "titleTooltip": "Your running total of savings as the year progresses. A steeper line means you are saving money faster.",
+      "description": "Total savings accumulated month by month over the year.",
+      "seriesName": "Cumulative Savings"
+    },
+    "disclaimers": {
+      "title": "Financial Disclaimers",
+      "description": "All bill and savings figures should be treated as estimates."
+    },
+    "toast": {
+      "saved": "Analysis saved to your project",
+      "saveFailed": "Failed to save the analysis"
+    },
+    "paybackTooltip": {
+      "intro": "How many years until your savings cover the cost of installing the system.",
+      "netBenefitProjection": "Net benefit projection:",
+      "yearLabel": "{{count}}-Year"
+    }
+  },
+  "tour": {
+    "overview": {
+      "title": "Your Solar Savings Analysis",
+      "description": "This page calculates how much you could save on your TNB electricity bill with solar panels. All numbers update live as you change the inputs on the left."
+    },
+    "consumption": {
+      "title": "Enter Your Electricity Usage",
+      "description": "This is the most important input. Find your average monthly kWh on your TNB bill (look for \"Purata Penggunaan\") and enter it here. Tap the info icon to see an example bill."
+    },
+    "viewToggle": {
+      "title": "Simple vs Advanced",
+      "description": "Start with Simple view for a quick summary. Switch to Advanced when you want detailed tariff breakdowns, bill components and system assumptions you can customise."
+    },
+    "heroCards": {
+      "title": "Key Numbers at a Glance",
+      "description": "These four metrics tell you everything you need to know: how much you save each month, how much per year, how long until the system pays for itself and how much CO2 you're offsetting."
+    },
+    "monthlyChart": {
+      "title": "Monthly Bill Comparison",
+      "description": "This chart compares what you'd pay without solar (orange) to what you'd pay with solar (green) for each month. The difference is your savings."
+    },
+    "exportSave": {
+      "title": "Export & Save",
+      "description": "When you're happy with the results, click \"Save Analysis\" to store your settings, or \"Export PDF\" to download a report you can share with solar installers or your family."
+    }
+  },
+  "sidebar": {
+    "systemSize": {
+      "label": "System Size",
+      "tooltip": "The maximum power your solar system can produce under ideal sunlight, measured in kilowatt-peak (kWp)."
+    },
+    "activePanels": "Active Panels",
+    "panelModel": "Panel Model",
+    "panelSpecs": {
+      "summary": "Panel Specifications",
+      "dimensions": "Dimensions:",
+      "capacity": "Capacity:",
+      "efficiency": "Efficiency:",
+      "cost": "Cost:",
+      "maxPanels": "Max Panels:",
+      "lifespan": "Lifespan:"
+    },
+    "adjustHint": "Adjust assumptions and review the NEM billing outcome before saving.",
+    "missingEnergy": "{{count}} panel(s) are missing monthly recompute data. They are treated as 0 kWh until the layout is saved again from the Workbench.",
+    "phaseCapExceeded": "The current array size exceeds the {{cap}} kW cap for a {{phase}}-phase NEM connection.",
+    "consumption": {
+      "label": "Monthly Electricity Consumption (kWh)",
+      "tooltipText": "Your average monthly electricity usage in kWh. Look for \"Purata Penggunaan\" on your TNB bill:",
+      "imageAlt": "TNB bill showing average kWh usage",
+      "imageHint": "Click image to enlarge",
+      "subtext": "Enter the kWh amount from your TNB bill, not the RM amount.",
+      "placeholder": "e.g. 600",
+      "profileLabel": "Profile:",
+      "profileFlat": "Flat",
+      "profileSeasonal": "Seasonal",
+      "profileTooltip": "Flat assumes the same kWh every month. Seasonal applies typical Malaysian variation, with higher use in hot months and lower use during the monsoon.",
+      "seasonalRange": "Monthly range: {{min}} to {{max}} kWh"
+    },
+    "connectionPhase": {
+      "label": "Connection Phase",
+      "tooltip": {
+        "intro": "How electricity enters your home from the grid. You can check this on your TNB bill under \"Jenis Fasa\" or from the labels on your meter box.",
+        "single": "Single Phase:",
+        "singleDetail": "Standard in most Malaysian homes. Solar export is capped at 5 kW under TNB's NEM 3.0 rules.",
+        "three": "Three Phase:",
+        "threeDetail": "Common in larger bungalows or homes with heavy appliances. The cap rises to 12.5 kW.",
+        "warning": "If your array is larger than the cap, you'll need to remove panels on the Workbench or apply to upgrade your TNB connection before installation."
+      },
+      "capacityCap": "Capacity cap: {{cap}} kW for the selected connection type.",
+      "labels": {
+        "single": "Single Phase",
+        "three": "Three Phase"
+      }
+    },
+    "roofType": {
+      "label": "Roof Type",
+      "tooltip": "The roof material decides the mounting hardware and labour cost. Tile roofs need scaffolding and special hooks. Metal roofs use simple L-foot clamps. Flat roofs use ballasted frames. Simple view assumes tile, which is most common in Malaysian homes.",
+      "subtext": "Affects mounting cost and, for tile, scaffolding.",
+      "labels": {
+        "tile": "Tile (Clay/Concrete)",
+        "metal": "Metal",
+        "flat": "Flat (Concrete Slab)"
+      }
+    },
+    "financialMode": {
+      "label": "Financial Mode",
+      "tooltip": {
+        "intro": "Choose how the payback and 25-year savings are calculated.",
+        "simple": "Simple:",
+        "simpleDetail": "Counts only the upfront installation cost. Gives the cleanest, most optimistic payback figure.",
+        "lifecycle": "Lifecycle:",
+        "lifecycleDetail": "Also subtracts yearly maintenance and any inverter replacements you schedule. Payback is longer but the 25-year picture is more realistic."
+      },
+      "subtext": "Switch to Lifecycle for a more realistic long-term view.",
+      "labels": {
+        "simple": "Simple",
+        "lifecycle": "Lifecycle"
+      },
+      "maintenance": {
+        "label": "Annual Maintenance (RM/yr)"
+      },
+      "inverterReplacements": {
+        "label": "Inverter Replacements",
+        "add": "Add",
+        "empty": "No replacements scheduled. Click Add to plan one.",
+        "costLabel": "Cost (RM)",
+        "yearLabel": "At Year",
+        "removeAriaLabel": "Remove replacement {{index}}"
+      }
+    },
+    "afa": {
+      "label": "AFA Rate",
+      "tooltip": "A government-set surcharge or rebate added to every kWh of consumption, in sen/kWh. Negative values mean a rebate. Updated periodically.",
+      "subtext": "Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.",
+      "seededDate": "Seeded value verified {{date}}.",
+      "placeholder": "e.g. 3.70"
+    },
+    "tariffEscalation": {
+      "label": "Tariff Escalation",
+      "tooltip": "How much you expect TNB tariffs to rise each year. A higher rate shortens payback and grows long-term savings. RP4 revisions in Malaysia have historically trended around 3 to 5% per year. Set to 0% if you want to assume flat tariffs.",
+      "subtext": "%/year. Compounds savings across the projection horizon."
+    },
+    "tariffParameters": {
+      "label": "Tariff Parameters",
+      "tooltip": "Override individual TNB RP4 tariff fields for this project, such as energy, capacity, and network charges, retail charge, SST, RE Fund, and minimum charge. Defaults match the published rates.",
+      "subtext": "Per-project overrides for TNB RP4 base rates. Defaults are the published values.",
+      "configure": "Configure Tariff Parameters",
+      "modified": "{{count}} modified"
+    },
+    "degradation": {
+      "label": "Panel Degradation",
+      "tooltip": "How much your panels lose in output each year. A higher rate means less generation over time, lower long-term savings, and a longer payback. Modern N-type panels lose around 0.5% per year. Older PERC panels lose around 0.7% per year.",
+      "subtext": "%/year. Affects payback and 10-year projections.",
+      "placeholder": "e.g. 0.5"
+    },
+    "systemAssumptions": {
+      "label": "System Assumptions",
+      "tooltip": "Engineering factors that fine-tune how the real-world output is estimated. Most homeowners can leave these at their defaults.",
+      "pr": "PR (%)",
+      "losses": "Losses (%)",
+      "dcAc": "DC/AC"
+    },
+    "buttons": {
+      "backToWorkbench": "Back to Workbench",
+      "exportPdf": "Export PDF",
+      "exporting": "Exporting PDF...",
+      "saveAnalysis": "Save Analysis",
+      "saving": "Saving Analysis..."
+    }
+  },
+  "verdict": {
+    "title": "Your Solar Verdict",
+    "titleTooltip": {
+      "intro": "A plain-language summary of your solar investment.",
+      "ratingIntro": "The star rating reflects how quickly the system pays back:",
+      "star5": "5 stars: under 6 years",
+      "star4": "4 stars: 6 to 12 years",
+      "star3": "3 stars: 12 to 25 years",
+      "star1": "1 star: more than 25 years"
+    },
+    "description": "Headline recommendation and key numbers at a glance.",
+    "headline": {
+      "noPanels": "Add panels on the Workbench to see your savings.",
+      "noPayback": "Solar saves you {{amount}}/month but may not pay back within 25 years.",
+      "withPayback": "Solar saves you {{amount}}/month and pays back in about {{years}} years."
+    },
+    "starAriaLabel": "{{label}}: {{count}} out of 5 stars",
+    "metrics": {
+      "monthlySavings": {
+        "label": "Monthly Savings",
+        "tooltip": {
+          "line1": "The average amount you save on each monthly bill compared to having no solar.",
+          "line2": "Calculated as the average of your 12 monthly bill differences over the year."
+        },
+        "detail": "{{pct}}% off your bill"
+      },
+      "annualSavings": {
+        "label": "Annual Savings",
+        "tooltip": {
+          "line1": "Your total savings across all 12 months of the year.",
+          "line2": "Calculated as your annual bill without solar minus your annual bill with solar."
+        },
+        "baseline": "Baseline {{amount}}"
+      },
+      "payback": {
+        "simpleLabel": "Simple Payback",
+        "lifecycleLabel": "Lifecycle Payback"
+      },
+      "nemFit": {
+        "label": "NEM Fit",
+        "tooltip": {
+          "intro": "How well this layout is sized for your usage under the current solar incentive program.",
+          "good": "Good:",
+          "goodDetail": "Most generation offsets your own bill, with very few credits left over.",
+          "moderate": "Moderate:",
+          "moderateDetail": "Some credit buildup. You will export more than you use in a few months and rely on previously banked credits in others.",
+          "oversized": "Oversized:",
+          "oversizedDetail": "Heavy credit buildup. Excess credits are not cash and are forfeited at year-end if unused.",
+          "importRate": "Import Rate:",
+          "importRateValue": "{{pct}}% of usage drawn from the grid",
+          "importRateSuffix": "of usage drawn from the grid",
+          "exportRate": "Export Rate:",
+          "exportRateValue": "{{pct}}% of generation sent back to the grid",
+          "exportRateSuffix": "of generation sent back to the grid"
+        },
+        "labels": {
+          "good": "Good",
+          "moderate": "Moderate",
+          "oversized": "Oversized"
+        }
+      }
+    }
+  },
+  "billComparison": {
+    "title": "Monthly Bill Comparison",
+    "titleTooltip": "Compares your estimated TNB bill with and without solar for each month. Orange bars show what you would normally pay. Green bars show what you would pay after NEM solar credits are applied.",
+    "description": "Your estimated monthly bill without solar (baseline) versus with solar for each month.",
+    "withoutSolar": "Without Solar",
+    "withSolar": "With Solar"
+  },
+  "billBreakdown": {
+    "title": "Bill Component Breakdown",
+    "titleTooltip": {
+      "intro": "Compares each charge on your TNB bill side by side: without solar vs. with solar. Includes energy, capacity, network, AFA, EEI rebate, RE fund and SST components.",
+      "threshold": "TNB stacks several extra fees onto monthly usage above {{threshold}} kWh. When your solar credits bring billable usage under that line, those fees fall away for the month.",
+      "retail": "Retail charge:",
+      "retailDetail": "A fixed TNB billing fee only applied above 600 kWh.",
+      "afa": "AFA:",
+      "afaDetail": "The Automatic Fuel Adjustment surcharge tied to fuel prices.",
+      "sst": "SST:",
+      "sstDetail": "8% Sales & Service Tax only applied above 600 kWh.",
+      "tierNote": "If solar pushes you into the lower tariff tier for a month, your true savings are larger than the energy cost alone suggests."
+    },
+    "description": "See how your TNB bill is calculated.",
+    "thresholdWarning": {
+      "title": "Lower TNB Tariff Tier Reached"
+    },
+    "withoutSolar": {
+      "title": "Without Solar",
+      "subtitle": "What you'd pay at full consumption"
+    },
+    "withSolar": {
+      "title": "With Solar",
+      "subtitle": "Your bill after solar offsets your usage under NEM"
+    },
+    "fields": {
+      "energy": "Energy",
+      "capacity": "Capacity",
+      "network": "Network",
+      "retail": "Retail",
+      "afa": "AFA",
+      "eeiRebate": "EEI Rebate",
+      "reFund": "RE Fund",
+      "sst": "SST",
+      "total": "Total",
+      "totalTooltipTemplate": "{{baseline}} (without solar) − {{savings}} (savings) = {{total}}",
+      "totalTooltipFormula": "Energy + Capacity + Network + Retail + AFA − EEI Rebate + RE Fund + SST",
+      "billableKwh": "Billable kWh",
+      "creditUsed": "Credit Used",
+      "creditBalance": "Credit Balance",
+      "creditForfeited": "Credit Forfeited",
+      "youSave": "You save {{amount}} this month"
+    }
+  },
+  "monthTable": {
+    "title": "Month-by-Month Breakdown",
+    "titleTooltip": "A full month-by-month view showing consumption, solar generation, net import from the grid, NEM credit usage, and the resulting bill savings. Expand the table to see all 12 months.",
+    "description": "Monthly billing inputs, credits and savings.",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "toggleLabel": "{{action}} the full billing table",
+    "columns": {
+      "month": "Month",
+      "consumption": "Consumption",
+      "generation": "Generation",
+      "netImport": "Net Import",
+      "creditUsed": "Credit Used",
+      "creditBalance": "Credit Balance",
+      "baselineBill": "Baseline Bill",
+      "nemSavings": "NEM Savings",
+      "totalBill": "Total Bill"
+    }
+  },
+  "netBenefit": {
+    "title": "Net Benefit Projection",
+    "titleTooltip": {
+      "simple": "Your cumulative savings minus the upfront system cost, projected over {{years}} years. Once the bars turn green, you have recovered your investment and are in net profit. Annual panel degradation is included.",
+      "lifecycle": "Your cumulative savings minus the upfront system cost, yearly maintenance, and any scheduled inverter replacements, projected over {{years}} years. Once the bars turn green, you have recovered your investment and are in net profit. Annual panel degradation is included."
+    },
+    "description": {
+      "simple": "How much you gain or lose after subtracting the upfront system cost.",
+      "lifecycle": "How much you gain or lose after subtracting the system cost, yearly maintenance, and inverter replacements."
+    },
+    "yearRangeButton": "{{years}}-Year",
+    "yearRangeOption": "{{years}}-Year",
+    "netBenefitLabel": "{{years}}-Year Net Benefit",
+    "seriesName": "Net Benefit",
+    "yearLabel": "Yr {{year}}"
+  },
+  "financialRoadmap": {
+    "title": "Financial Roadmap",
+    "titleTooltip": "A simplified timeline of key money milestones for your solar investment. Real-world results will shift based on tariff changes, maintenance, weather, and equipment lifespan.",
+    "description": "Key milestones for your solar investment over its lifetime.",
+    "milestones": {
+      "year0": {
+        "label": "Year 0",
+        "description": "Initial investment of {{cost}} for a {{kwp}} kWp turnkey system (panels, inverter, mounting, wiring, labour and permitting)."
+      },
+      "year1": {
+        "label": "Year 1",
+        "description": "Estimated first-year savings of {{savings}} on your electricity bill through NEM credit offsets."
+      },
+      "breakEven": {
+        "label": "Year {{years}}",
+        "description": "Break-even point. Your cumulative electricity savings have now covered the system cost. Every ringgit saved beyond this is net profit."
+      },
+      "inverterReplacement": {
+        "single": "Inverter replacement",
+        "numbered": "Inverter replacement #{{index}}",
+        "description": "{{label}} of ~{{cost}} subtracted from your cumulative savings. The payback figure above already reflects this cost."
+      },
+      "year25": {
+        "label": "Year 25",
+        "description": "Standard panel warranty period ends. At {{rate}}%/yr degradation, your system still produces ~{{output}}% of its original output."
+      }
+    },
+    "footer": {
+      "lifecycle": "Lifecycle mode subtracts ~{{maintenance}}/yr maintenance{{replacements}} from your cumulative savings.",
+      "replacementsSuffix": " and {{count}} inverter replacement{{plural}} totalling ~{{total}}",
+      "escalationSuffix": " Projection also applies {{rate}}%/yr tariff escalation.",
+      "simpleWithEscalation": "Projection applies {{rate}}%/yr tariff escalation. Switch Financial Mode to Lifecycle to also factor in maintenance and inverter replacements.",
+      "simpleNoEscalation": "Switch Financial Mode to Lifecycle to factor in yearly maintenance and inverter replacements."
+    }
+  },
+  "systemCost": {
+    "titleEmpty": "System Cost",
+    "descriptionEmpty": "Add panels on the Workbench to estimate installation cost.",
+    "title": "System Cost",
+    "titleTooltip": "A bottom-up turnkey estimate based on typical Malaysian residential solar costs. Covers panels, inverter, mounting, wiring, permits, labour, and installer margin.",
+    "description": "Estimated total turnkey installation cost.",
+    "quoteVariance": "±10% Typical Quote Variance",
+    "pricingNote": "Mid-tier Malaysian market pricing (2026). Actual installer quotes typically land within ±10% of this figure.",
+    "segments": {
+      "panels": "Panels",
+      "inverter": "Inverter",
+      "mounting": "Mounting",
+      "electricalBos": "Electrical BOS",
+      "electricalBosDetail": "Wiring, Protection",
+      "scaffolding": "Scaffolding",
+      "scaffoldingDetail": "Tile Roof Only",
+      "permit": "Permit",
+      "permitCcc": "Incl. CCC Fee",
+      "permitSeda": "SEDA Registration",
+      "labour": "Labour",
+      "labourDetail": "+18% of Hardware",
+      "installerMargin": "Installer margin",
+      "installerMarginDetail": "+15% of Hardware + Labour"
+    },
+    "roofLabels": {
+      "tile": "Tile",
+      "metal": "Metal",
+      "flat": "Flat"
+    }
+  },
+  "systemAssumptions": {
+    "title": "System Assumptions",
+    "titleTooltip": "The technical inputs feeding this analysis. Some come from Google Solar API for your roof, others are industry-standard defaults used across Malaysian residential systems.",
+    "description": "Standard industry assumptions used in this analysis (not site-measured values).",
+    "performanceRatio": {
+      "label": "Performance Ratio",
+      "tooltip": "How much of the panels' rated output actually reaches your meter after real-world losses. A higher number means better real-world performance.",
+      "detail": "Typical for Malaysian residential systems"
+    },
+    "assumedLosses": {
+      "label": "Assumed Losses",
+      "tooltip": "The share of generation lost to dust, wiring, heat, and inverter conversion. Calculated automatically as 100% minus the Performance Ratio.",
+      "detail": "Soiling, cable, inverter, temperature"
+    },
+    "degradation": {
+      "label": "Panel Degradation",
+      "detail": "Annual output decline (N-type ~0.5%)"
+    },
+    "panelLifetime": {
+      "label": "Panel Lifetime",
+      "tooltip": "How long the panels are expected to keep generating. Your payback should land well within this window for the system to be worthwhile.",
+      "detail": "From Google Solar API estimate",
+      "value": "{{years}} years"
+    },
+    "azimuthPitch": {
+      "label": "Azimuth / Pitch",
+      "tooltip": "The average direction (azimuth) and tilt (pitch) of your active panels, weighted by panel count across the roof segments they sit on. Updates as you add, remove, or move panels in the Workbench.",
+      "multiSegment": "{{count}} panels across {{segments}} roof segments",
+      "oneSegment": "{{count}} panels on one roof segment"
+    },
+    "dcAc": {
+      "label": "DC/AC Ratio",
+      "tooltip": "How much panel capacity is paired with each unit of inverter capacity. A value above 1.0 means slightly oversizing the panels, which lifts daily output without a bigger inverter.",
+      "detail": "Standard residential inverter sizing"
+    }
+  },
+  "disclaimers": {
+    "tnbTariff": "Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and NEM Rakyat 3.0 rules by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in \"Advanced\" view as needed.",
+    "afaRate": "The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes.",
+    "eeiRebate": "PETRA has indicated that Energy Efficiency Incentive (EEI) rates may be adjusted for NEM users. Current calculations use standard EEI rates pending official modification.",
+    "solarGeneration": "Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling and equipment condition.",
+    "creditForfeiture": "Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits.",
+    "systemCost": "System cost is estimated bottom-up: distributor panel pricing + inverter SKU lookup + roof-type-dependent mounting + electrical BOS + permits + labour markup + installer margin. Assumes mid-tier installer pricing and single-storey installation. Typical Malaysian turnkey quotes land within ±10% of this figure. Always confirm with a licensed SEDA-registered installer.",
+    "paybackProjections": "Payback and savings projections do not account for annual maintenance (around RM 500/yr) or inverter replacement (typically needed at year 10 to 15, costing around RM 3,000 to 6,000). Tariff escalation can be configured in Advanced view (default 0%). RP4 revisions in Malaysia have historically trended around 3 to 5% per year. Actual long-term returns may differ."
+  }
+}

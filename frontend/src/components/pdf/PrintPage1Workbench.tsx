@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ProjectResponse } from '@/api/projects'
 import { getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
 import { parsePanelEdits } from '@/lib/buildingInsights'
@@ -9,9 +10,8 @@ type Props = {
   project: ProjectResponse
 }
 
-const ROOF_LABEL = { tile: 'Tile', metal: 'Metal', flat: 'Flat' } as const
-
 export function PrintPage1Workbench({ project }: Props) {
+  const { t } = useTranslation('pdf')
   const activePanels = parsePanelEdits(project.editedLayout).filter((p) => p.status !== 'deleted')
   const panelModel = getPanelModel(project.analysisConfig?.selectedPanelModelId ?? DEFAULT_PANEL_MODEL_ID)
   const panelCapacityWp = panelModel?.capacityWp ?? 0
@@ -35,10 +35,12 @@ export function PrintPage1Workbench({ project }: Props) {
         })()
       : []
 
+  const roofTypeLabel = t(`page1.stats.roofType.labels.${roofType}`) ?? t('page1.stats.roofType.na')
+
   return (
     <PdfPageShell
-      sectionLabel="Installation Overview"
-      context="Panel layout and hardware selection from your Workbench configuration. Blue rectangles indicate active panels over the satellite imagery."
+      sectionLabel={t('page1.sectionLabel')}
+      context={t('page1.context')}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-3">
         <div className="flex min-h-0 flex-1 justify-center">
@@ -46,7 +48,7 @@ export function PrintPage1Workbench({ project }: Props) {
             <div className="relative inline-flex max-h-full overflow-hidden rounded-lg border border-border">
               <img
                 src={project.rgbSignedUrl}
-                alt="Rooftop satellite view with panel layout"
+                alt={t('page1.imageAlt')}
                 className="block max-h-full w-auto"
                 style={{ maxHeight: '140mm' }}
                 onLoad={(e) => {
@@ -81,10 +83,26 @@ export function PrintPage1Workbench({ project }: Props) {
         </div>
 
         <div className="grid grid-cols-4 gap-2">
-          <StatTile label="Active panels" value={String(activePanels.length)} suffix="panels" />
-          <StatTile label="System size" value={systemKwp.toString()} suffix="kWp" />
-          <StatTile label="Panel model" value={panelModel?.name ?? 'N/A'} suffix={panelModel ? `${panelCapacityWp} Wp` : ''} />
-          <StatTile label="Roof type" value={ROOF_LABEL[roofType] ?? 'N/A'} suffix="" />
+          <StatTile
+            label={t('page1.stats.activePanels.label')}
+            value={String(activePanels.length)}
+            suffix={t('page1.stats.activePanels.suffix')}
+          />
+          <StatTile
+            label={t('page1.stats.systemSize.label')}
+            value={systemKwp.toString()}
+            suffix={t('page1.stats.systemSize.suffix')}
+          />
+          <StatTile
+            label={t('page1.stats.panelModel.label')}
+            value={panelModel?.name ?? t('page1.stats.panelModel.na')}
+            suffix={panelModel ? `${panelCapacityWp} Wp` : ''}
+          />
+          <StatTile
+            label={t('page1.stats.roofType.label')}
+            value={roofTypeLabel}
+            suffix=""
+          />
         </div>
       </div>
     </PdfPageShell>

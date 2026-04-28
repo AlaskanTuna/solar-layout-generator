@@ -1,0 +1,60 @@
+{
+  "header": {
+    "title": "项目",
+    "subtitle": "管理您所有的太阳能评估项目"
+  },
+  "quota": {
+    "unlimited": "今日项目数量不受限制",
+    "limited": "今日已使用 {{used}} / {{limit}} 个项目 · 将于 {{time}} 重置"
+  },
+  "stats": {
+    "total": "项目总数",
+    "completed": "已完成",
+    "inProgress": "进行中"
+  },
+  "filter": {
+    "all": "全部（{{count}}）",
+    "completed": "已完成",
+    "inProgress": "进行中"
+  },
+  "empty": {
+    "noProjects": "暂无项目，请新建一个开始使用。",
+    "noFiltered": "暂无{{filter}}项目。"
+  },
+  "newProjectButton": "新建项目",
+  "howItWorks": {
+    "title": "使用指南",
+    "step1": {
+      "title": "搜索位置",
+      "desc": "在卫星地图上找到您的建筑物"
+    },
+    "step2": {
+      "title": "生成并调整布局",
+      "desc": "拖动、旋转、添加或删除太阳能板"
+    },
+    "step3": {
+      "title": "分析节省金额",
+      "desc": "查看预测结果并导出 PDF"
+    }
+  },
+  "dialog": {
+    "create": {
+      "title": "新建项目",
+      "description": "为您的太阳能评估项目命名，然后搜索您的建筑物。",
+      "nameLabel": "项目名称",
+      "namePlaceholder": "例如：我家的太阳能",
+      "submit": "继续"
+    },
+    "delete": {
+      "title": "删除项目",
+      "description": "确定要删除「{{name}}」吗？此操作无法撤销。",
+      "cancel": "取消",
+      "confirm": "删除",
+      "deleting": "删除中..."
+    }
+  },
+  "toast": {
+    "deleted": "「{{name}}」已被删除。",
+    "deleteFailed": "删除项目失败。"
+  }
+}

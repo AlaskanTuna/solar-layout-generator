@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { azimuthToCompass, type LayoutOrientationSummary } from '@/lib/analysis'
@@ -19,57 +20,59 @@ export function SystemAssumptions({
   panelLifetimeYears,
   layoutOrientation
 }: SystemAssumptionsProps) {
+  const { t } = useTranslation('analysis')
+
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader>
         <CardTitle>
-          System Assumptions
-          <InfoTooltip text="The technical inputs feeding this analysis. Some come from Google Solar API for your roof, others are industry-standard defaults used across Malaysian residential systems." />
+          {t('systemAssumptions.title')}
+          <InfoTooltip text={t('systemAssumptions.titleTooltip')} />
         </CardTitle>
-        <CardDescription>
-          Standard industry assumptions used in this analysis (not site-measured values).
-        </CardDescription>
+        <CardDescription>{t('systemAssumptions.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-lg bg-muted p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Performance Ratio
-              <InfoTooltip text="How much of the panels' rated output actually reaches your meter after real-world losses. A higher number means better real-world performance." />
+              {t('systemAssumptions.performanceRatio.label')}
+              <InfoTooltip text={t('systemAssumptions.performanceRatio.tooltip')} />
             </p>
             <p className="mt-1 text-lg font-semibold">{Math.round(performanceRatio * 100)}%</p>
-            <p className="text-xs text-muted-foreground">Typical for Malaysian residential systems</p>
+            <p className="text-xs text-muted-foreground">{t('systemAssumptions.performanceRatio.detail')}</p>
           </div>
           <div className="rounded-lg bg-muted p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Assumed Losses
-              <InfoTooltip text="The share of generation lost to dust, wiring, heat, and inverter conversion. Calculated automatically as 100% minus the Performance Ratio." />
+              {t('systemAssumptions.assumedLosses.label')}
+              <InfoTooltip text={t('systemAssumptions.assumedLosses.tooltip')} />
             </p>
             <p className="mt-1 text-lg font-semibold">{Math.round(assumedLosses * 100)}%</p>
-            <p className="text-xs text-muted-foreground">Soiling, cable, inverter, temperature</p>
+            <p className="text-xs text-muted-foreground">{t('systemAssumptions.assumedLosses.detail')}</p>
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-lg bg-muted p-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Panel Degradation</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {t('systemAssumptions.degradation.label')}
+            </p>
             <p className="mt-1 text-lg font-semibold">{(degradationRate * 100).toFixed(1)}%/yr</p>
-            <p className="text-xs text-muted-foreground">Annual output decline (N-type ~0.5%)</p>
+            <p className="text-xs text-muted-foreground">{t('systemAssumptions.degradation.detail')}</p>
           </div>
           {panelLifetimeYears != null && (
             <div className="rounded-lg bg-muted p-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Panel Lifetime
-                <InfoTooltip text="How long the panels are expected to keep generating. Your payback should land well within this window for the system to be worthwhile." />
+                {t('systemAssumptions.panelLifetime.label')}
+                <InfoTooltip text={t('systemAssumptions.panelLifetime.tooltip')} />
               </p>
-              <p className="mt-1 text-lg font-semibold">{panelLifetimeYears} years</p>
-              <p className="text-xs text-muted-foreground">From Google Solar API estimate</p>
+              <p className="mt-1 text-lg font-semibold">{t('systemAssumptions.panelLifetime.value', { years: panelLifetimeYears })}</p>
+              <p className="text-xs text-muted-foreground">{t('systemAssumptions.panelLifetime.detail')}</p>
             </div>
           )}
           {layoutOrientation && (
             <div className="rounded-lg bg-muted p-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Azimuth / Pitch
-                <InfoTooltip text="The average direction (azimuth) and tilt (pitch) of your active panels, weighted by panel count across the roof segments they sit on. Updates as you add, remove, or move panels in the Workbench." />
+                {t('systemAssumptions.azimuthPitch.label')}
+                <InfoTooltip text={t('systemAssumptions.azimuthPitch.tooltip')} />
               </p>
               <p className="mt-1 text-lg font-semibold">
                 {Math.round(layoutOrientation.azimuthDegrees)}° ({azimuthToCompass(layoutOrientation.azimuthDegrees)}) /{' '}
@@ -77,18 +80,21 @@ export function SystemAssumptions({
               </p>
               <p className="text-xs text-muted-foreground">
                 {layoutOrientation.segmentCount > 1
-                  ? `${layoutOrientation.panelCount} panels across ${layoutOrientation.segmentCount} roof segments`
-                  : `${layoutOrientation.panelCount} panels on one roof segment`}
+                  ? t('systemAssumptions.azimuthPitch.multiSegment', {
+                      count: layoutOrientation.panelCount,
+                      segments: layoutOrientation.segmentCount
+                    })
+                  : t('systemAssumptions.azimuthPitch.oneSegment', { count: layoutOrientation.panelCount })}
               </p>
             </div>
           )}
           <div className="rounded-lg bg-muted p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              DC/AC Ratio
-              <InfoTooltip text="How much panel capacity is paired with each unit of inverter capacity. A value above 1.0 means slightly oversizing the panels, which lifts daily output without a bigger inverter." />
+              {t('systemAssumptions.dcAc.label')}
+              <InfoTooltip text={t('systemAssumptions.dcAc.tooltip')} />
             </p>
             <p className="mt-1 text-lg font-semibold">{dcAcRatio}</p>
-            <p className="text-xs text-muted-foreground">Standard residential inverter sizing</p>
+            <p className="text-xs text-muted-foreground">{t('systemAssumptions.dcAc.detail')}</p>
           </div>
         </div>
       </CardContent>

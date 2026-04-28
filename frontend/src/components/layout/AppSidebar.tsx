@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { LucideIcon } from 'lucide-react'
 import { ChevronLeft, LayoutDashboard, FolderKanban, PieChart, CircleHelp } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
@@ -53,27 +54,33 @@ function NavLink({ to, icon: Icon, label, active }: { to: string; icon: LucideIc
   )
 }
 
-const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
+type NavSectionDef = {
+  titleKey: string
+  items: { to: string; labelKey: string; icon: LucideIcon; exact?: boolean }[]
+}
+
+const NAV_SECTIONS: NavSectionDef[] = [
   {
-    title: 'Overview',
-    items: [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true }],
+    titleKey: 'sections.overview',
+    items: [{ to: '/dashboard', labelKey: 'items.dashboard', icon: LayoutDashboard, exact: true }],
   },
   {
-    title: 'Insights',
+    titleKey: 'sections.insights',
     items: [
-      { to: '/dashboard/projects', label: 'Projects', icon: FolderKanban },
-      { to: '/dashboard/analytics', label: 'Analytics', icon: PieChart },
+      { to: '/dashboard/projects', labelKey: 'items.projects', icon: FolderKanban },
+      { to: '/dashboard/analytics', labelKey: 'items.analytics', icon: PieChart },
     ],
   },
   {
-    title: 'Help',
-    items: [{ to: '/dashboard/faq', label: 'FAQ', icon: CircleHelp }],
+    titleKey: 'sections.help',
+    items: [{ to: '/dashboard/faq', labelKey: 'items.faq', icon: CircleHelp }],
   },
 ]
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true)
   const { pathname } = useLocation()
+  const { t } = useTranslation('nav')
 
   const handleMouseEnter = useCallback(() => setCollapsed(false), [])
   const handleMouseLeave = useCallback(() => setCollapsed(true), [])
@@ -103,14 +110,14 @@ export function AppSidebar() {
         {/* Nav sections */}
         <nav className="flex-1 space-y-1.5 overflow-x-hidden overflow-y-auto px-2 py-3">
           {NAV_SECTIONS.map((section, i) => (
-            <div key={section.title}>
-              <SectionHeading title={section.title} first={i === 0} />
+            <div key={section.titleKey}>
+              <SectionHeading title={t(section.titleKey)} first={i === 0} />
               {section.items.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   icon={item.icon}
-                  label={item.label}
+                  label={t(item.labelKey)}
                   active={item.exact ? pathname === item.to : pathname.startsWith(item.to)}
                 />
               ))}

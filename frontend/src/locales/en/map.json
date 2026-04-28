@@ -1,0 +1,67 @@
+{
+  "errorState": {
+    "failedToLoadMaps": "Failed to load Google Maps",
+    "reloadPage": "Reload Page",
+    "dashboard": "Dashboard"
+  },
+  "loading": {
+    "loadingMaps": "Loading Google Maps...",
+    "preparingMap": "Preparing the map view..."
+  },
+  "search": {
+    "placeholder": "Search for your address...",
+    "readonlyHint": "Please create",
+    "readonlyHintLink": "new project",
+    "readonlyHintSuffix": "in dashboard for new location.",
+    "manualToggleHide": "Hide manual entry",
+    "manualToggleShow": "Or enter coordinates manually",
+    "manualForm": {
+      "latitudePlaceholder": "Latitude",
+      "longitudePlaceholder": "Longitude",
+      "submitButton": "Use these coordinates",
+      "errorInvalidCoords": "Enter valid latitude and longitude",
+      "errorOutOfBounds": "Coordinates must be within Malaysia (lat 0.85–7.4, lng 99.6–119.3)"
+    }
+  },
+  "readonlyCard": {
+    "viewingSavedLocation": "Viewing saved location",
+    "backToDashboard": "Back to Dashboard",
+    "proceedToWorkbench": "Proceed to Workbench"
+  },
+  "confirm": {
+    "question": "Is this your building?",
+    "confirmButton": "Confirm Location",
+    "checkingImagery": "Checking imagery...",
+    "searchAgain": "Search Again"
+  },
+  "processing": {
+    "title": "Analyzing your rooftop...",
+    "description": "Fetching satellite data and solar potential. This usually takes 15–30 seconds."
+  },
+  "error": {
+    "noImagery": "No solar imagery is available for this location. Try a nearby address.",
+    "checkImageryFailed": "Failed to check imagery availability",
+    "resolveLocationFailed": "Failed to resolve location",
+    "rooftopAnalysisFailed": "Solar data analysis failed for this location. Please try a different building.",
+    "checkStatusFailed": "Failed to check rooftop analysis status",
+    "timeout": "Rooftop analysis is taking longer than expected. The Google Solar API may be slow or this location may not have sufficient data. Please try again or try a different address.",
+    "tryAnotherLocation": "Try Another Location"
+  },
+  "consentModal": {
+    "title": "Lower-Resolution Imagery",
+    "description": "High-quality satellite data is not available for this address. We can proceed with BASE-tier imagery and expanded coverage instead, but accuracy will be lower.",
+    "bullet1": "Suggested panel positions may need more manual adjustment.",
+    "bullet2": "Flux and irradiance estimates are at a coarser resolution.",
+    "bullet3": "Coverage may extend slightly beyond the building outline.",
+    "cancel": "Cancel",
+    "proceed": "Proceed"
+  },
+  "tour": {
+    "step1Title": "Welcome to SolarSim",
+    "step1Body": "This tool helps you estimate how much you could save on your electricity bill by installing solar panels. Let's start by finding your home.",
+    "step2Title": "Search for Your Address",
+    "step2Body": "Type your full home address or postcode here. The map will zoom to your building and show its outline.",
+    "step3Title": "Confirm Your Building",
+    "step3Body": "After selecting an address, you'll see your building highlighted. Click \"Analyze This Location\" to fetch satellite solar data — this usually takes 15–30 seconds."
+  }
+}

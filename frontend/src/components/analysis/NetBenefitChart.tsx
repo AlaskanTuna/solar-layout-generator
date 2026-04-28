@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -53,6 +54,7 @@ export function NetBenefitChart({
   inverterReplacementCostRm,
   inverterReplacementYear
 }: NetBenefitChartProps) {
+  const { t } = useTranslation('analysis')
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
   const [yearRange, setYearRange] = useState<YearRange>(defaultYearRange)
@@ -73,7 +75,7 @@ export function NetBenefitChart({
             ? replacements.filter((r) => r.year <= yr).reduce((sum, r) => sum + r.costRm, 0)
             : 0
         return {
-          year: `Yr ${yr}`,
+          year: t('netBenefit.yearLabel', { year: yr }),
           value: round2(grossSavings - systemCostRm - maintenanceCost - inverterCost)
         }
       }),
@@ -85,10 +87,12 @@ export function NetBenefitChart({
       yearRange,
       analysisMode,
       annualMaintenanceRm,
-      replacements
+      replacements,
+      t
     ]
   )
 
+  const seriesName = t('netBenefit.seriesName')
   const finalYearBenefit = netBenefitData[netBenefitData.length - 1].value
   const xAxisInterval = yearRange <= 10 ? 0 : yearRange <= 20 ? 1 : 2
 
@@ -98,26 +102,26 @@ export function NetBenefitChart({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <CardTitle>
-              Net Benefit Projection
+              {t('netBenefit.title')}
               <InfoTooltip
                 text={
                   analysisMode === 'lifecycle'
-                    ? `Your cumulative savings minus the upfront system cost, yearly maintenance, and any scheduled inverter replacements, projected over ${yearRange} years. Once the bars turn green, you have recovered your investment and are in net profit. Annual panel degradation is included.`
-                    : `Your cumulative savings minus the upfront system cost, projected over ${yearRange} years. Once the bars turn green, you have recovered your investment and are in net profit. Annual panel degradation is included.`
+                    ? t('netBenefit.titleTooltip.lifecycle', { years: yearRange })
+                    : t('netBenefit.titleTooltip.simple', { years: yearRange })
                 }
               />
             </CardTitle>
             <CardDescription>
               {analysisMode === 'lifecycle'
-                ? 'How much you gain or lose after subtracting the system cost, yearly maintenance, and inverter replacements.'
-                : 'How much you gain or lose after subtracting the upfront system cost.'}
+                ? t('netBenefit.description.lifecycle')
+                : t('netBenefit.description.simple')}
             </CardDescription>
           </div>
           <div className="pdf-hide">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
-                  {yearRange}-Year
+                  {t('netBenefit.yearRangeButton', { years: yearRange })}
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -128,7 +132,7 @@ export function NetBenefitChart({
                 >
                   {YEAR_RANGES.map((range) => (
                     <DropdownMenuRadioItem key={range} value={String(range)}>
-                      {range}-Year
+                      {t('netBenefit.yearRangeOption', { years: range })}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
@@ -139,7 +143,7 @@ export function NetBenefitChart({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg bg-muted p-4 text-center">
-          <p className="text-sm text-muted-foreground">{yearRange}-Year Net Benefit</p>
+          <p className="text-sm text-muted-foreground">{t('netBenefit.netBenefitLabel', { years: yearRange })}</p>
           <p className={`text-3xl font-semibold ${finalYearBenefit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
             {formatCurrency(finalYearBenefit)}
           </p>
@@ -183,7 +187,7 @@ export function NetBenefitChart({
                     getItemClassName={(entry) => {
                       const value = typeof entry.value === 'number' ? entry.value : Number(entry.value)
 
-                      if (entry.name === 'Net Benefit') {
+                      if (entry.name === seriesName) {
                         return value < 0
                           ? 'font-bold text-red-600 dark:text-red-400'
                           : 'font-bold text-emerald-600 dark:text-emerald-400'
@@ -194,7 +198,7 @@ export function NetBenefitChart({
                   />
                 }
               />
-              <Bar dataKey="value" name="Net Benefit" radius={[2, 2, 0, 0]} strokeWidth={2}>
+              <Bar dataKey="value" name={seriesName} radius={[2, 2, 0, 0]} strokeWidth={2}>
                 {netBenefitData.map((entry, index) => (
                   <Cell
                     key={index}

@@ -1,0 +1,179 @@
+{
+  "nav": {
+    "goToDashboard": "Go to Dashboard",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "badge": "Built for Malaysian rooftops",
+    "title1": "See solar on",
+    "title2": "your roof —",
+    "titleHighlight": "before you commit.",
+    "subtitle": "SolarSim drops real solar panels onto your actual rooftop using satellite data, then runs the numbers under Malaysia's NEM Rakyat 3.0 — so you walk into installer quotes already knowing the answer.",
+    "metaFreeToStart": "Free to start",
+    "metaNoCall": "No installer call",
+    "metaResults": "Results in 90 sec",
+    "card": {
+      "sampleReport": "Sample report · {{location}}",
+      "live": "LIVE",
+      "systemSize": "System size",
+      "yearlySavings": "Yearly savings",
+      "payback": "Payback",
+      "monthlyYield": "Monthly yield (kWh)",
+      "sdgLabel": "SDG 7",
+      "sdgTitle": "Clean energy"
+    }
+  },
+  "trust": {
+    "googleSolarApi": "Powered by Google Solar API",
+    "nemSimulation": "NEM Rakyat 3.0 bill simulation",
+    "sdg7": "Aligned with UN SDG 7",
+    "dragDrop": "Drag-and-drop panel workbench",
+    "pdfReports": "Installer-ready PDF reports",
+    "rp4Tariff": "RP4 tariff savings analysis"
+  },
+  "pipeline": {
+    "eyebrow": "★ The Pipeline",
+    "title": "From address to answer",
+    "titleMuted": "in three steps.",
+    "steps": {
+      "step1": {
+        "num": "STEP 01",
+        "label": "LOCATE",
+        "title": "Find your roof on the map.",
+        "body": "Type your address. We center on your building, pull Google Solar API rooftop geometry, and show you exactly which structure we'll analyze — so there's no mistaking your home for the neighbor's.",
+        "tagGoogleMaps": "Google Maps",
+        "tagSolarApi": "Solar API",
+        "mockHost": "solarsim.app/locate",
+        "mockHeadline": "142 m²",
+        "mockSub": "Roof area detected"
+      },
+      "step2": {
+        "num": "STEP 02",
+        "label": "LAYOUT",
+        "title": "Drop, drag, rotate panels.",
+        "body": "We auto-place a yield-optimized array on your rooftop. Don't like it? Drag panels around, rotate them, delete the ones that fall in shade. Total energy and savings update on every move — no recalc button.",
+        "tagCanvas": "Interactive canvas",
+        "tagLiveYield": "Live yield",
+        "mockHost": "solarsim.app/workbench",
+        "mockHeadline": "26 panels · 10.4 kWp",
+        "mockSub": "+2.1% vs auto-layout"
+      },
+      "step3": {
+        "num": "STEP 03",
+        "label": "ANALYZE",
+        "title": "See your bill, twelve months out.",
+        "body": "We model your monthly bill against post-July 2025 RP4 tariffs, EEI rebates, AFA, SST and the RE Fund — month-by-month. Export the whole thing as a PDF to bring to your installer.",
+        "tagRp4": "RP4 tariff",
+        "tagPdf": "PDF export",
+        "mockHost": "solarsim.app/analysis",
+        "mockHeadline": "RM 5,840",
+        "mockSub": "yearly savings · 5.7 yr payback"
+      }
+    }
+  },
+  "features": {
+    "eyebrow": "★ What's inside",
+    "title": "Built like an engineer would.",
+    "titleMuted": "Designed for everyone else.",
+    "cards": {
+      "satellite": {
+        "title": "Real satellite, not estimates",
+        "description": "Every panel sits on actual rooftop geometry from Google Solar API. We don't ask you for measurements you don't have."
+      },
+      "workbench": {
+        "title": "Drag-to-edit workbench",
+        "description": "Auto-layout you don't like? Move, rotate, delete any panel. Yield recalculates the moment you let go."
+      },
+      "billing": {
+        "title": "RP4 + NEM, line by line",
+        "description": "Bills modeled with the post-July 2025 RP4 tariff, EEI rebates, AFA, SST, RE Fund — every charge attributable to a row."
+      },
+      "pdf": {
+        "title": "Installer-ready PDF",
+        "description": "Export a one-click report with system summary, monthly breakdown, and 25-year projection. Walk into quotes informed."
+      },
+      "seasonal": {
+        "title": "Seasonal consumption profiles",
+        "description": "Tell us how your usage shifts in school holidays, fasting month, year-end. We'll model it month-by-month."
+      },
+      "citations": {
+        "title": "Citations on every number",
+        "description": "Every kWh, every ringgit traces back to a published source — TNB tariff sheet, ST gazette, Google Solar API record."
+      }
+    }
+  },
+  "pricing": {
+    "eyebrow": "★ Pricing",
+    "title": "Free to start.",
+    "titleMuted": "Pay only when you need more.",
+    "mostPopular": "Most popular",
+    "tiers": {
+      "free": {
+        "name": "Free",
+        "price": "RM 0",
+        "description": "For homeowners exploring solar.",
+        "features": [
+          "5 projects per day",
+          "Auto-layout + manual edit",
+          "NEM bill simulation",
+          "Standard PDF export"
+        ],
+        "cta": "Get started"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "RM 29",
+        "period": "/month",
+        "description": "For serious solar planners.",
+        "features": [
+          "20 projects per day",
+          "Seasonal consumption profiles",
+          "Detailed PDF + 25-year projection",
+          "Email support · 24h SLA"
+        ],
+        "cta": "Coming soon"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Custom",
+        "description": "For installers and consultants.",
+        "features": [
+          "Unlimited projects",
+          "Team + client collaboration",
+          "White-label PDF reports",
+          "API access · dedicated support"
+        ],
+        "cta": "Contact sales"
+      }
+    }
+  },
+  "faq": {
+    "eyebrow": "★ Common questions",
+    "title": "Things people ask before",
+    "titleMuted": "signing up.",
+    "disclaimer": "Results are preliminary estimates and do not replace a professional on-site assessment. Financial projections use published RP4 + NEM Rakyat 3.0 rates as of 2025.",
+    "questions": {
+      "replaceInstaller": {
+        "question": "Does this replace an installer's site visit?",
+        "answer": "No — and we don't pretend to. SolarSim gives you a strong preliminary estimate so you walk into installer conversations informed. Final sizing, structural assessment, and inverter selection still need a qualified installer on-site."
+      },
+      "accuracy": {
+        "question": "How accurate are the savings projections?",
+        "answer": "Within ±8% of actual yield in development testing. Your real number depends on shading we can't see (overhanging trees, neighbor's new build), inverter losses, and how your usage shifts after install."
+      },
+      "addressNotFound": {
+        "question": "What if I can't find my address?",
+        "answer": "Coverage in Peninsular Malaysia is strong but not universal. If we can't pull your rooftop, we fall back to a manual-coordinates flow where you outline your roof yourself — same calculations downstream."
+      },
+      "eastMalaysia": {
+        "question": "Does this work for East Malaysia?",
+        "answer": "Solar potential calcs work anywhere with API coverage. Our tariff model is currently Peninsular Malaysia only (TNB RP4 + NEM Rakyat 3.0). Sabah Electricity and SESB tariffs are on the roadmap for late 2026."
+      },
+      "dataPrivacy": {
+        "question": "Do you sell my address or usage data?",
+        "answer": "No. Your project data stays in your account. We don't run installer affiliate programs or hand your details to third parties. If you want a quote, you ask for one — on your terms."
+      }
+    }
+  },
+  "scrollToTop": "Scroll to top"
+}

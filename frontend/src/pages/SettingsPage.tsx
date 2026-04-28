@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Bell, CircleCheck, History, Palette, RotateCcw, Settings, UserRound } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
@@ -13,12 +14,6 @@ import type { Notification } from '@/components/ui/NotificationPopover'
 
 const TOUR_KEYS = ['slg-tour-map', 'slg-tour-workbench', 'slg-tour-analysis']
 const RECENT_ACTIVITY_KEY = 'slg-recent-project-activity'
-
-const THEME_OPTIONS = [
-  { value: 'system', label: 'System', detail: 'Match your device' },
-  { value: 'light', label: 'Light', detail: 'Bright interface' },
-  { value: 'dark', label: 'Dark', detail: 'Low-light interface' }
-] as const
 
 function SettingCard({
   icon: Icon,
@@ -61,6 +56,7 @@ function useNotifications() {
 }
 
 export function SettingsPage() {
+  const { t } = useTranslation('settings')
   const { user } = useAuth()
   const quotaQuery = useQuota()
   const { theme, resolved, setTheme } = useTheme()
@@ -68,8 +64,14 @@ export function SettingsPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   const tier = quotaQuery.data?.tier
-  const planLabel = tier ? `${tier.charAt(0) + tier.slice(1).toLowerCase()} plan` : 'Loading plan...'
+  const planLabel = tier ? t('planLabel', { tier: tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() }) : t('account.loadingPlan')
   const unreadCount = notifications.filter((notification) => !notification.read).length
+
+  const THEME_OPTIONS = [
+    { value: 'system', label: t('appearance.options.system.label'), detail: t('appearance.options.system.detail') },
+    { value: 'light', label: t('appearance.options.light.label'), detail: t('appearance.options.light.detail') },
+    { value: 'dark', label: t('appearance.options.dark.label'), detail: t('appearance.options.dark.detail') }
+  ] as const
 
   function showStatus(message: string) {
     setStatusMessage(message)
@@ -77,17 +79,17 @@ export function SettingsPage() {
 
   function resetGuidedTours() {
     for (const key of TOUR_KEYS) localStorage.removeItem(key)
-    showStatus('Guided tours will appear again when you open Map, Workbench, or Analysis.')
+    showStatus(t('guidedTours.resetStatus'))
   }
 
   function clearNotifications() {
     notificationStore.clearAll()
-    showStatus('Notification history cleared.')
+    showStatus(t('notifications.clearStatus'))
   }
 
   function clearRecentActivity() {
     localStorage.removeItem(RECENT_ACTIVITY_KEY)
-    showStatus('Recent project activity cache cleared.')
+    showStatus(t('recentActivity.clearStatus'))
   }
 
   return (
@@ -99,10 +101,8 @@ export function SettingsPage() {
               <Settings className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="font-heading text-3xl font-bold tracking-tight">Settings</h1>
-              <p className="mt-1 max-w-2xl text-muted-foreground">
-                Manage your app preferences and lightweight local data.
-              </p>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">{t('header.title')}</h1>
+              <p className="mt-1 max-w-2xl text-muted-foreground">{t('header.subtitle')}</p>
             </div>
           </div>
           {statusMessage && (
@@ -117,16 +117,16 @@ export function SettingsPage() {
       <div className="mt-6 grid gap-4 xl:grid-cols-[1fr_1fr]">
         <SettingCard
           icon={UserRound}
-          title="Account"
-          description="Your signed-in profile and current project quota plan."
+          title={t('account.title')}
+          description={t('account.description')}
         >
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-border bg-card/50 p-3">
-              <p className="text-xs font-medium text-muted-foreground">Email</p>
-              <p className="mt-1 truncate text-sm font-semibold">{user?.email ?? 'Signed-in user'}</p>
+              <p className="text-xs font-medium text-muted-foreground">{t('account.emailLabel')}</p>
+              <p className="mt-1 truncate text-sm font-semibold">{user?.email ?? t('account.emailFallback')}</p>
             </div>
             <div className="rounded-lg border border-border bg-card/50 p-3">
-              <p className="text-xs font-medium text-muted-foreground">Plan</p>
+              <p className="text-xs font-medium text-muted-foreground">{t('account.planLabel')}</p>
               <p className="mt-1 text-sm font-semibold">{planLabel}</p>
             </div>
           </div>
@@ -134,8 +134,8 @@ export function SettingsPage() {
 
         <SettingCard
           icon={Palette}
-          title="Appearance"
-          description={`Choose the interface theme. Current resolved theme is ${resolved}.`}
+          title={t('appearance.title')}
+          description={t('appearance.description', { resolved })}
         >
           <div className="grid gap-2 sm:grid-cols-3">
             {THEME_OPTIONS.map((option) => {
@@ -151,7 +151,7 @@ export function SettingsPage() {
                   }`}
                   onClick={() => {
                     setTheme(option.value)
-                    showStatus(`Theme set to ${option.label}.`)
+                    showStatus(t('appearance.themeSet', { label: option.label }))
                   }}
                 >
                   <span className="block text-sm font-semibold">{option.label}</span>
@@ -164,37 +164,37 @@ export function SettingsPage() {
 
         <SettingCard
           icon={Bell}
-          title="Notifications"
-          description="Review and clear the local notification history shown from the top navigation bell."
+          title={t('notifications.title')}
+          description={t('notifications.description')}
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm">
-              <p className="font-semibold">{notifications.length} saved notifications</p>
-              <p className="text-muted-foreground">{unreadCount} unread</p>
+              <p className="font-semibold">{t('notifications.saved', { count: notifications.length })}</p>
+              <p className="text-muted-foreground">{t('notifications.unread', { count: unreadCount })}</p>
             </div>
             <Button type="button" variant="outline" onClick={clearNotifications} disabled={notifications.length === 0}>
-              Clear notifications
+              {t('notifications.clearButton')}
             </Button>
           </div>
         </SettingCard>
 
         <SettingCard
           icon={RotateCcw}
-          title="Guided Tours"
-          description="Reset onboarding hints for Map, Workbench, and Analysis so they can be replayed."
+          title={t('guidedTours.title')}
+          description={t('guidedTours.description')}
         >
           <Button type="button" variant="outline" onClick={resetGuidedTours}>
-            Reset guided tours
+            {t('guidedTours.resetButton')}
           </Button>
         </SettingCard>
 
         <SettingCard
           icon={History}
-          title="Recent Activity"
-          description="Clear the local recent-project activity cache used to order familiar work."
+          title={t('recentActivity.title')}
+          description={t('recentActivity.description')}
         >
           <Button type="button" variant="outline" onClick={clearRecentActivity}>
-            Clear recent activity
+            {t('recentActivity.clearButton')}
           </Button>
         </SettingCard>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/constants'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -68,6 +69,7 @@ export function CanvasControls({
   freeRotate,
   onToggleFreeRotate
 }: CanvasControlsProps) {
+  const { t } = useTranslation('workbench')
   const [tooltipState, setTooltipState] = useState<TooltipState>({ label: null, pinned: false })
   const tt = { tooltipState, setTooltipState }
 
@@ -83,7 +85,7 @@ export function CanvasControls({
             <ToolButton
               {...tt}
               onClick={onToggleCanvasExpanded}
-              tooltip={canvasExpanded ? 'Collapse View' : 'Expand View'}
+              tooltip={canvasExpanded ? t('controls.collapseView') : t('controls.expandView')}
             >
               {canvasExpanded ? <CollapseIcon /> : <ExpandIcon />}
             </ToolButton>
@@ -91,26 +93,26 @@ export function CanvasControls({
           </>
         )}
 
-        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">Tools</span>
-        <ToolButton {...tt} onClick={onUndo} disabled={!canUndo} tooltip="Undo">
+        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">{t('controls.sectionTools')}</span>
+        <ToolButton {...tt} onClick={onUndo} disabled={!canUndo} tooltip={t('controls.undo')}>
           <UndoIcon />
         </ToolButton>
-        <ToolButton {...tt} onClick={onRedo} disabled={!canRedo} tooltip="Redo">
+        <ToolButton {...tt} onClick={onRedo} disabled={!canRedo} tooltip={t('controls.redo')}>
           <RedoIcon />
         </ToolButton>
         <ToolButton
           {...tt}
           onClick={onToggleMarquee}
           active={marqueeMode}
-          tooltip={marqueeMode ? 'Marquee: ON' : 'Marquee'}
+          tooltip={marqueeMode ? t('controls.marqueeOn') : t('controls.marquee')}
         >
           <MarqueeIcon />
         </ToolButton>
-        <ToolButton {...tt} onClick={onToggleSnap} active={snapEnabled} tooltip={snapEnabled ? 'Snap: ON' : 'Snap'}>
+        <ToolButton {...tt} onClick={onToggleSnap} active={snapEnabled} tooltip={snapEnabled ? t('controls.snapOn') : t('controls.snap')}>
           <SnapIcon />
         </ToolButton>
         {onDeleteSelected && (
-          <ToolButton {...tt} onClick={onDeleteSelected} disabled={!hasSelection} tooltip="Delete Selected">
+          <ToolButton {...tt} onClick={onDeleteSelected} disabled={!hasSelection} tooltip={t('controls.deleteSelected')}>
             <DeleteIcon />
           </ToolButton>
         )}
@@ -119,7 +121,7 @@ export function CanvasControls({
             {...tt}
             onClick={onToggleFreeRotate}
             active={freeRotate}
-            tooltip={freeRotate ? 'Free Rotate: ON' : 'Free Rotate'}
+            tooltip={freeRotate ? t('controls.freeRotateOn') : t('controls.freeRotate')}
           >
             <RotateIcon />
           </ToolButton>
@@ -127,14 +129,14 @@ export function CanvasControls({
 
         <div className="my-1 border-t border-border" />
 
-        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">View</span>
-        <ToolButton {...tt} onClick={onZoomIn} tooltip="Zoom in">
+        <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">{t('controls.sectionView')}</span>
+        <ToolButton {...tt} onClick={onZoomIn} tooltip={t('controls.zoomIn')}>
           <span className="text-sm font-bold">+</span>
         </ToolButton>
-        <ToolButton {...tt} onClick={onZoomOut} tooltip="Zoom out">
+        <ToolButton {...tt} onClick={onZoomOut} tooltip={t('controls.zoomOut')}>
           <span className="text-sm font-bold">−</span>
         </ToolButton>
-        <ToolButton {...tt} onClick={onZoomReset} tooltip="Reset zoom">
+        <ToolButton {...tt} onClick={onZoomReset} tooltip={t('controls.zoomReset')}>
           <span className="text-xs font-medium">1:1</span>
         </ToolButton>
         {stageScale !== 1 && (
@@ -144,13 +146,13 @@ export function CanvasControls({
         <div className="my-1 border-t border-border" />
 
         <span className="text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground">
-          Layers
+          {t('controls.sectionLayers')}
         </span>
         <ToolButton
           {...tt}
           onClick={onToggleOverlayExpanded}
           className={overlayExpanded ? 'ring-1 ring-muted-foreground' : ''}
-          tooltip={overlayExpanded ? 'Hide overlays' : 'Overlays'}
+          tooltip={overlayExpanded ? t('controls.hideOverlays') : t('controls.overlays')}
         >
           <LayersIcon />
         </ToolButton>
@@ -164,35 +166,35 @@ export function CanvasControls({
             {...tt}
             active={overlayMode === 'rgb'}
             background={COLORS.overlayRgb}
-            label="RGB"
+            label={t('controls.overlayRgb')}
             onClick={() => onOverlayModeChange('rgb')}
           />
           <SwatchButton
             {...tt}
             active={overlayMode === 'annual-flux'}
             background={COLORS.overlayFlux}
-            label="Flux"
+            label={t('controls.overlayFlux')}
             onClick={() => onOverlayModeChange('annual-flux')}
           />
           <SwatchButton
             {...tt}
             active={overlayMode === 'dsm'}
             background={COLORS.overlayDsm}
-            label="DSM"
+            label={t('controls.overlayDsm')}
             onClick={() => onOverlayModeChange('dsm')}
           />
           <SwatchButton
             {...tt}
             active={overlayMode === 'mask'}
             background={COLORS.overlayMask}
-            label="Mask"
+            label={t('controls.overlayMask')}
             onClick={() => onOverlayModeChange('mask')}
           />
           <SwatchButton
             {...tt}
             active={showSegments}
             background={COLORS.overlaySegments}
-            label="Segments"
+            label={t('controls.overlaySegments')}
             onClick={onToggleSegments}
           />
         </div>

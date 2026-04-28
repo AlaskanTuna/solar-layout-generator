@@ -1,0 +1,170 @@
+{
+  "header": {
+    "reportTitle": "Solar Installation Report",
+    "generatedAt": "{{projectName}} · Generated {{date}}"
+  },
+  "footer": {
+    "sdg": "UN SDG 7: Affordable and Clean Energy",
+    "imageryBase": "Imagery: BASE (lower-resolution)",
+    "year": "· 2026"
+  },
+  "page1": {
+    "sectionLabel": "Installation Overview",
+    "context": "Panel layout and hardware selection from your Workbench configuration. Blue rectangles indicate active panels over the satellite imagery.",
+    "imageAlt": "Rooftop satellite view with panel layout",
+    "stats": {
+      "activePanels": {
+        "label": "Active panels",
+        "suffix": "panels"
+      },
+      "systemSize": {
+        "label": "System size",
+        "suffix": "kWp"
+      },
+      "panelModel": {
+        "label": "Panel model",
+        "na": "N/A"
+      },
+      "roofType": {
+        "label": "Roof type",
+        "na": "N/A",
+        "labels": {
+          "tile": "Tile",
+          "metal": "Metal",
+          "flat": "Flat"
+        }
+      }
+    }
+  },
+  "page2": {
+    "sectionLabel": "Solar Verdict & Bill Comparison",
+    "context": "Headline savings at a glance, plus your estimated monthly bill with and without solar. Refer to the Month-by-Month Breakdown for detailed per-month cost detail.",
+    "paybackTooltip": "Estimated time for accumulated savings to recover the system cost."
+  },
+  "page3": {
+    "sectionLabel": "Month-by-Month Breakdown",
+    "context": "Monthly consumption, solar generation, NEM credits applied, and resulting bill savings for each of the 12 calendar months."
+  },
+  "page4": {
+    "sectionLabel": "Cumulative Savings",
+    "context": "Running total of bill savings accumulated month-by-month from NEM credit offsets. Steeper lines indicate faster savings.",
+    "summary": {
+      "title": "Summary",
+      "peakMonthSavings": "Peak month savings",
+      "averageMonthSavings": "Average month savings",
+      "averageMonthSavingsDetail": "over 12 months",
+      "year1TotalSavings": "Year 1 total savings",
+      "year1TotalSavingsDetail": "cumulative"
+    },
+    "billComparison": {
+      "title": "Monthly Bill Comparison",
+      "description": "Your estimated monthly bill without solar (baseline) versus with solar for each month.",
+      "withoutSolar": "Without Solar",
+      "withSolar": "With Solar"
+    },
+    "cumulativeSavings": {
+      "title": "Cumulative Savings",
+      "description": "Total savings accumulated month by month over the year.",
+      "seriesName": "Cumulative Savings"
+    }
+  },
+  "page5": {
+    "sectionLabel": "System Cost & Assumptions",
+    "context": "Bottom-up turnkey cost plus the technical parameters used to compute your savings projection.",
+    "noCostBreakdown": "Add panels on the Workbench to see installation cost breakdown.",
+    "systemCost": {
+      "title": "System Cost",
+      "description": "Estimated total turnkey installation cost.",
+      "quoteVariance": "±10% Typical Quote Variance",
+      "pricingNote": "Mid-tier Malaysian market pricing (2026). Actual installer quotes typically land within ±10% of this figure.",
+      "segments": {
+        "panels": "Panels",
+        "inverter": "Inverter",
+        "mounting": "Mounting",
+        "electricalBos": "Electrical BOS",
+        "electricalBosDetail": "Wiring, Protection",
+        "scaffolding": "Scaffolding",
+        "scaffoldingDetail": "Tile Roof Only",
+        "permit": "Permit",
+        "permitCcc": "Incl. CCC Fee",
+        "permitSeda": "SEDA Registration",
+        "labour": "Labour",
+        "labourDetail": "+18% of Hardware",
+        "installerMargin": "Installer margin",
+        "installerMarginDetail": "+15% of Hardware + Labour"
+      },
+      "roofLabels": {
+        "tile": "Tile",
+        "metal": "Metal",
+        "flat": "Flat"
+      }
+    },
+    "assumptions": {
+      "sectionTitle": "System Assumptions",
+      "financialMode": "Financial mode",
+      "financialModeSimple": "Simple",
+      "financialModeLifecycle": "Lifecycle",
+      "financialModeSimpleDetail": "upfront cost only",
+      "financialModeLifecycleDetail": "incl. maint. + inverter",
+      "perfRatio": "Perf. ratio",
+      "perfRatioDetail": "MY residential",
+      "losses": "Losses",
+      "lossesDetail": "soiling/wiring",
+      "degradation": "Degradation",
+      "degradationDetail": "annual",
+      "tariffEscalation": "Tariff escalation",
+      "tariffEscalationDetail": "compounding",
+      "dcAcRatio": "DC/AC ratio",
+      "dcAcRatioDetail": "inverter sizing",
+      "maintenance": "Maintenance",
+      "maintenanceDetail": "subtracted",
+      "inverterSwap": "Inverter swap",
+      "inverterSwapNumbered": "Inverter swap #{{index}}",
+      "inverterSwapDetail": "at year {{year}}",
+      "panelLifetime": "Panel lifetime",
+      "panelLifetimeSuffix": "yrs",
+      "panelLifetimeDetail": "Solar API",
+      "azimuthPitch": "Azimuth/pitch",
+      "azimuthPitchMultiSegment": "{{compass}} · {{count}} segments",
+      "azimuthPitchOneSegment": "{{compass}} · {{count}} panels",
+      "tariffVerified": "Tariff verified",
+      "tariffVerifiedDetail": "TNB RP4 + AFA"
+    }
+  },
+  "page6": {
+    "sectionLabel": "Net Benefit Projection",
+    "contextSimple": "Cumulative solar savings minus your upfront system cost over 25 years. Green bars indicate years where you are in net profit after break-even.",
+    "contextLifecycle": "Cumulative solar savings minus your upfront system cost, yearly maintenance, and any scheduled inverter replacements, over 25 years. Green bars indicate years where you are in net profit after break-even.",
+    "summary": {
+      "title": "Summary",
+      "breakEven": "Break-even",
+      "breakEvenDetail": "payback period",
+      "breakEvenNA": "N/A",
+      "year25NetBenefit": "Year 25 net benefit",
+      "year25NetBenefitDetail": "after subtracting cost",
+      "year25GrossSavings": "Year 25 gross savings",
+      "year25GrossSavingsDetail": "with degradation"
+    }
+  },
+  "page7": {
+    "sectionLabel": "Financial Roadmap",
+    "context": "Key financial milestones over your system's expected 25-year lifetime."
+  },
+  "page8": {
+    "sectionLabel": "Assumptions & Disclaimers",
+    "title": "Assumptions & Disclaimers",
+    "disclaimers": {
+      "tnbTariff": "Estimates are based on published TNB tariff rates under Regulatory Period 4 (RP4; effective 1 July 2025) and NEM Rakyat 3.0 rules by default. Actual bills may vary due to billing cycle length, meter reading dates and tariff adjustments. Make your own adjustments in \"Advanced\" view as needed.",
+      "afaRate": "The Automatic Fuel Adjustment (AFA) rate changes monthly. Estimates use the latest known rate and may not reflect future changes.",
+      "eeiRebate": "PETRA has indicated that Energy Efficiency Incentive (EEI) rates may be adjusted for NEM users. Current calculations use standard EEI rates pending official modification.",
+      "solarGeneration": "Solar generation estimates are based on average irradiance data. Actual output varies with weather, shading, panel orientation, soiling and equipment condition.",
+      "creditForfeiture": "Excess credits are forfeited at the end of each calendar year. No cash payment is made for unused credits.",
+      "systemCost": "System cost is estimated bottom-up: distributor panel pricing + inverter SKU lookup + roof-type-dependent mounting + electrical BOS + permits + labour markup + installer margin. Assumes mid-tier installer pricing and single-storey installation. Typical Malaysian turnkey quotes land within ±10% of this figure. Always confirm with a licensed SEDA-registered installer.",
+      "paybackProjections": "Payback and savings projections do not account for annual maintenance (around RM 500/yr) or inverter replacement (typically needed at year 10 to 15, costing around RM 3,000 to 6,000). Tariff escalation can be configured in Advanced view (default 0%). RP4 revisions in Malaysia have historically trended around 3 to 5% per year. Actual long-term returns may differ."
+    }
+  },
+  "analysisError": {
+    "title": "Analysis not saved",
+    "description": "Save the analysis on this project before exporting the PDF."
+  }
+}

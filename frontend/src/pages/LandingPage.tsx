@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { LanguageToggle } from '@/components/layout/LanguageToggle'
 import { AppFooter } from '@/components/layout/AppFooter'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/Logo'
@@ -23,6 +25,7 @@ import {
 } from 'lucide-react'
 
 export function LandingPage() {
+  const { t } = useTranslation('landing')
   const { session, loading } = useAuth()
   const ticker = useHeroTicker()
   const heroImageRef = useRef<HTMLImageElement>(null)
@@ -82,14 +85,15 @@ export function LandingPage() {
             <span className="font-heading text-lg font-semibold tracking-tight">SolarSim</span>
           </Link>
           <div className="flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle />
             {isSignedIn ? (
               <Link to="/dashboard">
-                <Button size="sm">Go to Dashboard</Button>
+                <Button size="sm">{t('nav.goToDashboard')}</Button>
               </Link>
             ) : (
               <Link to="/sign-up">
-                <Button size="sm">Get Started</Button>
+                <Button size="sm">{t('nav.getStarted')}</Button>
               </Link>
             )}
           </div>
@@ -132,37 +136,36 @@ export function LandingPage() {
               <div className="hero-glass max-w-2xl rounded-3xl p-8 sm:p-12 animate-fade-in-up">
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/40 bg-orange-50/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#7c2d12] dark:border-white/10 dark:bg-stone-900/40 dark:text-orange-200">
                   <Sun className="h-3.5 w-3.5 text-primary" />
-                  Built for Malaysian rooftops
+                  {t('hero.badge')}
                 </div>
 
                 <h1 className="font-heading text-5xl font-bold leading-[1.04] tracking-tight text-[#1a0a02] dark:text-foreground sm:text-6xl lg:text-7xl">
-                  See solar on
+                  {t('hero.title1')}
                   <br />
-                  your roof —
+                  {t('hero.title2')}
                   <br />
                   <span className="bg-gradient-to-r from-[#7c2d12] via-primary to-emerald-600 bg-clip-text text-transparent dark:from-orange-300 dark:via-primary dark:to-emerald-400">
-                    before you commit.
+                    {t('hero.titleHighlight')}
                   </span>
                 </h1>
 
                 <p className="mt-6 max-w-lg text-lg leading-relaxed text-[#1a0a02]/75 dark:text-foreground/75">
-                  SolarSim drops real solar panels onto your actual rooftop using satellite data, then runs the numbers
-                  under Malaysia's NEM Rakyat 3.0 — so you walk into installer quotes already knowing the answer.
+                  {t('hero.subtitle')}
                 </p>
 
                 {/* Inline meta dots */}
                 <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 font-mono text-[11px] uppercase tracking-wider text-[#1a0a02]/60 dark:text-foreground/60">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Free to start
+                    {t('hero.metaFreeToStart')}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    No installer call
+                    {t('hero.metaNoCall')}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Results in 90 sec
+                    {t('hero.metaResults')}
                   </span>
                 </div>
               </div>
@@ -183,17 +186,17 @@ export function LandingPage() {
                 >
                   <div className="mb-5 flex items-center justify-between">
                     <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/70 transition-opacity duration-300">
-                      Sample report · {ticker.location}
+                      {t('hero.card.sampleReport', { location: ticker.location })}
                     </div>
                     <span className="rounded-full border border-emerald-400/40 bg-emerald-500/25 px-2 py-0.5 font-mono text-[10px] text-emerald-200">
-                      LIVE
+                      {t('hero.card.live')}
                     </span>
                   </div>
 
                   <div className="space-y-4">
                     <div>
                       <div className="font-mono text-[11px] uppercase tracking-wider text-amber-100/60">
-                        System size
+                        {t('hero.card.systemSize')}
                       </div>
                       <div className="mt-0.5 font-heading text-3xl font-bold">
                         <span className="tabular-nums">{ticker.kwp.toFixed(1)}</span>{' '}
@@ -204,14 +207,16 @@ export function LandingPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="rounded-xl border border-orange-300/25 bg-orange-400/15 p-3">
                         <div className="font-mono text-[10px] uppercase tracking-wider text-orange-200">
-                          Yearly savings
+                          {t('hero.card.yearlySavings')}
                         </div>
                         <div className="mt-1 font-heading text-xl font-bold">
                           RM <span className="tabular-nums">{ticker.savings.toLocaleString()}</span>
                         </div>
                       </div>
                       <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/15 p-3">
-                        <div className="font-mono text-[10px] uppercase tracking-wider text-emerald-200">Payback</div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-emerald-200">
+                          {t('hero.card.payback')}
+                        </div>
                         <div className="mt-1 font-heading text-xl font-bold">
                           <span className="tabular-nums">{ticker.payback.toFixed(1)}</span>{' '}
                           <span className="text-sm font-normal text-amber-100/70">yrs</span>
@@ -222,7 +227,7 @@ export function LandingPage() {
                     {/* Mini bar chart */}
                     <div>
                       <div className="mb-2 font-mono text-[11px] uppercase tracking-wider text-amber-100/60">
-                        Monthly yield (kWh)
+                        {t('hero.card.monthlyYield')}
                       </div>
                       <div className="flex h-16 items-end gap-1">
                         {ticker.monthly.map((h, i) => (
@@ -252,10 +257,10 @@ export function LandingPage() {
                   style={{ transform: 'rotate(-4deg)' }}
                 >
                   <div className="font-mono text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                    SDG 7
+                    {t('hero.card.sdgLabel')}
                   </div>
                   <div className="font-heading text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                    Clean energy
+                    {t('hero.card.sdgTitle')}
                   </div>
                 </div>
               </div>
@@ -270,26 +275,26 @@ export function LandingPage() {
         className="snap-start overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
       >
         <div className="flex w-max animate-marquee items-center gap-12 px-6 font-mono text-sm uppercase tracking-[0.18em] text-stone-400">
-          <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
+          <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label={t('trust.googleSolarApi')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 bill simulation" />
+          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label={t('trust.nemSimulation')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label="Aligned with UN SDG 7" />
+          <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label={t('trust.sdg7')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="Drag-and-drop panel workbench" />
+          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label={t('trust.dragDrop')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Installer-ready PDF reports" />
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label={t('trust.pdfReports')} />
           <span className="text-stone-700">·</span>
           {/* Duplicated for seamless loop */}
-          <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label="Powered by Google Solar API" />
+          <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label={t('trust.googleSolarApi')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label="NEM Rakyat 3.0 bill simulation" />
+          <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label={t('trust.nemSimulation')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label="Aligned with UN SDG 7" />
+          <TrustItem icon={<Leaf className="h-3.5 w-3.5 text-emerald-400" />} label={t('trust.sdg7')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label="RP4 tariff savings analysis" />
+          <TrustItem icon={<MapPin className="h-3.5 w-3.5 text-primary" />} label={t('trust.rp4Tariff')} />
           <span className="text-stone-700">·</span>
-          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label="Installer-ready PDF reports" />
+          <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label={t('trust.pdfReports')} />
           <span className="text-stone-700">·</span>
         </div>
       </section>
@@ -301,11 +306,11 @@ export function LandingPage() {
       <section id="features" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
-            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ What's inside</div>
+            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('features.eyebrow')}</div>
             <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl">
-              Built like an engineer would.
+              {t('features.title')}
               <br />
-              <span className="text-muted-foreground">Designed for everyone else.</span>
+              <span className="text-muted-foreground">{t('features.titleMuted')}</span>
             </h2>
           </div>
 
@@ -313,38 +318,38 @@ export function LandingPage() {
             <FeatureCard
               accent="tangerine"
               icon={<Satellite className="h-5 w-5" />}
-              title="Real satellite, not estimates"
-              description="Every panel sits on actual rooftop geometry from Google Solar API. We don't ask you for measurements you don't have."
+              title={t('features.cards.satellite.title')}
+              description={t('features.cards.satellite.description')}
             />
             <FeatureCard
               accent="leaf"
               icon={<Move className="h-5 w-5" />}
-              title="Drag-to-edit workbench"
-              description="Auto-layout you don't like? Move, rotate, delete any panel. Yield recalculates the moment you let go."
+              title={t('features.cards.workbench.title')}
+              description={t('features.cards.workbench.description')}
             />
             <FeatureCard
               accent="tangerine"
               icon={<Receipt className="h-5 w-5" />}
-              title="RP4 + NEM, line by line"
-              description="Bills modeled with the post-July 2025 RP4 tariff, EEI rebates, AFA, SST, RE Fund — every charge attributable to a row."
+              title={t('features.cards.billing.title')}
+              description={t('features.cards.billing.description')}
             />
             <FeatureCard
               accent="leaf"
               icon={<FileDown className="h-5 w-5" />}
-              title="Installer-ready PDF"
-              description="Export a one-click report with system summary, monthly breakdown, and 25-year projection. Walk into quotes informed."
+              title={t('features.cards.pdf.title')}
+              description={t('features.cards.pdf.description')}
             />
             <FeatureCard
               accent="tangerine"
               icon={<Clock className="h-5 w-5" />}
-              title="Seasonal consumption profiles"
-              description="Tell us how your usage shifts in school holidays, fasting month, year-end. We'll model it month-by-month."
+              title={t('features.cards.seasonal.title')}
+              description={t('features.cards.seasonal.description')}
             />
             <FeatureCard
               accent="leaf"
               icon={<BookOpen className="h-5 w-5" />}
-              title="Citations on every number"
-              description="Every kWh, every ringgit traces back to a published source — TNB tariff sheet, ST gazette, Google Solar API record."
+              title={t('features.cards.citations.title')}
+              description={t('features.cards.citations.description')}
             />
           </div>
         </div>
@@ -354,54 +359,39 @@ export function LandingPage() {
       <section id="pricing" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Pricing</div>
+            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('pricing.eyebrow')}</div>
             <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl">
-              Free to start.
+              {t('pricing.title')}
               <br />
-              Pay only when you need more.
+              {t('pricing.titleMuted')}
             </h2>
           </div>
 
           <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
             <PricingCard
-              tier="Free"
-              price="RM 0"
-              description="For homeowners exploring solar."
-              features={[
-                '5 projects per day',
-                'Auto-layout + manual edit',
-                'NEM bill simulation',
-                'Standard PDF export'
-              ]}
-              cta="Get started"
+              tier={t('pricing.tiers.free.name')}
+              price={t('pricing.tiers.free.price')}
+              description={t('pricing.tiers.free.description')}
+              features={t('pricing.tiers.free.features', { returnObjects: true }) as string[]}
+              cta={t('pricing.tiers.free.cta')}
               ctaLink="/sign-up"
             />
             <PricingCard
-              tier="Pro"
-              price="RM 29"
-              period="/month"
-              description="For serious solar planners."
-              features={[
-                '20 projects per day',
-                'Seasonal consumption profiles',
-                'Detailed PDF + 25-year projection',
-                'Email support · 24h SLA'
-              ]}
-              cta="Coming soon"
+              tier={t('pricing.tiers.pro.name')}
+              price={t('pricing.tiers.pro.price')}
+              period={t('pricing.tiers.pro.period')}
+              description={t('pricing.tiers.pro.description')}
+              features={t('pricing.tiers.pro.features', { returnObjects: true }) as string[]}
+              cta={t('pricing.tiers.pro.cta')}
               highlighted
               disabled
             />
             <PricingCard
-              tier="Enterprise"
-              price="Custom"
-              description="For installers and consultants."
-              features={[
-                'Unlimited projects',
-                'Team + client collaboration',
-                'White-label PDF reports',
-                'API access · dedicated support'
-              ]}
-              cta="Contact sales"
+              tier={t('pricing.tiers.enterprise.name')}
+              price={t('pricing.tiers.enterprise.price')}
+              description={t('pricing.tiers.enterprise.description')}
+              features={t('pricing.tiers.enterprise.features', { returnObjects: true }) as string[]}
+              cta={t('pricing.tiers.enterprise.cta')}
               disabled
             />
           </div>
@@ -412,42 +402,41 @@ export function LandingPage() {
       <section id="faq" className="snap-start bg-card px-6 py-24">
         <div className="mx-auto max-w-3xl">
           <div className="mb-14 text-center">
-            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ Common questions</div>
+            <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('faq.eyebrow')}</div>
             <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl">
-              Things people ask before
+              {t('faq.title')}
               <br />
-              signing up.
+              <span className="text-muted-foreground">{t('faq.titleMuted')}</span>
             </h2>
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border">
             <FaqItem
-              question="Does this replace an installer's site visit?"
-              answer="No — and we don't pretend to. SolarSim gives you a strong preliminary estimate so you walk into installer conversations informed. Final sizing, structural assessment, and inverter selection still need a qualified installer on-site."
+              question={t('faq.questions.replaceInstaller.question')}
+              answer={t('faq.questions.replaceInstaller.answer')}
               defaultOpen
               first
             />
             <FaqItem
-              question="How accurate are the savings projections?"
-              answer="Within ±8% of actual yield in development testing. Your real number depends on shading we can't see (overhanging trees, neighbor's new build), inverter losses, and how your usage shifts after install."
+              question={t('faq.questions.accuracy.question')}
+              answer={t('faq.questions.accuracy.answer')}
             />
             <FaqItem
-              question="What if I can't find my address?"
-              answer="Coverage in Peninsular Malaysia is strong but not universal. If we can't pull your rooftop, we fall back to a manual-coordinates flow where you outline your roof yourself — same calculations downstream."
+              question={t('faq.questions.addressNotFound.question')}
+              answer={t('faq.questions.addressNotFound.answer')}
             />
             <FaqItem
-              question="Does this work for East Malaysia?"
-              answer="Solar potential calcs work anywhere with API coverage. Our tariff model is currently Peninsular Malaysia only (TNB RP4 + NEM Rakyat 3.0). Sabah Electricity and SESB tariffs are on the roadmap for late 2026."
+              question={t('faq.questions.eastMalaysia.question')}
+              answer={t('faq.questions.eastMalaysia.answer')}
             />
             <FaqItem
-              question="Do you sell my address or usage data?"
-              answer="No. Your project data stays in your account. We don't run installer affiliate programs or hand your details to third parties. If you want a quote, you ask for one — on your terms."
+              question={t('faq.questions.dataPrivacy.question')}
+              answer={t('faq.questions.dataPrivacy.answer')}
             />
           </div>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
-            Results are preliminary estimates and do not replace a professional on-site assessment. Financial
-            projections use published RP4 + NEM Rakyat 3.0 rates as of 2025.
+            {t('faq.disclaimer')}
           </p>
         </div>
       </section>
@@ -459,7 +448,7 @@ export function LandingPage() {
       {/* Scroll-to-top button — glassmorphism, fades in past first viewport */}
       <button
         type="button"
-        aria-label="Scroll to top"
+        aria-label={t('scrollToTop')}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className={`fixed bottom-8 left-1/2 z-40 inline-flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-white/60 bg-white/40 text-foreground shadow-[0_8px_24px_rgba(234,88,12,0.18)] backdrop-blur-xl transition-all duration-300 hover:bg-white/60 dark:border-white/10 dark:bg-stone-900/55 dark:text-foreground dark:hover:bg-stone-900/75 ${
           scrollY > 400 ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
@@ -610,57 +599,58 @@ type PipelineStep = {
   mockBg: string
 }
 
-const PIPELINE_STEPS: PipelineStep[] = [
-  {
-    num: 'STEP 01',
-    label: 'LOCATE',
-    title: 'Find your roof on the map.',
-    body: "Type your address. We center on your building, pull Google Solar API rooftop geometry, and show you exactly which structure we'll analyze — so there's no mistaking your home for the neighbor's.",
-    tags: [
-      { label: 'Google Maps', tone: 'tangerine' },
-      { label: 'Solar API', tone: 'tangerine' }
-    ],
-    mockSrc: '/screenshots/map.webp',
-    mockHost: 'solarsim.app/locate',
-    mockHeadline: '142 m²',
-    mockSub: 'Roof area detected',
-    mockBg: 'linear-gradient(135deg, #1a1f1a, #23291f 40%, #3a4233 100%)'
-  },
-  {
-    num: 'STEP 02',
-    label: 'LAYOUT',
-    title: 'Drop, drag, rotate panels.',
-    body: "We auto-place a yield-optimized array on your rooftop. Don't like it? Drag panels around, rotate them, delete the ones that fall in shade. Total energy and savings update on every move — no recalc button.",
-    tags: [
-      { label: 'Interactive canvas', tone: 'leaf' },
-      { label: 'Live yield', tone: 'leaf' }
-    ],
-    mockSrc: '/screenshots/workbench.webp',
-    mockHost: 'solarsim.app/workbench',
-    mockHeadline: '26 panels · 10.4 kWp',
-    mockSub: '+2.1% vs auto-layout',
-    mockBg: 'linear-gradient(135deg, #221a13, #3a2a1c 60%, #2a3525 100%)'
-  },
-  {
-    num: 'STEP 03',
-    label: 'ANALYZE',
-    title: 'See your bill, twelve months out.',
-    body: 'We model your monthly bill against post-July 2025 RP4 tariffs, EEI rebates, AFA, SST and the RE Fund — month-by-month. Export the whole thing as a PDF to bring to your installer.',
-    tags: [
-      { label: 'RP4 tariff', tone: 'tangerine' },
-      { label: 'PDF export', tone: 'tangerine' }
-    ],
-    mockSrc: '/screenshots/analysis.webp',
-    mockHost: 'solarsim.app/analysis',
-    mockHeadline: 'RM 5,840',
-    mockSub: 'yearly savings · 5.7 yr payback',
-    mockBg: 'linear-gradient(135deg, #1a140e, #2a1f15)'
-  }
-]
-
 function PipelineSection() {
+  const { t } = useTranslation('landing')
   const [active, setActive] = useState(0)
   const stepRefs = useRef<(HTMLElement | null)[]>([])
+
+  const PIPELINE_STEPS: PipelineStep[] = [
+    {
+      num: t('pipeline.steps.step1.num'),
+      label: t('pipeline.steps.step1.label'),
+      title: t('pipeline.steps.step1.title'),
+      body: t('pipeline.steps.step1.body'),
+      tags: [
+        { label: t('pipeline.steps.step1.tagGoogleMaps'), tone: 'tangerine' },
+        { label: t('pipeline.steps.step1.tagSolarApi'), tone: 'tangerine' }
+      ],
+      mockSrc: '/screenshots/map.webp',
+      mockHost: t('pipeline.steps.step1.mockHost'),
+      mockHeadline: t('pipeline.steps.step1.mockHeadline'),
+      mockSub: t('pipeline.steps.step1.mockSub'),
+      mockBg: 'linear-gradient(135deg, #1a1f1a, #23291f 40%, #3a4233 100%)'
+    },
+    {
+      num: t('pipeline.steps.step2.num'),
+      label: t('pipeline.steps.step2.label'),
+      title: t('pipeline.steps.step2.title'),
+      body: t('pipeline.steps.step2.body'),
+      tags: [
+        { label: t('pipeline.steps.step2.tagCanvas'), tone: 'leaf' },
+        { label: t('pipeline.steps.step2.tagLiveYield'), tone: 'leaf' }
+      ],
+      mockSrc: '/screenshots/workbench.webp',
+      mockHost: t('pipeline.steps.step2.mockHost'),
+      mockHeadline: t('pipeline.steps.step2.mockHeadline'),
+      mockSub: t('pipeline.steps.step2.mockSub'),
+      mockBg: 'linear-gradient(135deg, #221a13, #3a2a1c 60%, #2a3525 100%)'
+    },
+    {
+      num: t('pipeline.steps.step3.num'),
+      label: t('pipeline.steps.step3.label'),
+      title: t('pipeline.steps.step3.title'),
+      body: t('pipeline.steps.step3.body'),
+      tags: [
+        { label: t('pipeline.steps.step3.tagRp4'), tone: 'tangerine' },
+        { label: t('pipeline.steps.step3.tagPdf'), tone: 'tangerine' }
+      ],
+      mockSrc: '/screenshots/analysis.webp',
+      mockHost: t('pipeline.steps.step3.mockHost'),
+      mockHeadline: t('pipeline.steps.step3.mockHeadline'),
+      mockSub: t('pipeline.steps.step3.mockSub'),
+      mockBg: 'linear-gradient(135deg, #1a140e, #2a1f15)'
+    }
+  ]
 
   useEffect(() => {
     function update() {
@@ -684,11 +674,11 @@ function PipelineSection() {
     <section id="how" className="relative snap-start bg-card px-6 text-foreground">
       <div className="mx-auto max-w-7xl pb-16 pt-24">
         <div className="max-w-2xl">
-          <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">★ The Pipeline</div>
+          <div className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-primary">{t('pipeline.eyebrow')}</div>
           <h2 className="font-heading text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
-            From address to answer
+            {t('pipeline.title')}
             <br />
-            <span className="text-muted-foreground">in three steps.</span>
+            <span className="text-muted-foreground">{t('pipeline.titleMuted')}</span>
           </h2>
         </div>
       </div>
@@ -725,16 +715,16 @@ function PipelineSection() {
                   </h3>
                   <p className="max-w-md text-base leading-relaxed text-muted-foreground">{step.body}</p>
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {step.tags.map((t) => (
+                    {step.tags.map((tag) => (
                       <span
-                        key={t.label}
+                        key={tag.label}
                         className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-wider ${
-                          t.tone === 'leaf'
+                          tag.tone === 'leaf'
                             ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/25 dark:text-emerald-300'
                             : 'border-primary/25 bg-primary/10 text-primary dark:text-orange-300'
                         }`}
                       >
-                        {t.label}
+                        {tag.label}
                       </span>
                     ))}
                   </div>
@@ -890,11 +880,13 @@ function PricingCard({
   highlighted?: boolean
   disabled?: boolean
 }) {
+  const { t } = useTranslation('landing')
+
   if (highlighted) {
     return (
       <div className="relative flex flex-col rounded-2xl bg-gradient-to-b from-stone-900 to-[#2a1505] p-8 text-white shadow-[0_30px_60px_-20px_rgba(234,88,12,0.4)]">
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-orange-400 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-stone-900">
-          Most popular
+          {t('pricing.mostPopular')}
         </span>
         <div className="font-heading text-xl font-bold">{tier}</div>
         <p className="mt-1 text-sm text-stone-300">{description}</p>

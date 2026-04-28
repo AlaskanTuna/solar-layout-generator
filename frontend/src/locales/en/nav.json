@@ -1,0 +1,66 @@
+{
+  "sections": {
+    "overview": "Overview",
+    "insights": "Insights",
+    "help": "Help"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "analytics": "Analytics",
+    "faq": "FAQ",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "home": "Home",
+    "summary": "Summary",
+    "map": "Map",
+    "workbench": "Workbench",
+    "analysis": "Analysis",
+    "howItWorks": "How It Works",
+    "features": "Features",
+    "pricing": "Pricing"
+  },
+  "menu": {
+    "loadingPlan": "Loading plan…",
+    "planLabel": "{{tier}} plan",
+    "settingsLink": "Settings"
+  },
+  "footer": {
+    "sdg": "UN SDG 7: Affordable and Clean Energy",
+    "year": "2026"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "subtitle": "The page you are looking for does not exist or has been moved. Let us get you back on track.",
+    "backHome": "Back to Home",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Performance insights across all your projects",
+    "subtitleWithCount": "Aggregated performance across {{count}} completed project",
+    "subtitleWithCount_plural": "Aggregated performance across {{count}} completed projects",
+    "noData": {
+      "title": "No data yet",
+      "subtitle": "Complete at least one solar analysis to see aggregated performance metrics here."
+    },
+    "stats": {
+      "totalMonthlySavings": "Total Monthly Savings",
+      "totalAnnualEnergy": "Total Annual Energy",
+      "totalCo2Offset": "Total CO2 Offset",
+      "totalPanels": "Total Panels"
+    },
+    "averages": {
+      "heading": "Averages per Project",
+      "avgMonthlySavings": "Avg. Monthly Savings",
+      "avgPanels": "Avg. Panels per Project",
+      "completionRate": "Completion Rate"
+    },
+    "breakdown": {
+      "heading": "Project Breakdown",
+      "colProject": "Project",
+      "colSavings": "Savings/mo",
+      "colPayback": "Payback"
+    }
+  }
+}

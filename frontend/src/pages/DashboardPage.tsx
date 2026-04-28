@@ -1,5 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { listProjects } from '@/api/projects'
 import { useAuth } from '@/hooks/useAuth'
@@ -26,9 +27,9 @@ import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 18) return 'Good afternoon'
-  return 'Good evening'
+  if (hour < 12) return 'morning'
+  if (hour < 18) return 'afternoon'
+  return 'evening'
 }
 
 function formatResetTime(resetsAt: string): string {
@@ -36,42 +37,43 @@ function formatResetTime(resetsAt: string): string {
   return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
-const QUICK_ACTIONS = [
-  {
-    to: '/dashboard/projects',
-    icon: FolderKanban,
-    label: 'Projects',
-    desc: 'Open saved layouts, continue drafts, and manage project history.',
-    art: '/dashboard/projects.webp'
-  },
-  {
-    to: '/dashboard/analytics',
-    icon: PieChart,
-    label: 'Analytics',
-    desc: 'Compare performance signals and savings across your solar work.',
-    art: '/dashboard/analytics.webp'
-  },
-  {
-    to: '/dashboard/faq',
-    icon: CircleHelp,
-    label: 'FAQ',
-    desc: 'Find answers about Solar API data, NEM tariffs, and how to use the workbench.',
-    art: '/dashboard/faq.webp'
-  }
-]
-
 export function DashboardPage() {
+  const { t } = useTranslation('dashboard')
   const { user } = useAuth()
   const navigate = useNavigate()
   const quotaQuery = useQuota()
   const projectsQuery = useQuery({ queryKey: ['projects'], queryFn: listProjects })
   const [dialogOpen, setDialogOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
-  const [greeting, setGreeting] = useState('Welcome back')
+  const [greetingKey, setGreetingKey] = useState<string>('fallback')
 
   useEffect(() => {
-    setGreeting(getGreeting())
+    setGreetingKey(getGreeting())
   }, [])
+
+  const QUICK_ACTIONS = [
+    {
+      to: '/dashboard/projects',
+      icon: FolderKanban,
+      labelKey: 'quickActions.projects.label',
+      descKey: 'quickActions.projects.desc',
+      art: '/dashboard/projects.webp'
+    },
+    {
+      to: '/dashboard/analytics',
+      icon: PieChart,
+      labelKey: 'quickActions.analytics.label',
+      descKey: 'quickActions.analytics.desc',
+      art: '/dashboard/analytics.webp'
+    },
+    {
+      to: '/dashboard/faq',
+      icon: CircleHelp,
+      labelKey: 'quickActions.faq.label',
+      descKey: 'quickActions.faq.desc',
+      art: '/dashboard/faq.webp'
+    }
+  ]
 
   const quota = quotaQuery.data
   const quotaReached = !!quota && quota.limit !== null && quota.used >= quota.limit
@@ -126,9 +128,9 @@ export function DashboardPage() {
         <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary" />
       </div>
       <div className="relative z-10">
-        <h2 className="font-heading text-xl font-semibold tracking-tight">New Project</h2>
+        <h2 className="font-heading text-xl font-semibold tracking-tight">{t('newProject.title')}</h2>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-          Search for a building, generate a rooftop layout, and start a new solar assessment.
+          {t('newProject.description')}
         </p>
       </div>
     </button>
@@ -144,10 +146,10 @@ export function DashboardPage() {
             </div>
             <div>
               <h1 className="font-heading text-3xl font-bold tracking-tight">
-                {greeting}
+                {t(`greeting.${greetingKey}`)}
                 {userName ? `, ${userName}` : ''}
               </h1>
-              <p className="mt-1 max-w-lg text-muted-foreground">Here's your workspace at a glance.</p>
+              <p className="mt-1 max-w-lg text-muted-foreground">{t('header.subtitle')}</p>
             </div>
           </div>
         </PageHeaderCard>
@@ -160,7 +162,9 @@ export function DashboardPage() {
                   <TooltipTrigger asChild>
                     <span className="block">{newProjectTile}</span>
                   </TooltipTrigger>
-                  <TooltipContent>Daily limit reached - resets at {formatResetTime(quota.resetsAt)}</TooltipContent>
+                  <TooltipContent>
+                    {t('newProject.quotaTooltip', { time: formatResetTime(quota.resetsAt) })}
+                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             ) : (
@@ -179,8 +183,10 @@ export function DashboardPage() {
                   <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary" />
                 </div>
                 <div className="relative z-10">
-                  <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">{action.label}</h2>
-                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{action.desc}</p>
+                  <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
+                    {t(action.labelKey)}
+                  </h2>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{t(action.descKey)}</p>
                 </div>
               </Link>
             ))}
@@ -197,13 +203,15 @@ export function DashboardPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Activity className="h-4 w-4" />
               </div>
-              <h2 className="mt-5 font-heading text-lg font-semibold tracking-tight">Continue Where You Left Off</h2>
-              <p className="mt-1 truncate text-sm text-muted-foreground">Resume your latest saved project.</p>
+              <h2 className="mt-5 font-heading text-lg font-semibold tracking-tight">{t('recents.title')}</h2>
+              <p className="mt-1 truncate text-sm text-muted-foreground">{t('recents.subtitle')}</p>
             </div>
 
             <div className="flex flex-1 flex-col">
               {projectsQuery.isLoading ? (
-                <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">Loading...</div>
+                <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+                  {t('recents.loading')}
+                </div>
               ) : recentProjects.length > 0 ? (
                 <div className="relative z-10 mt-5 space-y-2">
                   {recentProjects.map((project) => {
@@ -229,7 +237,7 @@ export function DashboardPage() {
                         <div className="mt-2 flex items-center justify-between gap-3 text-xs font-medium">
                           <span className="truncate text-muted-foreground">{status.label}</span>
                           <span className="flex shrink-0 items-center gap-1 text-primary">
-                            Continue
+                            {t('recents.continue')}
                             <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                           </span>
                         </div>
@@ -239,7 +247,7 @@ export function DashboardPage() {
                 </div>
               ) : (
                 <div className="relative z-10 flex flex-1 items-center justify-center text-sm font-medium text-muted-foreground">
-                  None
+                  {t('recents.empty')}
                 </div>
               )}
             </div>
@@ -252,16 +260,14 @@ export function DashboardPage() {
         <DialogContent>
           <form onSubmit={handleCreateProject}>
             <DialogHeader>
-              <DialogTitle>Create New Project</DialogTitle>
-              <DialogDescription>
-                Give your solar assessment project a name, then search for your building.
-              </DialogDescription>
+              <DialogTitle>{t('dialog.title')}</DialogTitle>
+              <DialogDescription>{t('dialog.description')}</DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-2">
-              <Label htmlFor="project-name">Project Name</Label>
+              <Label htmlFor="project-name">{t('dialog.nameLabel')}</Label>
               <Input
                 id="project-name"
-                placeholder="e.g. My Home Solar"
+                placeholder={t('dialog.namePlaceholder')}
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 required
@@ -270,7 +276,7 @@ export function DashboardPage() {
             </div>
             <DialogFooter className="mt-6">
               <Button type="submit" disabled={!projectName.trim() || quotaReached}>
-                Continue
+                {t('dialog.submit')}
               </Button>
             </DialogFooter>
           </form>

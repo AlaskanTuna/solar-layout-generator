@@ -1,0 +1,449 @@
+{
+  "page": {
+    "loadingHints": {
+      "loading": "Memuatkan analisis anda...",
+      "tariff": "Menyediakan data tarif...",
+      "crunching": "Mengira angka penjimatan solar anda..."
+    },
+    "error": {
+      "title": "Analisis Tidak Tersedia",
+      "description": "Kami tidak dapat menyediakan simulasi pengebilan untuk projek ini.",
+      "incompleteData": "Data analisis tidak lengkap. Kembali ke meja kerja dan simpan susun atur sekali lagi.",
+      "unknown": "Ralat tidak diketahui",
+      "backToWorkbench": "Kembali ke Meja Kerja"
+    },
+    "viewToggle": {
+      "simple": "Mudah",
+      "advanced": "Lanjutan",
+      "hint": "Mudah menunjukkan angka penjimatan utama. Lanjutan menambah pecahan tarif, unjuran dan butiran sistem."
+    },
+    "cumulativeSavings": {
+      "title": "Penjimatan Terkumpul",
+      "titleTooltip": "Jumlah penjimatan anda yang terkumpul sepanjang tahun. Garis yang lebih curam bermakna anda menjimatkan wang dengan lebih cepat.",
+      "description": "Jumlah penjimatan terkumpul bulan demi bulan sepanjang tahun.",
+      "seriesName": "Penjimatan Terkumpul"
+    },
+    "disclaimers": {
+      "title": "Penafian Kewangan",
+      "description": "Semua angka bil dan penjimatan hendaklah dianggap sebagai anggaran."
+    },
+    "toast": {
+      "saved": "Analisis disimpan ke projek anda",
+      "saveFailed": "Gagal menyimpan analisis"
+    },
+    "paybackTooltip": {
+      "intro": "Berapa tahun sehingga penjimatan anda menampung kos pemasangan sistem.",
+      "netBenefitProjection": "Unjuran manfaat bersih:",
+      "yearLabel": "{{count}}-Tahun"
+    }
+  },
+  "tour": {
+    "overview": {
+      "title": "Analisis Penjimatan Solar Anda",
+      "description": "Halaman ini mengira berapa banyak yang boleh anda jimat pada bil elektrik TNB dengan panel solar. Semua angka dikemas kini secara langsung apabila anda mengubah input di sebelah kiri."
+    },
+    "consumption": {
+      "title": "Masukkan Penggunaan Elektrik Anda",
+      "description": "Ini adalah input paling penting. Cari purata kWh bulanan anda pada bil TNB (cari \"Purata Penggunaan\") dan masukkannya di sini. Ketik ikon maklumat untuk melihat contoh bil."
+    },
+    "viewToggle": {
+      "title": "Mudah vs Lanjutan",
+      "description": "Mulakan dengan paparan Mudah untuk ringkasan cepat. Beralih ke Lanjutan apabila anda mahukan pecahan tarif terperinci, komponen bil dan andaian sistem yang boleh anda sesuaikan."
+    },
+    "heroCards": {
+      "title": "Angka Utama Sekilas Pandang",
+      "description": "Empat metrik ini memberitahu anda semua yang perlu diketahui: berapa banyak yang anda jimat setiap bulan, berapa banyak setahun, berapa lama sehingga sistem membayar dirinya sendiri dan berapa banyak CO2 yang anda offset."
+    },
+    "monthlyChart": {
+      "title": "Perbandingan Bil Bulanan",
+      "description": "Carta ini membandingkan apa yang anda bayar tanpa solar (oren) dengan apa yang anda bayar dengan solar (hijau) untuk setiap bulan. Perbezaannya adalah penjimatan anda."
+    },
+    "exportSave": {
+      "title": "Eksport & Simpan",
+      "description": "Apabila anda berpuas hati dengan keputusan, klik \"Simpan Analisis\" untuk menyimpan tetapan anda, atau \"Eksport PDF\" untuk memuat turun laporan yang boleh dikongsi dengan pemasang solar atau keluarga anda."
+    }
+  },
+  "sidebar": {
+    "systemSize": {
+      "label": "Saiz Sistem",
+      "tooltip": "Kuasa maksimum yang boleh dihasilkan sistem solar anda di bawah cahaya matahari ideal, diukur dalam kilowatt-peak (kWp)."
+    },
+    "activePanels": "Panel Aktif",
+    "panelModel": "Model Panel",
+    "panelSpecs": {
+      "summary": "Spesifikasi Panel",
+      "dimensions": "Dimensi:",
+      "capacity": "Kapasiti:",
+      "efficiency": "Kecekapan:",
+      "cost": "Kos:",
+      "maxPanels": "Maks Panel:",
+      "lifespan": "Jangka Hayat:"
+    },
+    "adjustHint": "Laraskan andaian dan semak hasil pengebilan NEM sebelum menyimpan.",
+    "missingEnergy": "{{count}} panel tidak mempunyai data kira semula bulanan. Ia dianggap sebagai 0 kWh sehingga susun atur disimpan semula dari Meja Kerja.",
+    "phaseCapExceeded": "Saiz susunan semasa melebihi had {{cap}} kW untuk sambungan NEM {{phase}}-fasa.",
+    "consumption": {
+      "label": "Penggunaan Elektrik Bulanan (kWh)",
+      "tooltipText": "Purata penggunaan elektrik bulanan anda dalam kWh. Cari \"Purata Penggunaan\" pada bil TNB anda:",
+      "imageAlt": "Bil TNB menunjukkan purata penggunaan kWh",
+      "imageHint": "Klik imej untuk membesarkan",
+      "subtext": "Masukkan jumlah kWh dari bil TNB anda, bukan jumlah RM.",
+      "placeholder": "cth. 600",
+      "profileLabel": "Profil:",
+      "profileFlat": "Rata",
+      "profileSeasonal": "Bermusim",
+      "profileTooltip": "Rata menganggap kWh yang sama setiap bulan. Bermusim menerapkan variasi Malaysia yang biasa, dengan penggunaan lebih tinggi pada bulan panas dan lebih rendah semasa monsun.",
+      "seasonalRange": "Julat bulanan: {{min}} hingga {{max}} kWh"
+    },
+    "connectionPhase": {
+      "label": "Fasa Sambungan",
+      "tooltip": {
+        "intro": "Cara elektrik masuk ke rumah anda dari grid. Anda boleh semak ini pada bil TNB anda di bawah \"Jenis Fasa\" atau dari label pada kotak meter anda.",
+        "single": "Satu Fasa:",
+        "singleDetail": "Standard di kebanyakan rumah Malaysia. Eksport solar dihadkan pada 5 kW di bawah peraturan NEM 3.0 TNB.",
+        "three": "Tiga Fasa:",
+        "threeDetail": "Biasa di banglo yang lebih besar atau rumah dengan peralatan berat. Had meningkat kepada 12.5 kW.",
+        "warning": "Jika susunan anda lebih besar daripada had, anda perlu mengeluarkan panel di Meja Kerja atau mohon untuk menaik taraf sambungan TNB anda sebelum pemasangan."
+      },
+      "capacityCap": "Had kapasiti: {{cap}} kW untuk jenis sambungan yang dipilih.",
+      "labels": {
+        "single": "Satu Fasa",
+        "three": "Tiga Fasa"
+      }
+    },
+    "roofType": {
+      "label": "Jenis Bumbung",
+      "tooltip": "Bahan bumbung menentukan perkakasan pemasangan dan kos buruh. Bumbung jubin memerlukan perancah dan cangkuk khas. Bumbung logam menggunakan pengapit L-foot mudah. Bumbung rata menggunakan rangka berimbangan. Paparan mudah menganggap jubin, yang paling biasa di rumah Malaysia.",
+      "subtext": "Mempengaruhi kos pemasangan dan, untuk jubin, perancah.",
+      "labels": {
+        "tile": "Jubin (Tanah Liat/Konkrit)",
+        "metal": "Logam",
+        "flat": "Rata (Papak Konkrit)"
+      }
+    },
+    "financialMode": {
+      "label": "Mod Kewangan",
+      "tooltip": {
+        "intro": "Pilih cara bayar balik dan penjimatan 25 tahun dikira.",
+        "simple": "Mudah:",
+        "simpleDetail": "Hanya mengira kos pemasangan pendahuluan. Memberikan angka bayar balik yang paling bersih dan optimis.",
+        "lifecycle": "Kitaran Hayat:",
+        "lifecycleDetail": "Juga menolak penyelenggaraan tahunan dan sebarang penggantian penyongsang yang dijadualkan. Bayar balik lebih lama tetapi gambaran 25 tahun lebih realistik."
+      },
+      "subtext": "Beralih ke Kitaran Hayat untuk pandangan jangka panjang yang lebih realistik.",
+      "labels": {
+        "simple": "Mudah",
+        "lifecycle": "Kitaran Hayat"
+      },
+      "maintenance": {
+        "label": "Penyelenggaraan Tahunan (RM/thn)"
+      },
+      "inverterReplacements": {
+        "label": "Penggantian Penyongsang",
+        "add": "Tambah",
+        "empty": "Tiada penggantian dijadualkan. Klik Tambah untuk merancang satu.",
+        "costLabel": "Kos (RM)",
+        "yearLabel": "Pada Tahun",
+        "removeAriaLabel": "Buang penggantian {{index}}"
+      }
+    },
+    "afa": {
+      "label": "Kadar AFA",
+      "tooltip": "Caj tambahan atau rebat yang ditetapkan kerajaan ditambah pada setiap kWh penggunaan, dalam sen/kWh. Nilai negatif bermakna rebat. Dikemas kini dari semasa ke semasa.",
+      "subtext": "Pelarasan Bahan Api Automatik semasa dalam sen/kWh. Nilai negatif mewakili rebat.",
+      "seededDate": "Nilai disah pada {{date}}.",
+      "placeholder": "cth. 3.70"
+    },
+    "tariffEscalation": {
+      "label": "Eskalasi Tarif",
+      "tooltip": "Berapa banyak yang anda jangkakan tarif TNB naik setiap tahun. Kadar yang lebih tinggi memendekkan bayar balik dan menumbuhkan penjimatan jangka panjang. Semakan RP4 di Malaysia secara sejarah cenderung sekitar 3 hingga 5% setahun. Tetapkan kepada 0% jika anda ingin menganggap tarif rata.",
+      "subtext": "%/tahun. Menggabungkan penjimatan merentas ufuk unjuran."
+    },
+    "tariffParameters": {
+      "label": "Parameter Tarif",
+      "tooltip": "Gantikan medan tarif RP4 TNB individu untuk projek ini, seperti caj tenaga, kapasiti, dan rangkaian, caj runcit, SST, Dana RE, dan caj minimum. Lalai sepadan dengan kadar yang diterbitkan.",
+      "subtext": "Penggantian setiap projek untuk kadar asas RP4 TNB. Lalai adalah nilai yang diterbitkan.",
+      "configure": "Konfigurasi Parameter Tarif",
+      "modified": "{{count}} diubah suai"
+    },
+    "degradation": {
+      "label": "Degradasi Panel",
+      "tooltip": "Berapa banyak panel anda kehilangan output setiap tahun. Kadar yang lebih tinggi bermakna penjanaan lebih sedikit dari masa ke masa, penjimatan jangka panjang lebih rendah, dan bayar balik lebih lama. Panel jenis-N moden kehilangan sekitar 0.5% setahun. Panel PERC lama kehilangan sekitar 0.7% setahun.",
+      "subtext": "%/tahun. Mempengaruhi bayar balik dan unjuran 10 tahun.",
+      "placeholder": "cth. 0.5"
+    },
+    "systemAssumptions": {
+      "label": "Andaian Sistem",
+      "tooltip": "Faktor kejuruteraan yang memperhalusi cara output dunia sebenar dianggarkan. Kebanyakan pemilik rumah boleh membiarkan ini pada lalainya.",
+      "pr": "NP (%)",
+      "losses": "Kerugian (%)",
+      "dcAc": "DC/AT"
+    },
+    "buttons": {
+      "backToWorkbench": "Kembali ke Meja Kerja",
+      "exportPdf": "Eksport PDF",
+      "exporting": "Mengeksport PDF...",
+      "saveAnalysis": "Simpan Analisis",
+      "saving": "Menyimpan Analisis..."
+    }
+  },
+  "verdict": {
+    "title": "Keputusan Solar Anda",
+    "titleTooltip": {
+      "intro": "Ringkasan pelaburan solar anda dalam bahasa biasa.",
+      "ratingIntro": "Penarafan bintang mencerminkan seberapa cepat sistem membayar balik:",
+      "star5": "5 bintang: kurang daripada 6 tahun",
+      "star4": "4 bintang: 6 hingga 12 tahun",
+      "star3": "3 bintang: 12 hingga 25 tahun",
+      "star1": "1 bintang: lebih daripada 25 tahun"
+    },
+    "description": "Cadangan utama dan angka-angka penting sekilas pandang.",
+    "headline": {
+      "noPanels": "Tambah panel di Meja Kerja untuk melihat penjimatan anda.",
+      "noPayback": "Solar menjimatkan {{amount}}/bulan untuk anda tetapi mungkin tidak membayar balik dalam masa 25 tahun.",
+      "withPayback": "Solar menjimatkan {{amount}}/bulan untuk anda dan membayar balik dalam kira-kira {{years}} tahun."
+    },
+    "starAriaLabel": "{{label}}: {{count}} daripada 5 bintang",
+    "metrics": {
+      "monthlySavings": {
+        "label": "Penjimatan Bulanan",
+        "tooltip": {
+          "line1": "Purata jumlah yang anda jimat pada setiap bil bulanan berbanding tanpa solar.",
+          "line2": "Dikira sebagai purata 12 perbezaan bil bulanan anda sepanjang tahun."
+        },
+        "detail": "{{pct}}% diskaun pada bil anda"
+      },
+      "annualSavings": {
+        "label": "Penjimatan Tahunan",
+        "tooltip": {
+          "line1": "Jumlah penjimatan anda merentas semua 12 bulan dalam setahun.",
+          "line2": "Dikira sebagai bil tahunan anda tanpa solar tolak bil tahunan anda dengan solar."
+        },
+        "baseline": "Asas {{amount}}"
+      },
+      "payback": {
+        "simpleLabel": "Bayar Balik Mudah",
+        "lifecycleLabel": "Bayar Balik Kitaran Hayat"
+      },
+      "nemFit": {
+        "label": "Padanan NEM",
+        "tooltip": {
+          "intro": "Seberapa baik susun atur ini disaizkan untuk penggunaan anda di bawah program insentif solar semasa.",
+          "good": "Baik:",
+          "goodDetail": "Kebanyakan penjanaan mengimbangi bil anda sendiri, dengan sangat sedikit kredit yang tersisa.",
+          "moderate": "Sederhana:",
+          "moderateDetail": "Terdapat sedikit pengumpulan kredit. Anda akan mengeksport lebih banyak daripada yang anda guna dalam beberapa bulan dan bergantung pada kredit yang disimpan sebelumnya dalam bulan lain.",
+          "oversized": "Terlalu Besar:",
+          "oversizedDetail": "Pengumpulan kredit yang banyak. Kredit berlebihan bukan wang tunai dan akan dilucutkan pada hujung tahun jika tidak digunakan.",
+          "importRate": "Kadar Import:",
+          "importRateValue": "{{pct}}% penggunaan diambil dari grid",
+          "importRateSuffix": "penggunaan diambil dari grid",
+          "exportRate": "Kadar Eksport:",
+          "exportRateValue": "{{pct}}% penjanaan dihantar balik ke grid",
+          "exportRateSuffix": "penjanaan dihantar balik ke grid"
+        },
+        "labels": {
+          "good": "Baik",
+          "moderate": "Sederhana",
+          "oversized": "Terlalu Besar"
+        }
+      }
+    }
+  },
+  "billComparison": {
+    "title": "Perbandingan Bil Bulanan",
+    "titleTooltip": "Membandingkan anggaran bil TNB anda dengan dan tanpa solar untuk setiap bulan. Bar oren menunjukkan apa yang biasanya anda bayar. Bar hijau menunjukkan apa yang anda bayar selepas kredit solar NEM digunakan.",
+    "description": "Anggaran bil bulanan anda tanpa solar (asas) berbanding dengan solar untuk setiap bulan.",
+    "withoutSolar": "Tanpa Solar",
+    "withSolar": "Dengan Solar"
+  },
+  "billBreakdown": {
+    "title": "Pecahan Komponen Bil",
+    "titleTooltip": {
+      "intro": "Membandingkan setiap caj pada bil TNB anda secara berdampingan: tanpa solar berbanding dengan solar. Termasuk komponen tenaga, kapasiti, rangkaian, AFA, rebat EEI, Dana RE dan SST.",
+      "threshold": "TNB menambah beberapa fi tambahan pada penggunaan bulanan melebihi {{threshold}} kWh. Apabila kredit solar anda membawa penggunaan boleh bil di bawah garis tersebut, fi-fi tersebut hilang untuk bulan itu.",
+      "retail": "Caj runcit:",
+      "retailDetail": "Fi pengebilan TNB tetap yang hanya dikenakan melebihi 600 kWh.",
+      "afa": "AFA:",
+      "afaDetail": "Caj Pelarasan Bahan Api Automatik yang dikaitkan dengan harga bahan api.",
+      "sst": "SST:",
+      "sstDetail": "Cukai Jualan & Perkhidmatan 8% yang hanya dikenakan melebihi 600 kWh.",
+      "tierNote": "Jika solar mendorong anda ke peringkat tarif yang lebih rendah untuk sebulan, penjimatan sebenar anda lebih besar daripada kos tenaga sahaja yang disyorkan."
+    },
+    "description": "Lihat cara bil TNB anda dikira.",
+    "thresholdWarning": {
+      "title": "Peringkat Tarif TNB Lebih Rendah Dicapai"
+    },
+    "withoutSolar": {
+      "title": "Tanpa Solar",
+      "subtitle": "Apa yang anda bayar pada penggunaan penuh"
+    },
+    "withSolar": {
+      "title": "Dengan Solar",
+      "subtitle": "Bil anda selepas solar mengimbangi penggunaan anda di bawah NEM"
+    },
+    "fields": {
+      "energy": "Tenaga",
+      "capacity": "Kapasiti",
+      "network": "Rangkaian",
+      "retail": "Runcit",
+      "afa": "AFA",
+      "eeiRebate": "Rebat EEI",
+      "reFund": "Dana RE",
+      "sst": "SST",
+      "total": "Jumlah",
+      "totalTooltipTemplate": "{{baseline}} (tanpa solar) − {{savings}} (penjimatan) = {{total}}",
+      "totalTooltipFormula": "Tenaga + Kapasiti + Rangkaian + Runcit + AFA − Rebat EEI + Dana RE + SST",
+      "billableKwh": "kWh Boleh Bil",
+      "creditUsed": "Kredit Digunakan",
+      "creditBalance": "Baki Kredit",
+      "creditForfeited": "Kredit Dilucutkan",
+      "youSave": "Anda jimat {{amount}} bulan ini"
+    }
+  },
+  "monthTable": {
+    "title": "Pecahan Bulan demi Bulan",
+    "titleTooltip": "Paparan penuh bulan demi bulan menunjukkan penggunaan, penjanaan solar, import bersih dari grid, penggunaan kredit NEM, dan penjimatan bil yang terhasil. Kembangkan jadual untuk melihat semua 12 bulan.",
+    "description": "Input pengebilan bulanan, kredit dan penjimatan.",
+    "collapse": "Runtuhkan",
+    "expand": "Kembangkan",
+    "toggleLabel": "{{action}} jadual pengebilan penuh",
+    "columns": {
+      "month": "Bulan",
+      "consumption": "Penggunaan",
+      "generation": "Penjanaan",
+      "netImport": "Import Bersih",
+      "creditUsed": "Kredit Digunakan",
+      "creditBalance": "Baki Kredit",
+      "baselineBill": "Bil Asas",
+      "nemSavings": "Penjimatan NEM",
+      "totalBill": "Jumlah Bil"
+    }
+  },
+  "netBenefit": {
+    "title": "Unjuran Manfaat Bersih",
+    "titleTooltip": {
+      "simple": "Penjimatan terkumpul anda tolak kos sistem pendahuluan, diunjurkan selama {{years}} tahun. Apabila bar bertukar hijau, anda telah mendapatkan semula pelaburan anda dan berada dalam keuntungan bersih. Degradasi panel tahunan diambil kira.",
+      "lifecycle": "Penjimatan terkumpul anda tolak kos sistem pendahuluan, penyelenggaraan tahunan, dan sebarang penggantian penyongsang yang dijadualkan, diunjurkan selama {{years}} tahun. Apabila bar bertukar hijau, anda telah mendapatkan semula pelaburan anda dan berada dalam keuntungan bersih. Degradasi panel tahunan diambil kira."
+    },
+    "description": {
+      "simple": "Berapa banyak yang anda perolehi atau rugi selepas menolak kos sistem pendahuluan.",
+      "lifecycle": "Berapa banyak yang anda perolehi atau rugi selepas menolak kos sistem, penyelenggaraan tahunan, dan penggantian penyongsang."
+    },
+    "yearRangeButton": "{{years}}-Tahun",
+    "yearRangeOption": "{{years}}-Tahun",
+    "netBenefitLabel": "Manfaat Bersih {{years}}-Tahun",
+    "seriesName": "Manfaat Bersih",
+    "yearLabel": "Thn {{year}}"
+  },
+  "financialRoadmap": {
+    "title": "Peta Jalan Kewangan",
+    "titleTooltip": "Garis masa ringkas pencapaian wang utama untuk pelaburan solar anda. Keputusan dunia sebenar akan berubah berdasarkan perubahan tarif, penyelenggaraan, cuaca, dan jangka hayat peralatan.",
+    "description": "Pencapaian utama untuk pelaburan solar anda sepanjang hayatnya.",
+    "milestones": {
+      "year0": {
+        "label": "Tahun 0",
+        "description": "Pelaburan awal sebanyak {{cost}} untuk sistem turnkey {{kwp}} kWp (panel, penyongsang, pemasangan, pendawaian, buruh dan permit)."
+      },
+      "year1": {
+        "label": "Tahun 1",
+        "description": "Anggaran penjimatan tahun pertama sebanyak {{savings}} pada bil elektrik anda melalui offset kredit NEM."
+      },
+      "breakEven": {
+        "label": "Tahun {{years}}",
+        "description": "Titik pulang modal. Penjimatan elektrik terkumpul anda kini telah menampung kos sistem. Setiap ringgit yang dijimat selepas ini adalah keuntungan bersih."
+      },
+      "inverterReplacement": {
+        "single": "Penggantian penyongsang",
+        "numbered": "Penggantian penyongsang #{{index}}",
+        "description": "{{label}} sebanyak ~{{cost}} ditolak daripada penjimatan terkumpul anda. Angka bayar balik di atas sudah mencerminkan kos ini."
+      },
+      "year25": {
+        "label": "Tahun 25",
+        "description": "Tempoh waranti panel standard tamat. Pada degradasi {{rate}}%/thn, sistem anda masih menghasilkan ~{{output}}% daripada output asalnya."
+      }
+    },
+    "footer": {
+      "lifecycle": "Mod Kitaran Hayat menolak penyelenggaraan ~{{maintenance}}/thn{{replacements}} daripada penjimatan terkumpul anda.",
+      "replacementsSuffix": " dan {{count}} penggantian penyongsang berjumlah ~{{total}}",
+      "escalationSuffix": " Unjuran juga menerapkan eskalasi tarif {{rate}}%/thn.",
+      "simpleWithEscalation": "Unjuran menerapkan eskalasi tarif {{rate}}%/thn. Tukar Mod Kewangan ke Kitaran Hayat untuk juga mengambil kira penyelenggaraan dan penggantian penyongsang.",
+      "simpleNoEscalation": "Tukar Mod Kewangan ke Kitaran Hayat untuk mengambil kira penyelenggaraan tahunan dan penggantian penyongsang."
+    }
+  },
+  "systemCost": {
+    "titleEmpty": "Kos Sistem",
+    "descriptionEmpty": "Tambah panel di Meja Kerja untuk menganggarkan kos pemasangan.",
+    "title": "Kos Sistem",
+    "titleTooltip": "Anggaran turnkey bawah ke atas berdasarkan kos solar kediaman Malaysia yang biasa. Merangkumi panel, penyongsang, pemasangan, pendawaian, permit, buruh, dan margin pemasang.",
+    "description": "Anggaran jumlah kos pemasangan turnkey.",
+    "quoteVariance": "±10% Varians Sebut Harga Biasa",
+    "pricingNote": "Harga pasaran Malaysia peringkat pertengahan (2026). Sebut harga pemasang sebenar biasanya jatuh dalam julat ±10% daripada angka ini.",
+    "segments": {
+      "panels": "Panel",
+      "inverter": "Penyongsang",
+      "mounting": "Pemasangan",
+      "electricalBos": "BOS Elektrik",
+      "electricalBosDetail": "Pendawaian, Perlindungan",
+      "scaffolding": "Perancah",
+      "scaffoldingDetail": "Bumbung Jubin Sahaja",
+      "permit": "Permit",
+      "permitCcc": "Termasuk Fi CCC",
+      "permitSeda": "Pendaftaran SEDA",
+      "labour": "Buruh",
+      "labourDetail": "+18% daripada Perkakasan",
+      "installerMargin": "Margin pemasang",
+      "installerMarginDetail": "+15% daripada Perkakasan + Buruh"
+    },
+    "roofLabels": {
+      "tile": "Jubin",
+      "metal": "Logam",
+      "flat": "Rata"
+    }
+  },
+  "systemAssumptions": {
+    "title": "Andaian Sistem",
+    "titleTooltip": "Input teknikal yang menyokong analisis ini. Sesetengahnya datang dari Google Solar API untuk bumbung anda, yang lain adalah lalai standard industri yang digunakan merentas sistem kediaman Malaysia.",
+    "description": "Andaian industri standard yang digunakan dalam analisis ini (bukan nilai yang diukur di tapak).",
+    "performanceRatio": {
+      "label": "Nisbah Prestasi",
+      "tooltip": "Berapa banyak output rated panel yang sebenarnya sampai ke meter anda selepas kehilangan dunia sebenar. Nombor yang lebih tinggi bermakna prestasi dunia sebenar yang lebih baik.",
+      "detail": "Tipikal untuk sistem kediaman Malaysia"
+    },
+    "assumedLosses": {
+      "label": "Kerugian Diandaikan",
+      "tooltip": "Bahagian penjanaan yang hilang akibat habuk, pendawaian, haba, dan penukaran penyongsang. Dikira secara automatik sebagai 100% tolak Nisbah Prestasi.",
+      "detail": "Pengotoran, kabel, penyongsang, suhu"
+    },
+    "degradation": {
+      "label": "Degradasi Panel",
+      "detail": "Penurunan output tahunan (jenis-N ~0.5%)"
+    },
+    "panelLifetime": {
+      "label": "Jangka Hayat Panel",
+      "tooltip": "Berapa lama panel dijangka terus menjana. Bayar balik anda sepatutnya jatuh jauh dalam tetingkap ini agar sistem berbaloi.",
+      "detail": "Daripada anggaran Google Solar API",
+      "value": "{{years}} tahun"
+    },
+    "azimuthPitch": {
+      "label": "Azimut / Kecondongan",
+      "tooltip": "Arah purata (azimut) dan kecerunan (kecondongan) panel aktif anda, ditimbang mengikut bilangan panel merentas segmen bumbung yang diduduki. Dikemas kini apabila anda menambah, mengeluarkan, atau mengalihkan panel di Meja Kerja.",
+      "multiSegment": "{{count}} panel merentas {{segments}} segmen bumbung",
+      "oneSegment": "{{count}} panel pada satu segmen bumbung"
+    },
+    "dcAc": {
+      "label": "Nisbah DC/AT",
+      "tooltip": "Berapa banyak kapasiti panel dipasangkan dengan setiap unit kapasiti penyongsang. Nilai melebihi 1.0 bermakna panel sedikit lebih besar daripada penyongsang, yang meningkatkan output harian tanpa penyongsang yang lebih besar.",
+      "detail": "Pensaizan penyongsang kediaman standard"
+    }
+  },
+  "disclaimers": {
+    "tnbTariff": "Anggaran adalah berdasarkan kadar tarif TNB yang diterbitkan di bawah Tempoh Kawal Selia 4 (RP4; berkuat kuasa 1 Julai 2025) dan peraturan NEM Rakyat 3.0 secara lalai. Bil sebenar mungkin berbeza akibat tempoh kitaran pengebilan, tarikh pembacaan meter dan pelarasan tarif. Buat pelarasan anda sendiri dalam paparan \"Lanjutan\" jika perlu.",
+    "afaRate": "Kadar Pelarasan Bahan Api Automatik (AFA) berubah setiap bulan. Anggaran menggunakan kadar terkini yang diketahui dan mungkin tidak mencerminkan perubahan masa hadapan.",
+    "eeiRebate": "PETRA telah menyatakan bahawa kadar Insentif Kecekapan Tenaga (EEI) mungkin diselaraskan untuk pengguna NEM. Pengiraan semasa menggunakan kadar EEI standard sementara menunggu pengubahsuaian rasmi.",
+    "solarGeneration": "Anggaran penjanaan solar adalah berdasarkan data purata sinaran matahari. Output sebenar berbeza dengan cuaca, teduhan, orientasi panel, pengotoran dan keadaan peralatan.",
+    "creditForfeiture": "Kredit berlebihan dilucutkan pada akhir setiap tahun kalendar. Tiada bayaran tunai dibuat untuk kredit yang tidak digunakan.",
+    "systemCost": "Kos sistem dianggarkan secara bawah ke atas: harga panel pengedar + carian SKU penyongsang + pemasangan bergantung pada jenis bumbung + BOS elektrik + permit + markup buruh + margin pemasang. Menganggap harga pemasang peringkat pertengahan dan pemasangan satu tingkat. Sebut harga turnkey Malaysia yang biasa jatuh dalam julat ±10% daripada angka ini. Sentiasa sahkan dengan pemasang berlesen yang berdaftar dengan SEDA.",
+    "paybackProjections": "Unjuran bayar balik dan penjimatan tidak mengambil kira penyelenggaraan tahunan (sekitar RM 500/thn) atau penggantian penyongsang (biasanya diperlukan pada tahun 10 hingga 15, kos sekitar RM 3,000 hingga 6,000). Eskalasi tarif boleh dikonfigurasi dalam paparan Lanjutan (lalai 0%). Semakan RP4 di Malaysia secara sejarah cenderung sekitar 3 hingga 5% setahun. Pulangan jangka panjang sebenar mungkin berbeza."
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { normalizeInverterReplacements, type InverterReplacement } from '@/lib/analysis'
@@ -41,6 +42,7 @@ export function FinancialRoadmap({
   inverterReplacementYear,
   annualMaintenanceRm
 }: FinancialRoadmapProps) {
+  const { t } = useTranslation('analysis')
   const outputAtYear25 = Math.round((1 - degradationRate) ** 24 * 100)
   const lifecycleActive = analysisMode === 'lifecycle'
   const maintenancePerYear = annualMaintenanceRm && annualMaintenanceRm > 0 ? annualMaintenanceRm : 500
@@ -54,51 +56,84 @@ export function FinancialRoadmap({
 
   const milestones: Milestone[] = [
     {
-      label: 'Year 0',
-      description: `Initial investment of ${formatCurrency(systemCostRm)} for a ${systemKwp} kWp turnkey system (panels, inverter, mounting, wiring, labour and permitting).`,
+      label: t('financialRoadmap.milestones.year0.label'),
+      description: t('financialRoadmap.milestones.year0.description', {
+        cost: formatCurrency(systemCostRm),
+        kwp: systemKwp
+      }),
       accent: 'bg-primary/20 border-primary/40'
     },
     {
-      label: 'Year 1',
-      description: `Estimated first-year savings of ${formatCurrency(year1Savings)} on your electricity bill through NEM credit offsets.`,
+      label: t('financialRoadmap.milestones.year1.label'),
+      description: t('financialRoadmap.milestones.year1.description', { savings: formatCurrency(year1Savings) }),
       accent: 'bg-emerald-100 border-emerald-300 dark:bg-emerald-950 dark:border-emerald-800'
     }
   ]
 
   if (paybackYears !== null && paybackYears <= 25) {
     milestones.push({
-      label: `Year ${paybackYears.toFixed(1)}`,
-      description:
-        'Break-even point. Your cumulative electricity savings have now covered the system cost. Every ringgit saved beyond this is net profit.',
+      label: t('financialRoadmap.milestones.breakEven.label', { years: paybackYears.toFixed(1) }),
+      description: t('financialRoadmap.milestones.breakEven.description'),
       accent: 'bg-emerald-100 border-emerald-300 dark:bg-emerald-950 dark:border-emerald-800'
     })
   }
 
   if (lifecycleActive && replacementsWithin25.length > 0) {
     replacementsWithin25.forEach((r, idx) => {
-      const ordinal = replacementsWithin25.length === 1 ? 'Inverter replacement' : `Inverter replacement #${idx + 1}`
+      const replacementLabel =
+        replacementsWithin25.length === 1
+          ? t('financialRoadmap.milestones.inverterReplacement.single')
+          : t('financialRoadmap.milestones.inverterReplacement.numbered', { index: idx + 1 })
       milestones.push({
         label: `Year ${r.year}`,
-        description: `${ordinal} of ~${formatCurrency(r.costRm)} subtracted from your cumulative savings. The payback figure above already reflects this cost.`,
+        description: t('financialRoadmap.milestones.inverterReplacement.description', {
+          label: replacementLabel,
+          cost: formatCurrency(r.costRm)
+        }),
         accent: 'bg-amber-100 border-amber-300 dark:bg-amber-950 dark:border-amber-800'
       })
     })
   }
 
   milestones.push({
-    label: 'Year 25',
-    description: `Standard panel warranty period ends. At ${degradationRate * 100}%/yr degradation, your system still produces ~${outputAtYear25}% of its original output.`,
+    label: t('financialRoadmap.milestones.year25.label'),
+    description: t('financialRoadmap.milestones.year25.description', {
+      rate: degradationRate * 100,
+      output: outputAtYear25
+    }),
     accent: 'bg-muted border-border'
   })
+
+  // Build footer text
+  let footerText: string
+  if (lifecycleActive) {
+    const replacementsSuffix =
+      replacementsWithin25.length > 0
+        ? t('financialRoadmap.footer.replacementsSuffix', {
+            count: replacementsWithin25.length,
+            plural: replacementsWithin25.length === 1 ? '' : 's',
+            total: formatCurrency(replacementCostTotal)
+          })
+        : ''
+    footerText =
+      t('financialRoadmap.footer.lifecycle', {
+        maintenance: formatCurrency(maintenancePerYear),
+        replacements: replacementsSuffix
+      }) + (tariffEscalationRate > 0 ? t('financialRoadmap.footer.escalationSuffix', { rate: (tariffEscalationRate * 100).toFixed(1) }) : '')
+  } else if (tariffEscalationRate > 0) {
+    footerText = t('financialRoadmap.footer.simpleWithEscalation', { rate: (tariffEscalationRate * 100).toFixed(1) })
+  } else {
+    footerText = t('financialRoadmap.footer.simpleNoEscalation')
+  }
 
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader>
         <CardTitle>
-          Financial Roadmap
-          <InfoTooltip text="A simplified timeline of key money milestones for your solar investment. Real-world results will shift based on tariff changes, maintenance, weather, and equipment lifespan." />
+          {t('financialRoadmap.title')}
+          <InfoTooltip text={t('financialRoadmap.titleTooltip')} />
         </CardTitle>
-        <CardDescription>Key milestones for your solar investment over its lifetime.</CardDescription>
+        <CardDescription>{t('financialRoadmap.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {milestones.map((milestone) => (
@@ -108,21 +143,7 @@ export function FinancialRoadmap({
           </div>
         ))}
 
-        <p className="mt-4 text-xs text-muted-foreground">
-          {lifecycleActive
-            ? `Lifecycle mode subtracts ~${formatCurrency(maintenancePerYear)}/yr maintenance${
-                replacementsWithin25.length > 0
-                  ? ` and ${replacementsWithin25.length} inverter replacement${replacementsWithin25.length === 1 ? '' : 's'} totalling ~${formatCurrency(replacementCostTotal)}`
-                  : ''
-              } from your cumulative savings.${
-                tariffEscalationRate > 0
-                  ? ` Projection also applies ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation.`
-                  : ''
-              }`
-            : tariffEscalationRate > 0
-              ? `Projection applies ${(tariffEscalationRate * 100).toFixed(1)}%/yr tariff escalation. Switch Financial Mode to Lifecycle to also factor in maintenance and inverter replacements.`
-              : 'Switch Financial Mode to Lifecycle to factor in yearly maintenance and inverter replacements.'}
-        </p>
+        <p className="mt-4 text-xs text-muted-foreground">{footerText}</p>
       </CardContent>
     </Card>
   )

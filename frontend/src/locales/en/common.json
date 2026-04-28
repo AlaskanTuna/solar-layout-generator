@@ -1,0 +1,63 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "delete": "Delete",
+    "discard": "Discard",
+    "download": "Download",
+    "edit": "Edit",
+    "next": "Next",
+    "ok": "OK",
+    "previous": "Previous",
+    "retry": "Retry",
+    "save": "Save",
+    "saving": "Saving…",
+    "search": "Search",
+    "skip": "Skip",
+    "submit": "Submit",
+    "tryAgain": "Try again",
+    "viewAll": "View all"
+  },
+  "states": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "empty": "Nothing to show",
+    "noResults": "No results"
+  },
+  "units": {
+    "kw": "kW",
+    "kwh": "kWh",
+    "kwhPerMonth": "kWh / month",
+    "kwhPerYear": "kWh / year",
+    "kwhPerKwp": "kWh / kWp",
+    "kwp": "kWp",
+    "myr": "RM",
+    "panels": "panels",
+    "percent": "%",
+    "year": "year",
+    "years": "years",
+    "month": "month",
+    "months": "months",
+    "ton": "t",
+    "kg": "kg"
+  },
+  "language": {
+    "label": "Language",
+    "toggleAria": "Change language"
+  },
+  "theme": {
+    "label": "Theme",
+    "toggleAria": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "branding": {
+    "appName": "SolarSim",
+    "tagline": "Affordable and Clean Energy",
+    "footerYear": "2026",
+    "sdg": "UN SDG 7: Affordable and Clean Energy"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "设置",
+    "subtitle": "管理应用偏好设置和本地数据。"
+  },
+  "account": {
+    "title": "账号",
+    "description": "您的登录档案及当前项目配额套餐。",
+    "emailLabel": "邮箱",
+    "emailFallback": "已登录用户",
+    "planLabel": "套餐",
+    "loadingPlan": "加载套餐中..."
+  },
+  "appearance": {
+    "title": "外观",
+    "description": "选择界面主题，当前解析主题为 {{resolved}}。",
+    "themeSet": "主题已设为 {{label}}。",
+    "options": {
+      "system": {
+        "label": "跟随系统",
+        "detail": "匹配您的设备设置"
+      },
+      "light": {
+        "label": "浅色",
+        "detail": "明亮界面"
+      },
+      "dark": {
+        "label": "深色",
+        "detail": "低光界面"
+      }
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "description": "查看并清除顶部导航铃铛图标显示的本地通知历史记录。",
+    "saved": "{{count}} 条已保存通知",
+    "unread": "{{count}} 条未读",
+    "clearButton": "清除通知",
+    "clearStatus": "通知历史记录已清除。"
+  },
+  "guidedTours": {
+    "title": "引导教程",
+    "description": "重置地图、工作台和分析页面的新手引导提示，以便重新播放。",
+    "resetButton": "重置引导教程",
+    "resetStatus": "下次打开地图、工作台或分析页面时，引导教程将重新显示。"
+  },
+  "recentActivity": {
+    "title": "最近活动",
+    "description": "清除用于排序常用项目的本地最近活动缓存。",
+    "clearButton": "清除最近活动",
+    "clearStatus": "最近项目活动缓存已清除。"
+  },
+  "planLabel": "{{tier}} 套餐"
+}

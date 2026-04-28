@@ -1,4 +1,5 @@
 import { Leaf } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Logo } from '@/components/ui/Logo'
 import type { ImageryQuality } from '@shared/types'
 
@@ -8,14 +9,16 @@ type HeaderProps = {
 }
 
 export function PdfFixedHeader({ projectName, generatedAt }: HeaderProps) {
+  const { t } = useTranslation('pdf')
+
   return (
     <header className="pdf-doc-header">
       <div className="flex items-center gap-2">
         <Logo className="h-6 w-6" />
         <div>
-          <p className="text-[10px] font-bold leading-tight text-foreground">Solar Installation Report</p>
+          <p className="text-[10px] font-bold leading-tight text-foreground">{t('header.reportTitle')}</p>
           <p className="text-[8px] leading-tight text-muted-foreground">
-            {projectName} &middot; Generated {generatedAt}
+            {t('header.generatedAt', { projectName, date: generatedAt })}
           </p>
         </div>
       </div>
@@ -28,17 +31,19 @@ type FooterProps = {
 }
 
 export function PdfFixedFooter({ imageryQuality }: FooterProps = {}) {
+  const { t } = useTranslation('pdf')
+
   return (
     <footer className="pdf-doc-footer">
       <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
         <Leaf className="h-2 w-2 text-green-600 dark:text-green-400" />
-        UN SDG 7: Affordable and Clean Energy
+        {t('footer.sdg')}
       </div>
       {imageryQuality === 'BASE' && (
         <>
           <div className="h-2 w-px bg-border" />
           <span className="text-[8px] font-medium text-amber-700 dark:text-amber-400">
-            Imagery: BASE (lower-resolution)
+            {t('footer.imageryBase')}
           </span>
         </>
       )}
@@ -46,7 +51,7 @@ export function PdfFixedFooter({ imageryQuality }: FooterProps = {}) {
       <div className="flex items-center gap-1">
         <Logo className="h-3.5 w-3.5" />
         <span className="font-heading text-[8px] font-semibold tracking-tight">SolarSim</span>
-        <span className="text-[8px] text-muted-foreground">&middot; 2026</span>
+        <span className="text-[8px] text-muted-foreground">{t('footer.year')}</span>
       </div>
     </footer>
   )

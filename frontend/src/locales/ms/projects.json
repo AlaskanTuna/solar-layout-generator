@@ -1,0 +1,60 @@
+{
+  "header": {
+    "title": "Projek",
+    "subtitle": "Urus semua projek penilaian solar anda"
+  },
+  "quota": {
+    "unlimited": "Projek tanpa had hari ini",
+    "limited": "{{used}} / {{limit}} projek hari ini · ditetapkan semula pada {{time}}"
+  },
+  "stats": {
+    "total": "Jumlah Projek",
+    "completed": "Selesai",
+    "inProgress": "Dalam Proses"
+  },
+  "filter": {
+    "all": "Semua ({{count}})",
+    "completed": "Selesai",
+    "inProgress": "Dalam Proses"
+  },
+  "empty": {
+    "noProjects": "Tiada projek lagi. Buat satu untuk memulakan.",
+    "noFiltered": "Tiada projek {{filter}}."
+  },
+  "newProjectButton": "Projek Baharu",
+  "howItWorks": {
+    "title": "Cara ia berfungsi",
+    "step1": {
+      "title": "Cari Lokasi",
+      "desc": "Cari bangunan anda di peta satelit"
+    },
+    "step2": {
+      "title": "Jana & Laraskan Susun Atur",
+      "desc": "Seret, putar, tambah atau buang panel"
+    },
+    "step3": {
+      "title": "Analisis Penjimatan",
+      "desc": "Lihat unjuran dan eksport PDF"
+    }
+  },
+  "dialog": {
+    "create": {
+      "title": "Buat Projek Baharu",
+      "description": "Beri nama projek penilaian solar anda, kemudian cari bangunan anda.",
+      "nameLabel": "Nama Projek",
+      "namePlaceholder": "cth. Solar Rumah Saya",
+      "submit": "Teruskan"
+    },
+    "delete": {
+      "title": "Padam Projek",
+      "description": "Adakah anda pasti mahu memadam \"{{name}}\"? Tindakan ini tidak boleh dibatalkan.",
+      "cancel": "Batal",
+      "confirm": "Padam",
+      "deleting": "Sedang memadam..."
+    }
+  },
+  "toast": {
+    "deleted": "\"{{name}}\" telah dipadam.",
+    "deleteFailed": "Gagal memadam projek."
+  }
+}

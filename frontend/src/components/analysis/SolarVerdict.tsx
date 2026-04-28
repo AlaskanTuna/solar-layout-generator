@@ -1,40 +1,20 @@
 import type { ReactNode } from 'react'
 import { Calendar, Clock, Gauge, Star, Wallet } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
 import { formatCurrency, formatNumber } from './formatters'
 import { getRoiCondition } from './roiVerdict'
 import { classifyNemFit, type AnalysisResultsRecord } from '@/lib/analysis'
 
-const NEM_FIT_LABELS = {
-  good: 'Good',
-  moderate: 'Moderate',
-  oversized: 'Oversized'
-} as const
-
 type SolarVerdictProps = {
   analysisResults: AnalysisResultsRecord
   paybackTooltip: ReactNode
 }
 
-function buildHeadline(analysisResults: AnalysisResultsRecord) {
-  const monthlySavings = analysisResults.averageMonthlySavingsRm
-  const payback = analysisResults.paybackYears
-
-  if (monthlySavings === null || monthlySavings <= 0) {
-    return 'Add panels on the Workbench to see your savings.'
-  }
-
-  if (payback === null || payback > 25) {
-    return `Solar saves you ${formatCurrency(monthlySavings)}/month but may not pay back within 25 years.`
-  }
-
-  return `Solar saves you ${formatCurrency(monthlySavings)}/month and pays back in about ${payback.toFixed(1)} years.`
-}
-
-function StarRating({ count, color, label }: { count: number; color: string; label: string }) {
+function StarRating({ count, color, label, ariaLabel }: { count: number; color: string; label: string; ariaLabel: string }) {
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${label}: ${count} out of 5 stars`}>
+    <div className="flex items-center gap-0.5" aria-label={ariaLabel}>
       {Array.from({ length: 5 }, (_, i) => (
         <Star key={i} className={`h-4 w-4 ${i < count ? `${color} fill-current` : 'text-muted-foreground/30'}`} />
       ))}
@@ -43,10 +23,24 @@ function StarRating({ count, color, label }: { count: number; color: string; lab
 }
 
 export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictProps) {
+  const { t } = useTranslation('analysis')
   const condition = getRoiCondition(analysisResults.paybackYears)
-  const headline = buildHeadline(analysisResults)
   const { averageMonthlySavingsRm, averageMonthlySavingsPct, annualTotals, paybackYears, monthlyBreakdown } =
     analysisResults
+
+  // Build headline using i18n keys
+  let headline: string
+  if (averageMonthlySavingsRm === null || averageMonthlySavingsRm <= 0) {
+    headline = t('verdict.headline.noPanels')
+  } else if (paybackYears === null || paybackYears > 25) {
+    headline = t('verdict.headline.noPayback', { amount: formatCurrency(averageMonthlySavingsRm) })
+  } else {
+    headline = t('verdict.headline.withPayback', {
+      amount: formatCurrency(averageMonthlySavingsRm),
+      years: paybackYears.toFixed(1)
+    })
+  }
+
   const nemFit = classifyNemFit({
     totalConsumptionKwh: annualTotals.totalConsumptionKwh,
     totalGenerationKwh: annualTotals.totalGenerationKwh,
@@ -62,29 +56,36 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
   const exportRatePct =
     annualTotals.totalGenerationKwh > 0 ? Math.round((totalExportKwh / annualTotals.totalGenerationKwh) * 100) : 0
 
+  const nemFitLabel = t(`verdict.metrics.nemFit.labels.${nemFit.fit}`)
+
   return (
     <Card className="border-border bg-card/90 shadow-sm">
       <CardHeader className="space-y-2">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <CardTitle>
-              Your Solar Verdict
+              {t('verdict.title')}
               <InfoTooltip>
                 <div className="space-y-2">
-                  <p>A plain-language summary of your solar investment.</p>
-                  <p>The star rating reflects how quickly the system pays back:</p>
+                  <p>{t('verdict.titleTooltip.intro')}</p>
+                  <p>{t('verdict.titleTooltip.ratingIntro')}</p>
                   <ul className="list-disc space-y-0.5 pl-4">
-                    <li>5 stars: under 6 years</li>
-                    <li>4 stars: 6 to 12 years</li>
-                    <li>3 stars: 12 to 25 years</li>
-                    <li>1 star: more than 25 years</li>
+                    <li>{t('verdict.titleTooltip.star5')}</li>
+                    <li>{t('verdict.titleTooltip.star4')}</li>
+                    <li>{t('verdict.titleTooltip.star3')}</li>
+                    <li>{t('verdict.titleTooltip.star1')}</li>
                   </ul>
                 </div>
               </InfoTooltip>
             </CardTitle>
-            <CardDescription>Headline recommendation and key numbers at a glance.</CardDescription>
+            <CardDescription>{t('verdict.description')}</CardDescription>
           </div>
-          <StarRating count={condition.starCount} color={condition.starColor} label={condition.label} />
+          <StarRating
+            count={condition.starCount}
+            color={condition.starColor}
+            label={condition.label}
+            ariaLabel={t('verdict.starAriaLabel', { label: condition.label, count: condition.starCount })}
+          />
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -96,43 +97,49 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Wallet className="h-3.5 w-3.5" />
               <span>
-                Monthly Savings
+                {t('verdict.metrics.monthlySavings.label')}
                 <InfoTooltip>
                   <div className="space-y-1.5">
-                    <p>The average amount you save on each monthly bill compared to having no solar.</p>
+                    <p>{t('verdict.metrics.monthlySavings.tooltip.line1')}</p>
                     <p className="text-primary-foreground/80">
-                      Calculated as the average of your 12 monthly bill differences over the year.
+                      {t('verdict.metrics.monthlySavings.tooltip.line2')}
                     </p>
                   </div>
                 </InfoTooltip>
               </span>
             </div>
             <p className="text-xl font-semibold tabular-nums">{formatCurrency(averageMonthlySavingsRm)}</p>
-            <p className="text-xs text-muted-foreground">{formatNumber(averageMonthlySavingsPct, '%')} off your bill</p>
+            <p className="text-xs text-muted-foreground">
+              {t('verdict.metrics.monthlySavings.detail', { pct: formatNumber(averageMonthlySavingsPct, '') })}
+            </p>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
               <span>
-                Annual Savings
+                {t('verdict.metrics.annualSavings.label')}
                 <InfoTooltip>
                   <div className="space-y-1.5">
-                    <p>Your total savings across all 12 months of the year.</p>
+                    <p>{t('verdict.metrics.annualSavings.tooltip.line1')}</p>
                     <p className="text-primary-foreground/80">
-                      Calculated as your annual bill without solar minus your annual bill with solar.
+                      {t('verdict.metrics.annualSavings.tooltip.line2')}
                     </p>
                   </div>
                 </InfoTooltip>
               </span>
             </div>
             <p className="text-xl font-semibold tabular-nums">{formatCurrency(annualTotals.totalSavingsRm)}</p>
-            <p className="text-xs text-muted-foreground">Baseline {formatCurrency(annualTotals.totalBaselineRm)}</p>
+            <p className="text-xs text-muted-foreground">
+              {t('verdict.metrics.annualSavings.baseline', { amount: formatCurrency(annualTotals.totalBaselineRm) })}
+            </p>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
               <span>
-                {analysisResults.analysisMode === 'lifecycle' ? 'Lifecycle Payback' : 'Simple Payback'}
+                {analysisResults.analysisMode === 'lifecycle'
+                  ? t('verdict.metrics.payback.lifecycleLabel')
+                  : t('verdict.metrics.payback.simpleLabel')}
                 <InfoTooltip>{paybackTooltip}</InfoTooltip>
               </span>
             </div>
@@ -143,39 +150,41 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Gauge className="h-3.5 w-3.5" />
               <span>
-                NEM Fit
+                {t('verdict.metrics.nemFit.label')}
                 <InfoTooltip>
                   <div className="space-y-2">
-                    <p>How well this layout is sized for your usage under the current solar incentive program.</p>
+                    <p>{t('verdict.metrics.nemFit.tooltip.intro')}</p>
                     <div className="space-y-1">
                       <p>
-                        <span className="font-semibold">Good:</span> Most generation offsets your own bill, with very
-                        few credits left over.
+                        <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.good')}</span>{' '}
+                        {t('verdict.metrics.nemFit.tooltip.goodDetail')}
                       </p>
                       <p>
-                        <span className="font-semibold">Moderate:</span> Some credit buildup. You will export more than
-                        you use in a few months and rely on previously banked credits in others.
+                        <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.moderate')}</span>{' '}
+                        {t('verdict.metrics.nemFit.tooltip.moderateDetail')}
                       </p>
                       <p>
-                        <span className="font-semibold">Oversized:</span> Heavy credit buildup. Excess credits are not
-                        cash and are forfeited at year-end if unused.
+                        <span className="font-semibold">{t('verdict.metrics.nemFit.tooltip.oversized')}</span>{' '}
+                        {t('verdict.metrics.nemFit.tooltip.oversizedDetail')}
                       </p>
                     </div>
                     <div className="space-y-0.5 border-t border-primary-foreground/20 pt-2 text-primary-foreground/80">
                       <p>
-                        Import Rate: <span className="font-semibold text-primary-foreground">{importRatePct}%</span> of
-                        usage drawn from the grid
+                        {t('verdict.metrics.nemFit.tooltip.importRate')}{' '}
+                        <span className="font-semibold text-primary-foreground">{importRatePct}%</span>{' '}
+                        {t('verdict.metrics.nemFit.tooltip.importRateSuffix')}
                       </p>
                       <p>
-                        Export Rate: <span className="font-semibold text-primary-foreground">{exportRatePct}%</span> of
-                        generation sent back to the grid
+                        {t('verdict.metrics.nemFit.tooltip.exportRate')}{' '}
+                        <span className="font-semibold text-primary-foreground">{exportRatePct}%</span>{' '}
+                        {t('verdict.metrics.nemFit.tooltip.exportRateSuffix')}
                       </p>
                     </div>
                   </div>
                 </InfoTooltip>
               </span>
             </div>
-            <p className="text-xl font-semibold">{NEM_FIT_LABELS[nemFit.fit]}</p>
+            <p className="text-xl font-semibold">{nemFitLabel}</p>
             <p className="text-xs text-muted-foreground">{nemFit.detail}</p>
           </div>
         </div>

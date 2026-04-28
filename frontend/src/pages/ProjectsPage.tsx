@@ -1,5 +1,6 @@
 import { useState, useMemo, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { listProjects, deleteProject } from '@/api/projects'
 import type { ProjectResponse } from '@/api/projects'
@@ -40,6 +41,7 @@ function formatResetTime(resetsAt: string): string {
 }
 
 export function ProjectsPage() {
+  const { t } = useTranslation('projects')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -55,8 +57,12 @@ export function ProjectsPage() {
   const quotaLabel = !quota
     ? null
     : isUnlimited
-      ? 'Unlimited projects today'
-      : `${quota.used} / ${quota.limit} projects today · resets at ${formatResetTime(quota.resetsAt)}`
+      ? t('quota.unlimited')
+      : t('quota.limited', {
+          used: quota.used,
+          limit: quota.limit,
+          time: formatResetTime(quota.resetsAt)
+        })
   const quotaReached = !!quota && quota.limit !== null && quota.used >= quota.limit
 
   const filtered = useMemo(() => {
@@ -74,20 +80,20 @@ export function ProjectsPage() {
     {
       step: 1,
       icon: <MapPin className="h-4 w-4" />,
-      title: 'Search Location',
-      desc: 'Find your building on the satellite map'
+      titleKey: 'howItWorks.step1.title',
+      descKey: 'howItWorks.step1.desc'
     },
     {
       step: 2,
       icon: <SlidersHorizontal className="h-4 w-4" />,
-      title: 'Generate & Adjust Layout',
-      desc: 'Drag, rotate, add or remove panels'
+      titleKey: 'howItWorks.step2.title',
+      descKey: 'howItWorks.step2.desc'
     },
     {
       step: 3,
       icon: <FileBarChart className="h-4 w-4" />,
-      title: 'Analyze Savings',
-      desc: 'View projections and export PDF'
+      titleKey: 'howItWorks.step3.title',
+      descKey: 'howItWorks.step3.desc'
     }
   ]
 
@@ -107,9 +113,9 @@ export function ProjectsPage() {
     try {
       await deleteProject(deleteTarget.id)
       await queryClient.invalidateQueries({ queryKey: ['projects'] })
-      notify.success(`"${deleteTarget.name}" has been deleted.`)
+      notify.success(t('toast.deleted', { name: deleteTarget.name }))
     } catch (err) {
-      notify.error(err instanceof Error ? err.message : 'Failed to delete project.')
+      notify.error(err instanceof Error ? err.message : t('toast.deleteFailed'))
     } finally {
       setIsDeleting(false)
       setDeleteTarget(null)
@@ -125,8 +131,8 @@ export function ProjectsPage() {
               <FolderKanban className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="font-heading text-3xl font-bold tracking-tight">Projects</h1>
-              <p className="mt-1 max-w-lg text-muted-foreground">Manage all your solar assessment projects</p>
+              <h1 className="font-heading text-3xl font-bold tracking-tight">{t('header.title')}</h1>
+              <p className="mt-1 max-w-lg text-muted-foreground">{t('header.subtitle')}</p>
               {quotaLabel && (
                 <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{quotaLabel}</p>
               )}
@@ -144,7 +150,7 @@ export function ProjectsPage() {
                   <FolderOpen className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground">Total Projects</p>
+                  <p className="text-[11px] text-muted-foreground">{t('stats.total')}</p>
                   <p className="font-heading text-lg font-bold">{totalProjects}</p>
                 </div>
               </div>
@@ -153,7 +159,7 @@ export function ProjectsPage() {
                   <BarChart3 className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground">Completed</p>
+                  <p className="text-[11px] text-muted-foreground">{t('stats.completed')}</p>
                   <p className="font-heading text-lg font-bold text-emerald-600 dark:text-emerald-400">
                     {completedProjects}
                   </p>
@@ -164,7 +170,7 @@ export function ProjectsPage() {
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground">In Progress</p>
+                  <p className="text-[11px] text-muted-foreground">{t('stats.inProgress')}</p>
                   <p className="font-heading text-lg font-bold text-amber-600 dark:text-amber-400">{inProgress}</p>
                 </div>
               </div>
@@ -180,7 +186,11 @@ export function ProjectsPage() {
                     filter === f ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {f === 'all' ? `All (${(projects ?? []).length})` : f === 'completed' ? 'Completed' : 'In Progress'}
+                  {f === 'all'
+                    ? t('filter.all', { count: (projects ?? []).length })
+                    : f === 'completed'
+                      ? t('filter.completed')
+                      : t('filter.inProgress')}
                 </button>
               ))}
             </div>
@@ -200,7 +210,9 @@ export function ProjectsPage() {
                 <div className="glass-card flex flex-col items-center py-16 text-center animate-fade-in-up">
                   <FolderOpen className="h-12 w-12 text-muted-foreground/30" />
                   <p className="mt-4 text-sm text-muted-foreground">
-                    {filter === 'all' ? 'No projects yet. Create one to get started.' : `No ${filter} projects.`}
+                    {filter === 'all'
+                      ? t('empty.noProjects')
+                      : t('empty.noFiltered', { filter })}
                   </p>
                 </div>
               ) : (
@@ -221,7 +233,7 @@ export function ProjectsPage() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
                       <Plus className="h-6 w-6" />
                     </div>
-                    <span className="text-sm font-medium">New Project</span>
+                    <span className="text-sm font-medium">{t('newProjectButton')}</span>
                   </button>
                 </div>
               )}
@@ -234,7 +246,7 @@ export function ProjectsPage() {
               <div className="border-b border-border bg-muted/30 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Lightbulb className="h-4 w-4 text-amber-500" />
-                  <h3 className="font-heading text-sm font-semibold">How it works</h3>
+                  <h3 className="font-heading text-sm font-semibold">{t('howItWorks.title')}</h3>
                 </div>
               </div>
               <div className="flex flex-col divide-y divide-border">
@@ -243,8 +255,8 @@ export function ProjectsPage() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       {s.icon}
                     </div>
-                    <p className="mt-2 text-sm font-semibold">{s.title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
+                    <p className="mt-2 text-sm font-semibold">{t(s.titleKey)}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t(s.descKey)}</p>
                   </div>
                 ))}
               </div>
@@ -258,16 +270,14 @@ export function ProjectsPage() {
         <DialogContent>
           <form onSubmit={handleCreateProject}>
             <DialogHeader>
-              <DialogTitle>Create New Project</DialogTitle>
-              <DialogDescription>
-                Give your solar assessment project a name, then search for your building.
-              </DialogDescription>
+              <DialogTitle>{t('dialog.create.title')}</DialogTitle>
+              <DialogDescription>{t('dialog.create.description')}</DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-2">
-              <Label htmlFor="project-name">Project Name</Label>
+              <Label htmlFor="project-name">{t('dialog.create.nameLabel')}</Label>
               <Input
                 id="project-name"
-                placeholder="e.g. My Home Solar"
+                placeholder={t('dialog.create.namePlaceholder')}
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 required
@@ -276,7 +286,7 @@ export function ProjectsPage() {
             </div>
             <DialogFooter className="mt-6">
               <Button type="submit" disabled={!projectName.trim()}>
-                Continue
+                {t('dialog.create.submit')}
               </Button>
             </DialogFooter>
           </form>
@@ -287,17 +297,17 @@ export function ProjectsPage() {
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Project</DialogTitle>
+            <DialogTitle>{t('dialog.delete.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete &ldquo;{deleteTarget?.name}&rdquo;? This action cannot be undone.
+              {t('dialog.delete.description', { name: deleteTarget?.name ?? '' })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>
-              Cancel
+              {t('dialog.delete.cancel')}
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? t('dialog.delete.deleting') : t('dialog.delete.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

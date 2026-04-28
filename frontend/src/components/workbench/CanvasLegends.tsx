@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { COLORS } from '@/lib/constants'
 import type { OverlayMode } from '@/hooks/useOverlayImages'
 
@@ -17,19 +18,25 @@ type CanvasLegendsProps = {
 }
 
 export function CanvasLegends({ showSegments, segmentHulls, overlayMode, isOverlayLoading }: CanvasLegendsProps) {
+  const { t } = useTranslation('workbench')
+
   return (
     <div className="absolute bottom-4 left-4 z-10 flex flex-col gap-2">
       {showSegments && segmentHulls.length > 0 && (
         <div className="rounded-lg bg-black/70 px-3 py-2 text-xs text-white backdrop-blur-sm">
-          <p className="mb-1 font-medium">Roof Segments</p>
+          <p className="mb-1 font-medium">{t('legends.roofSegments')}</p>
           {segmentHulls.map((hull) => (
             <p key={hull.segmentIndex} className="flex items-center gap-1.5">
               <span
                 className="inline-block h-2.5 w-2.5 rounded-full"
                 style={{ background: hull.color.replace('0.35)', '1)') }}
               />
-              Seg {hull.segmentIndex + 1}: {hull.azimuth.toFixed(0)}° / {hull.pitch.toFixed(0)}° ({hull.panelCount}{' '}
-              panels)
+              {t('legends.segmentLabel', {
+                index: hull.segmentIndex + 1,
+                azimuth: hull.azimuth.toFixed(0),
+                pitch: hull.pitch.toFixed(0),
+                count: hull.panelCount
+              })}
             </p>
           ))}
         </div>
@@ -40,17 +47,17 @@ export function CanvasLegends({ showSegments, segmentHulls, overlayMode, isOverl
             <div className="flex flex-col items-start gap-1.5">
               <div className="flex items-center gap-1.5">
                 <div className="h-3 w-3 rounded-sm bg-green-500/60" />
-                <span className="text-[9px] font-medium text-white/90">Roof</span>
+                <span className="text-[9px] font-medium text-white/90">{t('legends.mask.roof')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="h-3 w-3 rounded-sm bg-black/40 ring-1 ring-white/20" />
-                <span className="text-[9px] font-medium text-white/90">Off-roof</span>
+                <span className="text-[9px] font-medium text-white/90">{t('legends.mask.offRoof')}</span>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-1">
               <span className="text-[9px] font-medium text-white/90">
-                {overlayMode === 'annual-flux' ? 'Sunny' : 'High'}
+                {overlayMode === 'annual-flux' ? t('legends.flux.high') : t('legends.dsm.high')}
               </span>
               <div
                 className="w-3 rounded-sm"
@@ -60,7 +67,7 @@ export function CanvasLegends({ showSegments, segmentHulls, overlayMode, isOverl
                 }}
               />
               <span className="text-[9px] font-medium text-white/90">
-                {overlayMode === 'annual-flux' ? 'Shady' : 'Low'}
+                {overlayMode === 'annual-flux' ? t('legends.flux.low') : t('legends.dsm.low')}
               </span>
             </div>
           )}

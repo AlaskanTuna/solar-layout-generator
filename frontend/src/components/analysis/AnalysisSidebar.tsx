@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown, Plus, Sliders, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,21 +31,6 @@ import type { AnalysisFormState } from '@/hooks/useAnalysisForm'
 import type { ParsedBuildingInsights } from '@/lib/buildingInsights'
 import type { PanelModel, RoofType, TariffRates } from '@shared/types'
 
-const CONNECTION_PHASE_LABELS: Record<ConnectionPhase, string> = {
-  single: 'Single Phase',
-  three: 'Three Phase'
-}
-
-const ROOF_TYPE_LABELS: Record<RoofType, string> = {
-  tile: 'Tile (Clay/Concrete)',
-  metal: 'Metal',
-  flat: 'Flat (Concrete Slab)'
-}
-
-const ANALYSIS_MODE_LABELS: Record<AnalysisMode, string> = {
-  simple: 'Simple',
-  lifecycle: 'Lifecycle'
-}
 
 function DegradationInput({ value, onChange }: { value: number; onChange: (rate: number) => void }) {
   const [text, setText] = useState(() => (value === 0 ? '' : String(Math.round(value * 10000) / 100)))
@@ -129,10 +115,27 @@ export function AnalysisSidebar({
   tariffRatesDefaults,
   tariffEffectiveDate
 }: AnalysisSidebarProps) {
+  const { t } = useTranslation('analysis')
   const [billImageOpen, setBillImageOpen] = useState(false)
   const [tariffModalOpen, setTariffModalOpen] = useState(false)
   const handleBillImageOpenChange = useCallback((open: boolean) => setBillImageOpen(open), [])
   const tariffOverrideCount = formState.tariffRatesOverride ? Object.keys(formState.tariffRatesOverride).length : 0
+
+  const CONNECTION_PHASE_LABELS: Record<ConnectionPhase, string> = {
+    single: t('sidebar.connectionPhase.labels.single'),
+    three: t('sidebar.connectionPhase.labels.three')
+  }
+
+  const ROOF_TYPE_LABELS: Record<RoofType, string> = {
+    tile: t('sidebar.roofType.labels.tile'),
+    metal: t('sidebar.roofType.labels.metal'),
+    flat: t('sidebar.roofType.labels.flat')
+  }
+
+  const ANALYSIS_MODE_LABELS: Record<AnalysisMode, string> = {
+    simple: t('sidebar.financialMode.labels.simple'),
+    lifecycle: t('sidebar.financialMode.labels.lifecycle')
+  }
 
   return (
     <aside className="xl:overflow-y-auto xl:w-[24rem] xl:min-w-[24rem]">
@@ -146,37 +149,37 @@ export function AnalysisSidebar({
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-lg bg-muted p-3">
               <p className="text-muted-foreground">
-                System Size
-                <InfoTooltip text="The maximum power your solar system can produce under ideal sunlight, measured in kilowatt-peak (kWp)." />
+                {t('sidebar.systemSize.label')}
+                <InfoTooltip text={t('sidebar.systemSize.tooltip')} />
               </p>
               <p className="mt-1 text-lg font-semibold">{formatNumber(systemKwp, 'kWp')}</p>
             </div>
             <div className="rounded-lg bg-muted p-3">
-              <p className="text-muted-foreground">Active Panels</p>
+              <p className="text-muted-foreground">{t('sidebar.activePanels')}</p>
               <p className="mt-1 text-lg font-semibold">{activePanelCount}</p>
             </div>
           </div>
           {selectedPanelModel && (
             <div className="rounded-lg bg-muted p-3">
-              <p className="text-xs text-muted-foreground">Panel Model</p>
+              <p className="text-xs text-muted-foreground">{t('sidebar.panelModel')}</p>
               <p className="mt-1 text-sm font-semibold text-foreground">{selectedPanelModel.name}</p>
             </div>
           )}
           {selectedPanelModel && (
             <details className="rounded-lg border border-border bg-muted/50 text-sm">
               <summary className="cursor-pointer px-3 py-2 font-medium text-foreground select-none">
-                Panel Specifications
+                {t('sidebar.panelSpecs.summary')}
               </summary>
               <div className="space-y-1 border-t border-border px-3 py-2 text-muted-foreground">
                 <p>
-                  Dimensions: {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
+                  {t('sidebar.panelSpecs.dimensions')} {selectedPanelModel.heightM} &times; {selectedPanelModel.widthM} m
                 </p>
-                <p>Capacity: {selectedPanelModel.capacityWp} Wp</p>
-                <p>Efficiency: {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
-                {selectedPanelModel.costPerWp > 0 && <p>Cost: RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
-                <p>Max Panels: {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
+                <p>{t('sidebar.panelSpecs.capacity')} {selectedPanelModel.capacityWp} Wp</p>
+                <p>{t('sidebar.panelSpecs.efficiency')} {(selectedPanelModel.efficiency * 100).toFixed(1)}%</p>
+                {selectedPanelModel.costPerWp > 0 && <p>{t('sidebar.panelSpecs.cost')} RM {selectedPanelModel.costPerWp.toFixed(2)} / Wp</p>}
+                <p>{t('sidebar.panelSpecs.maxPanels')} {buildingInsights.solarPotential.maxArrayPanelsCount}</p>
                 {buildingInsights.solarPotential.panelLifetimeYears != null && (
-                  <p>Lifespan: {buildingInsights.solarPotential.panelLifetimeYears} years</p>
+                  <p>{t('sidebar.panelSpecs.lifespan')} {buildingInsights.solarPotential.panelLifetimeYears} years</p>
                 )}
               </div>
             </details>
@@ -184,50 +187,44 @@ export function AnalysisSidebar({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="border-t border-border pt-3">
-            <p className="text-xs text-muted-foreground">
-              Adjust assumptions and review the NEM billing outcome before saving.
-            </p>
+            <p className="text-xs text-muted-foreground">{t('sidebar.adjustHint')}</p>
           </div>
           {panelsMissingMonthlyEnergy.length > 0 && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-              {panelsMissingMonthlyEnergy.length} panel(s) are missing monthly recompute data. They are treated as 0 kWh
-              until the layout is saved again from the Workbench.
+              {t('sidebar.missingEnergy', { count: panelsMissingMonthlyEnergy.length })}
             </div>
           )}
 
           {systemKwp > phaseCapacityCapKw && phaseCapacityCapKw > 0 && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-              The current array size exceeds the {phaseCapacityCapKw} kW cap for a {formState.connectionPhase}
-              -phase NEM connection.
+              {t('sidebar.phaseCapExceeded', { cap: phaseCapacityCapKw, phase: formState.connectionPhase })}
             </div>
           )}
 
           <div data-tour="consumption-input" className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
             <div className="space-y-1">
               <Label>
-                Monthly Electricity Consumption (kWh)
+                {t('sidebar.consumption.label')}
                 <InfoTooltip open={billImageOpen || undefined}>
                   <div className="space-y-1.5">
-                    <p>Your average monthly electricity usage in kWh. Look for "Purata Penggunaan" on your TNB bill:</p>
+                    <p>{t('sidebar.consumption.tooltipText')}</p>
                     <ImagePopup
                       src={tnbBillImg}
-                      alt="TNB bill showing average kWh usage"
+                      alt={t('sidebar.consumption.imageAlt')}
                       className="w-full rounded"
                       onOpenChange={handleBillImageOpenChange}
                     />
-                    <p className="text-[10px]">Click image to enlarge</p>
+                    <p className="text-[10px]">{t('sidebar.consumption.imageHint')}</p>
                   </div>
                 </InfoTooltip>
               </Label>
-              <p className="text-xs text-muted-foreground">
-                Enter the kWh amount from your TNB bill, not the RM amount.
-              </p>
+              <p className="text-xs text-muted-foreground">{t('sidebar.consumption.subtext')}</p>
             </div>
             <Input
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              placeholder="e.g. 600"
+              placeholder={t('sidebar.consumption.placeholder')}
               value={formState.monthlyConsumptionKwh === 0 ? '' : String(formState.monthlyConsumptionKwh)}
               onChange={(event) => {
                 const raw = event.target.value.replace(/[^0-9]/g, '')
@@ -237,7 +234,7 @@ export function AnalysisSidebar({
               }}
             />
             <div className="mt-2 flex items-center gap-2">
-              <Label className="text-xs text-muted-foreground">Profile:</Label>
+              <Label className="text-xs text-muted-foreground">{t('sidebar.consumption.profileLabel')}</Label>
               <div className="inline-flex rounded-md border border-border bg-muted p-0.5 text-xs">
                 <button
                   type="button"
@@ -246,7 +243,7 @@ export function AnalysisSidebar({
                     setFormState((c) => (c ? { ...c, consumptionProfile: 'flat' as ConsumptionProfile } : c))
                   }
                 >
-                  Flat
+                  {t('sidebar.consumption.profileFlat')}
                 </button>
                 <button
                   type="button"
@@ -255,15 +252,17 @@ export function AnalysisSidebar({
                     setFormState((c) => (c ? { ...c, consumptionProfile: 'seasonal' as ConsumptionProfile } : c))
                   }
                 >
-                  Seasonal
+                  {t('sidebar.consumption.profileSeasonal')}
                 </button>
               </div>
-              <InfoTooltip text="Flat assumes the same kWh every month. Seasonal applies typical Malaysian variation, with higher use in hot months and lower use during the monsoon." />
+              <InfoTooltip text={t('sidebar.consumption.profileTooltip')} />
             </div>
             {formState.consumptionProfile === 'seasonal' && (
               <p className="text-xs text-muted-foreground">
-                Monthly range: {Math.round(formState.monthlyConsumptionKwh * Math.min(...SEASONAL_MULTIPLIERS))} to{' '}
-                {Math.round(formState.monthlyConsumptionKwh * Math.max(...SEASONAL_MULTIPLIERS))} kWh
+                {t('sidebar.consumption.seasonalRange', {
+                  min: Math.round(formState.monthlyConsumptionKwh * Math.min(...SEASONAL_MULTIPLIERS)),
+                  max: Math.round(formState.monthlyConsumptionKwh * Math.max(...SEASONAL_MULTIPLIERS))
+                })}
               </p>
             )}
           </div>
@@ -271,32 +270,26 @@ export function AnalysisSidebar({
           <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
             <div className="space-y-1">
               <Label>
-                Connection Phase
+                {t('sidebar.connectionPhase.label')}
                 <InfoTooltip>
                   <div className="space-y-2">
-                    <p>
-                      How electricity enters your home from the grid. You can check this on your TNB bill under "Jenis
-                      Fasa" or from the labels on your meter box.
-                    </p>
+                    <p>{t('sidebar.connectionPhase.tooltip.intro')}</p>
                     <div className="space-y-1">
                       <p>
-                        <span className="font-semibold">Single Phase:</span> Standard in most Malaysian homes. Solar
-                        export is capped at 5 kW under TNB's NEM 3.0 rules.
+                        <span className="font-semibold">{t('sidebar.connectionPhase.tooltip.single')}</span>{' '}
+                        {t('sidebar.connectionPhase.tooltip.singleDetail')}
                       </p>
                       <p>
-                        <span className="font-semibold">Three Phase:</span> Common in larger bungalows or homes with
-                        heavy appliances. The cap rises to 12.5 kW.
+                        <span className="font-semibold">{t('sidebar.connectionPhase.tooltip.three')}</span>{' '}
+                        {t('sidebar.connectionPhase.tooltip.threeDetail')}
                       </p>
                     </div>
-                    <p className="text-primary-foreground/80">
-                      If your array is larger than the cap, you'll need to remove panels on the Workbench or apply to
-                      upgrade your TNB connection before installation.
-                    </p>
+                    <p className="text-primary-foreground/80">{t('sidebar.connectionPhase.tooltip.warning')}</p>
                   </div>
                 </InfoTooltip>
               </Label>
               <p className="text-xs text-muted-foreground">
-                Capacity cap: {phaseCapacityCapKw || 0} kW for the selected connection type.
+                {t('sidebar.connectionPhase.capacityCap', { cap: phaseCapacityCapKw || 0 })}
               </p>
             </div>
             <DropdownMenu>
@@ -329,10 +322,10 @@ export function AnalysisSidebar({
             <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
               <div className="space-y-1">
                 <Label>
-                  Roof Type
-                  <InfoTooltip text="The roof material decides the mounting hardware and labour cost. Tile roofs need scaffolding and special hooks. Metal roofs use simple L-foot clamps. Flat roofs use ballasted frames. Simple view assumes tile, which is most common in Malaysian homes." />
+                  {t('sidebar.roofType.label')}
+                  <InfoTooltip text={t('sidebar.roofType.tooltip')} />
                 </Label>
-                <p className="text-xs text-muted-foreground">Affects mounting cost and, for tile, scaffolding.</p>
+                <p className="text-xs text-muted-foreground">{t('sidebar.roofType.subtext')}</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -364,27 +357,24 @@ export function AnalysisSidebar({
               <div className="space-y-3 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label className="text-sm font-semibold text-foreground">
-                    Financial Mode
+                    {t('sidebar.financialMode.label')}
                     <InfoTooltip>
                       <div className="space-y-2">
-                        <p>Choose how the payback and 25-year savings are calculated.</p>
+                        <p>{t('sidebar.financialMode.tooltip.intro')}</p>
                         <div className="space-y-1">
                           <p>
-                            <span className="font-semibold">Simple:</span> Counts only the upfront installation cost.
-                            Gives the cleanest, most optimistic payback figure.
+                            <span className="font-semibold">{t('sidebar.financialMode.tooltip.simple')}</span>{' '}
+                            {t('sidebar.financialMode.tooltip.simpleDetail')}
                           </p>
                           <p>
-                            <span className="font-semibold">Lifecycle:</span> Also subtracts yearly maintenance and any
-                            inverter replacements you schedule. Payback is longer but the 25-year picture is more
-                            realistic.
+                            <span className="font-semibold">{t('sidebar.financialMode.tooltip.lifecycle')}</span>{' '}
+                            {t('sidebar.financialMode.tooltip.lifecycleDetail')}
                           </p>
                         </div>
                       </div>
                     </InfoTooltip>
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Switch to Lifecycle for a more realistic long-term view.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('sidebar.financialMode.subtext')}</p>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -433,7 +423,7 @@ export function AnalysisSidebar({
                 {formState.analysisMode === 'lifecycle' && (
                   <div className="space-y-3">
                     <div>
-                      <Label className="text-[11px] text-muted-foreground">Annual Maintenance (RM/yr)</Label>
+                      <Label className="text-[11px] text-muted-foreground">{t('sidebar.financialMode.maintenance.label')}</Label>
                       <Input
                         type="number"
                         min={0}
@@ -447,7 +437,7 @@ export function AnalysisSidebar({
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label className="text-[11px] text-muted-foreground">Inverter Replacements</Label>
+                        <Label className="text-[11px] text-muted-foreground">{t('sidebar.financialMode.inverterReplacements.label')}</Label>
                         <Button
                           type="button"
                           variant="ghost"
@@ -468,18 +458,18 @@ export function AnalysisSidebar({
                           }
                         >
                           <Plus className="h-3.5 w-3.5" />
-                          Add
+                          {t('sidebar.financialMode.inverterReplacements.add')}
                         </Button>
                       </div>
                       {(formState.inverterReplacements ?? []).length === 0 && (
                         <p className="text-[11px] text-muted-foreground">
-                          No replacements scheduled. Click Add to plan one.
+                          {t('sidebar.financialMode.inverterReplacements.empty')}
                         </p>
                       )}
                       {(formState.inverterReplacements ?? []).map((replacement, index) => (
                         <div key={index} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Cost (RM)</Label>
+                            <Label className="text-[10px] text-muted-foreground">{t('sidebar.financialMode.inverterReplacements.costLabel')}</Label>
                             <Input
                               type="number"
                               min={0}
@@ -498,7 +488,7 @@ export function AnalysisSidebar({
                             />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">At Year</Label>
+                            <Label className="text-[10px] text-muted-foreground">{t('sidebar.financialMode.inverterReplacements.yearLabel')}</Label>
                             <Input
                               type="number"
                               min={1}
@@ -522,7 +512,7 @@ export function AnalysisSidebar({
                             variant="ghost"
                             size="sm"
                             className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive"
-                            aria-label={`Remove replacement ${index + 1}`}
+                            aria-label={t('sidebar.financialMode.inverterReplacements.removeAriaLabel', { index: index + 1 })}
                             onClick={() =>
                               setFormState((c) => {
                                 if (!c?.inverterReplacements) return c
@@ -543,21 +533,21 @@ export function AnalysisSidebar({
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
-                    AFA Rate
-                    <InfoTooltip text="A government-set surcharge or rebate added to every kWh of consumption, in sen/kWh. Negative values mean a rebate. Updated periodically." />
+                    {t('sidebar.afa.label')}
+                    <InfoTooltip text={t('sidebar.afa.tooltip')} />
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Current Automatic Fuel Adjustment in sen/kWh. Negative values represent a rebate.
+                    {t('sidebar.afa.subtext')}
                     {tariffEffectiveDate && (
                       <>
                         {' '}
                         <span className="text-muted-foreground/80">
-                          Seeded value verified{' '}
-                          {new Date(tariffEffectiveDate).toLocaleDateString('en-MY', {
-                            year: 'numeric',
-                            month: 'short'
+                          {t('sidebar.afa.seededDate', {
+                            date: new Date(tariffEffectiveDate).toLocaleDateString('en-MY', {
+                              year: 'numeric',
+                              month: 'short'
+                            })
                           })}
-                          .
                         </span>
                       </>
                     )}
@@ -566,7 +556,7 @@ export function AnalysisSidebar({
                 <Input
                   type="text"
                   inputMode="decimal"
-                  placeholder="e.g. 3.70"
+                  placeholder={t('sidebar.afa.placeholder')}
                   value={formState.afaRateSenPerKwh === 0 ? '' : String(formState.afaRateSenPerKwh)}
                   onChange={(event) => {
                     const raw = event.target.value.replace(/[^0-9.\-]/g, '')
@@ -591,12 +581,10 @@ export function AnalysisSidebar({
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
-                    Tariff Escalation
-                    <InfoTooltip text="How much you expect TNB tariffs to rise each year. A higher rate shortens payback and grows long-term savings. RP4 revisions in Malaysia have historically trended around 3 to 5% per year. Set to 0% if you want to assume flat tariffs." />
+                    {t('sidebar.tariffEscalation.label')}
+                    <InfoTooltip text={t('sidebar.tariffEscalation.tooltip')} />
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    %/year. Compounds savings across the projection horizon.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('sidebar.tariffEscalation.subtext')}</p>
                 </div>
                 <DegradationInput
                   value={formState.tariffEscalationRate}
@@ -607,12 +595,10 @@ export function AnalysisSidebar({
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
-                    Tariff Parameters
-                    <InfoTooltip text="Override individual TNB RP4 tariff fields for this project, such as energy, capacity, and network charges, retail charge, SST, RE Fund, and minimum charge. Defaults match the published rates." />
+                    {t('sidebar.tariffParameters.label')}
+                    <InfoTooltip text={t('sidebar.tariffParameters.tooltip')} />
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Per-project overrides for TNB RP4 base rates. Defaults are the published values.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('sidebar.tariffParameters.subtext')}</p>
                 </div>
                 <Button
                   type="button"
@@ -623,11 +609,11 @@ export function AnalysisSidebar({
                 >
                   <span className="inline-flex items-center gap-2">
                     <Sliders className="h-3.5 w-3.5" />
-                    Configure Tariff Parameters
+                    {t('sidebar.tariffParameters.configure')}
                   </span>
                   {tariffOverrideCount > 0 && (
                     <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-                      {tariffOverrideCount} modified
+                      {t('sidebar.tariffParameters.modified', { count: tariffOverrideCount })}
                     </span>
                   )}
                 </Button>
@@ -646,10 +632,10 @@ export function AnalysisSidebar({
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <div className="space-y-1">
                   <Label>
-                    Panel Degradation
-                    <InfoTooltip text="How much your panels lose in output each year. A higher rate means less generation over time, lower long-term savings, and a longer payback. Modern N-type panels lose around 0.5% per year. Older PERC panels lose around 0.7% per year." />
+                    {t('sidebar.degradation.label')}
+                    <InfoTooltip text={t('sidebar.degradation.tooltip')} />
                   </Label>
-                  <p className="text-xs text-muted-foreground">%/year. Affects payback and 10-year projections.</p>
+                  <p className="text-xs text-muted-foreground">{t('sidebar.degradation.subtext')}</p>
                 </div>
                 <DegradationInput
                   value={formState.degradationRate}
@@ -659,12 +645,12 @@ export function AnalysisSidebar({
 
               <div className="space-y-2 rounded-xl border border-border bg-card/90 p-4">
                 <Label className="text-sm font-semibold text-foreground">
-                  System Assumptions
-                  <InfoTooltip text="Engineering factors that fine-tune how the real-world output is estimated. Most homeowners can leave these at their defaults." />
+                  {t('sidebar.systemAssumptions.label')}
+                  <InfoTooltip text={t('sidebar.systemAssumptions.tooltip')} />
                 </Label>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <Label className="text-[11px] text-muted-foreground">PR (%)</Label>
+                    <Label className="text-[11px] text-muted-foreground">{t('sidebar.systemAssumptions.pr')}</Label>
                     <Input
                       type="number"
                       min={50}
@@ -679,7 +665,7 @@ export function AnalysisSidebar({
                     />
                   </div>
                   <div>
-                    <Label className="text-[11px] text-muted-foreground">Losses (%)</Label>
+                    <Label className="text-[11px] text-muted-foreground">{t('sidebar.systemAssumptions.losses')}</Label>
                     <Input
                       type="number"
                       disabled
@@ -688,7 +674,7 @@ export function AnalysisSidebar({
                     />
                   </div>
                   <div>
-                    <Label className="text-[11px] text-muted-foreground">DC/AC</Label>
+                    <Label className="text-[11px] text-muted-foreground">{t('sidebar.systemAssumptions.dcAc')}</Label>
                     <Input
                       type="number"
                       min={1.0}
@@ -708,7 +694,7 @@ export function AnalysisSidebar({
 
           <div className="grid gap-3">
             <Button variant="outline" size="sm" asChild className="w-full justify-center gap-2">
-              <Link to={`/project/${projectId}/workbench`}>Back to Workbench</Link>
+              <Link to={`/project/${projectId}/workbench`}>{t('sidebar.buttons.backToWorkbench')}</Link>
             </Button>
             <Button
               data-tour="export-pdf"
@@ -718,10 +704,10 @@ export function AnalysisSidebar({
               onClick={onExportPdf}
               disabled={isExporting}
             >
-              {isExporting ? 'Exporting PDF...' : 'Export PDF'}
+              {isExporting ? t('sidebar.buttons.exporting') : t('sidebar.buttons.exportPdf')}
             </Button>
             <Button onClick={onSaveAnalysis} disabled={isSaving}>
-              {isSaving ? 'Saving Analysis...' : 'Save Analysis'}
+              {isSaving ? t('sidebar.buttons.saving') : t('sidebar.buttons.saveAnalysis')}
             </Button>
           </div>
         </CardContent>
