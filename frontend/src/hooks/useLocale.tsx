@@ -25,6 +25,7 @@ function readInitialLocale(): SupportedLocale {
   return DEFAULT_LOCALE
 }
 
+/** Provide the active UI locale */
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [locale, setLocaleState] = useState<SupportedLocale>(() => readInitialLocale())
@@ -39,7 +40,6 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     }
   }, [locale])
 
-  // When a user signs in, hydrate their stored locale (if any) from Supabase user_metadata.
   useEffect(() => {
     if (!user) {
       lastSyncedUserId.current = null
@@ -61,7 +61,6 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(LOCALE_STORAGE_KEY, next)
       }
-      // Best-effort sync to Supabase user metadata; ignore errors.
       if (user) {
         getSupabase()
           .auth.updateUser({ data: { locale: next } })

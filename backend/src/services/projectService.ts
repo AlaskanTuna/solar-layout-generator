@@ -22,9 +22,6 @@ async function findOwnedProject(userId: string, projectId: string) {
 }
 
 export async function createProject(userId: string, name: string, locationId: string) {
-  // Wrap in a transaction so the immutable quota-usage row lands atomically with
-  // the Project itself. Counting from ProjectQuotaUsage means deleting a project
-  // does not refund the user's daily slot.
   return prisma.$transaction(async (tx) => {
     const project = await tx.project.create({
       data: { userId, name, locationId },

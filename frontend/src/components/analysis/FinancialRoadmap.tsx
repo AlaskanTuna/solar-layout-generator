@@ -10,15 +10,15 @@ type FinancialRoadmapProps = {
   year1Savings: number
   degradationRate: number
   systemKwp: number
-  /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year. Defaults to 0. */
+  /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year */
   tariffEscalationRate?: number
-  /** Active financial mode. Lifecycle adds the maintenance + inverter milestones and footer; Simple hides them. */
+  /** Active financial mode */
   analysisMode?: 'simple' | 'lifecycle'
-  /** Each entry is one planned inverter swap rendered as its own milestone in Lifecycle mode. */
+  /** Each entry is one planned inverter swap rendered in Lifecycle mode */
   inverterReplacements?: InverterReplacement[]
-  /** @deprecated Pass `inverterReplacements` instead. */
+  /** @deprecated Pass `inverterReplacements` instead */
   inverterReplacementCostRm?: number
-  /** @deprecated Pass `inverterReplacements` instead. */
+  /** @deprecated Pass `inverterReplacements` instead */
   inverterReplacementYear?: number
   annualMaintenanceRm?: number
 }
@@ -104,7 +104,6 @@ export function FinancialRoadmap({
     accent: 'bg-muted border-border'
   })
 
-  // Build footer text
   let footerText: string
   if (lifecycleActive) {
     const replacementsSuffix =

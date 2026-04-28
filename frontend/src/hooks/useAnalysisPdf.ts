@@ -27,6 +27,7 @@ function triggerDownload(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
+/** Export a PDF from the analysis preview */
 export function useAnalysisPdf() {
   const [isExporting, setIsExporting] = useState(false)
   const { resolved: resolvedTheme } = useTheme()
@@ -39,9 +40,6 @@ export function useAnalysisPdf() {
       return
     }
 
-    // The Vercel-hosted Puppeteer renderer can't reach localhost / 127.0.0.1, so PDF export
-    // only works when the frontend is served from a publicly reachable host (e.g. Heroku).
-    // Bail early with a clear message instead of a confusing connection-refused error.
     const host = window.location.hostname
     if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local')) {
       notify.error(

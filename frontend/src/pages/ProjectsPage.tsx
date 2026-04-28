@@ -141,9 +141,7 @@ export function ProjectsPage() {
         </PageHeaderCard>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem]">
-          {/* Left: stats → filters → project grid */}
           <div className="flex flex-col">
-            {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4 animate-fade-in-up">
               <div className="glass-card flex items-center gap-3 p-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -176,7 +174,6 @@ export function ProjectsPage() {
               </div>
             </div>
 
-            {/* Filter chips */}
             <div className="mt-6 flex w-fit gap-1 rounded-lg bg-muted/50 p-1">
               {(['all', 'completed', 'in-progress'] as const).map((f) => (
                 <button
@@ -195,7 +192,6 @@ export function ProjectsPage() {
               ))}
             </div>
 
-            {/* Project grid */}
             <div className="mt-6">
               {isLoading ? (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -240,7 +236,6 @@ export function ProjectsPage() {
             </div>
           </div>
 
-          {/* Right: How it works */}
           <aside className="hidden lg:block animate-fade-in">
             <div className="glass-card flex flex-col overflow-hidden">
               <div className="border-b border-border bg-muted/30 px-4 py-3">
@@ -265,7 +260,6 @@ export function ProjectsPage() {
         </div>
       </PageContainer>
 
-      {/* Create Project Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <form onSubmit={handleCreateProject}>
@@ -293,7 +287,6 @@ export function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Project Dialog */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>

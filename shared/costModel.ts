@@ -59,7 +59,6 @@ export const costModelDefaults = {
   installerMargin: 0.15
 }
 
-// Mid-range mounting RM/panel by roof type. Source: docs/MVP-PAGE-3-SOLAR-COST-MODEL.md §3.
 export const MOUNTING_PER_PANEL = costModelDefaults.mountingPerPanel
 
 function permitCost(kwac: number, phase: SupplyPhase): { total: number; cccTriggered: boolean } {
@@ -76,9 +75,6 @@ function electricalBosCost(kwp: number): number {
   return costModelDefaults.electricalBosBaseRm + costModelDefaults.electricalBosPerKwpRm * kwp
 }
 
-// Fires on tile roofs (per doc §3). We don't expose a storeys input, so 2-storey
-// metal-roof installations under-book scaffolding by ~RM 2,000 — users can nudge
-// the System Cost field manually if needed.
 function scaffoldingCost(roofType: RoofType): number {
   return roofType === 'tile' ? costModelDefaults.scaffoldingTileRm : 0
 }
@@ -91,8 +87,6 @@ function selectInverter(kwp: number, phase: SupplyPhase): InverterSku {
   for (const sku of candidates) {
     if (sku.kwac * costModelDefaults.dcAcMaxRatio >= kwp) return sku
   }
-  // kWp exceeds the NEM Rakyat cap for this phase — pick the largest cap-compliant SKU.
-  // AnalysisSidebar already warns when system size exceeds the phase capacity cap.
   return candidates[candidates.length - 1]!
 }
 

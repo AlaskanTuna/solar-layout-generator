@@ -17,6 +17,7 @@ type UndoRedoSnapshot = {
   visibleCount: number
 }
 
+/** Normalized panel state used by the workbench */
 export type WorkbenchPanelState = {
   id: string
   originalCenter: { lat: number; lng: number }
@@ -28,6 +29,7 @@ export type WorkbenchPanelState = {
   deleted: boolean
 }
 
+/** Batch recompute lifecycle status */
 export type BatchRecomputeStatus = 'idle' | 'loading' | 'done' | 'error'
 
 type UsePanelStateArgs = {
@@ -52,6 +54,7 @@ const WORKBENCH_CONFIG = {
   defaultVisiblePanelFloor: 4
 } as const
 
+/** Return monthly-derived energy when available */
 export function getPanelAnnualEnergy(panel: Pick<WorkbenchPanelState, 'monthlyEnergyDcKwh' | 'yearlyEnergyDcKwh'>) {
   return panel.monthlyEnergyDcKwh.length > 0
     ? annualEnergyFromMonthly(panel.monthlyEnergyDcKwh)
@@ -80,6 +83,7 @@ function getSortedPanelIds(
     .map((panel) => panel.id)
 }
 
+/** Manage workbench panel ordering and edits */
 export function usePanelState({
   projectId,
   locationId,
@@ -130,7 +134,6 @@ export function usePanelState({
       return
     }
 
-    // Only initialize once per project to avoid overwriting in-progress edits
     if (initializedProjectIdRef.current === projectId) return
     initializedProjectIdRef.current = projectId
 
@@ -154,11 +157,6 @@ export function usePanelState({
 
     setPanels(nextPanels)
 
-    // Stable order sorts panels by (direction-match desc, yield desc). Direction
-    // priority puts matching-aspect panels first so the visibleCount slice picks
-    // them before fallbacks. When user picks "south", south-facing panels rank
-    // ahead of east/west/north regardless of yield, but within each match group
-    // we still rank by yield so visibleCount keeps semantic "top-N highest yield".
     stableOrderRef.current = getSortedPanelIds(nextPanels, solarPanels, roofSegments, roofDirection)
 
     const savedActiveCount =
@@ -166,13 +164,9 @@ export function usePanelState({
     const nextVisibleCount = Math.max(minVisibleCount, Math.min(maxVisibleCount, savedActiveCount || maxVisibleCount))
     setVisibleCountState(nextVisibleCount)
 
-    // Push initial state so first edit can be undone
     undoRedo.push({ panels: nextPanels, visibleCount: nextVisibleCount })
   }, [projectId, solarPanels, roofSegments, parsedEdits, minVisibleCount, maxVisibleCount, undoRedo, roofDirection])
 
-  // Re-sort stable order when the user changes roof direction mid-session.
-  // Init effect above is gated by initializedProjectIdRef so it skips after
-  // first run, but direction changes still need to reshuffle the visible pool.
   const lastSortedDirectionRef = useRef<RoofDirection | undefined>(undefined)
   useEffect(() => {
     if (!projectId || initializedProjectIdRef.current !== projectId) return
@@ -180,11 +174,9 @@ export function usePanelState({
     lastSortedDirectionRef.current = roofDirection
     if (panelsRef.current.length === 0) return
     stableOrderRef.current = getSortedPanelIds(panelsRef.current, solarPanels, roofSegments, roofDirection)
-    // Force re-render by replacing panels array reference (panels themselves unchanged)
     setPanels((prev) => [...prev])
   }, [projectId, roofDirection, solarPanels, roofSegments])
 
-  // Auto-recompute monthly energy for panels that only have yearly data
   useEffect(() => {
     if (!projectId || !locationId || panels.length === 0) return
     if (initializedProjectIdRef.current !== projectId) return
@@ -329,14 +321,6 @@ export function usePanelState({
     setVisibleCountState(Math.max(minVisibleCount, Math.min(effectiveMaxVisibleCount, count)))
   }
 
-  // Layout Preset apply: reset every panel's `deleted` flag to false AND set
-  // visibleCount in one render, atomically. Without resetting first, the
-  // effectiveMaxVisibleCount cap (= maxVisibleCount − deletedCount) clamps the
-  // requested target down to whatever count the user previously saved with.
-  // serializeLayout marks every panel outside activePanelIds as 'deleted' when
-  // saving, so reopening a saved project loads with N "deleted" panels and
-  // higher-than-N preset targets become silently no-ops. This method bypasses
-  // the cap by computing against maxVisibleCount directly.
   function resetDeletionsAndApplyVisibleCount(count: number) {
     pushSnapshot()
     setPanels((current) => current.map((p) => (p.deleted ? { ...p, deleted: false } : p)))

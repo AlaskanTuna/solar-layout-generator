@@ -28,7 +28,6 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
   const { averageMonthlySavingsRm, averageMonthlySavingsPct, annualTotals, paybackYears, monthlyBreakdown } =
     analysisResults
 
-  // Build headline using i18n keys
   let headline: string
   if (averageMonthlySavingsRm === null || averageMonthlySavingsRm <= 0) {
     headline = t('verdict.headline.noPanels')
@@ -46,9 +45,6 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
     totalGenerationKwh: annualTotals.totalGenerationKwh,
     totalCreditsForfeitedKwh: annualTotals.totalCreditsForfeitedKwh
   })
-  // Physical grid flows: per-month sum of consumption beyond generation (import) and
-  // generation beyond consumption (export). NEM credits net these out for billing,
-  // but the raw flows are the most intuitive "what comes in / goes out" signal.
   const totalImportKwh = monthlyBreakdown.reduce((sum, m) => sum + Math.max(0, m.consumptionKwh - m.generationKwh), 0)
   const totalExportKwh = monthlyBreakdown.reduce((sum, m) => sum + Math.max(0, m.generationKwh - m.consumptionKwh), 0)
   const importRatePct =

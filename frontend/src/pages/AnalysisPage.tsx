@@ -116,10 +116,6 @@ export function AnalysisPage() {
 
   const { isExporting, handleExportPdf } = useAnalysisPdf()
 
-  // Layout-derived azimuth/pitch summary, computed from active panels' source
-  // segments (via panel id → SolarPanel.segmentIndex). Replaces the old
-  // `roofSegmentStats[0]` view so the displayed orientation reflects the
-  // user's edited Workbench layout, not the raw API.
   const layoutOrientation = useMemo(
     () =>
       buildingInsights
@@ -259,7 +255,6 @@ export function AnalysisPage() {
           tariffEffectiveDate={tariffQuery.data.effectiveDate}
         />
 
-        {/* Main Content */}
         <section className="min-w-0 flex-1 space-y-6 xl:overflow-y-auto">
           <div data-tour="view-toggle" className="inline-flex rounded-lg border border-border bg-card/90 p-1 shadow-sm">
             <button

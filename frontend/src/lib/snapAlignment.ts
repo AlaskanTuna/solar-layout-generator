@@ -103,8 +103,8 @@ export function computeSnap(
       const dist = Math.abs(u - target)
       if (dist < bestUDist) {
         bestUDist = dist
-        // t = u - target: moving dragged by t along U makes new u equal target.
-        // Derivation: new_u = (other - (dragged + t*U)) · U = u - t, set to target => t = u - target.
+        // t = u - target: moving dragged by t along U makes new u equal target
+        // Derivation: new_u = (other - (dragged + t*U)) · U = u - t, set to target => t = u - target
         bestU = { correction: u - target, otherX: other.x, otherY: other.y }
       }
     }
@@ -161,8 +161,8 @@ export function computeOverlapSnap(
   const result = obbsOverlapWithMinSeparation(draggedPoly, neighborPoly)
   if (!result) return { snapped: false } // shapes not actually overlapping
 
-  // Push dragged center along the SAT axis by the penetration depth — lands edge-to-edge.
-  // Add a tiny epsilon so FP slop can't leave the strict-> obbsOverlap check reporting overlap.
+  // Push dragged center along the SAT axis by the penetration depth — lands edge-to-edge
+  // Add a tiny epsilon so FP slop can't leave the strict-> obbsOverlap check reporting overlap
   const pushDistance = result.penetration + 0.01
   return {
     snapped: true,

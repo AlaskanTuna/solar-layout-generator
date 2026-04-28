@@ -113,8 +113,8 @@ export function aabbsOverlap(a: RectAabb, b: RectAabb): boolean {
 }
 
 /**
- * SAT (Separating Axis Theorem) overlap test for two convex polygons.
- * Returns true only when the shapes actually intersect — no false positives from AABB inflation.
+ * SAT (Separating Axis Theorem) overlap test for two convex polygons
+ * Returns true only when the shapes actually intersect — no false positives from AABB inflation
  */
 function satProjectionsOverlap(axis: PixelPoint, polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
   let minA = Infinity
@@ -156,17 +156,17 @@ export function obbsOverlap(polyA: PixelPoint[], polyB: PixelPoint[]): boolean {
 }
 
 export type MinSeparationResult = {
-  /** Signed penetration depth (positive = overlap, negative = gap). */
+  /** Signed penetration depth (positive = overlap, negative = gap) */
   penetration: number
-  /** Unit axis along which penetration is minimised (points from B toward A). */
+  /** Unit axis along which penetration is minimised (points from B toward A) */
   axis: PixelPoint
 }
 
 /**
- * SAT overlap test that also returns the minimum-separation axis and penetration depth.
- * Returns null when the shapes are separated (no overlap).
+ * SAT overlap test that also returns the minimum-separation axis and penetration depth
+ * Returns null when the shapes are separated (no overlap)
  * When the shapes overlap the returned penetration depth is the smallest push-out distance,
- * and axis points in the direction that moves polyA out of polyB.
+ * and axis points in the direction that moves polyA out of polyB
  */
 export function obbsOverlapWithMinSeparation(polyA: PixelPoint[], polyB: PixelPoint[]): MinSeparationResult | null {
   const axes = [...getEdgeNormals(polyA), ...getEdgeNormals(polyB)]

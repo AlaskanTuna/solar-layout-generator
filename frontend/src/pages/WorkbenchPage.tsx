@@ -88,9 +88,6 @@ export function WorkbenchPage() {
     }
   }, [projectId, project])
 
-  // ─── Layout Preset (W-1) ───────────────────────────────────────────────
-  // Auto-shows on first Workbench entry per project. Manual slider moves
-  // flip sizingGoal to 'custom' so the sidebar badge reflects reality.
   const queryClient = useQueryClient()
   const [layoutPresetOpen, setLayoutPresetOpen] = useState(false)
   const layoutPresetAutoShownRef = useRef<string | null>(null)
@@ -157,9 +154,6 @@ export function WorkbenchPage() {
     onBatchRecomputeStatusChange: setInitialBatchStatus
   })
 
-  // ─── Layout Preset (W-1) handlers ─────────────────────────────────────
-  // Wraps setVisibleCount so a manual slider move flips sizingGoal to 'custom'.
-  // Preset Save / Skip use the raw setter via applyingPresetRef.
   const handleVisibleCountChange = useCallback(
     (count: number) => {
       setVisibleCount(count)
@@ -179,12 +173,8 @@ export function WorkbenchPage() {
       const clamped = Math.max(minVisibleCount, Math.min(maxVisibleCount, targetCount))
       applyingPresetRef.current = true
       try {
-        // Reset all deletions before applying — on a reopened project,
-        // setVisibleCount alone is capped by effectiveMaxVisibleCount (= max − deleted),
-        // which silently floors larger preset targets to the saved active count.
         resetDeletionsAndApplyVisibleCount(clamped)
       } finally {
-        // Release on next tick so React's batched commit has settled before slider listener fires.
         setTimeout(() => {
           applyingPresetRef.current = false
         }, 0)

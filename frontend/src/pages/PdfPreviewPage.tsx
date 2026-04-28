@@ -22,7 +22,6 @@ export function PdfPreviewPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
 
-  // Sync theme before first paint so chart colors and card backgrounds match the app.
   applyThemeFromParam(searchParams.get('theme'))
 
   const [project, setProject] = useState<ProjectResponse | null>(null)
@@ -43,19 +42,15 @@ export function PdfPreviewPage() {
         setError(msg)
         window.__PDF_ERROR__ = msg
       })
-    // Tariff config endpoint is public — fetch independently so the PDF can
-    // surface freshness metadata (AFA effective date) alongside the assumption tile.
     getTariffConfig()
       .then(setTariff)
       .catch((err: Error) => {
-        // Non-fatal: PDF still renders without the date if tariff fetch fails.
         console.warn('[PdfPreview] tariff config fetch failed:', err.message)
       })
   }, [projectId, token])
 
   useEffect(() => {
     if (!project) return
-    // Wait for Recharts entry animations (~1.5s default) + final layout settlement.
     const timer = setTimeout(() => {
       window.__PDF_READY__ = true
     }, 2000)

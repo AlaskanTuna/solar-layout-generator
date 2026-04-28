@@ -27,11 +27,11 @@ const TARIFF_FIELDS: TariffField[] = [
 type TariffParameterModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** Default rates from the global tariff config (TNB RP4 published). */
+  /** Default rates from the global tariff config */
   defaults: TariffRates
-  /** Current per-project overrides (sparse — only changed fields). */
+  /** Current per-project overrides */
   override: Partial<TariffRates> | undefined
-  /** Called with the new override map when user clicks Save. Pass undefined to clear all overrides. */
+  /** Called with the new override map when saving */
   onSave: (next: Partial<TariffRates> | undefined) => void
 }
 
@@ -49,10 +49,8 @@ function parseInputToRate(text: string, unit: TariffField['unit']): number | nul
 }
 
 export function TariffParameterModal({ open, onOpenChange, defaults, override, onSave }: TariffParameterModalProps) {
-  // Draft state holds per-field text values keyed by tariff key. Initialised from override or default.
   const [draft, setDraft] = useState<Record<string, string>>({})
 
-  // Reseed draft whenever the modal opens, so external state changes are reflected.
   useEffect(() => {
     if (!open) return
     const next: Record<string, string> = {}
@@ -68,7 +66,6 @@ export function TariffParameterModal({ open, onOpenChange, defaults, override, o
     for (const field of TARIFF_FIELDS) {
       const parsed = parseInputToRate(draft[field.key] ?? '', field.unit)
       if (parsed === null) continue
-      // Only persist fields that differ from the default (sparse override).
       if (Math.abs(parsed - defaults[field.key]) > 1e-9) {
         next[field.key] = parsed
       }

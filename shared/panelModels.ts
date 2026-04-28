@@ -1,9 +1,5 @@
 import type { PanelModel } from './panelTypes.ts'
 
-// widthM = short side, heightM = long side (matches Google Solar API convention)
-// costPerWp is distributor-to-installer panel module price (RM/Wp) per doc §1.
-// Used as the `panels` input to computeSystemCost; installer margin/labour/BOS
-// are applied separately by the cost model — not by a flat multiplier.
 export const PANEL_MODELS: PanelModel[] = [
   {
     id: 'google-default',

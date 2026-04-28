@@ -21,8 +21,10 @@ import {
   getPanelModel,
   DEFAULT_PANEL_MODEL_ID
 } from '@shared/types'
+/** Editable analysis settings excluding derived system size */
 export type AnalysisFormState = Omit<AnalysisConfig, 'systemKwp'>
 
+/** Monthly bill chart point used by the analysis view */
 export type ChartDataPoint = {
   month: string
   baselineBill: number
@@ -30,6 +32,7 @@ export type ChartDataPoint = {
   cumulativeSavings: number
 }
 
+/** Load and derive the analysis form state for a project */
 export function useAnalysisForm(projectId: string | undefined) {
   const initializedProjectIdRef = useRef<string | null>(null)
 
@@ -68,14 +71,7 @@ export function useAnalysisForm(projectId: string | undefined) {
     () => activePanels.filter((panel) => panel.monthlyEnergyDcKwh.length !== 12),
     [activePanels]
   )
-  // Raw DC generation aggregated from panel-level flux. Preserved for any
-  // downstream consumer that wants the source-of-truth flux (e.g. future PR
-  // sensitivity analysis or recompute on a different assumption).
   const monthlyGenerationRaw = useMemo(() => aggregateMonthlyGeneration(activePanels), [activePanels])
-  // Performance Ratio derate is applied here so the billing simulation reflects
-  // the displayed assumption. PR (default 0.80) and `assumedLosses` are coupled
-  // (sidebar slider sets `losses = 1 − PR`), so they're alternative views of
-  // the same multiplier. We multiply by PR only.
   const monthlyGeneration = useMemo(
     () => applyPerformanceRatio(monthlyGenerationRaw, formState?.performanceRatio ?? 0.8),
     [monthlyGenerationRaw, formState?.performanceRatio]
@@ -117,10 +113,6 @@ export function useAnalysisForm(projectId: string | undefined) {
 
     const resolvedSystemCostRm = savedConfig?.systemCostRm ?? defaultSystemCostRm
 
-    // Seed monthly consumption from the Layout Preset bill range when the user
-    // hasn't already overridden it. Falls back to 600 kWh (the historic default
-    // and the BILL_RANGE_TO_KWH_PER_MONTH 'unknown' bucket value) when no
-    // preference is set.
     const billRangeDefaultKwh =
       projectQuery.data.layoutPreferences?.billRange != null
         ? BILL_RANGE_TO_KWH_PER_MONTH[projectQuery.data.layoutPreferences.billRange]
@@ -139,10 +131,6 @@ export function useAnalysisForm(projectId: string | undefined) {
       performanceRatio: savedConfig?.performanceRatio ?? 0.8,
       assumedLosses: savedConfig?.assumedLosses ?? 0.2,
       dcAcRatio: savedConfig?.dcAcRatio ?? 1.2,
-      // Lifecycle financial mode (Task 6). Default 'simple' preserves the
-      // original simple-payback behaviour. Maintenance and inverter cost
-      // default to 0; the sidebar seeds Malaysian-typical defaults the moment
-      // the user flips to 'lifecycle'.
       analysisMode: savedConfig?.analysisMode ?? 'simple',
       annualMaintenanceRm: savedConfig?.annualMaintenanceRm ?? 0,
       inverterReplacements: savedConfig?.inverterReplacements ?? []
@@ -177,7 +165,6 @@ export function useAnalysisForm(projectId: string | undefined) {
   const billingConfig = useMemo(() => {
     if (!tariffQuery.data || !formState) return null
     return {
-      // Merge per-project tariff-rate overrides on top of TNB RP4 defaults.
       rates: { ...tariffQuery.data.rates, ...(formState.tariffRatesOverride ?? {}) },
       thresholds: tariffQuery.data.thresholds,
       eeiTable: tariffQuery.data.eeiTable,

@@ -5,7 +5,6 @@ import { getQuotaSummary } from '../services/userService.js'
 
 export const quotaRouter: ExpressRouter = Router()
 
-// GET /api/quota
 quotaRouter.get(
   '/',
   requireAuth,

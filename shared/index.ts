@@ -3,17 +3,11 @@ import type { PanelEdit } from './panelTypes.ts'
 import type { AnalysisConfigDto, AnalysisResultsDto, BuildingInsightsDto } from './projectDtos.ts'
 import type { TariffDefaults } from './tariffDefaults.ts'
 
-/* LOCATION */
-
 export type LocationStatus = 'processing' | 'ready' | 'failed'
 
 export type ImageryQuality = 'HIGH' | 'BASE'
 
-/* PROJECT */
-
 export type ProjectStatus = 'draft' | 'layout_saved' | 'analysis_saved'
-
-/* LAYOUT PRESET (W-1) */
 
 export {
   BILL_RANGE_TO_KWH_PER_MONTH,
@@ -25,12 +19,8 @@ export {
 } from './layoutPreferences.ts'
 export type { BillRange, LayoutPreferences, RoofDirection, SizingGoal } from './layoutPreferences.ts'
 
-/* PANEL EDIT */
-
 export { panelEditSchema } from './panelTypes.ts'
 export type { PanelEdit } from './panelTypes.ts'
-
-/* API REQUEST / RESPONSE TYPES */
 
 export type ResolveLocationRequest = {
   lat: number
@@ -128,9 +118,9 @@ export type TariffConfigResponse = {
   eeiTable: [number, number][]
   afaRateDefault: number
   defaults: TariffDefaults
-  /** When the seeded rates/AFA were last verified against TNB sources. ISO-8601 string when present. */
+  /** When the seeded rates and AFA were last verified */
   effectiveDate: string | null
-  /** Short human-readable note about the source publication or revision cycle. */
+  /** Short human-readable source note */
   sourceNote: string | null
 }
 
@@ -154,8 +144,6 @@ export type {
   BuildingInsightsDto,
   StoredAnalysisConfigDto
 } from './projectDtos.ts'
-
-/* PANEL MODEL */
 
 export type { PanelModel } from './panelTypes.ts'
 export { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from './panelModels.ts'

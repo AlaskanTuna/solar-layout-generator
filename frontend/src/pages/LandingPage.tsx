@@ -73,7 +73,6 @@ export function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background font-body">
-      {/* Navbar */}
       <nav
         className={`fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 ${
           navScrolled ? 'glass-nav' : 'border-b border-transparent bg-transparent'
@@ -100,9 +99,7 @@ export function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
       <section className="relative h-screen snap-start overflow-hidden">
-        {/* Background image — blurs progressively on scroll */}
         <div className="absolute inset-0">
           <img
             ref={heroImageRef}
@@ -112,7 +109,6 @@ export function LandingPage() {
             className="h-full w-full object-cover object-[right_center] will-change-[filter]"
             style={{ filter: 'blur(0px)', transform: 'scale(1)' }}
           />
-          {/* Light-mode left-to-right warm wash */}
           <div
             className="absolute inset-0 dark:hidden"
             style={{
@@ -120,7 +116,6 @@ export function LandingPage() {
                 'linear-gradient(90deg, rgba(253,249,244,0.85) 0%, rgba(253,249,244,0.45) 35%, rgba(253,249,244,0) 60%)'
             }}
           />
-          {/* Dark-mode left-to-right black wash (mirror of light-mode fade — keeps house exposed on right) */}
           <div
             className="absolute inset-0 hidden dark:block"
             style={{
@@ -131,7 +126,6 @@ export function LandingPage() {
 
         <div className="relative mx-auto flex h-full max-w-7xl items-center px-6 pt-16">
           <div className="grid w-full items-center gap-10 lg:grid-cols-12">
-            {/* Left: glass content card */}
             <div className="lg:col-span-7">
               <div className="hero-glass max-w-2xl rounded-3xl p-8 sm:p-12 animate-fade-in-up">
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/40 bg-orange-50/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#7c2d12] dark:border-white/10 dark:bg-stone-900/40 dark:text-orange-200">
@@ -153,7 +147,6 @@ export function LandingPage() {
                   {t('hero.subtitle')}
                 </p>
 
-                {/* Inline meta dots */}
                 <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 font-mono text-[11px] uppercase tracking-wider text-[#1a0a02]/60 dark:text-foreground/60">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -171,7 +164,6 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Right: sample report card (lg+ only) */}
             <div className="hidden lg:col-span-5 lg:block">
               <div className="relative ml-auto max-w-md animate-fade-in-up [animation-delay:120ms]">
                 <div
@@ -224,7 +216,6 @@ export function LandingPage() {
                       </div>
                     </div>
 
-                    {/* Mini bar chart */}
                     <div>
                       <div className="mb-2 font-mono text-[11px] uppercase tracking-wider text-amber-100/60">
                         {t('hero.card.monthlyYield')}
@@ -251,7 +242,6 @@ export function LandingPage() {
                   </div>
                 </div>
 
-                {/* Floating SDG badge */}
                 <div
                   className="absolute -left-4 -top-4 rounded-xl bg-card px-3 py-2 shadow-lg"
                   style={{ transform: 'rotate(-4deg)' }}
@@ -269,7 +259,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Trust band — scrolling marquee */}
       <section
         aria-label="Trust signals"
         className="snap-start overflow-hidden border-y border-white/10 bg-stone-900 py-7 dark:border-white/5"
@@ -285,7 +274,6 @@ export function LandingPage() {
           <span className="text-stone-700">·</span>
           <TrustItem icon={<Shield className="h-3.5 w-3.5 text-emerald-400" />} label={t('trust.pdfReports')} />
           <span className="text-stone-700">·</span>
-          {/* Duplicated for seamless loop */}
           <TrustItem icon={<Star className="h-3.5 w-3.5 text-primary" />} label={t('trust.googleSolarApi')} />
           <span className="text-stone-700">·</span>
           <TrustItem icon={<Zap className="h-3.5 w-3.5 text-primary" />} label={t('trust.nemSimulation')} />
@@ -299,10 +287,8 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works — sticky-scroll pipeline */}
       <PipelineSection />
 
-      {/* Features */}
       <section id="features" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
@@ -357,7 +343,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
       <section id="pricing" className="snap-start px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
@@ -400,7 +385,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section id="faq" className="snap-start bg-card px-6 py-24">
         <div className="mx-auto max-w-3xl">
           <div className="mb-14 text-center">
@@ -444,7 +428,6 @@ export function LandingPage() {
         <AppFooter />
       </div>
 
-      {/* Scroll-to-top button — glassmorphism, fades in past first viewport */}
       <button
         type="button"
         aria-label={t('scrollToTop')}
@@ -458,8 +441,6 @@ export function LandingPage() {
     </div>
   )
 }
-
-/* SUB-COMPONENTS */
 
 function useScrollY() {
   const [y, setY] = useState(0)
@@ -545,13 +526,11 @@ function useHeroTicker() {
   const valsRef = useRef(vals)
   valsRef.current = vals
 
-  // Rotate to next profile every 5s
   useEffect(() => {
     const id = setInterval(() => setProfileIdx((i) => (i + 1) % HERO_PROFILES.length), 5000)
     return () => clearInterval(id)
   }, [])
 
-  // Animate ticker values from current displayed values to the new target whenever the profile flips
   useEffect(() => {
     const target = HERO_PROFILES[profileIdx]
     const start = { ...valsRef.current }
@@ -684,7 +663,6 @@ function PipelineSection() {
 
       <div className="mx-auto max-w-7xl pb-32">
         <div className="grid gap-12 lg:grid-cols-12">
-          {/* Left — text steps */}
           <div className="space-y-2 lg:col-span-6">
             {PIPELINE_STEPS.map((step, i) => {
               const isActive = i === active
@@ -732,7 +710,6 @@ function PipelineSection() {
             })}
           </div>
 
-          {/* Right — sticky mock visuals */}
           <div className="lg:col-span-6">
             <div className="sticky top-28">
               <div className="relative h-[460px]">
@@ -741,7 +718,6 @@ function PipelineSection() {
                 ))}
               </div>
 
-              {/* Step pip indicator */}
               <div className="mt-6 flex items-center justify-center gap-2">
                 {PIPELINE_STEPS.map((_, i) => (
                   <span
@@ -770,7 +746,6 @@ function PipelineMock({ step, visible }: { step: PipelineStep; visible: boolean 
       }`}
       style={{ background: '#161310' }}
     >
-      {/* Browser chrome */}
       <div className="flex h-9 items-center gap-1.5 border-b border-white/5 bg-white/[0.02] px-3.5">
         <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
         <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
@@ -778,9 +753,7 @@ function PipelineMock({ step, visible }: { step: PipelineStep; visible: boolean 
         <span className="ml-3 font-mono text-[11px] text-stone-500">{step.mockHost}</span>
       </div>
 
-      {/* Content area */}
       <div className="relative h-[calc(100%-2.25rem)]">
-        {/* Real screenshot if available */}
         <img
           src={step.mockSrc}
           alt=""
@@ -792,7 +765,6 @@ function PipelineMock({ step, visible }: { step: PipelineStep; visible: boolean 
           }`}
         />
 
-        {/* Editorial fallback (also visible behind transparent corners of real screenshots) */}
         <div
           className={`absolute inset-0 flex flex-col justify-between p-7 transition-opacity duration-300 ${
             imgLoaded ? 'opacity-0' : 'opacity-100'

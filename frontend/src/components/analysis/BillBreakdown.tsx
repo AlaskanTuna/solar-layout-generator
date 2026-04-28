@@ -80,7 +80,6 @@ export function BillBreakdown({
         )}
       </CardHeader>
       <CardContent className="grid gap-6 lg:grid-cols-2">
-        {/* "Without Solar" column */}
         <div className="rounded-xl border border-border bg-muted/70 p-4">
           <h3 className="text-sm font-semibold text-foreground">{t('billBreakdown.withoutSolar.title')}</h3>
           <p className="text-xs text-muted-foreground">{t('billBreakdown.withoutSolar.subtitle')}</p>
@@ -143,7 +142,6 @@ export function BillBreakdown({
           </div>
         </div>
 
-        {/* "With Solar" column */}
         <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/35">
           <h3 className="text-sm font-semibold text-emerald-950 dark:text-emerald-100">{t('billBreakdown.withSolar.title')}</h3>
           <p className="text-xs text-emerald-800/70 dark:text-emerald-200/75">{t('billBreakdown.withSolar.subtitle')}</p>

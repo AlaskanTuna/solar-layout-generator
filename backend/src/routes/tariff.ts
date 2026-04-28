@@ -6,7 +6,6 @@ import { tariffDefaults, type TariffConfigResponse } from '@shared/types'
 
 export const tariffRouter: ExpressRouter = Router()
 
-// GET /api/tariff/config — public, no auth required
 tariffRouter.get(
   '/config',
   asyncHandler(async (_req, res) => {

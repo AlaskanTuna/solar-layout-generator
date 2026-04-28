@@ -26,9 +26,9 @@ type AnalysisSidebarProps = {
   isSaving: boolean
   onExportPdf: () => void
   onSaveAnalysis: () => void
-  /** Default TNB RP4 tariff rates from the global tariff config — passed through to the override modal. */
+  /** Default TNB RP4 tariff rates passed through to the override modal */
   tariffRatesDefaults: TariffRates
-  /** ISO date string indicating when the seeded AFA / tariff rates were last verified. Null when not seeded. */
+  /** ISO date string for the last tariff verification date */
   tariffEffectiveDate?: string | null
 }
 

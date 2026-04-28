@@ -21,10 +21,7 @@ export const layoutPreferencesPartialSchema = layoutPreferencesSchema.partial()
 
 export type LayoutPreferences = z.infer<typeof layoutPreferencesSchema>
 
-// Estimated monthly kWh consumption by bill bucket — derived from average TNB blended
-// residential tariff (~RM 0.35/kWh after capacity, network, retail, AFA, and SST).
-// Midpoints chosen to err slightly conservative so balanced/conservative presets do
-// not over-size systems.
+/** Approximate monthly kWh consumption by bill bucket */
 export const BILL_RANGE_TO_KWH_PER_MONTH: Record<BillRange, number> = {
   '<100': 250,
   '100-200': 450,

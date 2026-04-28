@@ -48,7 +48,6 @@ export function SignInPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left panel — branding */}
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-primary via-solar-600 to-solar-800 p-10 lg:flex">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-primary-foreground/10 blur-[100px]" />
@@ -74,7 +73,6 @@ export function SignInPage() {
         <p className="relative text-xs text-primary-foreground/40">{t('branding.tagline2026')}</p>
       </div>
 
-      {/* Right panel — form */}
       <div className="flex flex-1 flex-col">
         <div className="flex items-center justify-between p-6">
           <Link to="/" className="flex items-center gap-2 lg:hidden">

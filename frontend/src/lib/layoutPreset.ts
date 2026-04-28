@@ -16,18 +16,13 @@ export type RoofSegmentEntry = {
   azimuthDegrees: number
 }
 
-// Offset multipliers calibrated for tropical Malaysian residential under NEM 3.0:
-// daytime AC + appliance load typically draws 50-65% of daily kWh, so a 50%
-// system maximizes self-consumption with minimal credit forfeiture from overnight
-// export. 100% offset is wasteful here — excess credits expire after 24 months.
-// 30% is the budget-first bracket — fastest payback per RM, smallest install.
 const SIZING_GOAL_OFFSET: Record<Exclude<SizingGoal, 'custom'>, number> = {
   conservative: 0.3,
   balanced: 0.5,
   maximum: Number.POSITIVE_INFINITY
 }
 
-// Convert a bill range bucket to an estimated annual kWh consumption target.
+/** Convert a bill range bucket to annual kWh */
 export function billRangeToAnnualKwh(billRange: BillRange | undefined): number {
   const monthly = BILL_RANGE_TO_KWH_PER_MONTH[billRange ?? 'unknown']
   return monthly * 12
@@ -45,17 +40,10 @@ function filterByDirection(
     if (!seg) return false
     return azimuthMatchesRoofDirection(seg.azimuthDegrees, direction)
   })
-  // If the roof has no panels in the chosen direction, fall back to the full set
-  // rather than show zero panels — keeps the preset graceful for funky roof shapes.
   return filtered.length === 0 ? panels : filtered
 }
 
-// Resolve the panel count that satisfies the chosen sizing goal.
-// Panels are assumed pre-sorted by yearlyEnergyDcKwh desc (matches usePanelState's
-// stable order). For balanced/conservative we sum highest-yield panels in the
-// roof-direction-filtered set until the target offset is met. For maximum (or any
-// infinite multiplier) we return the size of the filtered set. Custom is unhandled
-// here — caller should keep the user's manual visibleCount.
+/** Resolve the visible panel count for the current sizing goal */
 export function inferVisibleCount(
   panels: PanelYieldEntry[],
   prefs: LayoutPreferences,
@@ -81,12 +69,10 @@ export function inferVisibleCount(
     total += sorted[i]!.yearlyEnergyDcKwh
     if (total >= targetKwh) return i + 1
   }
-  // Target exceeds total roof yield — give them everything in the filtered set.
   return sorted.length
 }
 
-// Short label for the sidebar pill — keeps the user-facing copy free of internal
-// offset percentages so non-technical homeowners aren't confused by the math.
+/** Human-readable label for the sidebar preset pill */
 export function describeLayoutPreset(prefs: LayoutPreferences | null | undefined): string {
   if (!prefs) return 'Not set'
   switch (prefs.sizingGoal) {

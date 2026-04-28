@@ -255,7 +255,6 @@ export function DashboardPage() {
         </div>
       </PageContainer>
 
-      {/* Create Project Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <form onSubmit={handleCreateProject}>

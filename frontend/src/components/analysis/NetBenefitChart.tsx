@@ -22,14 +22,14 @@ type NetBenefitChartProps = {
   year1Savings: number
   degradationRate: number
   systemCostRm: number
-  /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year. Defaults to 0 (no escalation). */
+  /** Compounding tariff escalation rate, e.g. 0.04 = 4%/year */
   tariffEscalationRate?: number
-  /** Override the default active year range (e.g. 25 for PDF exports). */
+  /** Override the default active year range, e.g. 25 for PDF exports */
   defaultYearRange?: YearRange
-  /** When 'lifecycle', subtracts maintenance and any scheduled inverter replacements. Defaults to 'simple'. */
+  /** When 'lifecycle', subtracts maintenance and scheduled inverter replacements */
   analysisMode?: 'simple' | 'lifecycle'
   annualMaintenanceRm?: number
-  /** Each entry is one planned inverter swap. Empty array = no swaps factored in. */
+  /** Each entry is one planned inverter swap */
   inverterReplacements?: InverterReplacement[]
   /** @deprecated Pass `inverterReplacements` instead. */
   inverterReplacementCostRm?: number

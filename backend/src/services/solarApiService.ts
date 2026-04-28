@@ -53,6 +53,7 @@ function buildSolarParams(lat: number, lng: number, opts: SolarApiOpts = {}): UR
   return params
 }
 
+/** Fetch the closest Solar API building insights record */
 export async function fetchBuildingInsights(
   lat: number,
   lng: number,
@@ -70,6 +71,7 @@ export async function fetchBuildingInsights(
   return json
 }
 
+/** Fetch Solar API raster layer URLs for a location */
 export async function fetchDataLayers(
   lat: number,
   lng: number,
@@ -77,9 +79,6 @@ export async function fetchDataLayers(
   opts: SolarApiOpts = {}
 ): Promise<DataLayersApiResponse> {
   const { requiredQuality = 'HIGH', expandedCoverage = false } = opts
-  // FULL_LAYERS works for both HIGH and BASE+EXPANDED (validated empirically
-  // against tests/smoke/m2-klang-matrix.ts — for BASE+EXPANDED it returns
-  // dsm/rgb/mask/annualFlux/monthlyFlux/hourlyShadeUrls).
   const params = new URLSearchParams({
     'location.latitude': lat.toString(),
     'location.longitude': lng.toString(),
@@ -115,11 +114,12 @@ export async function fetchDataLayers(
 // Each probe checks BOTH buildingInsights AND dataLayers because the matrix
 // (tests/smoke/m2-klang-matrix.ts) showed that buildingInsights can return 200
 // while dataLayers 404s for the same coords. Probing only buildingInsights
-// produced false positives that broke pipelines downstream (M-2 root cause).
+// produced false positives that broke pipelines downstream (M-2 root cause)
 //
 // Note: EXPANDED_COVERAGE is rejected (400) by Solar API at HIGH and MEDIUM —
 // it's only valid with BASE. Failed Solar API calls don't count toward the
-// free quota, so the exhaustive probe is cheap.
+// free quota, so the exhaustive probe is cheap
+/** Available imagery quality options for a probed location */
 export type ProbeResult = {
   availableQualities: ImageryQuality[]
   bestQuality: ImageryQuality | null
@@ -128,18 +128,17 @@ export type ProbeResult = {
 
 const PROBE_RADIUS_METERS = 100
 
+/** Probe the best Solar API quality available for a coordinate */
 export async function findBestQualityForLocation(lat: number, lng: number): Promise<ProbeResult> {
   const available: ImageryQuality[] = []
   let bestQuality: ImageryQuality | null = null
   let expandedCoverage = false
 
-  // Step 1: HIGH (no expansion)
   if (await probeFullChain(lat, lng, { requiredQuality: 'HIGH', expandedCoverage: false })) {
     available.push('HIGH')
     bestQuality = 'HIGH'
   }
 
-  // Step 2: BASE (no expansion). Only consider as best if HIGH didn't win.
   const baseNoExpansionWorks =
     bestQuality === null && (await probeFullChain(lat, lng, { requiredQuality: 'BASE', expandedCoverage: false }))
   if (baseNoExpansionWorks) {
@@ -148,8 +147,6 @@ export async function findBestQualityForLocation(lat: number, lng: number): Prom
     expandedCoverage = false
   }
 
-  // Step 3: BASE + EXPANDED_COVERAGE (widest radius). Only fall through if
-  // neither HIGH nor BASE-no-expansion worked.
   if (
     bestQuality === null &&
     (await probeFullChain(lat, lng, { requiredQuality: 'BASE', expandedCoverage: true }))
@@ -162,10 +159,7 @@ export async function findBestQualityForLocation(lat: number, lng: number): Prom
   return { availableQualities: available, bestQuality, expandedCoverage }
 }
 
-// Probe both endpoints — buildingInsights AND dataLayers — to confirm the
-// full pipeline is viable at the requested combo. Uses a fixed 100 m radius
-// for the dataLayers probe; the actual pipeline computes radius from the
-// buildingInsights bounding box.
+/** Probe both endpoints before accepting a quality combination */
 async function probeFullChain(lat: number, lng: number, opts: SolarApiOpts): Promise<boolean> {
   if (!(await probeEndpoint(`${BASE_URL}/buildingInsights:findClosest`, lat, lng, opts))) return false
   return probeEndpoint(`${BASE_URL}/dataLayers:get`, lat, lng, opts, PROBE_RADIUS_METERS)
@@ -191,6 +185,7 @@ async function probeEndpoint(
   }
 }
 
+/** Derive a conservative data-layer radius from a bounding box */
 export function calculateRadius(bbox: SolarBoundingBox): number {
   const diameter = haversineDistance(bbox.sw.latitude, bbox.sw.longitude, bbox.ne.latitude, bbox.ne.longitude)
   return Math.ceil(diameter / 2) + 10
@@ -206,6 +201,7 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+/** Attach stable panel ids to a building insights payload */
 export function enrichBuildingInsights(insights: BuildingInsightsApiResponse): BuildingInsightsApiResponse {
   const solarPotential = isRecord(insights.solarPotential) ? insights.solarPotential : {}
   const panels = Array.isArray(solarPotential.solarPanels)

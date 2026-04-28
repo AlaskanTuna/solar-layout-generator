@@ -5,7 +5,7 @@ import { PrintPage2Analysis } from './PrintPage2Analysis'
 
 type PrintReportProps = {
   project: ProjectResponse
-  /** ISO date string for when the seeded AFA / tariff was last verified. Null when not seeded. */
+  /** ISO date string for when the seeded AFA and tariff were last verified */
   tariffEffectiveDate?: string | null
 }
 

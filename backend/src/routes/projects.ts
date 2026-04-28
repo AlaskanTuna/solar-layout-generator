@@ -17,7 +17,6 @@ import { NotFoundError } from '../errors.js'
 
 export const projectsRouter: ExpressRouter = Router()
 
-// POST /api/projects
 projectsRouter.post(
   '/',
   requireAuth,
@@ -30,7 +29,6 @@ projectsRouter.post(
   })
 )
 
-// GET /api/projects
 projectsRouter.get(
   '/',
   requireAuth,
@@ -40,7 +38,6 @@ projectsRouter.get(
   })
 )
 
-// GET /api/projects/:id
 projectsRouter.get(
   '/:id',
   requireAuth,
@@ -55,7 +52,6 @@ projectsRouter.get(
   })
 )
 
-// DELETE /api/projects/:id
 projectsRouter.delete(
   '/:id',
   requireAuth,
@@ -70,7 +66,6 @@ projectsRouter.delete(
   })
 )
 
-// PATCH /api/projects/:id/layout
 projectsRouter.patch(
   '/:id/layout',
   requireAuth,
@@ -88,7 +83,6 @@ projectsRouter.patch(
   })
 )
 
-// PATCH /api/projects/:id/layout-preferences — sparse merge of layout preset state
 projectsRouter.patch(
   '/:id/layout-preferences',
   requireAuth,
@@ -104,7 +98,6 @@ projectsRouter.patch(
   })
 )
 
-// PATCH /api/projects/:id/analysis
 projectsRouter.patch(
   '/:id/analysis',
   requireAuth,
@@ -120,7 +113,6 @@ projectsRouter.patch(
   })
 )
 
-// POST /api/projects/:id/pdf-token — session-auth'd, returns short-lived token for the PDF service
 projectsRouter.post(
   '/:id/pdf-token',
   requireAuth,
@@ -138,7 +130,6 @@ projectsRouter.post(
   })
 )
 
-// GET /api/projects/:id/pdf-data — pdf-token-auth'd, returns project+location bundle for the print view
 projectsRouter.get(
   '/:id/pdf-data',
   requirePdfToken,

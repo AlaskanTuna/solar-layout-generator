@@ -15,7 +15,6 @@ import type { OverlayType } from '../services/overlayService.js'
 
 export const locationsRouter: ExpressRouter = Router()
 
-// POST /api/locations/resolve
 locationsRouter.post(
   '/resolve',
   requireAuth,
@@ -29,7 +28,6 @@ locationsRouter.post(
   })
 )
 
-// GET /api/locations/probe?lat=X&lng=Y
 locationsRouter.get(
   '/probe',
   requireAuth,
@@ -43,7 +41,6 @@ locationsRouter.get(
   })
 )
 
-// GET /api/locations/:id/status
 locationsRouter.get(
   '/:id/status',
   requireAuth,
@@ -54,7 +51,6 @@ locationsRouter.get(
   })
 )
 
-// GET /api/locations/:id/data
 locationsRouter.get(
   '/:id/data',
   requireAuth,
@@ -65,7 +61,6 @@ locationsRouter.get(
   })
 )
 
-// GET /api/locations/:locationId/overlay/:type
 locationsRouter.get(
   '/:locationId/overlay/:type',
   requireAuth,
@@ -84,7 +79,6 @@ locationsRouter.get(
   })
 )
 
-// POST /api/locations/:locationId/panels/recompute
 locationsRouter.post(
   '/:locationId/panels/recompute',
   requireAuth,
@@ -105,7 +99,6 @@ locationsRouter.post(
   })
 )
 
-// POST /api/locations/:locationId/panels/recompute-batch
 locationsRouter.post(
   '/:locationId/panels/recompute-batch',
   requireAuth,
