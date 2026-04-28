@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
-import { Loader2 } from 'lucide-react'
+import { Leaf, Loader2 } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 
 const REMEMBER_EMAIL_KEY = 'slg-remember-email'
@@ -18,6 +18,7 @@ const REMEMBER_EMAIL_KEY = 'slg-remember-email'
  */
 export function SignInPage() {
   const { t } = useTranslation('auth')
+  const { t: tNav } = useTranslation('nav')
   const { session, loading, signIn } = useAuth()
   const navigate = useNavigate()
   const rememberedEmail = typeof window !== 'undefined' ? (window.localStorage.getItem(REMEMBER_EMAIL_KEY) ?? '') : ''
@@ -61,20 +62,29 @@ export function SignInPage() {
         <div className="relative">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo className="h-8 w-8" />
-            <span className="font-heading text-lg font-semibold text-primary-foreground">SolarSim</span>
+            <span className="font-heading text-lg font-semibold text-[#1a0a02] dark:text-primary-foreground">
+              SolarSim
+            </span>
           </Link>
         </div>
 
         <div className="relative">
-          <h2 className="font-heading text-3xl font-bold leading-tight text-primary-foreground">
+          <h2 className="font-heading text-3xl font-bold leading-tight text-[#1a0a02] dark:text-primary-foreground">
             {t('signIn.panelHeading')}
           </h2>
-          <p className="mt-3 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#1a0a02]/75 dark:text-primary-foreground/70">
             {t('signIn.panelSubtitle')}
           </p>
         </div>
 
-        <p className="relative text-xs text-primary-foreground/40">{t('branding.tagline2026')}</p>
+        <div className="relative flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[#1a0a02]/55 dark:text-primary-foreground/40">
+          <span>{t('branding.tagline2026')}</span>
+          <span className="h-3 w-px bg-[#1a0a02]/25 dark:bg-primary-foreground/25" />
+          <span className="flex items-center gap-1.5">
+            <Leaf className="h-3 w-3 text-emerald-700 dark:text-emerald-400" />
+            {tNav('footer.sdg')}
+          </span>
+        </div>
       </div>
 
       {/* Form panel */}
