@@ -31,7 +31,19 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 })
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Tab focus and reconnect refetches were silently re-firing project, location and
+      // quota requests on every tab switch. On a slow network this read as a freeze.
+      // Hooks that need live data (e.g. useQuota) opt back in explicitly.
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      staleTime: 60_000,
+      retry: 1
+    }
+  }
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

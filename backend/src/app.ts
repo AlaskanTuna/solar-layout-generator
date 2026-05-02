@@ -45,8 +45,11 @@ if (process.env.NODE_ENV === 'production') {
   const frontendDist = path.resolve(__dirname, '../../frontend/dist')
   app.use(express.static(frontendDist))
 
-  // Catch-all: send non-API requests to index.html for React Router
-  app.get('{*path}', (_req, res) => {
+  // Catch-all: send non-API requests to index.html for React Router. Skip
+  // /assets/* so a stale asset URL after a deploy returns 404 instead of HTML
+  // (otherwise the browser tries to execute index.html as JS and silently breaks).
+  app.get('{*path}', (req, res, next) => {
+    if (req.path.startsWith('/assets/')) return next()
     res.sendFile(path.join(frontendDist, 'index.html'))
   })
 }
