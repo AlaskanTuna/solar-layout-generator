@@ -127,7 +127,9 @@ export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictPr
                 </InfoTooltip>
               </span>
             </div>
-            <p className="text-lg font-semibold tabular-nums sm:text-xl">{formatCurrency(annualTotals.totalSavingsRm)}</p>
+            <p className="text-lg font-semibold tabular-nums sm:text-xl">
+              {formatCurrency(annualTotals.totalSavingsRm)}
+            </p>
             <p className="text-xs text-muted-foreground">
               {t('verdict.metrics.annualSavings.baseline', { amount: formatCurrency(annualTotals.totalBaselineRm) })}
             </p>

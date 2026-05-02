@@ -26,9 +26,7 @@ export function loadKnowledgeBible(): Map<string, string> {
  * Renders the cached knowledge bible back into prompt-ready Markdown.
  */
 export function renderKnowledgeForPrompt(): string {
-  return [...loadKnowledgeBible().entries()]
-    .map(([title, body]) => `## ${title}\n${body.trim()}`)
-    .join('\n\n')
+  return [...loadKnowledgeBible().entries()].map(([title, body]) => `## ${title}\n${body.trim()}`).join('\n\n')
 }
 
 function parseSections(raw: string): Map<string, string> {

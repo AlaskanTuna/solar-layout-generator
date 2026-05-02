@@ -282,7 +282,18 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
         }
       }
     },
-    [i18n.language, i18n.resolvedLanguage, page, projectId, removeMessage, setState, state.isStreaming, state.messages, t, updateMessage]
+    [
+      i18n.language,
+      i18n.resolvedLanguage,
+      page,
+      projectId,
+      removeMessage,
+      setState,
+      state.isStreaming,
+      state.messages,
+      t,
+      updateMessage
+    ]
   )
 
   return useMemo(

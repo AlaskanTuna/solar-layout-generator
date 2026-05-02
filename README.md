@@ -194,19 +194,19 @@ flowchart LR
 
 ## 🧰 Tech Stack
 
-| Category        | Technology                                                                   | Notes                                                          |
-| --------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Frontend        | React 19 · Vite 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui · lucide-react | SPA with React Router, TanStack Query, framer-motion           |
-| Canvas & 3D     | Konva 9 · react-konva · @react-three/fiber · @react-three/drei               | Workbench stage, snap alignment, panel-model 3D preview        |
-| Charts & DnD    | Recharts 3 · @dnd-kit/core · @dnd-kit/sortable                               | Analysis charts, sortable hero card layout                     |
-| i18n & Theming  | i18next · react-i18next · next-themes                                        | en / ms / zh, light / dark / system theme                      |
-| Backend         | Express 5 · TypeScript 5 · Prisma 6 · Zod                                    | REST API, validators, typed Supabase access                    |
-| Geo & Imagery   | geotiff.js · sharp · proj4                                                   | GeoTIFF parsing, raster → WebP, lat-lng ↔ pixel reprojection   |
-| Identity & Data | Supabase (Auth + Postgres + Storage)                                         | Email/password + Google OAuth, RLS-backed projects             |
-| External APIs   | Google Solar API · Google Maps JavaScript API · Geocoding API                | One Solar call per address, cached forever                     |
-| Testing         | Vitest · @testing-library/react · jsdom                                      | Co-located unit tests, 205 passing                             |
-| PDF Service     | Vercel function · Puppeteer · Chromium (headless)                            | Sandboxed off the Heroku dyno, signed-token access             |
-| Deploy          | Heroku (web dyno) · Vercel (PDF function) · GitHub Actions CI/CD             | `pnpm` build on Heroku via `heroku-postbuild`                  |
+| Category        | Technology                                                                   | Notes                                                        |
+| --------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Frontend        | React 19 · Vite 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui · lucide-react | SPA with React Router, TanStack Query, framer-motion         |
+| Canvas & 3D     | Konva 9 · react-konva · @react-three/fiber · @react-three/drei               | Workbench stage, snap alignment, panel-model 3D preview      |
+| Charts & DnD    | Recharts 3 · @dnd-kit/core · @dnd-kit/sortable                               | Analysis charts, sortable hero card layout                   |
+| i18n & Theming  | i18next · react-i18next · next-themes                                        | en / ms / zh, light / dark / system theme                    |
+| Backend         | Express 5 · TypeScript 5 · Prisma 6 · Zod                                    | REST API, validators, typed Supabase access                  |
+| Geo & Imagery   | geotiff.js · sharp · proj4                                                   | GeoTIFF parsing, raster → WebP, lat-lng ↔ pixel reprojection |
+| Identity & Data | Supabase (Auth + Postgres + Storage)                                         | Email/password + Google OAuth, RLS-backed projects           |
+| External APIs   | Google Solar API · Google Maps JavaScript API · Geocoding API                | One Solar call per address, cached forever                   |
+| Testing         | Vitest · @testing-library/react · jsdom                                      | Co-located unit tests, 205 passing                           |
+| PDF Service     | Vercel function · Puppeteer · Chromium (headless)                            | Sandboxed off the Heroku dyno, signed-token access           |
+| Deploy          | Heroku (web dyno) · Vercel (PDF function) · GitHub Actions CI/CD             | `pnpm` build on Heroku via `heroku-postbuild`                |
 
 ---
 

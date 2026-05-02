@@ -1,9 +1,4 @@
-import {
-  HarmBlockThreshold,
-  HarmCategory,
-  type Content,
-  type GenerateContentResponse
-} from '@google/genai'
+import { HarmBlockThreshold, HarmCategory, type Content, type GenerateContentResponse } from '@google/genai'
 import type { Request, Response } from 'express'
 import { env } from '../../config/env.js'
 import { NotFoundError } from '../../errors.js'

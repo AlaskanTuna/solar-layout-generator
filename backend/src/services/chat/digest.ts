@@ -55,8 +55,7 @@ function renderProjectBlock(
   const maxPanels = buildingInsights?.solarPotential.maxArrayPanelsCount ?? '—'
   const lat = project.location?.lat
   const lng = project.location?.lng
-  const locationText =
-    typeof lat === 'number' && typeof lng === 'number' ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : '—'
+  const locationText = typeof lat === 'number' && typeof lng === 'number' ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : '—'
 
   return [
     '## Project',
@@ -140,9 +139,7 @@ function countActivePanels(editedLayout: PanelEdit[]): number {
 }
 
 function bucketByOrientation(editedLayout: PanelEdit[], buildingInsights: BuildingInsightsDto | null): string {
-  const activePanelIds = new Set(
-    editedLayout.filter((panel) => panel.status !== 'deleted').map((panel) => panel.id)
-  )
+  const activePanelIds = new Set(editedLayout.filter((panel) => panel.status !== 'deleted').map((panel) => panel.id))
 
   const counters = {
     portrait: 0,
@@ -177,9 +174,7 @@ function bucketByOrientation(editedLayout: PanelEdit[], buildingInsights: Buildi
 }
 
 function countSegmentsUsed(editedLayout: PanelEdit[], buildingInsights: BuildingInsightsDto | null): string {
-  const activePanelIds = new Set(
-    editedLayout.filter((panel) => panel.status !== 'deleted').map((panel) => panel.id)
-  )
+  const activePanelIds = new Set(editedLayout.filter((panel) => panel.status !== 'deleted').map((panel) => panel.id))
   const segmentIndexes = new Set<number>()
 
   const rawSolarPanels = Array.isArray(buildingInsights?.solarPotential.solarPanels)

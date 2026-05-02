@@ -16,7 +16,15 @@ const SIDEBAR_EXPANDED = 200
 const SIDEBAR_COLLAPSED = 64
 
 /** Crossfade section heading: divider when collapsed, title text when expanded */
-function SectionHeading({ title, first, alwaysExpanded }: { title: string; first?: boolean; alwaysExpanded?: boolean }) {
+function SectionHeading({
+  title,
+  first,
+  alwaysExpanded
+}: {
+  title: string
+  first?: boolean
+  alwaysExpanded?: boolean
+}) {
   return (
     <div className={`relative mb-1 flex h-5 items-center ${first ? '' : 'mt-4'}`}>
       <div

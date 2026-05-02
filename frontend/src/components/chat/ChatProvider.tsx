@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type PropsWithChildren
-} from 'react'
+import { createContext, useCallback, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 
 export type ChatMessage = {
@@ -57,10 +50,7 @@ export function ChatProvider({ children }: PropsWithChildren) {
     }
   }, [user])
 
-  const getState = useCallback(
-    (projectId: string) => projectStates.get(projectId) ?? EMPTY_CHAT_STATE,
-    [projectStates]
-  )
+  const getState = useCallback((projectId: string) => projectStates.get(projectId) ?? EMPTY_CHAT_STATE, [projectStates])
 
   const setState = useCallback((projectId: string, updater: (state: ProjectChatState) => ProjectChatState) => {
     setProjectStates((prev) => {

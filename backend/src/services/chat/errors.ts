@@ -11,10 +11,7 @@ type ChatLanguage = 'en' | 'ms' | 'zh'
 /**
  * Maps a thrown chat error into a localized user-facing category and message.
  */
-export function categoriseError(
-  error: unknown,
-  language: ChatLanguage
-): { category: ErrorCategory; message: string } {
+export function categoriseError(error: unknown, language: ChatLanguage): { category: ErrorCategory; message: string } {
   const redactedMessage = redactErrorMessage(error)
   const code = getErrorCode(error)
 

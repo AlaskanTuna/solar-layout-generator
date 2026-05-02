@@ -62,13 +62,13 @@ old 5-tier progressive block tariff in force since 2014. The total bill is
 built from five charges plus pass-throughs and an EEI rebate. Numbers below
 are sen/kWh unless stated.
 
-| Component | Rate | Notes |
-|---|---|---|
+| Component                  | Rate                                                         | Notes                                                                                                          |
+| -------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
 | Energy (Generation) Charge | **27.03** if monthly use ≤1,500 kWh; **37.03** if >1,500 kWh | Cliff, not marginal — the higher rate applies to the entire month's consumption once the threshold is crossed. |
-| Capacity Charge | **4.55** flat | Applies to all kWh. |
-| Network Charge | **12.85** flat | Applies to all kWh. |
-| Retail Charge | **RM 10.00 / month** fixed | Waived if net consumption ≤600 kWh. |
-| AFA | Variable monthly | Waived if net consumption ≤600 kWh. See AFA section. |
+| Capacity Charge            | **4.55** flat                                                | Applies to all kWh.                                                                                            |
+| Network Charge             | **12.85** flat                                               | Applies to all kWh.                                                                                            |
+| Retail Charge              | **RM 10.00 / month** fixed                                   | Waived if net consumption ≤600 kWh.                                                                            |
+| AFA                        | Variable monthly                                             | Waived if net consumption ≤600 kWh. See AFA section.                                                           |
 
 Combined base subtotal: **44.43 sen/kWh** for the ≤1,500 kWh tier;
 **54.43 sen/kWh** above 1,500 kWh. The average household paid roughly

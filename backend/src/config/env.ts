@@ -30,8 +30,7 @@ const envSchema = z
     if (!value.GEMINI_API_KEY && !value.GOOGLE_CLOUD_PROJECT) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message:
-          'At least one of GEMINI_API_KEY or GOOGLE_CLOUD_PROJECT must be set for the chat assistant.',
+        message: 'At least one of GEMINI_API_KEY or GOOGLE_CLOUD_PROJECT must be set for the chat assistant.',
         path: ['GEMINI_API_KEY']
       })
     }

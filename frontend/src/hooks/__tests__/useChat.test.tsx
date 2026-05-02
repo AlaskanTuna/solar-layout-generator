@@ -87,13 +87,15 @@ describe('useChat', () => {
   })
 
   it('streams tokens and parses suggestions from the marker buffer', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      buildSseResponse([
-        'data: {"type":"token","text":"Hello there"}\n\n',
-        'data: {"type":"token","text":"\\n<<<SUGGESTIONS>>>\\n[\\"Ask about payback\\",\\"Explain NEM\\"]"}\n\n',
-        'data: {"type":"done"}\n\n'
-      ])
-    )
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        buildSseResponse([
+          'data: {"type":"token","text":"Hello there"}\n\n',
+          'data: {"type":"token","text":"\\n<<<SUGGESTIONS>>>\\n[\\"Ask about payback\\",\\"Explain NEM\\"]"}\n\n',
+          'data: {"type":"done"}\n\n'
+        ])
+      )
     installFetchMock(fetchMock)
 
     const { result } = renderHook(() => useChat('project-1', 'analysis'), { wrapper })

@@ -65,9 +65,7 @@ export function buildSystemInstruction(project: ChatProject, page: ChatPage, lan
 }
 
 function renderLanguageLayer(languageMeta: (typeof LANGUAGE_META)[ChatLanguage]): string {
-  const glossaryRows = languageMeta.glossary
-    .map(([term, rendering]) => `| ${term} | ${rendering} |`)
-    .join('\n')
+  const glossaryRows = languageMeta.glossary.map(([term, rendering]) => `| ${term} | ${rendering} |`).join('\n')
 
   return [
     '[LAYER 0 — Language Lock]',
