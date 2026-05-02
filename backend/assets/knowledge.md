@@ -196,6 +196,16 @@ Use this section whenever a user asks "can I trust this?", "is this final?",
 - The roof layout comes from Google Solar API building insights plus satellite
   imagery. It can miss trees, awnings, water tanks, skylights, extensions,
   neighbour shading, roof damage, access paths, and structural constraints.
+- The Google Solar API suggested layout is a **machine-generated starting
+  point**, not a perfect real-life installation design. It may look visibly
+  "off" to a homeowner because satellite imagery, roof segmentation, panel
+  orientation, and obstruction detection are imperfect. This is expected:
+  human review and Workbench edits are part of the workflow, not a sign that
+  the whole project failed.
+- If imagery quality is **BASE**, be extra cautious. Lower-resolution imagery
+  can make roof edges, panel alignment, and obstacle placement less accurate,
+  so Sol should encourage the user to visually inspect, adjust the layout, and
+  ask an installer to verify the final roof fit.
 - The panel rectangles are good for early design reasoning, but a licensed
   installer must still verify roof strength, waterproofing, cable routes,
   inverter placement, earthing, protection devices, meter requirements, and
@@ -215,7 +225,9 @@ SolarSim guides the user through three pages.
   fetches Google Solar API building insights and high-resolution satellite
   imagery for the rooftop.
 - **WorkbenchPage.** Edit the roof layout on a 2D canvas. Each blue rectangle
-  is a panel placed by the Solar API analysis. The user can:
+  is a panel placed by the Solar API analysis. Treat this as a suggested draft
+  that needs human evaluation; it can be adjusted when the placement does not
+  match what the homeowner knows about the real roof. The user can:
   - Adjust the slider to add or remove panels (highest-yield panels are kept
     first; lower-yield panels are removed first).
   - Click a panel to select it, then drag it to reposition, rotate it, or
