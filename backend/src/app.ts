@@ -1,5 +1,6 @@
 import express, { type Express } from 'express'
 import cors from 'cors'
+import compression from 'compression'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { healthRouter } from './routes/health.js'
@@ -30,6 +31,19 @@ if (env.NODE_ENV === 'development') {
 export const app: Express = express()
 
 app.use(cors({ origin: allowedOrigins }))
+// Gzip every response except SSE streams. The default compression() buffers chunks until it has
+// enough bytes to compress efficiently, which would stall Sol's token-by-token chat stream.
+// Skipping by Content-Type keeps streaming intact while still shaving ~70% off bundle and JSON
+// transfer for everything else.
+app.use(
+  compression({
+    filter: (req, res) => {
+      const contentType = res.getHeader('Content-Type')
+      if (typeof contentType === 'string' && contentType.includes('text/event-stream')) return false
+      return compression.filter(req, res)
+    }
+  })
+)
 app.use(express.json())
 app.use(requestLogger)
 
