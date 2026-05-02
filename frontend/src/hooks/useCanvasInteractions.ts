@@ -96,7 +96,7 @@ export function useCanvasInteractions({
     grabbedPanelId: string
   } | null>(null)
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<string>>(new Set())
-  const [snapEnabled, setSnapEnabled] = useState(true)
+  const [snapEnabled, setSnapEnabled] = useState(false)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
   const [pendingPanelId, setPendingPanelId] = useState<string | null>(null)
   const [message, setMessage] = useState<{ tone: 'error' | 'info'; text: string } | null>(null)

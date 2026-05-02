@@ -31,6 +31,7 @@ import { CanvasControls } from '@/components/workbench/CanvasControls'
 import { CanvasLegends } from '@/components/workbench/CanvasLegends'
 import { WorkbenchSidebar } from '@/components/workbench/WorkbenchSidebar'
 import { LayoutPresetModal } from '@/components/workbench/LayoutPresetModal'
+import { WorkbenchHintOverlay } from '@/components/workbench/WorkbenchHintOverlay'
 import { saveLayoutPreferences } from '@/api/projects'
 import { describeLayoutPreset, inferVisibleCount } from '@/lib/layoutPreset'
 import { markProjectVisited } from '@/lib/recentProjectActivity'
@@ -52,6 +53,7 @@ export function WorkbenchPage() {
   const [initialBatchStatus, setInitialBatchStatus] = useState<BatchRecomputeStatus>('idle')
   const [canvasExpanded, setCanvasExpanded] = useState(false)
   const [freeRotate, setFreeRotate] = useState(false)
+  const [tourActive, setTourActive] = useState(false)
   const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
   const hydratedPanelModelProjectIdRef = useRef<string | null>(null)
   const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
@@ -240,7 +242,10 @@ export function WorkbenchPage() {
     selectedPanelIds: interactions.selectedPanelIds,
     onDeleteSelected: interactions.handleDeleteSelected,
     onSpaceDown: () => setSpaceHeld(true),
-    onSpaceUp: () => setSpaceHeld(false)
+    onSpaceUp: () => setSpaceHeld(false),
+    onToggleMarquee: () => interactions.setMarqueeMode((v) => !v),
+    onToggleSnap: () => interactions.setSnapEnabled((v) => !v),
+    onToggleFreeRotate: () => setFreeRotate((v) => !v)
   })
 
   if (isMobile) {
@@ -297,7 +302,7 @@ export function WorkbenchPage() {
 
   return (
     <AppLayout>
-      <GuidedTour storageKey="slg-tour-workbench" steps={getWorkbenchTourSteps(t)} />
+      <GuidedTour storageKey="slg-tour-workbench" steps={getWorkbenchTourSteps(t)} onActiveChange={setTourActive} />
       <PageContainer variant="mvp">
         {/* Workbench sidebar */}
         <WorkbenchSidebar
@@ -343,10 +348,7 @@ export function WorkbenchPage() {
             <CardHeader className="border-b border-border bg-muted/50">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle data-tour="canvas-title">
-                    {t('canvas.title')}
-                    <InfoTooltip text={t('canvas.titleTooltip')} />
-                  </CardTitle>
+                  <CardTitle data-tour="canvas-title">{t('canvas.title')}</CardTitle>
                 </div>
                 {(interactions.pendingPanelId || isBatchRecomputing || initialBatchStatus === 'loading') && (
                   <Badge className="bg-amber-600 text-white hover:bg-amber-600">
@@ -525,6 +527,12 @@ export function WorkbenchPage() {
                       segmentHulls={interactions.segmentHulls}
                       overlayMode={overlayMode}
                       isOverlayLoading={isOverlayLoading}
+                    />
+
+                    <WorkbenchHintOverlay
+                      targetRef={containerRef}
+                      ready={interactions.stageReady}
+                      suppressed={tourActive}
                     />
                   </>
                 ) : (

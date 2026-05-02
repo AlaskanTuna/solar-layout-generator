@@ -140,8 +140,20 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
   )
 }
 
-export function GuidedTour({ storageKey, steps }: { storageKey: string; steps: TourStep[] }) {
+export function GuidedTour({
+  storageKey,
+  steps,
+  onActiveChange
+}: {
+  storageKey: string
+  steps: TourStep[]
+  onActiveChange?: (active: boolean) => void
+}) {
   const [showTour, setShowTour] = useState(() => !localStorage.getItem(storageKey))
+
+  useEffect(() => {
+    onActiveChange?.(showTour)
+  }, [showTour, onActiveChange])
 
   const closeTour = useCallback(() => {
     localStorage.setItem(storageKey, 'true')

@@ -40,6 +40,16 @@
     "computingMonthly": "Computing Monthly Data",
     "recomputing": "Recomputing"
   },
+  "hint": {
+    "title": "How to use the workbench",
+    "subtitle": "Try these gestures to shape your layout.",
+    "click": "Click a panel to select it",
+    "drag": "Drag any panel to reposition it",
+    "zoom": "Scroll to zoom in and out",
+    "pan": "Hold Space and drag to pan the view",
+    "dismiss": "Dismiss",
+    "dismissCta": "Click anywhere or press Esc to dismiss"
+  },
   "sidebar": {
     "description": "Adjust the suggested layout before moving to financial analysis.",
     "imageryBase": "Imagery: BASE",
@@ -97,19 +107,19 @@
     "sectionLayers": "Layers",
     "expandView": "Expand View",
     "collapseView": "Collapse View",
-    "undo": "Undo",
-    "redo": "Redo",
-    "marqueeOn": "Marquee: ON",
-    "marquee": "Marquee",
-    "snapOn": "Snap: ON",
-    "snap": "Snap",
-    "deleteSelected": "Delete Selected",
-    "freeRotateOn": "Free Rotate: ON",
-    "freeRotate": "Free Rotate",
-    "zoomIn": "Zoom in",
-    "zoomOut": "Zoom out",
-    "zoomReset": "Reset zoom",
-    "hideOverlays": "Hide overlays",
+    "undo": "Undo (Ctrl + Z)",
+    "redo": "Redo (Ctrl + Y)",
+    "marqueeOn": "Multi-Select: ON (M)",
+    "marquee": "Multi-Select (M)",
+    "snapOn": "Snap: ON (S)",
+    "snap": "Snap (S)",
+    "deleteSelected": "Delete Selected (Del)",
+    "freeRotateOn": "Free Rotate: ON (R)",
+    "freeRotate": "Free Rotate (R)",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "zoomReset": "Reset Zoom",
+    "hideOverlays": "Hide Overlays",
     "overlays": "Overlays",
     "overlayRgb": "RGB",
     "overlayFlux": "Flux",
@@ -122,7 +132,7 @@
     "segmentLabel": "Seg {{index}}: {{azimuth}}° / {{pitch}}° ({{count}} panels)",
     "mask": {
       "roof": "Roof",
-      "offRoof": "Off-roof"
+      "offRoof": "Off-Roof"
     },
     "flux": {
       "high": "Sunny",
@@ -199,7 +209,7 @@
     "step3Title": "Shape the Layout",
     "step3Body": "Pick a panel model and count from the sidebar, then click any panel on the canvas to drag, rotate or delete it.",
     "step4Title": "Canvas Tools",
-    "step4Body": "The toolbar handles the rest: undo/redo, marquee select to edit groups of panels at once, snap alignment for clean edges, zoom, and layer toggles for flux and satellite overlays.",
+    "step4Body": "The toolbar handles the rest: undo/redo, multi-select to edit groups of panels at once, snap alignment for clean edges, zoom, and layer toggles for flux and satellite overlays.",
     "step5Title": "Save & Continue",
     "step5Body": "Happy with the layout? Click \"Save & Continue\" to move on to the savings analysis. You can always come back to adjust."
   }

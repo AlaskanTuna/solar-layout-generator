@@ -40,6 +40,16 @@
     "computingMonthly": "Mengira Data Bulanan",
     "recomputing": "Mengira Semula"
   },
+  "hint": {
+    "title": "Cara menggunakan meja kerja",
+    "subtitle": "Cuba gerak isyarat ini untuk membentuk susun atur anda.",
+    "click": "Klik panel untuk memilihnya",
+    "drag": "Seret mana-mana panel untuk mengubah kedudukannya",
+    "zoom": "Tatal untuk zum masuk dan keluar",
+    "pan": "Tahan Space dan seret untuk menggeser pandangan",
+    "dismiss": "Tutup",
+    "dismissCta": "Klik di mana-mana atau tekan Esc untuk menutup"
+  },
   "sidebar": {
     "description": "Laraskan susun atur yang dicadangkan sebelum beralih ke analisis kewangan.",
     "imageryBase": "Imej: BASE",
@@ -97,19 +107,19 @@
     "sectionLayers": "Lapisan",
     "expandView": "Kembangkan Paparan",
     "collapseView": "Runtuhkan Paparan",
-    "undo": "Buat Asal",
-    "redo": "Buat Semula",
-    "marqueeOn": "Marquee: HIDUP",
-    "marquee": "Marquee",
-    "snapOn": "Snap: HIDUP",
-    "snap": "Snap",
-    "deleteSelected": "Padam Yang Dipilih",
-    "freeRotateOn": "Putar Bebas: HIDUP",
-    "freeRotate": "Putar Bebas",
-    "zoomIn": "Zum masuk",
-    "zoomOut": "Zum keluar",
-    "zoomReset": "Tetapkan semula zum",
-    "hideOverlays": "Sembunyikan lapisan",
+    "undo": "Buat Asal (Ctrl + Z)",
+    "redo": "Buat Semula (Ctrl + Y)",
+    "marqueeOn": "Pilih Berbilang: HIDUP (M)",
+    "marquee": "Pilih Berbilang (M)",
+    "snapOn": "Snap: HIDUP (S)",
+    "snap": "Snap (S)",
+    "deleteSelected": "Padam Yang Dipilih (Del)",
+    "freeRotateOn": "Putar Bebas: HIDUP (R)",
+    "freeRotate": "Putar Bebas (R)",
+    "zoomIn": "Zum Masuk",
+    "zoomOut": "Zum Keluar",
+    "zoomReset": "Tetapkan Semula Zum",
+    "hideOverlays": "Sembunyikan Lapisan",
     "overlays": "Lapisan",
     "overlayRgb": "RGB",
     "overlayFlux": "Fluks",
@@ -122,7 +132,7 @@
     "segmentLabel": "Seg {{index}}: {{azimuth}}° / {{pitch}}° ({{count}} panel)",
     "mask": {
       "roof": "Bumbung",
-      "offRoof": "Luar bumbung"
+      "offRoof": "Luar Bumbung"
     },
     "flux": {
       "high": "Cerah",
@@ -199,7 +209,7 @@
     "step3Title": "Bentuk Susun Atur",
     "step3Body": "Pilih model dan bilangan panel dari bar sisi, kemudian klik mana-mana panel di kanvas untuk menyeret, memutar atau memadamnya.",
     "step4Title": "Alat Kanvas",
-    "step4Body": "Bar alat mengendalikan selebihnya: buat asal/buat semula, pilih marquee untuk mengedit kumpulan panel sekaligus, penjajaran snap untuk tepi yang kemas, zum, dan togol lapisan untuk fluks dan lapisan satelit.",
+    "step4Body": "Bar alat mengendalikan selebihnya: buat asal/buat semula, pilih berbilang untuk mengedit kumpulan panel sekaligus, penjajaran snap untuk tepi yang kemas, zum, dan togol lapisan untuk fluks dan lapisan satelit.",
     "step5Title": "Simpan & Teruskan",
     "step5Body": "Berpuas hati dengan susun atur? Klik \"Simpan & Teruskan\" untuk beralih ke analisis penjimatan. Anda sentiasa boleh kembali untuk membuat pelarasan."
   }
