@@ -1,0 +1,43 @@
+{
+  "launcher": {
+    "aria": "Open SolarSim Assistant",
+    "title": "Ask SolarSim Assistant"
+  },
+  "panel": {
+    "title": "SolarSim Assistant",
+    "subtitle": "Ask about this project, your layout, or how the analysis works.",
+    "empty": "Start with one of these questions.",
+    "reset": "Clear conversation",
+    "close": "Close assistant"
+  },
+  "composer": {
+    "placeholder": "Ask about your roof layout, NEM credits, payback, or this analysis...",
+    "send": "Send",
+    "stop": "Stop"
+  },
+  "errors": {
+    "quotaExhausted": "We've hit our daily limit. Please try again in a few minutes.",
+    "serviceUnavailable": "The assistant is temporarily unavailable. Please try again shortly.",
+    "permissionDenied": "The assistant is not configured correctly. Please contact support.",
+    "injectionRejected": "Sorry, I can't process that request. Try rephrasing your question.",
+    "networkFailure": "Couldn't reach the assistant. Check your connection and try again.",
+    "unknown": "Session expired or the assistant hit an unexpected issue. Please try again."
+  },
+  "suggestions": {
+    "workbench": [
+      "How do I rotate a panel?",
+      "Why are some panels not on my roof?",
+      "Will moving panels change my savings?",
+      "What does the snap tool do?"
+    ],
+    "analysis": [
+      "Why is my payback {{years}} years?",
+      "What is AFA on my bill?",
+      "Should I add more panels?",
+      "How does NEM 3.0 work for me?"
+    ]
+  },
+  "streaming": {
+    "cursor": "Assistant is still typing"
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +32,8 @@ import { CanvasLegends } from '@/components/workbench/CanvasLegends'
 import { WorkbenchSidebar } from '@/components/workbench/WorkbenchSidebar'
 import { LayoutPresetModal } from '@/components/workbench/LayoutPresetModal'
 import { WorkbenchHintOverlay } from '@/components/workbench/WorkbenchHintOverlay'
+import { ChatContext } from '@/components/chat/ChatProvider'
+import { ChatLauncher } from '@/components/chat/ChatLauncher'
 import { saveLayoutPreferences } from '@/api/projects'
 import { describeLayoutPreset, inferVisibleCount } from '@/lib/layoutPreset'
 import { markProjectVisited } from '@/lib/recentProjectActivity'
@@ -49,6 +51,7 @@ export function WorkbenchPage() {
   const { t } = useTranslation('workbench')
   const { projectId } = useParams<{ projectId: string }>()
   const containerRef = useRef<HTMLDivElement>(null)
+  const { getState } = useContext(ChatContext)
 
   const [initialBatchStatus, setInitialBatchStatus] = useState<BatchRecomputeStatus>('idle')
   const [canvasExpanded, setCanvasExpanded] = useState(false)
@@ -299,6 +302,7 @@ export function WorkbenchPage() {
   const selectedAnnualEnergy = interactions.selectedPanel
     ? getPanelAnnualEnergy(interactions.selectedPanel.monthlyEnergyDcKwh, interactions.selectedPanel.yearlyEnergyDcKwh)
     : null
+  const isChatOpen = projectId ? getState(projectId).isOpen : false
 
   return (
     <AppLayout>
@@ -532,7 +536,8 @@ export function WorkbenchPage() {
                     <WorkbenchHintOverlay
                       targetRef={containerRef}
                       ready={interactions.stageReady}
-                      suppressed={tourActive}
+                      // Keep chat-specific suppression at the call site so the overlay API stays unchanged.
+                      suppressed={tourActive || isChatOpen}
                     />
                   </>
                 ) : (
@@ -575,6 +580,8 @@ export function WorkbenchPage() {
             </CardContent>
           </Card>
         </section>
+
+        {projectId && <ChatLauncher projectId={projectId} page="workbench" />}
       </PageContainer>
 
       <LayoutPresetModal

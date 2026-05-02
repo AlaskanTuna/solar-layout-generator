@@ -15,6 +15,7 @@ import enPdf from '@/locales/en/pdf.json'
 import enFaq from '@/locales/en/faq.json'
 import enSettings from '@/locales/en/settings.json'
 import enNotifications from '@/locales/en/notifications.json'
+import enChat from '@/locales/en/chat.json'
 
 import msCommon from '@/locales/ms/common.json'
 import msNav from '@/locales/ms/nav.json'
@@ -29,6 +30,7 @@ import msPdf from '@/locales/ms/pdf.json'
 import msFaq from '@/locales/ms/faq.json'
 import msSettings from '@/locales/ms/settings.json'
 import msNotifications from '@/locales/ms/notifications.json'
+import msChat from '@/locales/ms/chat.json'
 
 import zhCommon from '@/locales/zh/common.json'
 import zhNav from '@/locales/zh/nav.json'
@@ -43,6 +45,7 @@ import zhPdf from '@/locales/zh/pdf.json'
 import zhFaq from '@/locales/zh/faq.json'
 import zhSettings from '@/locales/zh/settings.json'
 import zhNotifications from '@/locales/zh/notifications.json'
+import zhChat from '@/locales/zh/chat.json'
 
 /** Locale codes the app ships translations for. First entry is the i18next fallback. */
 export const SUPPORTED_LOCALES = ['en', 'ms', 'zh'] as const
@@ -87,7 +90,8 @@ const resources = {
     pdf: enPdf,
     faq: enFaq,
     settings: enSettings,
-    notifications: enNotifications
+    notifications: enNotifications,
+    chat: enChat
   },
   ms: {
     common: msCommon,
@@ -102,7 +106,8 @@ const resources = {
     pdf: msPdf,
     faq: msFaq,
     settings: msSettings,
-    notifications: msNotifications
+    notifications: msNotifications,
+    chat: msChat
   },
   zh: {
     common: zhCommon,
@@ -117,7 +122,8 @@ const resources = {
     pdf: zhPdf,
     faq: zhFaq,
     settings: zhSettings,
-    notifications: zhNotifications
+    notifications: zhNotifications,
+    chat: zhChat
   }
 } as const
 
@@ -153,7 +159,8 @@ i18n
       'pdf',
       'faq',
       'settings',
-      'notifications'
+      'notifications',
+      'chat'
     ],
     interpolation: { escapeValue: false },
     detection: {
@@ -164,5 +171,5 @@ i18n
     }
   })
 
-/** Configured i18next instance with all 13 namespaces registered for en/ms/zh. */
+/** Configured i18next instance with all 14 namespaces registered for en/ms/zh. */
 export default i18n

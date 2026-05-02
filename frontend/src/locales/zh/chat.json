@@ -1,0 +1,43 @@
+{
+  "launcher": {
+    "aria": "打开 SolarSim 助手",
+    "title": "询问 SolarSim 助手"
+  },
+  "panel": {
+    "title": "SolarSim 助手",
+    "subtitle": "可询问这个项目、您的布局，或分析结果是如何计算的。",
+    "empty": "可先从以下问题开始。",
+    "reset": "清除对话",
+    "close": "关闭助手"
+  },
+  "composer": {
+    "placeholder": "询问屋顶布局、NEM 电费抵扣、回本期，或这份分析结果...",
+    "send": "发送",
+    "stop": "停止"
+  },
+  "errors": {
+    "quotaExhausted": "我们已达到每日上限，请几分钟后再试。",
+    "serviceUnavailable": "助手暂时不可用，请稍后再试。",
+    "permissionDenied": "助手当前配置不正确，请联系支持团队。",
+    "injectionRejected": "抱歉，我无法处理该请求。请换一种问法。",
+    "networkFailure": "无法连接到助手，请检查网络后重试。",
+    "unknown": "会话可能已过期，或助手遇到了意外问题。请再试一次。"
+  },
+  "suggestions": {
+    "workbench": [
+      "我该如何旋转太阳能板？",
+      "为什么有些太阳能板没有放在我的屋顶上？",
+      "移动太阳能板会改变我的节省金额吗？",
+      "对齐工具有什么作用？"
+    ],
+    "analysis": [
+      "为什么我的回本期是 {{years}} 年？",
+      "账单里的 AFA 是什么？",
+      "我应该再增加一些太阳能板吗？",
+      "NEM 3.0 对我来说是怎么运作的？"
+    ]
+  },
+  "streaming": {
+    "cursor": "助手仍在输入中"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "launcher": {
+    "aria": "Buka Pembantu SolarSim",
+    "title": "Tanya Pembantu SolarSim"
+  },
+  "panel": {
+    "title": "Pembantu SolarSim",
+    "subtitle": "Tanya tentang projek ini, susun atur anda, atau cara analisis dikira.",
+    "empty": "Mulakan dengan salah satu soalan ini.",
+    "reset": "Kosongkan perbualan",
+    "close": "Tutup pembantu"
+  },
+  "composer": {
+    "placeholder": "Tanya tentang susun atur bumbung, kredit NEM, tempoh pulang modal, atau analisis ini...",
+    "send": "Hantar",
+    "stop": "Henti"
+  },
+  "errors": {
+    "quotaExhausted": "Kami telah mencapai had harian. Sila cuba lagi dalam beberapa minit.",
+    "serviceUnavailable": "Pembantu tidak tersedia buat sementara waktu. Sila cuba lagi sebentar lagi.",
+    "permissionDenied": "Pembantu tidak dikonfigurasikan dengan betul. Sila hubungi sokongan.",
+    "injectionRejected": "Maaf, saya tidak dapat memproses permintaan itu. Cuba tulis semula soalan anda.",
+    "networkFailure": "Tidak dapat menghubungi pembantu. Semak sambungan anda dan cuba lagi.",
+    "unknown": "Sesi anda mungkin tamat atau pembantu menghadapi isu yang tidak dijangka. Sila cuba lagi."
+  },
+  "suggestions": {
+    "workbench": [
+      "Bagaimana saya boleh memutar panel?",
+      "Mengapa ada panel yang tidak berada di atas bumbung saya?",
+      "Adakah memindahkan panel akan ubah penjimatan saya?",
+      "Apa fungsi alat snap?"
+    ],
+    "analysis": [
+      "Mengapa tempoh pulang modal saya {{years}} tahun?",
+      "Apakah AFA pada bil saya?",
+      "Patutkah saya tambah lagi panel?",
+      "Bagaimana NEM 3.0 berfungsi untuk saya?"
+    ]
+  },
+  "streaming": {
+    "cursor": "Pembantu masih sedang menaip"
+  }
+}

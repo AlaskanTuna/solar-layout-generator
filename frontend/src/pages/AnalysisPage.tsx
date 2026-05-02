@@ -32,6 +32,7 @@ import { SystemCostCard } from '@/components/analysis/SystemCostCard'
 import { SolarVerdict } from '@/components/analysis/SolarVerdict'
 import { SortableCardContainer } from '@/components/analysis/SortableCardContainer'
 import { AnalysisSidebar } from '@/components/analysis/AnalysisSidebar'
+import { ChatLauncher } from '@/components/chat/ChatLauncher'
 import { useAnalysisForm, type AnalysisFormState } from '@/hooks/useAnalysisForm'
 import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
 import { summarizeLayoutOrientation } from '@/lib/analysis'
@@ -472,6 +473,8 @@ export function AnalysisPage() {
             ]}
           />
         </section>
+
+        {projectId && <ChatLauncher projectId={projectId} page="analysis" />}
       </PageContainer>
     </AppLayout>
   )
