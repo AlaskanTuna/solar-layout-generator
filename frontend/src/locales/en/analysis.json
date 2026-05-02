@@ -61,6 +61,10 @@
     "exportSave": {
       "title": "Export & Save",
       "description": "When you're happy with the results, click \"Save Analysis\" to store your settings, or \"Export PDF\" to download a report you can share with solar installers or your family."
+    },
+    "askSol": {
+      "title": "Meet Sol",
+      "description": "Have a question about your numbers? Tap Sol — your friendly solar guide — to ask why your payback is what it is, what AFA means on your bill, or anything else about this analysis."
     }
   },
   "sidebar": {

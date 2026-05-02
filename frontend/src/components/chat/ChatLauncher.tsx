@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChatContext } from './ChatProvider'
 import { ChatPanel } from './ChatPanel'
@@ -14,6 +14,15 @@ export function ChatLauncher({ projectId, page }: ChatLauncherProps) {
   const { getState, setState } = useContext(ChatContext)
   const { isOpen } = getState(projectId)
 
+  // Close the panel on mount of a fresh launcher instance, which fires every
+  // time the user navigates between WorkbenchPage and AnalysisPage. The
+  // conversation history is keyed by projectId in ChatProvider and stays
+  // intact, so reopening the panel on the new page picks up where it left off.
+  useEffect(() => {
+    setState(projectId, (prev) => (prev.isOpen ? { ...prev, isOpen: false } : prev))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only by design
+  }, [])
+
   if (isOpen) {
     return <ChatPanel projectId={projectId} page={page} />
   }
@@ -21,6 +30,7 @@ export function ChatLauncher({ projectId, page }: ChatLauncherProps) {
   return (
     <button
       type="button"
+      data-tour="chat-launcher"
       onClick={() =>
         setState(projectId, (prev) => ({
           ...prev,

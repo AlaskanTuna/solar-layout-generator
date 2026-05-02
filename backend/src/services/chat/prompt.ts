@@ -54,13 +54,15 @@ const LANGUAGE_META: Record<
 export function buildSystemInstruction(project: ChatProject, page: ChatPage, language: ChatLanguage): string {
   const languageMeta = LANGUAGE_META[language]
 
+  // Suggestions are no longer model-generated — the frontend renders chips from
+  // a curated chat.json pool to avoid hallucinated follow-ups about features
+  // that don't exist. Layers 0-2 + 4-5 only.
   return [
     renderLanguageLayer(languageMeta),
     renderPersonaLayer(),
     renderRulesLayer(),
-    renderSuggestionsLayer(languageMeta.name),
-    ['[LAYER 4 — Malaysian-Solar Primer]', renderKnowledgeForPrompt()].join('\n'),
-    ['[LAYER 5 — Project Digest]', renderProjectDigest(project, page)].join('\n')
+    ['[LAYER 3 — Malaysian-Solar Primer]', renderKnowledgeForPrompt()].join('\n'),
+    ['[LAYER 4 — Project Digest]', renderProjectDigest(project, page)].join('\n')
   ].join('\n\n')
 }
 
@@ -94,13 +96,3 @@ function renderRulesLayer(): string {
   ].join('\n')
 }
 
-function renderSuggestionsLayer(languageName: string): string {
-  return [
-    '[LAYER 3 — Suggestions Protocol]',
-    'After your response, append on a NEW LINE exactly:',
-    '<<<SUGGESTIONS>>>',
-    '["question 1", "question 2", "question 3"]',
-    `Write 2 or 3 short follow-up questions in ${languageName}, each 60 characters or fewer, that the user might naturally ask next given your answer and the project context.`,
-    'Never include this marker mid-response. If you cannot produce suggestions, omit the marker and the JSON entirely.'
-  ].join('\n')
-}

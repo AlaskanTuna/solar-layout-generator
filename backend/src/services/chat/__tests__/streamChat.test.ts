@@ -43,7 +43,9 @@ function makeRequest(message = 'What is my payback?'): Request {
       language: 'en',
       page: 'analysis'
     },
-    user: { id: 'user-1' }
+    user: { id: 'user-1' },
+    on: vi.fn(),
+    off: vi.fn()
   } as unknown as Request
 }
 
@@ -53,7 +55,10 @@ function makeResponse(): Response {
     flushHeaders: vi.fn(),
     write: vi.fn(),
     end: vi.fn(),
-    json: vi.fn()
+    json: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+    writableEnded: false
   } as unknown as Response & { status: ReturnType<typeof vi.fn> }
 
   res.status = vi.fn().mockReturnValue(res)

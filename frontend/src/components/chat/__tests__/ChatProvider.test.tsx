@@ -22,7 +22,8 @@ describe('ChatProvider', () => {
       messages: [],
       isStreaming: false,
       error: null,
-      isOpen: false
+      isOpen: false,
+      lastSentAt: 0
     })
     expect(result.current.isAnyOpen).toBe(false)
 
@@ -63,7 +64,8 @@ describe('ChatProvider', () => {
       messages: [],
       isStreaming: false,
       error: null,
-      isOpen: false
+      isOpen: false,
+      lastSentAt: 0
     })
     expect(result.current.getState('project-2').isOpen).toBe(true)
   })

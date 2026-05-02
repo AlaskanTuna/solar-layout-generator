@@ -86,13 +86,13 @@ describe('useChat', () => {
     })
   })
 
-  it('streams tokens and parses suggestions from the marker buffer', async () => {
+  it('streams tokens and attaches follow-up suggestions sampled from the JSON pool', async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValue(
         buildSseResponse([
-          'data: {"type":"token","text":"Hello there"}\n\n',
-          'data: {"type":"token","text":"\\n<<<SUGGESTIONS>>>\\n[\\"Ask about payback\\",\\"Explain NEM\\"]"}\n\n',
+          'data: {"type":"token","text":"Hello "}\n\n',
+          'data: {"type":"token","text":"there"}\n\n',
           'data: {"type":"done"}\n\n'
         ])
       )
@@ -120,9 +120,12 @@ describe('useChat', () => {
     expect(result.current.messages).toHaveLength(2)
     expect(result.current.messages[1]).toMatchObject({
       role: 'model',
-      content: 'Hello there',
-      suggestions: ['Ask about payback', 'Explain NEM']
+      content: 'Hello there'
     })
+    // The mocked t() returns the raw key string, not an array — samplePool guards
+    // against non-arrays and returns []. With a real i18n pool populated in
+    // chat.json, this would be an array of up to 3 sampled strings.
+    expect(result.current.messages[1].suggestions).toEqual([])
   })
 
   it('drops the placeholder model bubble after an abort', async () => {

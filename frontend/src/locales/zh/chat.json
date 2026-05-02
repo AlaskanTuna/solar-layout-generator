@@ -5,15 +5,16 @@
   },
   "panel": {
     "title": "问问 Sol！",
-    "subtitle": "你的太阳能小帮手 Sol。任何关于这个项目、节省金额或马来西亚太阳能的问题，都可以问。",
-    "empty": "嗨！选一个问题开始吧：",
+    "subtitle": "任何关于这个项目、节省金额或马来西亚太阳能的问题，都可以问 Sol。",
+    "empty": "我可以怎么帮你？",
     "reset": "清除对话",
     "close": "关闭 Sol"
   },
   "composer": {
     "placeholder": "向 Sol 提问关于屋顶、节省金额、NEM 净电量积分...",
     "send": "发送",
-    "stop": "停止"
+    "stop": "停止",
+    "cooldown": "请等待 {{seconds}} 秒后再发送"
   },
   "errors": {
     "quotaExhausted": "Sol 今天和很多人聊过了，已达到每日上限。请几分钟后再试。",
@@ -35,7 +36,9 @@
       "账单里的 AFA 是什么？",
       "我应该再增加一些太阳能板吗？",
       "NEM 3.0 对我来说是怎么运作的？"
-    ]
+    ],
+    "followupsWorkbench": [],
+    "followupsAnalysis": []
   },
   "streaming": {
     "cursor": "Sol 正在输入"

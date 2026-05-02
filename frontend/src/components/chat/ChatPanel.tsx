@@ -1,8 +1,8 @@
-import { useContext, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useContext, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { RotateCcw, Send, Square, X } from 'lucide-react'
-import { ChatContext } from './ChatProvider'
+import { CHAT_SEND_COOLDOWN_MS, ChatContext } from './ChatProvider'
 import { MessageBubble } from './MessageBubble'
 import { SuggestedQuestions } from './SuggestedQuestions'
 import { useChat } from '@/hooks/useChat'
@@ -23,14 +23,41 @@ export function ChatPanel({ projectId, page }: ChatPanelProps) {
   const { t } = useTranslation('chat')
   const queryClient = useQueryClient()
   const { setState } = useContext(ChatContext)
-  const { messages, isStreaming, error, send, stop, clear } = useChat(projectId, page)
+  const { messages, isStreaming, error, send, stop, clear, cooldownUntil } = useChat(projectId, page)
   const [draft, setDraft] = useState('')
   const composerRef = useRef<HTMLTextAreaElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  // Re-render every 250ms while a cooldown window is active so the countdown
+  // text and the disabled/enabled send button stay live without a wider state change.
+  const [, forceTick] = useState(0)
+  useEffect(() => {
+    if (Date.now() >= cooldownUntil) return
+    const interval = window.setInterval(() => {
+      forceTick((n) => n + 1)
+      if (Date.now() >= cooldownUntil) window.clearInterval(interval)
+    }, 250)
+    return () => window.clearInterval(interval)
+  }, [cooldownUntil])
+
   const paybackYears = getPaybackYears(queryClient.getQueryData<ProjectResponse>(['project', projectId]))
 
-  const canSend = draft.trim().length > 0 && !isStreaming
+  const cooldownRemainingMs = Math.max(0, cooldownUntil - Date.now())
+  const cooldownActive = cooldownRemainingMs > 0
+  const canSend = draft.trim().length > 0 && !isStreaming && !cooldownActive
+  const cooldownSeconds = Math.ceil(cooldownRemainingMs / 1000)
+
+  const handleSuggestionPick = (suggestion: string) => {
+    if (isStreaming || cooldownActive) {
+      // Fall back to filling the composer if the user can't actually send right now —
+      // their click is preserved and they can hit Send themselves once the gate lifts.
+      setDraft(suggestion)
+      composerRef.current?.focus()
+      return
+    }
+    setDraft('')
+    void send(suggestion)
+  }
 
   useEffect(() => {
     composerRef.current?.focus()
@@ -88,17 +115,11 @@ export function ChatPanel({ projectId, page }: ChatPanelProps) {
     }
   }
 
-  const emptyState = useMemo(
-    () => (
-      <div className="space-y-4 rounded-2xl border border-dashed border-border/80 bg-background/30 px-4 py-5">
-        <div className="space-y-1">
-          <p className="font-medium text-foreground">{t('panel.empty')}</p>
-          <p className="text-sm text-muted-foreground">{t('panel.subtitle')}</p>
-        </div>
-        <SuggestedQuestions page={page} paybackYears={paybackYears} onPick={setDraft} />
-      </div>
-    ),
-    [page, paybackYears, t]
+  const emptyState = (
+    <div className="space-y-4 rounded-2xl border border-dashed border-border/80 bg-background/30 px-4 py-5">
+      <h3 className="font-heading text-base font-semibold text-foreground">{t('panel.empty')}</h3>
+      <SuggestedQuestions page={page} paybackYears={paybackYears} onPick={handleSuggestionPick} />
+    </div>
   )
 
   return (
@@ -136,7 +157,7 @@ export function ChatPanel({ projectId, page }: ChatPanelProps) {
         ) : (
           <>
             {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} onSuggestionPick={setDraft} />
+              <MessageBubble key={message.id} message={message} onSuggestionPick={handleSuggestionPick} />
             ))}
             {error && (
               <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -156,19 +177,26 @@ export function ChatPanel({ projectId, page }: ChatPanelProps) {
             onKeyDown={(event) => void handleComposerKeyDown(event)}
             placeholder={t('composer.placeholder')}
             rows={1}
-            // Suppress the global :focus-visible orange ring (globals.css) — the
-            // surrounding card already conveys focus via focus-within above.
-            className="max-h-36 min-h-6 w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground focus:outline-none focus-visible:outline-none focus-visible:shadow-none"
+            data-chat-composer="true"
+            className="max-h-36 min-h-6 w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{draft.length}/4000</span>
+            <span className="text-xs text-muted-foreground">
+              {cooldownActive ? t('composer.cooldown', { seconds: cooldownSeconds }) : `${draft.length}/4000`}
+            </span>
             {isStreaming ? (
               <Button type="button" size="sm" onClick={stop}>
                 <Square className="h-4 w-4" />
                 {t('composer.stop')}
               </Button>
             ) : (
-              <Button type="button" size="sm" onClick={() => void handleSend()} disabled={!canSend}>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => void handleSend()}
+                disabled={!canSend}
+                title={cooldownActive ? t('composer.cooldown', { seconds: cooldownSeconds }) : undefined}
+              >
                 <Send className="h-4 w-4" />
                 {t('composer.send')}
               </Button>

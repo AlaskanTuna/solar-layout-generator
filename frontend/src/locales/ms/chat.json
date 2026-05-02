@@ -5,15 +5,16 @@
   },
   "panel": {
     "title": "Tanya Sol!",
-    "subtitle": "Pemandu solar mesra anda. Tanya apa-apa tentang projek anda, penjimatan, atau cara solar berfungsi di Malaysia.",
-    "empty": "Hai! Pilih satu soalan untuk bermula:",
+    "subtitle": "Tanya Sol apa-apa tentang projek anda, penjimatan, atau cara solar berfungsi di Malaysia.",
+    "empty": "Bagaimana saya boleh bantu?",
     "reset": "Kosongkan perbualan",
     "close": "Tutup Sol"
   },
   "composer": {
     "placeholder": "Tanya Sol tentang bumbung, penjimatan, kredit NEM...",
     "send": "Hantar",
-    "stop": "Henti"
+    "stop": "Henti",
+    "cooldown": "Tunggu {{seconds}}s sebelum hantar lagi"
   },
   "errors": {
     "quotaExhausted": "Sol sedang bersembang dengan ramai orang hari ini dan telah mencapai had harian. Sila cuba lagi dalam beberapa minit.",
@@ -35,7 +36,9 @@
       "Apakah AFA pada bil saya?",
       "Patutkah saya tambah lagi panel?",
       "Bagaimana NEM 3.0 berfungsi untuk saya?"
-    ]
+    ],
+    "followupsWorkbench": [],
+    "followupsAnalysis": []
   },
   "streaming": {
     "cursor": "Sol sedang menaip"

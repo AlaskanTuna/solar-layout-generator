@@ -333,6 +333,17 @@ select:focus-visible,
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 18%, transparent);
 }
 
+/* Opt-out for the chat composer textarea — its parent card already conveys
+   focus via focus-within, so the ring would be visually duplicate noise. The
+   attribute selector adds specificity above the bare textarea:focus-visible
+   rule above so this wins regardless of source order. */
+textarea[data-chat-composer]:focus,
+textarea[data-chat-composer]:focus-visible {
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+}
+
 /* CUSTOM SCROLLBAR */
 * {
   scrollbar-width: thin;

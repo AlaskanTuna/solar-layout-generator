@@ -211,6 +211,8 @@
     "step4Title": "Canvas Tools",
     "step4Body": "The toolbar handles the rest: undo/redo, multi-select to edit groups of panels at once, snap alignment for clean edges, zoom, and layer toggles for flux and satellite overlays.",
     "step5Title": "Save & Continue",
-    "step5Body": "Happy with the layout? Click \"Save & Continue\" to move on to the savings analysis. You can always come back to adjust."
+    "step5Body": "Happy with the layout? Click \"Save & Continue\" to move on to the savings analysis. You can always come back to adjust.",
+    "step6Title": "Meet Sol",
+    "step6Body": "Stuck or curious? Tap Sol — your friendly solar guide — to ask anything about this layout, your savings, NEM credits, or how solar works in Malaysia."
   }
 }

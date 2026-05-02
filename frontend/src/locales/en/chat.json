@@ -5,15 +5,16 @@
   },
   "panel": {
     "title": "Ask Sol!",
-    "subtitle": "Your friendly solar guide. Ask anything about your project, your savings, or how solar works in Malaysia.",
-    "empty": "Hi! Pick a question to get started:",
+    "subtitle": "Ask Sol anything about your project, your savings, or how solar works in Malaysia.",
+    "empty": "How can I help you?",
     "reset": "Clear chat",
     "close": "Close Sol"
   },
   "composer": {
     "placeholder": "Ask Sol about your roof, your savings, NEM credits...",
     "send": "Send",
-    "stop": "Stop"
+    "stop": "Stop",
+    "cooldown": "Wait {{seconds}}s before sending another"
   },
   "errors": {
     "quotaExhausted": "Sol's chatting with a lot of folks today and hit the daily limit. Please try again in a few minutes.",
@@ -35,9 +36,11 @@
       "What is AFA on my bill?",
       "Should I add more panels?",
       "How does NEM 3.0 work for me?"
-    ]
+    ],
+    "followupsWorkbench": [],
+    "followupsAnalysis": []
   },
   "streaming": {
-    "cursor": "Sol is typing"
+    "cursor": "Sol is typing..."
   }
 }

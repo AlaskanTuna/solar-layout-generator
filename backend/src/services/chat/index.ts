@@ -57,6 +57,22 @@ export async function streamChat(req: Request, res: Response): Promise<void> {
   const systemInstruction = buildSystemInstruction(project, page, language)
   const contents = buildContents(history, message)
 
+  // Stop further token generation if the client disconnects mid-stream (browser
+  // refresh, network drop, user navigates away). Note: the upstream Gemini call
+  // is already counted toward the request quota the moment we issue it; the
+  // abort just stops further token reads, saving bandwidth and any
+  // output-token billing past the cancellation point.
+  const abortController = new AbortController()
+  let clientGone = false
+  const onClientClose = () => {
+    if (clientGone) return
+    clientGone = true
+    console.info(`[Chat] Client disconnected mid-stream, aborting Gemini call (project=${projectId})`)
+    abortController.abort()
+  }
+  req.on('close', onClientClose)
+  res.on('close', onClientClose)
+
   async function callOnce(): Promise<AsyncGenerator<GenerateContentResponse>> {
     const client = getGenAIClient()
     return client.models.generateContentStream({
@@ -64,6 +80,7 @@ export async function streamChat(req: Request, res: Response): Promise<void> {
       contents,
       config: {
         systemInstruction,
+        abortSignal: abortController.signal,
         safetySettings: [
           {
             category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -86,6 +103,11 @@ export async function streamChat(req: Request, res: Response): Promise<void> {
     })
   }
 
+  function safeWrite(payload: ChatEvent): void {
+    if (clientGone || res.writableEnded) return
+    writeSse(res, payload)
+  }
+
   try {
     let stream: AsyncGenerator<GenerateContentResponse>
 
@@ -103,19 +125,29 @@ export async function streamChat(req: Request, res: Response): Promise<void> {
     }
 
     for await (const chunk of stream) {
+      if (clientGone) break
       const text = chunk.text ?? ''
       if (text) {
-        writeSse(res, { type: 'token', text })
+        safeWrite({ type: 'token', text })
       }
     }
 
-    writeSse(res, { type: 'done' })
+    safeWrite({ type: 'done' })
   } catch (error) {
+    if (clientGone || abortController.signal.aborted) {
+      // Abort-driven exits are expected when the client disconnects; don't surface
+      // them as user-facing errors and don't write to a closed response.
+      return
+    }
     console.error('[Chat] Stream failed', error)
     const { category, message: localisedMessage } = categoriseError(error, language)
-    writeSse(res, { type: 'error', category, message: localisedMessage })
+    safeWrite({ type: 'error', category, message: localisedMessage })
   } finally {
-    res.end()
+    req.off('close', onClientClose)
+    res.off('close', onClientClose)
+    if (!res.writableEnded) {
+      res.end()
+    }
   }
 }
 

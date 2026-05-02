@@ -15,6 +15,8 @@ export type ProjectChatState = {
   isStreaming: boolean
   error: string | null
   isOpen: boolean
+  /** Wall-clock ms timestamp of the last user send. Drives the spam-guard cooldown. */
+  lastSentAt: number
 }
 
 export type ChatContextValue = {
@@ -28,8 +30,12 @@ const EMPTY_CHAT_STATE: ProjectChatState = {
   messages: [],
   isStreaming: false,
   error: null,
-  isOpen: false
+  isOpen: false,
+  lastSentAt: 0
 }
+
+/** Minimum gap (ms) between consecutive user sends. Spam guard. */
+export const CHAT_SEND_COOLDOWN_MS = 5000
 
 /** Shared per-project chat state that survives page navigation within the SPA. */
 export const ChatContext = createContext<ChatContextValue>({

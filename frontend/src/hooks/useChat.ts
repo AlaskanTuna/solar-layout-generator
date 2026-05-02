@@ -1,9 +1,10 @@
 import { useCallback, useContext, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChatContext, type ChatMessage } from '@/components/chat/ChatProvider'
+import { CHAT_SEND_COOLDOWN_MS, ChatContext, type ChatMessage } from '@/components/chat/ChatProvider'
 import { getSupabase } from '@/lib/supabase'
 
-const SUGGESTIONS_MARKER = '\n<<<SUGGESTIONS>>>\n'
+/** How many follow-up chips to render per model bubble, sampled from the page-specific pool. */
+const FOLLOWUP_CHIP_COUNT = 3
 
 type ChatPage = 'workbench' | 'analysis'
 type ChatEvent =
@@ -11,7 +12,18 @@ type ChatEvent =
   | { type: 'done' }
   | { type: 'error'; category: string; message: string }
 
-type SendPhase = 'message' | 'suggestions'
+/** Random sample of N entries from a pool, without replacement. Returns [] if pool is empty. */
+function samplePool(pool: string[], n: number): string[] {
+  if (!Array.isArray(pool) || pool.length === 0) return []
+  if (pool.length <= n) return [...pool]
+  const copy = [...pool]
+  const out: string[] = []
+  for (let i = 0; i < n; i += 1) {
+    const idx = Math.floor(Math.random() * copy.length)
+    out.push(copy.splice(idx, 1)[0])
+  }
+  return out
+}
 
 type UseChatReturn = {
   messages: ChatMessage[]
@@ -20,6 +32,8 @@ type UseChatReturn = {
   send: (message: string) => Promise<void>
   stop: () => void
   clear: () => void
+  /** Wall-clock ms until the spam-guard cooldown lifts, or 0 if it's already lifted. */
+  cooldownUntil: number
 }
 
 function normaliseLanguage(language: string | undefined): 'en' | 'ms' | 'zh' {
@@ -87,6 +101,12 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
       const message = rawMessage.trim().slice(0, 4000)
       if (!message || state.isStreaming) return
 
+      // Spam guard: enforce a minimum gap between sends. The UI also disables the
+      // send button during cooldown, but this guard backs that up so suggestion
+      // chips and Enter-to-send can't bypass it.
+      const now = Date.now()
+      if (now - state.lastSentAt < CHAT_SEND_COOLDOWN_MS) return
+
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'user',
@@ -104,15 +124,16 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
         ...prev,
         error: null,
         isStreaming: true,
+        lastSentAt: now,
         messages: [...prev.messages, userMessage, modelMessage]
       }))
 
       const controller = new AbortController()
       abortRef.current = controller
 
-      let phase: SendPhase = 'message'
-      let suggestionsBuffer = ''
       let streamFinished = false
+      const followupPoolKey = page === 'workbench' ? 'suggestions.followupsWorkbench' : 'suggestions.followupsAnalysis'
+      const followupPool = (t(followupPoolKey, { returnObjects: true, defaultValue: [] }) as unknown) as string[]
 
       try {
         const supabase = getSupabase()
@@ -156,46 +177,24 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
         let buffer = ''
 
         const handleToken = (text: string) => {
-          updateMessage(modelMessage.id, (current) => {
-            if (phase === 'suggestions') {
-              suggestionsBuffer += text
-              return current
-            }
-
-            const combined = current.content + text
-            const markerIndex = combined.indexOf(SUGGESTIONS_MARKER)
-            if (markerIndex === -1) {
-              return { ...current, content: combined }
-            }
-
-            phase = 'suggestions'
-            suggestionsBuffer = combined.slice(markerIndex + SUGGESTIONS_MARKER.length)
-            return { ...current, content: combined.slice(0, markerIndex) }
-          })
+          updateMessage(modelMessage.id, (current) => ({ ...current, content: current.content + text }))
         }
 
         const finalizeMessage = (category?: string, messageText?: string) => {
           streamFinished = true
           updateMessage(modelMessage.id, (current) => {
-            let suggestions = current.suggestions
-
-            if (phase === 'suggestions' && suggestionsBuffer.trim()) {
-              try {
-                const parsed = JSON.parse(suggestionsBuffer.trim())
-                if (Array.isArray(parsed)) {
-                  suggestions = parsed.filter((entry): entry is string => typeof entry === 'string').slice(0, 4)
-                }
-              } catch (error) {
-                console.warn('[Chat] Failed to parse suggestions JSON', error, suggestionsBuffer)
-              }
-            }
+            // Follow-up chips: sample N from the page-specific pool authored in chat.json.
+            // Suppressed on error bubbles since clicking an unrelated chip after a failure
+            // would be more noise than help. Empty pool → no chips, no console noise.
+            const isErrorTurn = Boolean(category && messageText)
+            const suggestions = isErrorTurn ? current.suggestions : samplePool(followupPool, FOLLOWUP_CHIP_COUNT)
 
             return {
               ...current,
-              content: category && messageText ? messageText : current.content,
+              content: isErrorTurn ? (messageText as string) : current.content,
               streaming: false,
               suggestions,
-              error: category && messageText ? { category, message: messageText } : current.error
+              error: isErrorTurn ? { category: category as string, message: messageText as string } : current.error
             }
           })
         }
@@ -303,8 +302,9 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
       error: state.error,
       send,
       stop,
-      clear
+      clear,
+      cooldownUntil: state.lastSentAt + CHAT_SEND_COOLDOWN_MS
     }),
-    [clear, send, state.error, state.isStreaming, state.messages, stop]
+    [clear, send, state.error, state.isStreaming, state.lastSentAt, state.messages, stop]
   )
 }
