@@ -48,7 +48,8 @@
     "zoom": "Scroll to zoom in and out",
     "pan": "Hold Space and drag to pan the view",
     "dismiss": "Dismiss",
-    "dismissCta": "Click anywhere or press Esc to dismiss"
+    "dismissCta": "Click anywhere or press Esc to dismiss",
+    "dontShowAgain": "Don't show again"
   },
   "sidebar": {
     "description": "Adjust the suggested layout before moving to financial analysis.",

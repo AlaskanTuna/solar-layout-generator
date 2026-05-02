@@ -1,8 +1,27 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Hand, Keyboard, Move, MousePointerClick, X, ZoomIn } from 'lucide-react'
+import { Check, Hand, Keyboard, Move, MousePointerClick, X, ZoomIn } from 'lucide-react'
 
 const IDLE_MS = 10000
+const PERMANENT_DISMISS_KEY = 'solarsim.workbench.hintDismissed'
+
+function readPermanentDismiss(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem(PERMANENT_DISMISS_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function writePermanentDismiss(): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(PERMANENT_DISMISS_KEY, 'true')
+  } catch {
+    // Storage unavailable (private mode, quota); fail silently — the user just sees the overlay again next session.
+  }
+}
 
 type Props = {
   /** Container element whose activity drives the idle timer. */
@@ -17,6 +36,8 @@ type Props = {
 export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: Props) {
   const { t } = useTranslation('workbench')
   const [visible, setVisible] = useState(false)
+  const [permanentlyDismissed, setPermanentlyDismissed] = useState<boolean>(() => readPermanentDismiss())
+  const [dontShowAgain, setDontShowAgain] = useState(false)
   const visibleRef = useRef(false)
   const timerRef = useRef<number | null>(null)
 
@@ -29,7 +50,7 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
   }, [suppressed, visible])
 
   useEffect(() => {
-    if (!ready || suppressed) return
+    if (!ready || suppressed || permanentlyDismissed) return
     const target = targetRef.current
     if (!target) return
 
@@ -72,9 +93,15 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
       window.removeEventListener('keydown', onAction)
       clearTimer()
     }
-  }, [ready, suppressed, targetRef])
+  }, [ready, suppressed, permanentlyDismissed, targetRef])
 
-  const dismiss = () => setVisible(false)
+  const dismiss = () => {
+    if (dontShowAgain) {
+      writePermanentDismiss()
+      setPermanentlyDismissed(true)
+    }
+    setVisible(false)
+  }
 
   if (!visible) return null
 
@@ -119,7 +146,29 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
             </li>
           ))}
         </ul>
-        <p className="mt-4 text-center text-[10px] text-muted-foreground/80">{t('hint.dismissCta')}</p>
+        <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 text-xs text-muted-foreground select-none">
+          <span
+            role="checkbox"
+            tabIndex={0}
+            aria-checked={dontShowAgain}
+            onClick={() => setDontShowAgain((v) => !v)}
+            onKeyDown={(event) => {
+              if (event.key === ' ' || event.key === 'Enter') {
+                event.preventDefault()
+                setDontShowAgain((v) => !v)
+              }
+            }}
+            className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
+              dontShowAgain
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background hover:border-primary/60'
+            }`}
+          >
+            {dontShowAgain && <Check className="h-3 w-3" strokeWidth={3} />}
+          </span>
+          <span onClick={() => setDontShowAgain((v) => !v)}>{t('hint.dontShowAgain')}</span>
+        </label>
+        <p className="mt-2 text-center text-[10px] text-muted-foreground/80">{t('hint.dismissCta')}</p>
       </div>
     </>
   )

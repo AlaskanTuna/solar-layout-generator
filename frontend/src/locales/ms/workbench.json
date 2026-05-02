@@ -48,7 +48,8 @@
     "zoom": "Tatal untuk zum masuk dan keluar",
     "pan": "Tahan Space dan seret untuk menggeser pandangan",
     "dismiss": "Tutup",
-    "dismissCta": "Klik di mana-mana atau tekan Esc untuk menutup"
+    "dismissCta": "Klik di mana-mana atau tekan Esc untuk menutup",
+    "dontShowAgain": "Jangan tunjukkan lagi"
   },
   "sidebar": {
     "description": "Laraskan susun atur yang dicadangkan sebelum beralih ke analisis kewangan.",

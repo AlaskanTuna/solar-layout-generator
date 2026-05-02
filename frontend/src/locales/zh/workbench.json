@@ -48,7 +48,8 @@
     "zoom": "滚动鼠标滚轮以缩放",
     "pan": "按住空格键并拖动以平移视图",
     "dismiss": "关闭",
-    "dismissCta": "点击任意位置或按 Esc 关闭"
+    "dismissCta": "点击任意位置或按 Esc 关闭",
+    "dontShowAgain": "不再显示"
   },
   "sidebar": {
     "description": "在进行财务分析前，请先调整建议的布局。",
