@@ -148,7 +148,7 @@ export function ChatPanel({ projectId, page }: ChatPanelProps) {
       </div>
 
       <div className="border-t border-border/70 px-4 py-4">
-        <div className="rounded-2xl border border-border bg-background/70 px-3 py-3 shadow-sm">
+        <div className="rounded-2xl border border-border bg-background/70 px-3 py-3 shadow-sm transition-colors focus-within:border-primary/40">
           <textarea
             ref={composerRef}
             value={draft}
@@ -156,7 +156,9 @@ export function ChatPanel({ projectId, page }: ChatPanelProps) {
             onKeyDown={(event) => void handleComposerKeyDown(event)}
             placeholder={t('composer.placeholder')}
             rows={1}
-            className="max-h-36 min-h-6 w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            // Suppress the global :focus-visible orange ring (globals.css) — the
+            // surrounding card already conveys focus via focus-within above.
+            className="max-h-36 min-h-6 w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground focus:outline-none focus-visible:outline-none focus-visible:shadow-none"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">{draft.length}/4000</span>

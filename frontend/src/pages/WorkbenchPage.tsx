@@ -306,7 +306,12 @@ export function WorkbenchPage() {
 
   return (
     <AppLayout>
-      <GuidedTour storageKey="slg-tour-workbench" steps={getWorkbenchTourSteps(t)} onActiveChange={setTourActive} />
+      <GuidedTour
+        storageKey="slg-tour-workbench"
+        steps={getWorkbenchTourSteps(t)}
+        onActiveChange={setTourActive}
+        hidden={isChatOpen}
+      />
       <PageContainer variant="mvp">
         {/* Workbench sidebar */}
         <WorkbenchSidebar

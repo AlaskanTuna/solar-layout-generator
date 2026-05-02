@@ -143,11 +143,14 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
 export function GuidedTour({
   storageKey,
   steps,
-  onActiveChange
+  onActiveChange,
+  hidden = false
 }: {
   storageKey: string
   steps: TourStep[]
   onActiveChange?: (active: boolean) => void
+  /** When true, hide the launcher FAB (e.g. while the chat panel owns the screen). */
+  hidden?: boolean
 }) {
   const [showTour, setShowTour] = useState(() => !localStorage.getItem(storageKey))
 
@@ -168,14 +171,16 @@ export function GuidedTour({
     <>
       {showTour && <GuidedTourModal steps={steps} onClose={closeTour} />}
 
-      <button
-        type="button"
-        className="fixed bottom-5 right-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 text-foreground shadow-[0_8px_24px_rgba(234,88,12,0.18)] backdrop-blur-xl transition-colors duration-300 hover:bg-white/60 dark:border-white/10 dark:bg-stone-900/55 dark:hover:bg-stone-900/75"
-        onClick={openTour}
-        title="Show guided tour"
-      >
-        <HelpCircle className="h-5 w-5" />
-      </button>
+      {!hidden && (
+        <button
+          type="button"
+          className="fixed bottom-5 right-5 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 text-foreground shadow-[0_8px_24px_rgba(234,88,12,0.18)] backdrop-blur-xl transition-colors duration-300 hover:bg-white/60 dark:border-white/10 dark:bg-stone-900/55 dark:hover:bg-stone-900/75"
+          onClick={openTour}
+          title="Show guided tour"
+        >
+          <HelpCircle className="h-5 w-5" />
+        </button>
+      )}
     </>
   )
 }

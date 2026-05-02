@@ -46,6 +46,10 @@ export function useWorkbenchKeyboard({
         return
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Don't hijack Delete/Backspace while the user is typing in a text field
+        // (e.g. the chat composer) — that would erase a selected canvas panel
+        // instead of the character they meant to delete.
+        if (isTypingInElement(e.target)) return
         if (selectedPanelIds.size > 0) {
           e.preventDefault()
           onDeleteSelected()
@@ -53,6 +57,9 @@ export function useWorkbenchKeyboard({
         return
       }
       if (e.key === ' ') {
+        // Same guard — pressing Space in the chat composer should insert a space,
+        // not toggle pan mode on the canvas.
+        if (isTypingInElement(e.target)) return
         e.preventDefault()
         if (!e.repeat) onSpaceDown()
         return

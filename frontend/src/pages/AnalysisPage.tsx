@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +32,7 @@ import { SystemCostCard } from '@/components/analysis/SystemCostCard'
 import { SolarVerdict } from '@/components/analysis/SolarVerdict'
 import { SortableCardContainer } from '@/components/analysis/SortableCardContainer'
 import { AnalysisSidebar } from '@/components/analysis/AnalysisSidebar'
+import { ChatContext } from '@/components/chat/ChatProvider'
 import { ChatLauncher } from '@/components/chat/ChatLauncher'
 import { useAnalysisForm, type AnalysisFormState } from '@/hooks/useAnalysisForm'
 import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
@@ -55,6 +56,8 @@ export function AnalysisPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { getState } = useContext(ChatContext)
+  const isChatOpen = projectId ? getState(projectId).isOpen : false
   const { resolved } = useTheme()
   const chartTooltipStyle = getChartTooltipStyle(resolved)
   const { t } = useTranslation('analysis')
@@ -254,7 +257,7 @@ export function AnalysisPage() {
 
   return (
     <AppLayout>
-      <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} />
+      <GuidedTour storageKey="slg-tour-analysis" steps={ANALYSIS_TOUR_STEPS} hidden={isChatOpen} />
       <PageContainer variant="mvp" className="gap-6 py-6">
         {/* Analysis sidebar */}
         <AnalysisSidebar

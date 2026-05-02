@@ -3,7 +3,11 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const KNOWLEDGE_PATH = path.join(__dirname, 'knowledge.md')
+// Anchor the bible outside the src/dist trees so it doesn't depend on tsc copying
+// non-TS files at build time. Same relative path resolves in dev
+// (backend/src/services/chat → backend/assets) and in prod
+// (backend/dist/services/chat → backend/assets).
+const KNOWLEDGE_PATH = path.resolve(__dirname, '../../../assets/knowledge.md')
 const SECTION_RE = /^##\s+(.+)$/gm
 
 let cachedSections: Map<string, string> | null = null

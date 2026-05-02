@@ -36,7 +36,7 @@ export function SuggestedQuestions({ page, onPick, paybackYears }: SuggestedQues
           key={suggestion}
           type="button"
           onClick={() => onPick(suggestion)}
-          className="w-full rounded-2xl border border-border bg-background/60 px-4 py-3 text-left text-sm text-foreground transition-colors hover:bg-background"
+          className="w-full rounded-2xl border border-border bg-background/60 px-4 py-3 text-left text-sm text-foreground shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-background hover:shadow-md"
         >
           {suggestion}
         </button>

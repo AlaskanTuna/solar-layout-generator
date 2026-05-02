@@ -41,7 +41,7 @@ export function MessageBubble({ message, onSuggestionPick }: MessageBubbleProps)
                 key={suggestion}
                 type="button"
                 onClick={() => onSuggestionPick(suggestion)}
-                className="rounded-full border border-border bg-background/60 px-3 py-1 text-left text-xs text-foreground/80 transition-colors hover:bg-background"
+                className="rounded-full border border-border bg-background/60 px-3 py-1 text-left text-xs text-foreground/80 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-background hover:text-foreground hover:shadow-md"
               >
                 {suggestion}
               </button>

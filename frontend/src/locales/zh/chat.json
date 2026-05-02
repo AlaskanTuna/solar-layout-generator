@@ -1,27 +1,27 @@
 {
   "launcher": {
-    "aria": "打开 SolarSim 助手",
-    "title": "询问 SolarSim 助手"
+    "aria": "打开 Sol — 你的太阳能小帮手",
+    "title": "问问 Sol！"
   },
   "panel": {
-    "title": "SolarSim 助手",
-    "subtitle": "可询问这个项目、您的布局，或分析结果是如何计算的。",
-    "empty": "可先从以下问题开始。",
+    "title": "问问 Sol！",
+    "subtitle": "你的太阳能小帮手 Sol。任何关于这个项目、节省金额或马来西亚太阳能的问题，都可以问。",
+    "empty": "嗨！选一个问题开始吧：",
     "reset": "清除对话",
-    "close": "关闭助手"
+    "close": "关闭 Sol"
   },
   "composer": {
-    "placeholder": "询问屋顶布局、NEM 电费抵扣、回本期，或这份分析结果...",
+    "placeholder": "向 Sol 提问关于屋顶、节省金额、NEM 净电量积分...",
     "send": "发送",
     "stop": "停止"
   },
   "errors": {
-    "quotaExhausted": "我们已达到每日上限，请几分钟后再试。",
-    "serviceUnavailable": "助手暂时不可用，请稍后再试。",
-    "permissionDenied": "助手当前配置不正确，请联系支持团队。",
-    "injectionRejected": "抱歉，我无法处理该请求。请换一种问法。",
-    "networkFailure": "无法连接到助手，请检查网络后重试。",
-    "unknown": "会话可能已过期，或助手遇到了意外问题。请再试一次。"
+    "quotaExhausted": "Sol 今天和很多人聊过了，已达到每日上限。请几分钟后再试。",
+    "serviceUnavailable": "Sol 在小憩一下，请稍后再试。",
+    "permissionDenied": "Sol 当前配置不正确，请联系支持团队。",
+    "injectionRejected": "嗯，Sol 无法处理这个请求。换个说法再问一次？",
+    "networkFailure": "无法连接到 Sol。请检查网络后再试。",
+    "unknown": "Sol 遇到了意外问题。请再试一次。"
   },
   "suggestions": {
     "workbench": [
@@ -38,6 +38,6 @@
     ]
   },
   "streaming": {
-    "cursor": "助手仍在输入中"
+    "cursor": "Sol 正在输入"
   }
 }

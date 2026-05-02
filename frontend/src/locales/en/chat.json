@@ -1,27 +1,27 @@
 {
   "launcher": {
-    "aria": "Open SolarSim Assistant",
-    "title": "Ask SolarSim Assistant"
+    "aria": "Open Sol — your solar guide",
+    "title": "Ask Sol!"
   },
   "panel": {
-    "title": "SolarSim Assistant",
-    "subtitle": "Ask about this project, your layout, or how the analysis works.",
-    "empty": "Start with one of these questions.",
-    "reset": "Clear conversation",
-    "close": "Close assistant"
+    "title": "Ask Sol!",
+    "subtitle": "Your friendly solar guide. Ask anything about your project, your savings, or how solar works in Malaysia.",
+    "empty": "Hi! Pick a question to get started:",
+    "reset": "Clear chat",
+    "close": "Close Sol"
   },
   "composer": {
-    "placeholder": "Ask about your roof layout, NEM credits, payback, or this analysis...",
+    "placeholder": "Ask Sol about your roof, your savings, NEM credits...",
     "send": "Send",
     "stop": "Stop"
   },
   "errors": {
-    "quotaExhausted": "We've hit our daily limit. Please try again in a few minutes.",
-    "serviceUnavailable": "The assistant is temporarily unavailable. Please try again shortly.",
-    "permissionDenied": "The assistant is not configured correctly. Please contact support.",
-    "injectionRejected": "Sorry, I can't process that request. Try rephrasing your question.",
-    "networkFailure": "Couldn't reach the assistant. Check your connection and try again.",
-    "unknown": "Session expired or the assistant hit an unexpected issue. Please try again."
+    "quotaExhausted": "Sol's chatting with a lot of folks today and hit the daily limit. Please try again in a few minutes.",
+    "serviceUnavailable": "Sol is taking a quick breather. Please try again shortly.",
+    "permissionDenied": "Sol isn't configured correctly. Please contact support.",
+    "injectionRejected": "Hmm, Sol can't process that one. Try rephrasing your question?",
+    "networkFailure": "Couldn't reach Sol. Check your connection and try again.",
+    "unknown": "Sol hit an unexpected snag. Please try again."
   },
   "suggestions": {
     "workbench": [
@@ -38,6 +38,6 @@
     ]
   },
   "streaming": {
-    "cursor": "Assistant is still typing"
+    "cursor": "Sol is typing"
   }
 }
