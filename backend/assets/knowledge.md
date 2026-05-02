@@ -236,6 +236,9 @@ SolarSim guides the user through three pages.
     pan the view, scroll to zoom.
   - Toggle layers: RGB satellite imagery, flux (solar irradiance heatmap),
     DSM (height map), roof mask, and roof segments.
+  - Use overlays as diagnostic tools when the suggested layout looks strange:
+    they help the user compare the machine-generated panel rectangles against
+    roof shape, sunlight, height/elevation, and roof-segment boundaries.
   - When a panel is moved, the backend recomputes its monthly energy yield
     by sampling the flux GeoTIFF at the new position.
   - Save & Continue persists the edited layout and selected panel model before
@@ -251,6 +254,44 @@ SolarSim guides the user through three pages.
   panel in a sunny spot — sometimes 30–50% less. The app's flux map shows
   exactly where these spots are. Moving a panel from a shaded area to a
   sunny one changes its annual yield, which changes the system's payback.
+
+## Workbench Overlays and Irradiance Slider
+
+Use this section when a user asks what the colored layers mean, which overlay
+to use, why the canvas looks wrong, or how to inspect a suggested layout.
+
+- **RGB overlay.** The normal satellite photo. Use it to visually compare panel
+  rectangles against the roof, ridges, edges, extensions, skylights, water
+  tanks, and obvious obstacles. This is the first sanity-check layer.
+- **Flux overlay.** The solar irradiance / sunlight heatmap. Bright or "sunny"
+  areas are better candidates for panels; darker or "shady" areas are weaker.
+  If a panel sits on a low-flux patch, moving or removing it can improve the
+  layout's real usefulness and payback. Flux is the best overlay for "where
+  should panels go for yield?"
+- **DSM overlay.** Digital Surface Model / height map. Use it to understand
+  relative elevation and roof form: ridges, slopes, raised structures, tanks,
+  neighbouring buildings, or other height changes. DSM helps explain why a roof
+  may be split into segments or why shadows/obstructions may exist, but it is
+  not a structural engineering check.
+- **Mask overlay.** Shows what the data pipeline believes is roof vs off-roof.
+  Use it when panels appear outside the actual roof or when the roof outline
+  seems wrong. If the mask looks inaccurate, the layout needs human correction
+  and installer verification.
+- **Segments overlay.** Shows roof-plane groupings with azimuth and pitch. Use
+  it to understand why panels are grouped by roof face and why some faces yield
+  better than others. A south-ish, less-shaded segment is usually stronger in
+  Peninsular Malaysia than a shaded or north-facing segment.
+- **Overlay loading.** "Loading overlay..." means the app is fetching or
+  rendering the selected data layer. Wait before drawing conclusions.
+- **Monthly irradiance direction slider.** The bottom slider changes the visual
+  amber sun-glow month and approximate sun azimuth/intensity for Peninsular
+  Malaysia. It is a teaching and inspection aid: it helps users see seasonal
+  sun direction and brightness. It does **not** by itself change saved panel
+  generation, billing, or payback. Actual panel kWh comes from the stored
+  monthly energy arrays and recomputation after layout edits.
+- Good guidance: start with RGB to check roof realism, switch to Flux to find
+  the best sunlight zones, use DSM/Segments to understand roof shape, and use
+  Mask if panel placement seems off-roof.
 
 ## Common Warning and Error Messages
 

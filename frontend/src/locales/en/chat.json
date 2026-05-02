@@ -28,8 +28,8 @@
     "workbench": [
       "Which panels should I remove first?",
       "How do I know if this layout is realistic?",
-      "What do the heatmap colors mean?",
-      "Why should I save after moving panels?"
+      "Which overlay should I use to inspect my roof?",
+      "What does the irradiance direction slider show?"
     ],
     "analysis": [
       "Is this payback good for Malaysia?",
@@ -45,6 +45,10 @@
       "How do I compare two layout options?",
       "Why did my annual yield change?",
       "Which overlay should I look at first?",
+      "How do Flux, DSM, Mask and Segments differ?",
+      "Can the Flux overlay show the best panel spots?",
+      "What does the DSM height map tell me?",
+      "What does the monthly sun direction slider change?",
       "Can I trust panels near the roof edge?",
       "What should an installer verify on this roof?",
       "Why is monthly energy still pending?",

@@ -28,8 +28,8 @@
     "workbench": [
       "Panel mana patut saya buang dahulu?",
       "Bagaimana saya tahu susun atur ini realistik?",
-      "Apa maksud warna pada peta haba?",
-      "Mengapa perlu simpan selepas alih panel?"
+      "Lapisan mana patut saya guna untuk semak bumbung?",
+      "Apa yang ditunjukkan oleh slider arah irradiance?"
     ],
     "analysis": [
       "Adakah tempoh pulang modal ini bagus di Malaysia?",
@@ -45,6 +45,10 @@
       "Bagaimana saya bandingkan dua pilihan susun atur?",
       "Mengapa hasil tahunan saya berubah?",
       "Lapisan mana patut saya lihat dahulu?",
+      "Apa beza Flux, DSM, Mask dan Segments?",
+      "Boleh Flux tunjuk tempat panel terbaik?",
+      "Apa maksud peta ketinggian DSM?",
+      "Apa yang berubah bila guna slider arah matahari bulanan?",
       "Boleh saya percaya panel berhampiran tepi bumbung?",
       "Apa yang pemasang perlu semak pada bumbung ini?",
       "Mengapa data tenaga bulanan masih belum siap?",
