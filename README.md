@@ -110,6 +110,7 @@ User assumptions: non-technical, unfamiliar with solar terminology, accessing vi
 | 🎭  | **Theme + A11y**              | Light / dark / system theme persisted via `next-themes`, glassmorphic UI primitives, full keyboard support on the canvas, and visible focus rings.     |
 | 📄  | **Sandboxed PDF Export**      | Heroku backend signs a 60-second token; a separate Vercel function navigates a headless Chromium to a print route and ships the A4 landscape PDF.      |
 | 🔐  | **Supabase Auth**             | Email/password and Google OAuth, with per-user quota enforcement, project-level RLS, and remember-email on sign-in.                                    |
+| 💬  | **Sol Chatbot Assistant**     | Project-aware chat grounded in your project's data and a curated solar knowledge bible. Streams over SSE, page-aware, EN/MS/ZH, prompt-injection guarded. |
 
 ---
 
@@ -135,6 +136,7 @@ flowchart LR
     Backend --> Postgres[(Supabase Postgres)]
     Backend --> Storage[(Supabase Storage<br/>cached GeoTIFFs)]
     Backend --> Solar[Google Solar API]
+    Backend --> Gemini[Gemini / Vertex AI<br/>Sol chatbot]
     Frontend --> Maps[Google Maps JS API]
     Frontend --> PdfFn[Vercel PDF function]
     PdfFn --> Frontend
@@ -204,6 +206,7 @@ flowchart LR
 | Geo & Imagery   | geotiff.js · sharp · proj4                                                   | GeoTIFF parsing, raster → WebP, lat-lng ↔ pixel reprojection |
 | Identity & Data | Supabase (Auth + Postgres + Storage)                                         | Email/password + Google OAuth, RLS-backed projects           |
 | External APIs   | Google Solar API · Google Maps JavaScript API · Geocoding API                | One Solar call per address, cached forever                   |
+| Chat & GenAI    | @google/genai (Gemini / Vertex AI) · SSE-over-POST streaming                 | Sol assistant with project-grounded prompts, dual-auth fallback |
 | Testing         | Vitest · @testing-library/react · jsdom                                      | Co-located unit tests, 205 passing                           |
 | PDF Service     | Vercel function · Puppeteer · Chromium (headless)                            | Sandboxed off the Heroku dyno, signed-token access           |
 | Deploy          | Heroku (web dyno) · Vercel (PDF function) · GitHub Actions CI/CD             | `pnpm` build on Heroku via `heroku-postbuild`                |
