@@ -216,6 +216,12 @@ export function ProjectsPage() {
                   <p className="mt-4 text-sm text-muted-foreground">
                     {filter === 'all' ? t('empty.noProjects') : t('empty.noFiltered', { filter })}
                   </p>
+                  {filter === 'all' && (
+                    <Button type="button" onClick={() => setDialogOpen(true)} disabled={quotaReached} className="mt-6">
+                      <Plus className="h-4 w-4" />
+                      {t('newProjectButton')}
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 animate-fade-in">
