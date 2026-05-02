@@ -7,26 +7,33 @@ type SuggestedQuestionsProps = {
   paybackYears?: number | null
 }
 
+const KICKOFF_CHIP_COUNT = 4
+
+function samplePool(pool: string[], count: number): string[] {
+  if (pool.length <= count) return [...pool]
+
+  const copy = [...pool]
+  const selected: string[] = []
+  for (let i = 0; i < count; i += 1) {
+    const index = Math.floor(Math.random() * copy.length)
+    selected.push(copy.splice(index, 1)[0])
+  }
+  return selected
+}
+
 /** Renders page-aware empty-state prompt chips. Clicks delegate to onPick, which auto-sends. */
 export function SuggestedQuestions({ page, onPick, paybackYears }: SuggestedQuestionsProps) {
   const { t } = useTranslation('chat')
 
   const suggestions = useMemo(() => {
-    if (page === 'analysis') {
-      return [
-        t('suggestions.analysis.0', { years: paybackYears ?? 'unknown' }),
-        t('suggestions.analysis.1'),
-        t('suggestions.analysis.2'),
-        t('suggestions.analysis.3')
-      ]
-    }
+    const key = page === 'analysis' ? 'suggestions.analysis' : 'suggestions.workbench'
+    const pool = t(key, {
+      returnObjects: true,
+      years: paybackYears ?? 'unknown',
+      defaultValue: []
+    }) as unknown
 
-    return [
-      t('suggestions.workbench.0'),
-      t('suggestions.workbench.1'),
-      t('suggestions.workbench.2'),
-      t('suggestions.workbench.3')
-    ]
+    return samplePool(Array.isArray(pool) ? (pool as string[]) : [], KICKOFF_CHIP_COUNT)
   }, [page, paybackYears, t])
 
   return (

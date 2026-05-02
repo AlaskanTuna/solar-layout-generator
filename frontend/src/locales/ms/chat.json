@@ -29,13 +29,21 @@
       "Panel mana patut saya buang dahulu?",
       "Bagaimana saya tahu susun atur ini realistik?",
       "Lapisan mana patut saya guna untuk semak bumbung?",
-      "Apa yang ditunjukkan oleh slider arah irradiance?"
+      "Apa yang ditunjukkan oleh slider arah irradiance?",
+      "Boleh Sol terangkan susun atur ini seperti saya baru belajar solar?",
+      "Apa maksud imej BASE terhadap ketepatan?",
+      "Mengapa hasil tahunan saya berubah?",
+      "Apa yang pemasang perlu semak pada bumbung ini?"
     ],
     "analysis": [
       "Adakah tempoh pulang modal ini bagus di Malaysia?",
       "Mengapa ada kredit yang dilupuskan?",
       "Andaian apa patut saya ubah supaya sepadan dengan bil TNB?",
-      "Apa yang patut saya tunjuk kepada pemasang?"
+      "Apa yang patut saya tunjuk kepada pemasang?",
+      "Mengapa tempoh pulang modal saya {{years}} tahun?",
+      "Patutkah saya kecilkan saiz sistem?",
+      "Mengapa bil solar saya bukan RM0?",
+      "Nombor mana yang paling patut saya percaya?"
     ],
     "followupsWorkbench": [
       "Terangkan susun atur ini seperti saya baru belajar solar.",

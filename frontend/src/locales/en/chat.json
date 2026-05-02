@@ -29,13 +29,21 @@
       "Which panels should I remove first?",
       "How do I know if this layout is realistic?",
       "Which overlay should I use to inspect my roof?",
-      "What does the irradiance direction slider show?"
+      "What does the irradiance direction slider show?",
+      "Can Sol explain this layout like I'm new to solar?",
+      "What does BASE imagery mean for accuracy?",
+      "Why did my annual yield change?",
+      "What should an installer verify on this roof?"
     ],
     "analysis": [
       "Is this payback good for Malaysia?",
       "Why are credits forfeited?",
       "What assumptions should I change to match my TNB bill?",
-      "What should I show an installer?"
+      "What should I show an installer?",
+      "Why is my payback {{years}} years?",
+      "Should I reduce the system size?",
+      "Why is my solar bill not RM0?",
+      "Which number should I trust most?"
     ],
     "followupsWorkbench": [
       "Explain this layout like I'm new to solar.",
