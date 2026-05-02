@@ -316,7 +316,31 @@ export function usePanelState({
 
   function setVisibleCount(count: number) {
     pushSnapshot()
-    setVisibleCountState(Math.max(minVisibleCount, Math.min(maxVisibleCount, count)))
+    const target = Math.max(minVisibleCount, Math.min(maxVisibleCount, count))
+
+    // If the slider goes above the current non-deleted pool size, resurrect the
+    // top-of-stable-order deleted panels so increasing the slider actually adds
+    // panels back to the workbench. activePanelIds always filters out deleted
+    // panels, so without this the slider would silently cap at nonDeletedCount.
+    setPanels((current) => {
+      const nonDeletedCount = current.reduce((acc, panel) => acc + (panel.deleted ? 0 : 1), 0)
+      if (target <= nonDeletedCount) return current
+
+      const needed = target - nonDeletedCount
+      const orderIndex = new Map(stableOrderRef.current.map((id, i) => [id, i]))
+      const resurrectIds = new Set(
+        current
+          .filter((panel) => panel.deleted)
+          .sort((a, b) => (orderIndex.get(a.id) ?? Infinity) - (orderIndex.get(b.id) ?? Infinity))
+          .slice(0, needed)
+          .map((panel) => panel.id)
+      )
+
+      if (resurrectIds.size === 0) return current
+      return current.map((panel) => (resurrectIds.has(panel.id) ? { ...panel, deleted: false } : panel))
+    })
+
+    setVisibleCountState(target)
   }
 
   function resetDeletionsAndApplyVisibleCount(count: number) {
