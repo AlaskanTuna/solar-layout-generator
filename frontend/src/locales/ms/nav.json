@@ -45,22 +45,45 @@
       "subtitle": "Lengkapkan sekurang-kurangnya satu analisis solar untuk melihat metrik prestasi agregat di sini."
     },
     "stats": {
-      "totalMonthlySavings": "Jumlah Penjimatan Bulanan",
-      "totalAnnualEnergy": "Jumlah Tenaga Tahunan",
-      "totalCo2Offset": "Jumlah Offset CO2",
-      "totalPanels": "Jumlah Panel"
+      "totalMonthlySavings": "Penjimatan Bulanan",
+      "totalAnnualEnergy": "Penjanaan Tahunan",
+      "total25YrNetBenefit": "Manfaat Bersih 25-thn",
+      "totalCo2Offset": "Offset CO2",
+      "co2Equivalent": "≈ {{count}} kereta tidak digunakan / thn",
+      "co2Equivalent_plural": "≈ {{count}} kereta tidak digunakan / thn"
+    },
+    "comparison": {
+      "heading": "Perbandingan Projek",
+      "description": "Susun penilaian anda mengikut metrik yang paling penting kepada anda.",
+      "metric": {
+        "payback": "Bayar Balik",
+        "monthlySavings": "Penjimatan Bulanan",
+        "netBenefit": "Manfaat 25-thn",
+        "roi": "ROI 10-thn"
+      },
+      "empty": "Tiada projek mempunyai nilai untuk metrik ini.",
+      "excluded_one": "1 projek disembunyikan — tiada nilai untuk metrik ini.",
+      "excluded_other": "{{count}} projek disembunyikan — tiada nilai untuk metrik ini."
     },
     "averages": {
-      "heading": "Purata setiap Projek",
-      "avgMonthlySavings": "Purata Penjimatan Bulanan",
-      "avgPanels": "Purata Panel setiap Projek",
-      "completionRate": "Kadar Penyiapan"
+      "heading": "Purata Portfolio",
+      "avgPayback": "Purata Bayar Balik",
+      "avg10YrRoi": "Purata ROI 10-thn",
+      "avgBillReduction": "Purata Pengurangan Bil"
+    },
+    "distribution": {
+      "highlight": "Projek {{project}} anda membayar balik paling cepat dalam {{years}} thn.",
+      "spread": "Terbaik {{best}} thn · Terburuk {{worst}} thn · Julat ±{{spread}} thn"
     },
     "breakdown": {
       "heading": "Pecahan Projek",
+      "description": "Klik mana-mana baris untuk membuka analisis penuh.",
       "colProject": "Projek",
+      "colSystem": "Sistem",
       "colSavings": "Penjimatan/bulan",
-      "colPayback": "Bayar Balik"
+      "colPayback": "Bayar Balik",
+      "col25YrBenefit": "Manfaat 25-thn",
+      "colRoi": "ROI 10-thn"
     }
   }
 }

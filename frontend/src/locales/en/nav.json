@@ -45,22 +45,45 @@
       "subtitle": "Complete at least one solar analysis to see aggregated performance metrics here."
     },
     "stats": {
-      "totalMonthlySavings": "Total Monthly Savings",
-      "totalAnnualEnergy": "Total Annual Energy",
-      "totalCo2Offset": "Total CO2 Offset",
-      "totalPanels": "Total Panels"
+      "totalMonthlySavings": "Monthly Savings",
+      "totalAnnualEnergy": "Annual Generation",
+      "total25YrNetBenefit": "25-yr Net Benefit",
+      "totalCo2Offset": "CO2 Offset",
+      "co2Equivalent": "≈ {{count}} car off the road / yr",
+      "co2Equivalent_plural": "≈ {{count}} cars off the road / yr"
+    },
+    "comparison": {
+      "heading": "Project Comparison",
+      "description": "Rank your assessments by the metric that matters most to you.",
+      "metric": {
+        "payback": "Payback",
+        "monthlySavings": "Monthly Savings",
+        "netBenefit": "25-yr Benefit",
+        "roi": "10-yr ROI"
+      },
+      "empty": "No projects have a value for this metric yet.",
+      "excluded_one": "1 project hidden — no value for this metric.",
+      "excluded_other": "{{count}} projects hidden — no value for this metric."
     },
     "averages": {
-      "heading": "Averages per Project",
-      "avgMonthlySavings": "Avg. Monthly Savings",
-      "avgPanels": "Avg. Panels per Project",
-      "completionRate": "Completion Rate"
+      "heading": "Portfolio Averages",
+      "avgPayback": "Avg. Payback",
+      "avg10YrRoi": "Avg. 10-yr ROI",
+      "avgBillReduction": "Avg. Bill Reduction"
+    },
+    "distribution": {
+      "highlight": "Your {{project}} project pays back fastest at {{years}} yrs.",
+      "spread": "Best {{best}} yr · Worst {{worst}} yr · Spread ±{{spread}} yr"
     },
     "breakdown": {
       "heading": "Project Breakdown",
+      "description": "Click any row to open the full analysis.",
       "colProject": "Project",
+      "colSystem": "System",
       "colSavings": "Savings/mo",
-      "colPayback": "Payback"
+      "colPayback": "Payback",
+      "col25YrBenefit": "25-yr Benefit",
+      "colRoi": "10-yr ROI"
     }
   }
 }

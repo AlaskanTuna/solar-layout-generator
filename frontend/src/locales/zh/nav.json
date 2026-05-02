@@ -45,22 +45,45 @@
       "subtitle": "请完成至少一次太阳能分析，以在此处查看汇总性能指标。"
     },
     "stats": {
-      "totalMonthlySavings": "每月总节省",
-      "totalAnnualEnergy": "年度总发电量",
-      "totalCo2Offset": "CO2 总抵消量",
-      "totalPanels": "太阳能板总数"
+      "totalMonthlySavings": "每月节省",
+      "totalAnnualEnergy": "年度发电量",
+      "total25YrNetBenefit": "25 年净收益",
+      "totalCo2Offset": "CO2 抵消量",
+      "co2Equivalent": "≈ 减少 {{count}} 辆汽车上路 / 年",
+      "co2Equivalent_plural": "≈ 减少 {{count}} 辆汽车上路 / 年"
+    },
+    "comparison": {
+      "heading": "项目比较",
+      "description": "按您最关心的指标对评估进行排序。",
+      "metric": {
+        "payback": "回本期",
+        "monthlySavings": "每月节省",
+        "netBenefit": "25 年收益",
+        "roi": "10 年 ROI"
+      },
+      "empty": "暂无项目具备此指标的数值。",
+      "excluded_one": "已隐藏 1 个项目 — 此指标无数值。",
+      "excluded_other": "已隐藏 {{count}} 个项目 — 此指标无数值。"
     },
     "averages": {
-      "heading": "各项目平均值",
-      "avgMonthlySavings": "平均每月节省",
-      "avgPanels": "每项目平均太阳能板数",
-      "completionRate": "完成率"
+      "heading": "组合平均值",
+      "avgPayback": "平均回本期",
+      "avg10YrRoi": "平均 10 年投资回报率",
+      "avgBillReduction": "平均账单减幅"
+    },
+    "distribution": {
+      "highlight": "您的 {{project}} 项目回本最快，仅需 {{years}} 年。",
+      "spread": "最佳 {{best}} 年 · 最差 {{worst}} 年 · 差距 ±{{spread}} 年"
     },
     "breakdown": {
       "heading": "项目明细",
+      "description": "点击任意行查看完整分析。",
       "colProject": "项目",
+      "colSystem": "系统",
       "colSavings": "节省 / 月",
-      "colPayback": "回本期"
+      "colPayback": "回本期",
+      "col25YrBenefit": "25 年收益",
+      "colRoi": "10 年 ROI"
     }
   }
 }
