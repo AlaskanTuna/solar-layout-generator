@@ -88,15 +88,15 @@ export function AnalysisPage() {
       description: t('tour.monthlyChart.description')
     },
     {
-      target: '[data-tour="export-pdf"]',
-      title: t('tour.exportSave.title'),
-      description: t('tour.exportSave.description')
-    },
-    {
       target: '[data-tour="chat-launcher"]',
       title: t('tour.askSol.title'),
       description: t('tour.askSol.description'),
       placement: 'left' as const
+    },
+    {
+      target: '[data-tour="export-pdf"]',
+      title: t('tour.exportSave.title'),
+      description: t('tour.exportSave.description')
     }
   ]
 

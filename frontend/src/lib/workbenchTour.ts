@@ -30,15 +30,15 @@ export function getWorkbenchTourSteps(t: TFunction): TourStep[] {
       placement: 'left' as const
     },
     {
-      target: '[data-tour="save-continue"]',
-      title: t('tour.step5Title'),
-      description: t('tour.step5Body')
-    },
-    {
       target: '[data-tour="chat-launcher"]',
       title: t('tour.step6Title'),
       description: t('tour.step6Body'),
       placement: 'left' as const
+    },
+    {
+      target: '[data-tour="save-continue"]',
+      title: t('tour.step5Title'),
+      description: t('tour.step5Body')
     }
   ]
 }
