@@ -5,7 +5,7 @@ import { NotFoundError } from '../../errors.js'
 import * as projectService from '../projectService.js'
 import { buildSystemInstruction } from './prompt.js'
 import { getGenAIClient, invalidateForAuthFailure } from './client.js'
-import { categoriseError, type ErrorCategory } from './errors.js'
+import { categoriseError, getErrorCode, type ErrorCategory } from './errors.js'
 import { validateChatInput } from './guardrails.js'
 import { generateWithRetry } from './retry.js'
 import type { ChatRequest } from '../../validators/chat.js'
@@ -179,13 +179,4 @@ function buildContents(history: ChatRequest['history'], message: string): Conten
       parts: [{ text: message }]
     }
   ]
-}
-
-function getErrorCode(error: unknown): number | string | undefined {
-  if (typeof error !== 'object' || error === null) {
-    return undefined
-  }
-
-  const maybeCode = error as { status?: number | string; code?: number | string }
-  return maybeCode.status ?? maybeCode.code
 }

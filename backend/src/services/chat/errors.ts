@@ -9,6 +9,20 @@ export type ErrorCategory =
 type ChatLanguage = 'en' | 'ms' | 'zh'
 
 /**
+ * Pulls the HTTP-style status or string code off an unknown thrown value.
+ * Shared across the chat orchestrator (auth-failure detection) and retry helper
+ * (transient-vs-fatal classification).
+ */
+export function getErrorCode(error: unknown): number | string | undefined {
+  if (typeof error !== 'object' || error === null) {
+    return undefined
+  }
+
+  const maybeCode = error as { status?: number | string; code?: number | string }
+  return maybeCode.status ?? maybeCode.code
+}
+
+/**
  * Maps a thrown chat error into a localized user-facing category and message.
  */
 export function categoriseError(error: unknown, language: ChatLanguage): { category: ErrorCategory; message: string } {
@@ -32,15 +46,6 @@ export function categoriseError(error: unknown, language: ChatLanguage): { categ
     category,
     message: localiseErrorMessage(category, language)
   }
-}
-
-function getErrorCode(error: unknown): number | string | undefined {
-  if (typeof error !== 'object' || error === null) {
-    return undefined
-  }
-
-  const maybeCode = error as { status?: number | string; code?: number | string }
-  return maybeCode.status ?? maybeCode.code
 }
 
 function redactErrorMessage(error: unknown): string {

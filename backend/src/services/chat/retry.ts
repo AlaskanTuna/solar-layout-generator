@@ -1,3 +1,5 @@
+import { getErrorCode } from './errors.js'
+
 /**
  * Retries a transient Gemini generation call with exponential backoff.
  */
@@ -22,15 +24,6 @@ export async function generateWithRetry<T>(call: () => Promise<T>): Promise<T> {
 function isRetryable(error: unknown): boolean {
   const code = getErrorCode(error)
   return code === 429 || code === 503
-}
-
-function getErrorCode(error: unknown): number | string | undefined {
-  if (typeof error !== 'object' || error === null) {
-    return undefined
-  }
-
-  const maybeCode = error as { status?: number | string; code?: number | string }
-  return maybeCode.status ?? maybeCode.code
 }
 
 function sleep(ms: number): Promise<void> {
