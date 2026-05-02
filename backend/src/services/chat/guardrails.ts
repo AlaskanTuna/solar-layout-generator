@@ -1,5 +1,5 @@
 const PATTERNS = [
-  /ignore\s+(previous|all|above)\s+(instructions|rules)/i,
+  /ignore\s+(?:(?:all|previous|above)\s+){1,2}(instructions|rules)/i,
   /you\s+are\s+now\s+(a|an)\s+/i,
   /act\s+as\s+(a|an)\s+different\s+ai/i,
   /<\s*system\s*>/i,
