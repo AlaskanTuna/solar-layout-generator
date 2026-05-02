@@ -17,9 +17,7 @@ type UndoRedoSnapshot = {
   visibleCount: number
 }
 
-/**
- * Normalized panel state used by the workbench
- */
+/** Normalized panel state used by the workbench. */
 export type WorkbenchPanelState = {
   id: string
   originalCenter: { lat: number; lng: number }
@@ -31,9 +29,7 @@ export type WorkbenchPanelState = {
   deleted: boolean
 }
 
-/**
- * Batch recompute lifecycle status
- */
+/** Batch recompute lifecycle status. */
 export type BatchRecomputeStatus = 'idle' | 'loading' | 'done' | 'error'
 
 type UsePanelStateArgs = {
@@ -58,11 +54,7 @@ const WORKBENCH_CONFIG = {
   defaultVisiblePanelFloor: 4
 } as const
 
-/**
- * Return monthly-derived energy when available
- * @param {Object} panel - Value used for panel
- * @returns {any} The requested panel annual energy
- */
+/** Return monthly-derived annual energy when monthly samples exist; otherwise the API yearly value. */
 export function getPanelAnnualEnergy(panel: Pick<WorkbenchPanelState, 'monthlyEnergyDcKwh' | 'yearlyEnergyDcKwh'>) {
   return panel.monthlyEnergyDcKwh.length > 0
     ? annualEnergyFromMonthly(panel.monthlyEnergyDcKwh)
@@ -91,11 +83,7 @@ function getSortedPanelIds(
     .map((panel) => panel.id)
 }
 
-/**
- * Manage workbench panel ordering and edits
- * @param {UsePanelStateArgs} options - Value used for options
- * @returns {Object} Hook state for panel state
- */
+/** Manages workbench panel state: ordering, edits, undo/redo, batch flux recompute, slider count, serialisation. */
 export function usePanelState({
   projectId,
   locationId,

@@ -7,7 +7,7 @@ type SuggestedQuestionsProps = {
   paybackYears?: number | null
 }
 
-/** Renders page-aware empty-state prompt chips that fill the composer without auto-sending. */
+/** Renders page-aware empty-state prompt chips. Clicks delegate to onPick, which auto-sends. */
 export function SuggestedQuestions({ page, onPick, paybackYears }: SuggestedQuestionsProps) {
   const { t } = useTranslation('chat')
 

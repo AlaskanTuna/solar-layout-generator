@@ -18,7 +18,7 @@ function getPaybackYears(project: ProjectResponse | undefined): number | null | 
   return project?.analysisResults?.paybackYears
 }
 
-/** Glass chat panel with streaming message list, error state, and seeded prompts. */
+/** Glass chat panel: streaming message list, markdown rendering, follow-up chips, spam-cooldown composer. */
 export function ChatPanel({ projectId, page }: ChatPanelProps) {
   const { t } = useTranslation('chat')
   const queryClient = useQueryClient()

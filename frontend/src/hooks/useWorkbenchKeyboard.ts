@@ -19,8 +19,8 @@ function isTypingInElement(target: EventTarget | null): boolean {
 }
 
 /**
- * Provides the workbenchKeyboard hook
- * @param {UseWorkbenchKeyboardOptions} options - Value used for options
+ * Wires window-level workbench shortcuts (undo/redo, Delete, Space-to-pan, M/S/R tool toggles).
+ * Skips Delete/Space/letter shortcuts when the user is typing in a text field.
  */
 export function useWorkbenchKeyboard({
   undo,

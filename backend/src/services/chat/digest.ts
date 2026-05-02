@@ -94,16 +94,16 @@ function renderAnalysisBlock(
   return [
     '## Financial Analysis',
     `- Annual generation: ${formatNumber(analysisResults.annualTotals.totalGenerationKwh)} kWh`,
-    `- Annual baseline bill: RM ${formatMoney(analysisResults.annualTotals.totalBaselineRm)}`,
-    `- Annual NEM bill: RM ${formatMoney(analysisResults.annualTotals.totalNemRm)}`,
-    `- Annual savings: RM ${formatMoney(analysisResults.annualTotals.totalSavingsRm)}`,
-    `- Avg monthly savings: RM ${formatMoney(analysisResults.averageMonthlySavingsRm)} (${formatPercent(analysisResults.averageMonthlySavingsPct)}%)`,
+    `- Annual baseline bill: RM ${formatRm(analysisResults.annualTotals.totalBaselineRm)}`,
+    `- Annual NEM bill: RM ${formatRm(analysisResults.annualTotals.totalNemRm)}`,
+    `- Annual savings: RM ${formatRm(analysisResults.annualTotals.totalSavingsRm)}`,
+    `- Avg monthly savings: RM ${formatRm(analysisResults.averageMonthlySavingsRm)} (${formatPercent(analysisResults.averageMonthlySavingsPct)}%)`,
     `- Payback: ${analysisResults.paybackYears ?? 'n/a'} years (${analysisResults.analysisMode} mode)`,
-    `- 10-yr net benefit: RM ${formatMoney(analysisResults.tenYearNetBenefitRm)} (ROI ${analysisResults.tenYearRoiPercent ?? 'n/a'}%)`,
-    `- 25-yr net benefit: RM ${formatMoney(analysisResults.twentyFiveYearNetBenefitRm)}`,
+    `- 10-yr net benefit: RM ${formatRm(analysisResults.tenYearNetBenefitRm)} (ROI ${analysisResults.tenYearRoiPercent ?? 'n/a'}%)`,
+    `- 25-yr net benefit: RM ${formatRm(analysisResults.twentyFiveYearNetBenefitRm)}`,
     `- Annual NEM credits forfeited: ${formatNumber(analysisResults.annualTotals.totalCreditsForfeitedKwh)} kWh`,
     `- Carbon offset: ${formatNumber(analysisResults.carbonOffsetKg)} kg/yr`,
-    `- System cost: RM ${formatMoney(analysisConfig?.systemCostRm)}`,
+    `- System cost: RM ${formatRm(analysisConfig?.systemCostRm)}`,
     `- Tariff escalation assumption: ${formatRate(analysisConfig?.tariffEscalationRate)}`,
     `- Performance ratio: ${formatMaybeNumber(analysisConfig?.performanceRatio)}`
   ].join('\n')
@@ -192,7 +192,7 @@ function countSegmentsUsed(editedLayout: PanelEdit[], buildingInsights: Building
   return segmentIndexes.size > 0 ? String(segmentIndexes.size) : 'unknown'
 }
 
-function formatMoney(value: number | null | undefined): string {
+function formatRm(value: number | null | undefined): string {
   return typeof value === 'number' ? value.toFixed(2) : '—'
 }
 
