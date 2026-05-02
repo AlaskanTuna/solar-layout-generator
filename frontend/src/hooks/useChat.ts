@@ -25,6 +25,45 @@ function samplePool(pool: string[], n: number): string[] {
   return out
 }
 
+/** Parses one `\n\n`-terminated SSE event block into zero or more ChatEvents. */
+function parseSseEventBlock(rawEvent: string): ChatEvent[] {
+  const events: ChatEvent[] = []
+  for (const line of rawEvent.split('\n')) {
+    if (!line.startsWith('data:')) continue
+    const payload = line.slice(5).trim()
+    if (!payload) continue
+    events.push(JSON.parse(payload) as ChatEvent)
+  }
+  return events
+}
+
+/** Drains all complete `\n\n`-separated events from a buffer; returns the trailing remainder. */
+function drainSseBuffer(buffer: string): { events: ChatEvent[]; remaining: string } {
+  const events: ChatEvent[] = []
+  let remaining = buffer
+  while (remaining.includes('\n\n')) {
+    const separatorIndex = remaining.indexOf('\n\n')
+    const rawEvent = remaining.slice(0, separatorIndex)
+    remaining = remaining.slice(separatorIndex + 2)
+    events.push(...parseSseEventBlock(rawEvent))
+  }
+  return { events, remaining }
+}
+
+/** Builds JSON + Bearer-auth headers from the current Supabase session, if any. */
+async function buildAuthHeaders(): Promise<Record<string, string>> {
+  const supabase = getSupabase()
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`
+  }
+  return headers
+}
+
 type UseChatReturn = {
   messages: ChatMessage[]
   isStreaming: boolean
@@ -136,18 +175,7 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
       const followupPool = (t(followupPoolKey, { returnObjects: true, defaultValue: [] }) as unknown) as string[]
 
       try {
-        const supabase = getSupabase()
-        const {
-          data: { session }
-        } = await supabase.auth.getSession()
-
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        }
-
-        if (session?.access_token) {
-          headers.Authorization = `Bearer ${session.access_token}`
-        }
+        const headers = await buildAuthHeaders()
 
         const response = await fetch(`/api/projects/${projectId}/chat`, {
           method: 'POST',
@@ -224,30 +252,14 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
           if (done) break
 
           buffer += decoder.decode(value, { stream: true })
-
-          while (buffer.includes('\n\n')) {
-            const separatorIndex = buffer.indexOf('\n\n')
-            const rawEvent = buffer.slice(0, separatorIndex)
-            buffer = buffer.slice(separatorIndex + 2)
-
-            for (const line of rawEvent.split('\n')) {
-              if (!line.startsWith('data:')) continue
-              const payload = line.slice(5).trim()
-              if (!payload) continue
-              processEvent(JSON.parse(payload) as ChatEvent)
-            }
-          }
+          const drained = drainSseBuffer(buffer)
+          buffer = drained.remaining
+          drained.events.forEach(processEvent)
         }
 
         buffer += decoder.decode()
-
         if (buffer.trim()) {
-          for (const line of buffer.split('\n')) {
-            if (!line.startsWith('data:')) continue
-            const payload = line.slice(5).trim()
-            if (!payload) continue
-            processEvent(JSON.parse(payload) as ChatEvent)
-          }
+          parseSseEventBlock(buffer).forEach(processEvent)
         }
 
         if (!streamFinished) {
