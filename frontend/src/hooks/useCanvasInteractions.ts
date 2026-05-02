@@ -104,6 +104,20 @@ export function useCanvasInteractions({
   const [marqueeMode, setMarqueeMode] = useState(false)
   const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null)
+  // RAF-throttle marquee updates: pointermove fires faster than the display can paint, so we
+  // coalesce all moves between frames into one setMarqueeRect per RAF tick. Without this the
+  // canvas thrashes with ~60+ React re-renders per second during selection drag.
+  const marqueeRafRef = useRef<number | null>(null)
+  const marqueeNextRef = useRef<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (marqueeRafRef.current != null) {
+        cancelAnimationFrame(marqueeRafRef.current)
+        marqueeRafRef.current = null
+      }
+    }
+  }, [])
 
   const geo = useMemo(() => {
     if (!imageGeoTransform || stageSize.width === 0 || stageSize.height === 0) return null
@@ -772,21 +786,32 @@ export function useCanvasInteractions({
   }
 
   function handleMarqueeMove(pointerX: number, pointerY: number, scaleX: number, stageX: number, stageY: number) {
-    if (!marqueeStartRef.current || !marqueeRect) return
-    const stagePos = {
+    if (!marqueeStartRef.current) return
+    marqueeNextRef.current = {
       x: (pointerX - stageX) / scaleX,
       y: (pointerY - stageY) / scaleX
     }
-    const start = marqueeStartRef.current
-    setMarqueeRect({
-      x: Math.min(start.x, stagePos.x),
-      y: Math.min(start.y, stagePos.y),
-      width: Math.abs(stagePos.x - start.x),
-      height: Math.abs(stagePos.y - start.y)
+    if (marqueeRafRef.current != null) return
+    marqueeRafRef.current = requestAnimationFrame(() => {
+      marqueeRafRef.current = null
+      const next = marqueeNextRef.current
+      const start = marqueeStartRef.current
+      if (!next || !start) return
+      setMarqueeRect({
+        x: Math.min(start.x, next.x),
+        y: Math.min(start.y, next.y),
+        width: Math.abs(next.x - start.x),
+        height: Math.abs(next.y - start.y)
+      })
     })
   }
 
   function handleMarqueeEnd() {
+    if (marqueeRafRef.current != null) {
+      cancelAnimationFrame(marqueeRafRef.current)
+      marqueeRafRef.current = null
+    }
+    marqueeNextRef.current = null
     if (!marqueeRect || !marqueeStartRef.current) return
     const selected = new Set<string>()
     for (const { panel, x, y } of renderPanels) {
