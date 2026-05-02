@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Rect } from 'react-konva'
 
 type PanelRectProps = {
@@ -28,11 +28,8 @@ function getCursor(disabled: boolean, selected: boolean): string {
   return 'pointer'
 }
 
-/**
- * Renders the PanelRect component
- * @param {PanelRectProps} props - Props for the component
- */
-export function PanelRect({
+/** Single Konva Rect for one solar panel. Memoized so unrelated parent re-renders don't cascade. */
+function PanelRectInternal({
   id,
   x,
   y,
@@ -118,3 +115,5 @@ export function PanelRect({
     />
   )
 }
+
+export const PanelRect = memo(PanelRectInternal)

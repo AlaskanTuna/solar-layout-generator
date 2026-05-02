@@ -806,6 +806,42 @@ export function useCanvasInteractions({
     marqueeStartRef.current = null
   }
 
+  // Stable callback wrappers for the handlers passed down to memoized PanelRect/PanelLayer.
+  // Without this, every parent render produces fresh function refs and React.memo's shallow
+  // equality always returns false — defeating memoization. The ref is reassigned every render
+  // so the wrappers always invoke the latest closure (no stale-state risk).
+  const latestHandlersRef = useRef({
+    handleSnapDragMove,
+    handlePanelSelect,
+    handlePanelDragStart,
+    handlePanelDragMove,
+    handlePanelDragEnd,
+    handleCanvasRotate
+  })
+  latestHandlersRef.current.handleSnapDragMove = handleSnapDragMove
+  latestHandlersRef.current.handlePanelSelect = handlePanelSelect
+  latestHandlersRef.current.handlePanelDragStart = handlePanelDragStart
+  latestHandlersRef.current.handlePanelDragMove = handlePanelDragMove
+  latestHandlersRef.current.handlePanelDragEnd = handlePanelDragEnd
+  latestHandlersRef.current.handleCanvasRotate = handleCanvasRotate
+
+  const stableHandlers = useMemo(
+    () => ({
+      handleSnapDragMove: (panelId: string, position: { x: number; y: number }) =>
+        latestHandlersRef.current.handleSnapDragMove(panelId, position),
+      handlePanelSelect: (panelId: string, shiftKey: boolean) =>
+        latestHandlersRef.current.handlePanelSelect(panelId, shiftKey),
+      handlePanelDragStart: (panelId: string) => latestHandlersRef.current.handlePanelDragStart(panelId),
+      handlePanelDragMove: (panelId: string, position: { x: number; y: number }) =>
+        latestHandlersRef.current.handlePanelDragMove(panelId, position),
+      handlePanelDragEnd: (panelId: string, position: { x: number; y: number }, resetPosition: () => void) =>
+        latestHandlersRef.current.handlePanelDragEnd(panelId, position, resetPosition),
+      handleCanvasRotate: (panelId: string, value: number) =>
+        latestHandlersRef.current.handleCanvasRotate(panelId, value)
+    }),
+    []
+  )
+
   return {
     geo,
     panelDimensions,
@@ -824,12 +860,12 @@ export function useCanvasInteractions({
     marqueeMode,
     setMarqueeMode,
     marqueeRect,
-    handleSnapDragMove,
-    handlePanelSelect,
-    handlePanelDragStart,
-    handlePanelDragMove,
-    handlePanelDragEnd,
-    handleCanvasRotate,
+    handleSnapDragMove: stableHandlers.handleSnapDragMove,
+    handlePanelSelect: stableHandlers.handlePanelSelect,
+    handlePanelDragStart: stableHandlers.handlePanelDragStart,
+    handlePanelDragMove: stableHandlers.handlePanelDragMove,
+    handlePanelDragEnd: stableHandlers.handlePanelDragEnd,
+    handleCanvasRotate: stableHandlers.handleCanvasRotate,
     handleGroupRotateStart,
     handleGroupRotateMove,
     handleGroupRotateEnd,
