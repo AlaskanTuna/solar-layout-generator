@@ -5,16 +5,21 @@ type ClientMode = 'vertex' | 'apikey'
 
 let cached: GoogleGenAI | null = null
 let mode: ClientMode | null = null
+// Latches once a Vertex request hits 401/403 so subsequent calls skip the Vertex
+// branch entirely instead of looping back into the same broken auth path. Reset
+// only on process restart (or via the test-reset helper).
+let forceApiKey = false
 
 /**
  * Returns a process-cached GoogleGenAI client.
  * Tries Vertex AI first when GOOGLE_CLOUD_PROJECT is set, falls back to the
  * Gemini Developer API key when Vertex initialisation throws or no project is configured.
+ * Once `invalidateForAuthFailure()` has fired, the Vertex branch is skipped entirely.
  */
 export function getGenAIClient(): GoogleGenAI {
   if (cached) return cached
 
-  if (env.GOOGLE_CLOUD_PROJECT) {
+  if (env.GOOGLE_CLOUD_PROJECT && !forceApiKey) {
     try {
       cached = new GoogleGenAI({
         vertexai: true,
@@ -42,15 +47,17 @@ export function getGenAIClient(): GoogleGenAI {
 }
 
 /**
- * Drops the cached client when the orchestrator catches a 401/403 in Vertex mode,
- * so the next getGenAIClient() rebuilds in API-key mode. No-op when there's no
- * fallback key configured or the active mode is already apikey.
+ * Drops the cached client when the orchestrator catches a 401/403 in Vertex mode
+ * AND latches the API-key path so the next getGenAIClient() rebuilds in API-key
+ * mode (not back into Vertex). No-op when there's no fallback key configured or
+ * the active mode is already apikey.
  */
 export function invalidateForAuthFailure(): void {
   if (mode === 'vertex' && env.GEMINI_API_KEY) {
-    console.warn('[Chat] Vertex auth failed at request time, invalidating cache for API-key fallback')
+    console.warn('[Chat] Vertex auth failed at request time, latching API-key fallback for the rest of the process')
     cached = null
     mode = null
+    forceApiKey = true
   }
 }
 
@@ -60,4 +67,5 @@ export function invalidateForAuthFailure(): void {
 export function __resetClientForTests(): void {
   cached = null
   mode = null
+  forceApiKey = false
 }
