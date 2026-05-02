@@ -4,7 +4,9 @@ const PATTERNS = [
   /act\s+as\s+(a|an)\s+different\s+ai/i,
   /<\s*system\s*>/i,
   /^\s*system\s*:/i,
-  /(reveal|show|print)\s+(your|the)\s+(system\s+)?prompt/i
+  // Allow "me/us" between verb and pronoun ("show me your prompt"), and accept
+  // "tell" / "repeat" plus "instructions(s)" / "initial instructions" variants.
+  /(reveal|show|print|tell|repeat)\s+(?:me\s+|us\s+)?(your|the)\s+(?:system\s+|initial\s+|original\s+)?(prompt|instructions?)/i
 ]
 
 export type GuardResult = { ok: true } | { ok: false; reason: 'too_long' | 'injection_attempt' }

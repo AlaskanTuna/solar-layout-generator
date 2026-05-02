@@ -26,19 +26,45 @@
   },
   "suggestions": {
     "workbench": [
-      "Bagaimana saya boleh memutar panel?",
-      "Mengapa ada panel yang tidak berada di atas bumbung saya?",
-      "Adakah memindahkan panel akan ubah penjimatan saya?",
-      "Apa fungsi alat snap?"
+      "Panel mana patut saya buang dahulu?",
+      "Bagaimana saya tahu susun atur ini realistik?",
+      "Apa maksud warna pada peta haba?",
+      "Mengapa perlu simpan selepas alih panel?"
     ],
     "analysis": [
-      "Mengapa tempoh pulang modal saya {{years}} tahun?",
-      "Apakah AFA pada bil saya?",
-      "Patutkah saya tambah lagi panel?",
-      "Bagaimana NEM 3.0 berfungsi untuk saya?"
+      "Adakah tempoh pulang modal ini bagus di Malaysia?",
+      "Mengapa ada kredit yang dilupuskan?",
+      "Andaian apa patut saya ubah supaya sepadan dengan bil TNB?",
+      "Apa yang patut saya tunjuk kepada pemasang?"
     ],
-    "followupsWorkbench": [],
-    "followupsAnalysis": []
+    "followupsWorkbench": [
+      "Terangkan susun atur ini seperti saya baru belajar solar.",
+      "Ada panel yang mungkin berada di tempat lemah?",
+      "Patutkah saya guna panel yang lebih sedikit untuk pulangan lebih baik?",
+      "Apa maksud imej BASE terhadap ketepatan?",
+      "Bagaimana saya bandingkan dua pilihan susun atur?",
+      "Mengapa hasil tahunan saya berubah?",
+      "Lapisan mana patut saya lihat dahulu?",
+      "Boleh saya percaya panel berhampiran tepi bumbung?",
+      "Apa yang pemasang perlu semak pada bumbung ini?",
+      "Mengapa data tenaga bulanan masih belum siap?",
+      "Bagaimana pilihan model panel mempengaruhi susun atur?",
+      "Apakah langkah paling selamat sebelum analisis?"
+    ],
+    "followupsAnalysis": [
+      "Terangkan penjimatan saya dengan bahasa mudah.",
+      "Apa yang membuat tempoh pulang modal saya lebih panjang?",
+      "Patutkah saya kecilkan saiz sistem?",
+      "Mengapa NEM Fit kata terlebih besar?",
+      "Apa kesan perubahan kadar AFA?",
+      "Bagaimana ambang tarif mempengaruhi bil ini?",
+      "Apa yang termasuk dalam mod kitar hayat?",
+      "Nombor mana yang paling patut saya percaya?",
+      "Mengapa bil solar saya bukan RM0?",
+      "Andaian mana yang paling tidak pasti?",
+      "Bagaimana saya bandingkan sebut harga pemasang?",
+      "Apa yang boleh membuat anggaran ini terlalu optimistik?"
+    ]
   },
   "streaming": {
     "cursor": "Sol sedang menaip"

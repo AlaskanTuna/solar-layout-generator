@@ -26,19 +26,45 @@
   },
   "suggestions": {
     "workbench": [
-      "How do I rotate a panel?",
-      "Why are some panels not on my roof?",
-      "Will moving panels change my savings?",
-      "What does the snap tool do?"
+      "Which panels should I remove first?",
+      "How do I know if this layout is realistic?",
+      "What do the heatmap colors mean?",
+      "Why should I save after moving panels?"
     ],
     "analysis": [
-      "Why is my payback {{years}} years?",
-      "What is AFA on my bill?",
-      "Should I add more panels?",
-      "How does NEM 3.0 work for me?"
+      "Is this payback good for Malaysia?",
+      "Why are credits forfeited?",
+      "What assumptions should I change to match my TNB bill?",
+      "What should I show an installer?"
     ],
-    "followupsWorkbench": [],
-    "followupsAnalysis": []
+    "followupsWorkbench": [
+      "Explain this layout like I'm new to solar.",
+      "Are any panels likely in a weak spot?",
+      "Should I use fewer panels for better payback?",
+      "What does BASE imagery mean for accuracy?",
+      "How do I compare two layout options?",
+      "Why did my annual yield change?",
+      "Which overlay should I look at first?",
+      "Can I trust panels near the roof edge?",
+      "What should an installer verify on this roof?",
+      "Why is monthly energy still pending?",
+      "How do panel model choices affect the layout?",
+      "What's the safest next step before analysis?"
+    ],
+    "followupsAnalysis": [
+      "Explain my savings in plain English.",
+      "What is making my payback longer?",
+      "Should I reduce the system size?",
+      "Why does NEM Fit say oversized?",
+      "What does the AFA rate change?",
+      "How do tariff thresholds affect this bill?",
+      "What does lifecycle mode include?",
+      "Which number should I trust most?",
+      "Why is my solar bill not RM0?",
+      "What assumptions are most uncertain?",
+      "How should I compare installer quotes?",
+      "What would make this estimate too optimistic?"
+    ]
   },
   "streaming": {
     "cursor": "Sol is typing..."
