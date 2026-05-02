@@ -192,6 +192,29 @@ flowchart LR
 
 </details>
 
+<details>
+<summary><strong>Sol Chatbot: Project-Grounded SSE Pipeline</strong></summary>
+
+```mermaid
+flowchart LR
+    User[User opens Sol panel] --> Composer[Composer + cooldown gate]
+    Composer --> Post[POST /api/projects/:id/chat]
+    Post --> Auth[Supabase JWT auth]
+    Auth --> Guard[Prompt-injection + length guard]
+    Guard --> Project[(Load Project + Location<br/>from Postgres)]
+    Project --> Digest[Render page-aware digest<br/>workbench or analysis]
+    Digest --> Bible[Load knowledge bible<br/>Malaysian solar primer]
+    Bible --> Prompt[Build layered system prompt<br/>language · persona · rules · primer · digest]
+    Prompt --> Client[GenAI client<br/>Vertex AI → API-key fallback]
+    Client --> Gemini[Gemini streamGenerateContent]
+    Gemini --> SSE[SSE token stream]
+    SSE --> Frontend[Stream + render markdown]
+    Frontend --> Chips[Sample follow-up chips<br/>from chat.json pool]
+    Frontend -.client disconnect.-> Abort[AbortController cancels Gemini call]
+```
+
+</details>
+
 ---
 
 ## 🧰 Tech Stack
