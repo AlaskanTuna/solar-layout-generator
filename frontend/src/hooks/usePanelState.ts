@@ -250,9 +250,9 @@ export function usePanelState({
 
   const panelMap = useMemo(() => new Map(panels.map((panel) => [panel.id, panel])), [panels])
 
-  const deletedCount = useMemo(() => panels.filter((p) => p.deleted).length, [panels])
-  const effectiveMaxVisibleCount = Math.max(minVisibleCount, maxVisibleCount - deletedCount)
-
+  // Slider max stays anchored to the Solar API ceiling regardless of how many
+  // panels the user has deleted. Per UX intent, deleting reduces the visible
+  // count (and therefore the slider position) but never the slider's upper bound.
   const activePanelIds = useMemo(() => {
     const ids = stableOrderRef.current
       .filter((id) => {
@@ -328,7 +328,7 @@ export function usePanelState({
 
   function setVisibleCount(count: number) {
     pushSnapshot()
-    setVisibleCountState(Math.max(minVisibleCount, Math.min(effectiveMaxVisibleCount, count)))
+    setVisibleCountState(Math.max(minVisibleCount, Math.min(maxVisibleCount, count)))
   }
 
   function resetDeletionsAndApplyVisibleCount(count: number) {
@@ -383,7 +383,7 @@ export function usePanelState({
     visiblePanels,
     visibleCount,
     minVisibleCount,
-    maxVisibleCount: effectiveMaxVisibleCount,
+    maxVisibleCount,
     totalAnnualYield,
     totalCarbonOffsetKg,
     activePanelIds,
