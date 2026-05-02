@@ -86,7 +86,7 @@
       },
       "billing": {
         "title": "RP4 + NEM, line by line",
-        "description": "Bills modeled with the post-July 2025 RP4 tariff, EEI rebates, AFA, SST, and the RE Fund. Every charge is attributable to a row."
+        "description": "Bills modeled with the configurable RP4 tariff, EEI rebates, AFA, SST, and the RE Fund. Every charge is attributable to a row."
       },
       "pdf": {
         "title": "Installer-ready PDF",
@@ -96,9 +96,9 @@
         "title": "Seasonal consumption profiles",
         "description": "Tell us how your usage shifts in school holidays, fasting month, year-end. We'll model it month-by-month."
       },
-      "citations": {
-        "title": "Citations on every number",
-        "description": "Every kWh and every ringgit traces back to a published source (TNB tariff sheet, ST gazette, Google Solar API record)."
+      "assistant": {
+        "title": "Sol, your built-in solar guide",
+        "description": "Sol is a project-aware chatbot grounded in your real numbers, layout and tariffs. Ask it anything in English, Bahasa or Chinese."
       }
     }
   },

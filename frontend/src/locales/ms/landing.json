@@ -86,7 +86,7 @@
       },
       "billing": {
         "title": "RP4 + NEM, baris demi baris",
-        "description": "Bil dimodelkan dengan tarif RP4 selepas Julai 2025, rebat EEI, AFA, SST dan Dana RE. Setiap caj boleh ditelusuri ke satu baris."
+        "description": "Bil dimodelkan dengan tarif RP4 yang boleh dikonfigurasi, rebat EEI, AFA, SST dan Dana RE. Setiap caj boleh ditelusuri ke satu baris."
       },
       "pdf": {
         "title": "PDF sedia untuk pemasang",
@@ -96,9 +96,9 @@
         "title": "Profil penggunaan bermusim",
         "description": "Beritahu kami bagaimana penggunaan anda berubah semasa cuti sekolah, bulan puasa, dan hujung tahun. Kami akan modelkannya bulan demi bulan."
       },
-      "citations": {
-        "title": "Rujukan pada setiap angka",
-        "description": "Setiap kWh dan setiap ringgit boleh ditelusuri kembali ke sumber yang diterbitkan (helaian tarif TNB, gazet ST, rekod Google Solar API)."
+      "assistant": {
+        "title": "Sol, pemandu solar terbina dalam anda",
+        "description": "Sol ialah chatbot sedar-projek yang berasaskan angka, susun atur dan tarif sebenar anda. Tanya apa sahaja dalam bahasa Inggeris, Melayu atau Cina."
       }
     }
   },

@@ -21,7 +21,7 @@ import {
   ChevronUp,
   Clock,
   Sun,
-  BookOpen
+  Bot
 } from 'lucide-react'
 
 /**
@@ -149,7 +149,7 @@ export function LandingPage() {
                 </h1>
 
                 <p className="mt-5 max-w-lg text-base leading-relaxed text-[#1a0a02]/75 dark:text-foreground/75 sm:mt-6 sm:text-lg">
-                  {t('hero.subtitle')}
+                  <HeroSubtitle text={t('hero.subtitle')} />
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-x-4 gap-y-3 font-mono text-[11px] uppercase tracking-wider text-[#1a0a02]/60 dark:text-foreground/60 sm:mt-10 sm:gap-x-7">
@@ -343,9 +343,9 @@ export function LandingPage() {
             />
             <FeatureCard
               accent="leaf"
-              icon={<BookOpen className="h-5 w-5" />}
-              title={t('features.cards.citations.title')}
-              description={t('features.cards.citations.description')}
+              icon={<Bot className="h-5 w-5" />}
+              title={t('features.cards.assistant.title')}
+              description={t('features.cards.assistant.description')}
             />
           </div>
         </div>
@@ -428,7 +428,10 @@ export function LandingPage() {
             />
           </div>
 
-          <p className="mx-auto mt-3 max-w-3xl text-center text-[11px] leading-relaxed text-muted-foreground/80">
+          <p
+            id="asterisk-note"
+            className="mx-auto mt-3 max-w-3xl text-center text-[11px] leading-relaxed text-muted-foreground/80 scroll-mt-24"
+          >
             {t('faq.asteriskNote')}
           </p>
         </div>
@@ -564,6 +567,27 @@ function useHeroTicker() {
 
   const profile = useMemo(() => HERO_PROFILES[profileIdx], [profileIdx])
   return { ...vals, location: profile.location, monthly: profile.monthly }
+}
+
+function HeroSubtitle({ text }: { text: string }) {
+  const idx = text.indexOf('*')
+  if (idx === -1) return <>{text}</>
+  return (
+    <>
+      {text.slice(0, idx)}
+      <a
+        href="#asterisk-note"
+        onClick={(event) => {
+          event.preventDefault()
+          document.getElementById('asterisk-note')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }}
+        className="cursor-pointer text-inherit no-underline hover:text-primary"
+      >
+        *
+      </a>
+      {text.slice(idx + 1)}
+    </>
+  )
 }
 
 function TrustItem({ icon, label }: { icon: React.ReactNode; label: string }) {

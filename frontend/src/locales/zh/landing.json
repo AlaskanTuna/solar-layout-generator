@@ -86,7 +86,7 @@
       },
       "billing": {
         "title": "RP4 + NEM 逐行计费",
-        "description": "账单依据 2025 年 7 月后的 RP4 电价建模，包含 EEI 回扣、AFA、SST、可再生能源基金——每项费用清晰可追溯。"
+        "description": "账单依据可配置的 RP4 电价建模，包含 EEI 回扣、AFA、SST、可再生能源基金——每项费用清晰可追溯。"
       },
       "pdf": {
         "title": "安装商可用的 PDF",
@@ -96,9 +96,9 @@
         "title": "季节性用电量档案",
         "description": "告诉我们您在学校假期、斋戒月、年末的用电变化，我们将逐月建模。"
       },
-      "citations": {
-        "title": "每个数字均有依据",
-        "description": "每一 kWh、每一令吉均可追溯至公开来源——TNB 电价表、ST 公报、Google Solar API 记录。"
+      "assistant": {
+        "title": "Sol，您的内置太阳能助手",
+        "description": "Sol 是一个项目感知聊天机器人，基于您真实的数据、布局与电价——可用英语、马来语或中文随时提问。"
       }
     }
   },
