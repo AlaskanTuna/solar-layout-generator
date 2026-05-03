@@ -30,6 +30,21 @@ if (env.NODE_ENV === 'development') {
  */
 export const app: Express = express()
 
+app.use((req, res, next) => {
+  if (env.NODE_ENV !== 'production') return next()
+  if (req.path.startsWith('/.well-known/acme-challenge/')) return next()
+
+  const rootDomain = 'solarsim.tech'
+  const host = req.hostname.toLowerCase()
+  if (host !== rootDomain && host !== `www.${rootDomain}`) return next()
+
+  const forwardedProto = req.get('x-forwarded-proto')?.split(',')[0]?.trim()
+  const isHttps = req.secure || forwardedProto === 'https'
+  if (isHttps && host === rootDomain) return next()
+
+  res.redirect(301, new URL(req.originalUrl, `https://${rootDomain}`).toString())
+})
+
 app.use(cors({ origin: allowedOrigins }))
 // Gzip every response except SSE streams. The default compression() buffers chunks until it has
 // enough bytes to compress efficiently, which would stall Sol's token-by-token chat stream.
