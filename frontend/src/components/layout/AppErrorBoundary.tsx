@@ -10,6 +10,20 @@ type AppErrorBoundaryState = {
   hasError: boolean
 }
 
+const CHUNK_RECOVERY_KEY = 'app-chunk-recovery-ts'
+const CHUNK_RECOVERY_WINDOW_MS = 30_000
+
+function isChunkLoadError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false
+  if (error.name === 'ChunkLoadError') return true
+  const message = error.message
+  return (
+    /Loading chunk \d+ failed/.test(message) ||
+    /Failed to fetch dynamically imported module/.test(message) ||
+    /Importing a module script failed/.test(message)
+  )
+}
+
 /**
  * Top-level React error boundary mounted in `main.tsx`.
  * Catches rendering errors anywhere in the tree, logs them, and shows a recoverable
@@ -26,6 +40,22 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
 
   componentDidCatch(error: unknown) {
     console.error('[AppErrorBoundary] Unhandled application error', error)
+
+    // Stale lazy-chunk recovery: when the browser's cached index.html points to chunk
+    // hashes from a previous deploy, dynamic imports 404. Auto-reload once so users
+    // don't have to think about it. Guarded by a 30 s sessionStorage flag so a real
+    // chunk bug can't trap them in a reload loop.
+    if (isChunkLoadError(error)) {
+      try {
+        const last = Number(window.sessionStorage.getItem(CHUNK_RECOVERY_KEY) ?? '0')
+        if (Date.now() - last > CHUNK_RECOVERY_WINDOW_MS) {
+          window.sessionStorage.setItem(CHUNK_RECOVERY_KEY, String(Date.now()))
+          window.location.reload()
+        }
+      } catch {
+        // sessionStorage unavailable (private mode etc); user can still hit the manual Reload button.
+      }
+    }
   }
 
   private handleReload = () => {
