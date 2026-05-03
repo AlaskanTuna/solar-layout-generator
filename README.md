@@ -238,158 +238,44 @@ flowchart LR
 
 ## 🚀 Getting Started
 
-This section walks a fresh clone end-to-end: local dev → cloud provisioning → first production deploy. Reproducible from a clean machine in ~30 minutes if you have CLIs installed, ~60 minutes from zero.
+> [!TIP]
+> **Looking to reproduce the full stack from scratch — local dev *and* cloud deploy?**  
+> See **[RUNBOOK.md](RUNBOOK.md)** for the complete clone-to-production walkthrough: cloud account setup, CLI provisioning, env wiring, Heroku + Vercel deploy, custom domain, smoke tests, and troubleshooting. ~60-90 min on a fresh machine.
+>
+> The section below is the **5-minute local quickstart** — enough to boot SolarSim against an existing Supabase + Google Cloud + Resend setup. If you don't have those yet, jump to RUNBOOK.md instead.
 
-> [!IMPORTANT]
-> **CLI-first operations.** Every cloud platform here is configured via its CLI (`supabase`, `gcloud`, `gh`, `heroku`, `vercel`), not the dashboard. Dashboards are for read-only inspection (logs, metrics). Anything that creates, modifies, or deletes config goes through the CLI so it's reproducible, scriptable, agent-friendly, and easy to document.
-
-### 1. Prerequisites
-
-**Local toolchain:**
-
-- **Node.js** `24.x` — [nodejs.org](https://nodejs.org)
-- **pnpm** `10.33.0` — `corepack enable` (ships with Node 24)
-- **git**
-
-**Cloud Platform CLIs** (one-time install per machine):
+### Local Quickstart (Existing Cloud Setup)
 
 ```bash
-# macOS / Linux examples — adjust per platform
-brew install supabase/tap/supabase   # or scoop/winget on Windows
-brew install --cask google-cloud-sdk  # gcloud
-brew install gh                       # GitHub CLI
-brew install heroku/brew/heroku
-npm install -g vercel
-```
+# 1. Install local toolchain
+corepack enable                                   # bundles pnpm 10.33.0 with Node 24
 
-**Cloud Accounts** (free tiers cover everything for this project):
-
-- [Supabase](https://supabase.com) — Postgres + Auth + Storage
-- [Google Cloud Console](https://console.cloud.google.com) — Solar API, Maps JS API, OAuth 2.0, optional Vertex AI for chat
-- [Resend](https://resend.com) — transactional email (3,000/month free)
-- [Heroku](https://heroku.com) — backend + bundled frontend (Basic dyno: $7/mo)
-- [Vercel](https://vercel.com) — PDF render function (Hobby tier free)
-
-Authenticate each CLI before starting:
-
-```bash
-supabase login
-gcloud auth login
-gh auth login
-heroku login
-vercel login
-```
-
-### 2. Clone and Install
-
-```bash
+# 2. Clone and install
 git clone https://github.com/AlaskanTuna/solar-layout-generator.git
 cd solar-layout-generator
-corepack enable
 pnpm install
-cp .env.example .env   # fill in values per the table in §4
+
+# 3. Configure env (fill in values from your existing cloud accounts)
+cp .env.example .env
+# edit .env — see RUNBOOK.md §4 for what each variable means
+
+# 4. Initialise the database and run
+pnpm prisma:generate
+pnpm db:migrate
+pnpm db:seed
+pnpm dev                                          # frontend :5173 + backend :3001
 ```
 
-### 3. Provision Cloud Resources
+Visit `http://localhost:5173` → sign up → click the confirmation email → you're in.
 
-Each cloud account needs a dedicated project/app for SolarSim. Do these in order — later steps depend on earlier values.
+### Prerequisites
 
-**3a. Google Cloud Project**
+- **Node.js** `24.x` — [nodejs.org](https://nodejs.org)
+- **pnpm** `10.33.0` (via `corepack enable` — ships with Node 24)
+- **git**
+- An existing Supabase project, Google Cloud project (Solar + Maps + Geocoding APIs enabled), and Resend account. New to all of these? Use **[RUNBOOK.md](RUNBOOK.md)** to provision them.
 
-```bash
-gcloud projects create solar-layout-generator --name="SolarSim"
-gcloud config set project solar-layout-generator
-gcloud services enable solar.googleapis.com maps-backend.googleapis.com geocoding-backend.googleapis.com
-gcloud services enable aiplatform.googleapis.com   # for Sol chatbot via Vertex AI
-```
-
-Then in the Cloud Console (one-time, no CLI equivalent):
-
-- **APIs & Services → Credentials → Create credentials → API Key** → name it `SolarSim Backend`. Restrict to the 3 enabled APIs above. Copy the key for `GOOGLE_API_KEY`.
-- **APIs & Services → Credentials → Create credentials → OAuth client ID** → Application type: Web. Authorized redirect URI: `https://<your-supabase-ref>.supabase.co/auth/v1/callback` (you'll get the ref in step 3b). Copy `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_SECRET`.
-
-**3b. Supabase Project**
-
-```bash
-# Create the project via dashboard (no CLI for create yet); pick a region close to your users.
-# Then back in the terminal:
-supabase projects list                      # find the reference id of the new project
-supabase link --project-ref <your-ref>      # links this repo to that project
-```
-
-In the Supabase dashboard → Settings → API, copy:
-
-- `Project URL` → `SUPABASE_URL`
-- `anon public` key → `SUPABASE_ANON_KEY`
-- `service_role` key → `SUPABASE_SERVICE_ROLE_KEY`
-- Settings → Database → Connection String (URI) → `SUPABASE_DATABASE_URL`
-
-Create the storage bucket the backend writes GeoTIFFs to (the bucket name is hardcoded in `backend/src/services/storageService.ts` as `geotiffs`):
-
-```bash
-# In the dashboard: Storage → New bucket → name: geotiffs → Public: OFF.
-# Or via SQL editor:
-# insert into storage.buckets (id, name, public) values ('geotiffs', 'geotiffs', false);
-```
-
-**3c. Resend (Email Delivery)**
-
-1. Sign up at [resend.com](https://resend.com) → API Keys → Create.
-2. Copy the key for `RESEND_API_KEY` (only used by Supabase's SMTP relay; backend doesn't use it).
-3. Optional: verify a custom domain (`Domains → Add`) for production-quality sender. Until then, the SMTP config uses `onboarding@resend.dev` as a pre-verified test sender.
-
-### 4. Configure Environment Variables
-
-Open `.env` and fill in every value below. Vars prefixed `VITE_` use `dotenv-expand` so they auto-derive from the canonical value (no duplicate paste).
-
-| Variable                    | Required for                              | Source / How to get it                                                                                                                                                   |
-| --------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GOOGLE_API_KEY`            | Solar API, Maps JS, Geocoding             | GCP Console → Credentials → API Key                                                                                                                                      |
-| `GOOGLE_OAUTH_CLIENT_ID`    | "Sign in with Google"                     | GCP Console → Credentials → OAuth client ID                                                                                                                              |
-| `GOOGLE_OAUTH_SECRET`       | "Sign in with Google"                     | Same OAuth client                                                                                                                                                        |
-| `GOOGLE_CLOUD_PROJECT`      | Sol chatbot (Vertex AI mode, recommended) | GCP project ID, e.g. `solar-layout-generator`                                                                                                                            |
-| `GOOGLE_CLOUD_LOCATION`     | Sol chatbot                               | Region for Vertex AI; `global` works                                                                                                                                     |
-| `GEMINI_API_KEY`            | Sol chatbot (API-key fallback)            | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — at least one of `GOOGLE_CLOUD_PROJECT` or `GEMINI_API_KEY` is required or the backend refuses to boot |
-| `CHAT_MODEL`                | Sol chatbot model                         | Defaults to `gemini-3.1-flash-lite-preview`; override to any Gemini model id                                                                                             |
-| `SUPABASE_URL`              | Auth, DB, Storage                         | Supabase → Settings → API                                                                                                                                                |
-| `SUPABASE_ANON_KEY`         | Frontend Supabase client                  | Same                                                                                                                                                                     |
-| `SUPABASE_SERVICE_ROLE_KEY` | Backend Supabase client (privileged)      | Same — never expose to the browser                                                                                                                                       |
-| `SUPABASE_DATABASE_URL`     | Prisma direct connection                  | Supabase → Settings → Database → Connection String                                                                                                                       |
-| `SITE_URL`                  | Auth redirect base                        | `http://localhost:5173` for local; production URL for deployed                                                                                                           |
-| `RESEND_API_KEY`            | Auth confirmation / reset emails          | Resend → API Keys                                                                                                                                                        |
-| `FRONTEND_URL`              | Backend CORS allowlist                    | `http://localhost:5173` locally, custom domain in production                                                                                                             |
-| `BACKEND_PORT`              | Local dev backend                         | Default `3001`, only override on conflict                                                                                                                                |
-| `FRONTEND_PORT`             | Local dev frontend                        | Default `5173`, only override on conflict                                                                                                                                |
-| `PDF_TOKEN_SECRET`          | PDF export signed-token HMAC              | Generate with `openssl rand -hex 32`                                                                                                                                     |
-| `PDF_EXPORT_URL`            | Frontend → PDF function                   | Set after Vercel deploy in §6 (placeholder OK for local)                                                                                                                 |
-
-### 5. Initialise the Database and Run Locally
-
-```bash
-pnpm prisma:generate              # generate the Prisma client
-pnpm db:migrate                   # apply migrations to your Supabase Postgres
-pnpm db:seed                      # seed Malaysian tariff config (tariff bands, EEI, AFA, RE Fund, SST)
-pnpm dev                          # frontend on :5173, backend on :3001
-```
-
-> [!NOTE]
-> `pnpm db:migrate` runs `prisma migrate dev` which is interactive — fine locally, but Heroku/CI must use `prisma migrate deploy` (see §7).
-
-Visit `http://localhost:5173`. Sign up with a real email → confirmation email arrives via Resend → click the link → you're in.
-
-### 6. Sync Supabase Auth Config and Email Templates
-
-Auth redirect URLs, OAuth provider settings, custom SMTP, and the four email templates (signup confirm, password reset, invite, email change) live in `supabase/config.toml` and `supabase/templates/*.html`. They are NOT auto-deployed when you `git push` — you must push them via the CLI:
-
-```bash
-set -a && source .env && set +a && yes | supabase config push
-```
-
-The `set -a; source .env; set +a` exports every var so `env(VAR)` references in `config.toml` resolve correctly. The `yes |` auto-confirms the diff prompt.
-
-Verify in Supabase dashboard → Authentication → SMTP Settings: Custom SMTP should be enabled with `smtp.resend.com:587`.
-
-### 7. Useful Commands
+### Useful Commands
 
 | Command                  | Description                                                         |
 | ------------------------ | ------------------------------------------------------------------- |
@@ -410,105 +296,23 @@ Verify in Supabase dashboard → Authentication → SMTP Settings: Custom SMTP s
 
 ## ☁ Deployment
 
-The app ships as **two services**: the Heroku web dyno (frontend bundle + Express API) and a separate Vercel function for PDF rendering. Both must be deployed for the app to be fully functional.
+The production stack is **two services**: a Heroku web dyno (frontend bundle + Express API) and a separate Vercel function for PDF rendering, fronted by a custom domain (`solarsim.tech`) with HTTPS via Heroku ACM.
 
-### 1. Heroku (Frontend + API)
+> [!TIP]
+> The full deploy walkthrough — `heroku create`, every config var, custom domain attachment, Vercel link, CI/CD secrets, and post-deploy smoke tests — lives in **[RUNBOOK.md §7-§10](RUNBOOK.md)**. It's the canonical guide; this section is a one-screen reference for maintainers who already deployed once and just need a refresher.
 
-**First-time app creation:**
+**Live deployment:**
 
-```bash
-heroku create <your-app-name>                    # e.g. solarsim-prod
-heroku buildpacks:set heroku/nodejs              # auto-detected, but explicit is safer
-git remote -v                                    # confirm 'heroku' remote was added
-```
+- Frontend + API: <https://solarsim.tech> (Heroku dyno behind custom domain)
+- PDF render function: Vercel Hobby tier (URL set via `PDF_EXPORT_URL`)
+- CI/CD: `.github/workflows/ci-cd.yml` — PRs run tests, pushes to `main` deploy to Heroku
+- Database migrations: auto-applied via Heroku's `release:` phase in `Procfile` (`pnpm db:migrate:deploy`)
+- Email delivery: Resend SMTP relay through Supabase Auth, sender `noreply@solarsim.tech`
 
-**Set every config var** (Heroku injects them at build AND runtime; `VITE_*` vars get baked into the frontend bundle during `pnpm build`, so they MUST be set before the first deploy):
+**Required GitHub repo secrets** (set via `gh secret set <name>`):
 
-```bash
-# Replace placeholders with real values from your .env
-heroku config:set \
-  GOOGLE_API_KEY="..." \
-  GOOGLE_OAUTH_CLIENT_ID="..." \
-  GOOGLE_OAUTH_SECRET="..." \
-  GOOGLE_CLOUD_PROJECT="solar-layout-generator" \
-  GOOGLE_CLOUD_LOCATION="global" \
-  GEMINI_API_KEY="..." \
-  CHAT_MODEL="gemini-3.1-flash-lite-preview" \
-  SUPABASE_URL="https://<ref>.supabase.co" \
-  SUPABASE_ANON_KEY="..." \
-  SUPABASE_SERVICE_ROLE_KEY="..." \
-  SUPABASE_DATABASE_URL="postgresql://..." \
-  SITE_URL="https://solarsim.tech" \
-  FRONTEND_URL="https://solarsim.tech" \
-  APEX_DOMAIN="solarsim.tech" \
-  PDF_TOKEN_SECRET="$(openssl rand -hex 32)" \
-  PDF_EXPORT_URL="placeholder-update-after-vercel-deploy" \
-  VITE_GOOGLE_API_KEY="..." \
-  VITE_SUPABASE_URL="https://<ref>.supabase.co" \
-  VITE_SUPABASE_ANON_KEY="..." \
-  VITE_PDF_EXPORT_URL="placeholder-update-after-vercel-deploy"
-```
-
-**First deploy:**
-
-```bash
-git push heroku main
-```
-
-`heroku-postbuild` (in root `package.json`) runs `pnpm build` which compiles backend + bundles frontend. The dyno then starts via the `Procfile` (`web: pnpm start`).
-
-**Database migrations run automatically on every deploy** via the `release:` phase in the `Procfile` (`pnpm db:migrate:deploy`). The first deploy will apply all migrations from `prisma/migrations/` to your Supabase Postgres before the web dyno starts. If a migration fails, the release fails and the dyno keeps the previous image — safe by design.
-
-Seed the tariff config once (only needed on a fresh DB):
-
-```bash
-heroku run pnpm db:seed
-```
-
-Verify the app: `heroku open` → sign up → check Heroku logs (`heroku logs --tail`) for any boot errors.
-
-### 2. Vercel (PDF Render Function)
-
-```bash
-cd services/pdf-service
-vercel                                           # interactive first-time link, accept defaults
-vercel env add ALLOWED_FRONTEND_ORIGIN production
-# When prompted: paste your production app origin (no trailing slash, e.g. https://solarsim.tech)
-vercel --prod                                    # deploys; prints the function URL
-```
-
-Copy the function URL, then update Heroku and re-deploy the bundle so the frontend picks up the real URL:
-
-```bash
-heroku config:set \
-  PDF_EXPORT_URL="https://<pdf-service>.vercel.app" \
-  VITE_PDF_EXPORT_URL="https://<pdf-service>.vercel.app"
-git commit --allow-empty -m "chore: rebuild for pdf service url" && git push heroku main
-```
-
-The empty commit triggers a rebuild so the new `VITE_PDF_EXPORT_URL` gets baked into the frontend bundle.
-
-### 3. CI/CD
-
-`.github/workflows/ci-cd.yml` runs on pushes to `main`:
-
-- Pull requests run `pnpm install`, `build`, and unit tests.
-- Pushes to `main` re-run CI then deploy the passing commit to Heroku via the Heroku Git endpoint.
-
-**Required GitHub repo secrets** (set via `gh secret set <name>` or the dashboard):
-
-- `HEROKU_API_KEY` — `heroku auth:token` to retrieve
-- `HEROKU_APP_NAME` — the Heroku app name from §1
-
-### 4. Post-Deploy Checklist
-
-- Sign up via the live URL → confirmation email arrives from Resend → click → land on `/dashboard`.
-- Create a project → search a Malaysian address → confirm → workbench loads with panels.
-- Open the analysis page → enter a monthly bill → results render.
-- Open Sol chatbot → send a message → tokens stream in word-by-word.
-- Export PDF → file downloads.
-
-If any step fails, `heroku logs --tail` and `vercel logs <deployment>` are the first places to look.
+- `HEROKU_API_KEY` — `heroku auth:token`
+- `HEROKU_APP_NAME` — the Heroku app slug
 
 > [!IMPORTANT]
 > If the live URLs or commands drift, the `Procfile`, `heroku-postbuild` script in `package.json`, and `.github/workflows/ci-cd.yml` are the source of truth, not this README.
