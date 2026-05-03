@@ -69,16 +69,18 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
     { value: 'north', label: t('layoutPresetModal.roofDirection.options.north') }
   ]
 
-  const SIZING_OPTIONS: { value: Goal; title: string; description: string }[] = [
+  const SIZING_OPTIONS: { value: Goal; title: string; description: string; note?: string }[] = [
     {
       value: 'conservative',
       title: t('layoutPresetModal.sizingGoal.options.conservative.title'),
-      description: t('layoutPresetModal.sizingGoal.options.conservative.description')
+      description: t('layoutPresetModal.sizingGoal.options.conservative.description'),
+      note: t('layoutPresetModal.sizingGoal.options.conservative.note')
     },
     {
       value: 'balanced',
       title: t('layoutPresetModal.sizingGoal.options.balanced.title'),
-      description: t('layoutPresetModal.sizingGoal.options.balanced.description')
+      description: t('layoutPresetModal.sizingGoal.options.balanced.description'),
+      note: t('layoutPresetModal.sizingGoal.options.balanced.note')
     },
     {
       value: 'maximum',
@@ -93,7 +95,7 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
     ROOF_DIRECTION_OPTIONS.find((o) => o.value === v)?.label ?? t('layoutPresetModal.roofDirection.options.any')
 
   const [billRange, setBillRange] = useState<BillRange>('unknown')
-  const [sizingGoal, setSizingGoal] = useState<Goal>('balanced')
+  const [sizingGoal, setSizingGoal] = useState<Goal>('maximum')
   const [roofDirection, setRoofDirection] = useState<RoofDirection>('any')
   const [billImageOpen, setBillImageOpen] = useState(false)
 
@@ -129,7 +131,7 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
   useEffect(() => {
     if (!open) return
     setBillRange(prefs?.billRange ?? 'unknown')
-    const initialGoal = prefs?.sizingGoal && prefs.sizingGoal !== 'custom' ? prefs.sizingGoal : 'balanced'
+    const initialGoal = prefs?.sizingGoal && prefs.sizingGoal !== 'custom' ? prefs.sizingGoal : 'maximum'
     setSizingGoal(initialGoal)
     setRoofDirection(prefs?.roofDirection ?? 'any')
     // Reset tooltip state every time the modal reopens.
@@ -257,6 +259,9 @@ export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }:
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{opt.description}</p>
+                    {opt.note && (
+                      <p className="mt-1.5 text-[11px] italic text-amber-700 dark:text-amber-400">{opt.note}</p>
+                    )}
                   </button>
                 )
               })}

@@ -185,11 +185,13 @@
       "options": {
         "conservative": {
           "title": "Economy",
-          "description": "Smallest viable system. Lowest upfront cost, longer payback. Good if budget is the priority."
+          "description": "Smallest viable system. Lowest upfront cost, longer payback. Good if budget is the priority.",
+          "note": "Heads up: changes panel quantity only, not panel positions."
         },
         "balanced": {
           "title": "Self-Consumption",
-          "description": "Sized to match your typical daytime usage. Most cost-efficient, minimizes generation that goes to waste from overnight export."
+          "description": "Sized to match your typical daytime usage. Most cost-efficient, minimizes generation that goes to waste from overnight export.",
+          "note": "Heads up: changes panel quantity only, not panel positions."
         },
         "maximum": {
           "title": "Maximum",

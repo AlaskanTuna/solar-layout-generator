@@ -185,11 +185,13 @@
       "options": {
         "conservative": {
           "title": "Ekonomi",
-          "description": "Sistem minimum yang boleh dilaksanakan. Kos pendahuluan terendah, bayar balik lebih lama. Sesuai jika bajet adalah keutamaan."
+          "description": "Sistem minimum yang boleh dilaksanakan. Kos pendahuluan terendah, bayar balik lebih lama. Sesuai jika bajet adalah keutamaan.",
+          "note": "Perhatian: hanya mengubah kuantiti panel, bukan kedudukan panel."
         },
         "balanced": {
           "title": "Penggunaan Sendiri",
-          "description": "Disaizkan untuk memadankan penggunaan siang hari biasa anda. Paling cekap dari segi kos, meminimumkan penjanaan yang terbuang akibat eksport malam."
+          "description": "Disaizkan untuk memadankan penggunaan siang hari biasa anda. Paling cekap dari segi kos, meminimumkan penjanaan yang terbuang akibat eksport malam.",
+          "note": "Perhatian: hanya mengubah kuantiti panel, bukan kedudukan panel."
         },
         "maximum": {
           "title": "Maksimum",
