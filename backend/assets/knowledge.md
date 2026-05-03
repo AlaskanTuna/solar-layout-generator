@@ -106,6 +106,94 @@ Combined base subtotal: **44.43 sen/kWh** for the ≤1,500 kWh tier;
 - **Sabah and Sarawak** use entirely different regimes (SESB / SEB) — none
   of these RP4 numbers apply there.
 
+## Common Homeowner Confusions
+
+These patterns trip up almost every first-time user looking at their
+analysis. Recognise them and explain in plain language. Use the parking-lot
+analogy below — it works better than tariff jargon.
+
+### Why does my Ringgit savings go UP but my percentage savings go DOWN when I use more electricity?
+
+This looks contradictory but is the correct behaviour of RP4. Two reasons:
+
+1. **Solar offsets your most expensive kWh first, not your cheapest.** A
+   household using 1,800 kWh/month is paying the >1,500 kWh cliff rate
+   (37.03 sen) on every kWh, plus full AFA, full retail charge, and
+   proportional SST. When solar removes 550 kWh, those removed kWh were the
+   most expensive ones in the bill. A household using 800 kWh/month is paying
+   the lower 27.03 sen rate with smaller surcharges, so the same 550 kWh
+   removed represent less RM value.
+2. **Crossing the 1,500 kWh cliff in reverse.** When solar drops billable
+   consumption from 1,800 → 1,250 kWh, the **entire** remaining bill
+   re-prices from 37.03 → 27.03 sen. That is roughly RM 125/month of pure
+   cliff-clearance savings on top of the kWh offset.
+
+The percentage drops because the "before" bill grew much faster than the
+"after" bill. A household on RM 1,000/month saving RM 400 (40%) is keeping
+much more cash than one on RM 330/month saving RM 250 (75%).
+
+### Why does my friend with a smaller bill seem to save a higher percentage?
+
+Same reason. The percentage is misleading because **a small bill is
+artificially inflated by EEI rebates and below-threshold waivers**. At
+800 kWh consumption, a household gets:
+
+- An EEI rebate of ~4 sen/kWh on baseline (and ~25 sen/kWh on the post-NEM
+  bill if solar drops it to ~200 kWh billable — the rebate slides bigger as
+  you go lower)
+- AFA still applies but at a small absolute amount
+- SST applies only to the 200 kWh portion above the 600 kWh waiver
+
+When solar removes 550 kWh, the post-NEM bill is tiny, the EEI rebate
+balloons, and the percentage looks dramatic. The friend on 1,800 kWh has no
+EEI rebate at all (>1,000 kWh cliff) and pays full SST/AFA on a much larger
+absolute base, so the percentage looks smaller even though the RM saved is
+much bigger.
+
+**Honest framing:** "Solar gives you more total Ringgit back the more
+electricity you use, even if the percentage on the bill looks smaller. Your
+friend's percentage is high because their bill was small to start with."
+
+### The parking-lot analogy (use this when explaining to non-technical users)
+
+Imagine a parking lot that charges:
+
+- **5 hours or less:** RM 2/hour
+- **6 hours or more:** RM 5/hour applied to **every** hour you parked
+
+So 5 hours = RM 10, but 6 hours = RM 30 (not RM 15). One extra hour pushes
+you over the line and re-prices your earlier hours too. Now imagine a friend
+pays for 3 of your hours — that is your solar:
+
+- **You parked 4 hours.** Original RM 8, friend covers 3, you owe RM 2.
+  You "saved" RM 6.
+- **You parked 7 hours.** Original RM 35 (full RM 5 rate), friend covers 3,
+  you owe 4 hours × RM 2 = RM 8 (back below the cliff).
+  You "saved" RM 27.
+
+Same friend, same 3 hours of help. The Ringgit savings jumped from RM 6 to
+RM 27 because the heavier user crossed the cliff in reverse. That is exactly
+what happens with solar at high vs low monthly electricity usage.
+
+### Will solar always pay back faster for high-bill households?
+
+Generally yes, on RP4 specifically, because the cliff effect amplifies
+savings dramatically once monthly net consumption falls back under 1,500
+kWh. The household that benefits least is one already well below the cliff
+(say 400-600 kWh/month) — solar still helps but the absolute Ringgit
+returned per panel is smaller, so payback is longer.
+
+### Why is my analysis showing zero savings on some months?
+
+Two likely causes the user's analysis can confirm:
+
+1. The system over-generated in earlier months and **NEM credits forfeited
+   in December** (credits reset to zero each January under NEM Rakyat 3.0).
+   The simulator shows this as `creditForfeited` in the monthly breakdown.
+2. The household consumption was already very low in that month (school
+   holidays, travel) and solar generation fully covered it — the bill was
+   already at the **RM 3 minimum charge**, leaving no further room to save.
+
 ## kWp vs kWh
 
 Two units that homeowners often confuse.
