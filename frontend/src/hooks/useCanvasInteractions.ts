@@ -724,7 +724,11 @@ export function useCanvasInteractions({
             if (r.monthlyEnergyDcKwh.length === 12) updatePanelEnergy(r.panelId, r.monthlyEnergyDcKwh)
           }
         })
-        .catch(() => {})
+        .catch((err) => {
+          notify.error(
+            err instanceof Error ? err.message : 'Failed to recompute rotated panels. Energy values may be stale.'
+          )
+        })
     }, 500)
   }
 

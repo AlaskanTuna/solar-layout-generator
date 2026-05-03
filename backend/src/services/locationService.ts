@@ -130,10 +130,19 @@ export async function probeLocation(lat: number, lng: number) {
  * @returns {Promise<{ status: LocationStatus; }>} A promise resolving to the requested location status for user
  */
 export async function getLocationStatusForUser(userId: string, locationId: string) {
+  // Allow status polling for: (a) locations linked to a project the user owns, OR
+  // (b) freshly-created orphan locations (within the 5-min post-create window) so the
+  // user who just kicked off the pipeline can poll before linkOwnedProjectToLocation
+  // runs. The previous unscoped `{ projects: { none: {} } }` arm let any authenticated
+  // user poll the status of any orphan location indefinitely (UUID guessing).
+  const orphanWindowStart = new Date(Date.now() - 5 * 60_000)
   return prisma.location.findFirst({
     where: {
       id: locationId,
-      OR: [{ projects: { some: { userId } } }, { projects: { none: {} } }]
+      OR: [
+        { projects: { some: { userId } } },
+        { projects: { none: {} }, createdAt: { gte: orphanWindowStart } }
+      ]
     },
     select: { status: true }
   })
