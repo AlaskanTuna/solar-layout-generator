@@ -24,7 +24,7 @@ const envSchema = z
     GEMINI_API_KEY: z.preprocess((val) => (val === '' ? undefined : val), z.string().min(1).optional()),
     GOOGLE_CLOUD_PROJECT: z.preprocess((val) => (val === '' ? undefined : val), z.string().min(1).optional()),
     GOOGLE_CLOUD_LOCATION: z.string().min(1).default('global'),
-    CHAT_MODEL: z.string().min(1).default('gemini-2.5-flash')
+    CHAT_MODEL: z.string().min(1).default('gemini-3.1-flash-lite-preview')
   })
   .superRefine((value, ctx) => {
     if (!value.GEMINI_API_KEY && !value.GOOGLE_CLOUD_PROJECT) {

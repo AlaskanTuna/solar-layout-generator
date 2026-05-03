@@ -350,7 +350,7 @@ Open `.env` and fill in every value below. Vars prefixed `VITE_` use `dotenv-exp
 | `GOOGLE_CLOUD_PROJECT`      | Sol chatbot (Vertex AI mode, recommended) | GCP project ID, e.g. `solar-layout-generator`                                   |
 | `GOOGLE_CLOUD_LOCATION`     | Sol chatbot                               | Region for Vertex AI; `global` works                                            |
 | `GEMINI_API_KEY`            | Sol chatbot (API-key fallback)            | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — at least one of `GOOGLE_CLOUD_PROJECT` or `GEMINI_API_KEY` is required or the backend refuses to boot |
-| `CHAT_MODEL`                | Sol chatbot model                         | Defaults to `gemini-2.5-flash`; override per `.env.example`                     |
+| `CHAT_MODEL`                | Sol chatbot model                         | Defaults to `gemini-3.1-flash-lite-preview`; override to any Gemini model id    |
 | `SUPABASE_URL`              | Auth, DB, Storage                         | Supabase → Settings → API                                                       |
 | `SUPABASE_ANON_KEY`         | Frontend Supabase client                  | Same                                                                            |
 | `SUPABASE_SERVICE_ROLE_KEY` | Backend Supabase client (privileged)      | Same — never expose to the browser                                              |
@@ -433,7 +433,7 @@ heroku config:set \
   GOOGLE_CLOUD_PROJECT="solar-layout-generator" \
   GOOGLE_CLOUD_LOCATION="global" \
   GEMINI_API_KEY="..." \
-  CHAT_MODEL="gemini-2.5-flash" \
+  CHAT_MODEL="gemini-3.1-flash-lite-preview" \
   SUPABASE_URL="https://<ref>.supabase.co" \
   SUPABASE_ANON_KEY="..." \
   SUPABASE_SERVICE_ROLE_KEY="..." \
@@ -456,11 +456,12 @@ git push heroku main
 
 `heroku-postbuild` (in root `package.json`) runs `pnpm build` which compiles backend + bundles frontend. The dyno then starts via the `Procfile` (`web: pnpm start`).
 
-**Apply database migrations on the live database** (Prisma migrations from `prisma/migrations/` need to land in your Supabase Postgres):
+**Database migrations run automatically on every deploy** via the `release:` phase in the `Procfile` (`pnpm db:migrate:deploy`). The first deploy will apply all migrations from `prisma/migrations/` to your Supabase Postgres before the web dyno starts. If a migration fails, the release fails and the dyno keeps the previous image — safe by design.
+
+Seed the tariff config once (only needed on a fresh DB):
 
 ```bash
-heroku run pnpm db:migrate:deploy
-heroku run pnpm db:seed                          # one-time, only if not already seeded locally
+heroku run pnpm db:seed
 ```
 
 Verify the app: `heroku open` → sign up → check Heroku logs (`heroku logs --tail`) for any boot errors.
