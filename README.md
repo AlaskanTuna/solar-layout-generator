@@ -306,6 +306,9 @@ The app ships as **two services**: the Heroku web dyno (frontend bundle + Expres
 - **Frontend + API (Heroku):** <https://solar-layout-generator-8e2cfa5a38c7.herokuapp.com/>
 - **PDF Function (Vercel):** Refer to `PDF Service Deploy` below.
 
+> [!IMPORTANT]
+> **CLI-first operations.** Configure every cloud platform via its CLI, not the dashboard — `supabase`, `gcloud`, `gh`, `heroku`, `vercel`. Dashboards are for read-only inspection (logs, metrics). Anything that creates, modifies, or deletes config goes through the CLI so it's reproducible, scriptable, agent-friendly, and easy to document. See [`docs/TRD.md` §15](docs/TRD.md) for the full playbook including one-time setup commands and per-platform recipes (e.g. `supabase config push` to sync email templates from `supabase/templates/` to the hosted project — edits are NOT auto-deployed).
+
 ### CI/CD
 
 `.github/workflows/ci-cd.yml` is the source of truth:
