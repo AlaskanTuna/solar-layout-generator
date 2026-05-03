@@ -357,7 +357,7 @@ Open `.env` and fill in every value below. Vars prefixed `VITE_` use `dotenv-exp
 | `SUPABASE_DATABASE_URL`     | Prisma direct connection                  | Supabase → Settings → Database → Connection String                              |
 | `SITE_URL`                  | Auth redirect base                        | `http://localhost:5173` for local; production URL for deployed                  |
 | `RESEND_API_KEY`            | Auth confirmation / reset emails          | Resend → API Keys                                                               |
-| `FRONTEND_URL`              | Backend CORS allowlist                    | `http://localhost:5173` locally, Heroku URL in production                       |
+| `FRONTEND_URL`              | Backend CORS allowlist                    | `http://localhost:5173` locally, custom domain in production                    |
 | `BACKEND_PORT`              | Local dev backend                         | Default `3001`, only override on conflict                                       |
 | `FRONTEND_PORT`             | Local dev frontend                        | Default `5173`, only override on conflict                                       |
 | `PDF_TOKEN_SECRET`          | PDF export signed-token HMAC              | Generate with `openssl rand -hex 32`                                            |
@@ -438,8 +438,9 @@ heroku config:set \
   SUPABASE_ANON_KEY="..." \
   SUPABASE_SERVICE_ROLE_KEY="..." \
   SUPABASE_DATABASE_URL="postgresql://..." \
-  SITE_URL="https://<your-app-name>.herokuapp.com" \
-  FRONTEND_URL="https://<your-app-name>.herokuapp.com" \
+  SITE_URL="https://solarsim.tech" \
+  FRONTEND_URL="https://solarsim.tech" \
+  APEX_DOMAIN="solarsim.tech" \
   PDF_TOKEN_SECRET="$(openssl rand -hex 32)" \
   PDF_EXPORT_URL="placeholder-update-after-vercel-deploy" \
   VITE_GOOGLE_API_KEY="..." \
@@ -472,7 +473,7 @@ Verify the app: `heroku open` → sign up → check Heroku logs (`heroku logs --
 cd services/pdf-service
 vercel                                           # interactive first-time link, accept defaults
 vercel env add ALLOWED_FRONTEND_ORIGIN production
-# When prompted: paste your Heroku URL (no trailing slash, e.g. https://your-app.herokuapp.com)
+# When prompted: paste your production app origin (no trailing slash, e.g. https://solarsim.tech)
 vercel --prod                                    # deploys; prints the function URL
 ```
 

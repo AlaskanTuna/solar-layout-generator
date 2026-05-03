@@ -30,8 +30,8 @@ if (env.NODE_ENV === 'development') {
  */
 export const app: Express = express()
 
-// Canonical-host enforcement: in production, 301-redirect any request hitting
-// the Heroku origin (`*.herokuapp.com`) or the `www.` subdomain to `https://<APEX_DOMAIN>`.
+// Canonical-host enforcement: in production, 301-redirect the apex domain over HTTP
+// or the `www.` subdomain to `https://<APEX_DOMAIN>`.
 // No-op if APEX_DOMAIN is unset, so deployments without a custom domain (and local dev)
 // pass through unchanged. The ACME challenge path is always exempt so Heroku ACM can
 // renew Let's Encrypt certs without redirect interference.

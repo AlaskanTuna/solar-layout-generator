@@ -46,7 +46,7 @@ export function useAnalysisPdf() {
     const host = window.location.hostname
     if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local')) {
       notify.error(
-        'PDF export requires the deployed app — the cloud renderer cannot reach your local dev server. Test from the Heroku URL.'
+        'PDF export requires the deployed app - the cloud renderer cannot reach your local dev server. Test from https://solarsim.tech.'
       )
       return
     }
