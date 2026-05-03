@@ -12,6 +12,7 @@ import {
   type StoredAnalysisConfigDto
 } from '@shared/types'
 import * as projectService from '../projectService.js'
+import type { ChatLiveState } from '../../validators/chat.js'
 
 const MAX_DIGEST_CHARS = 6000
 
@@ -28,12 +29,18 @@ type ChatPage = 'workbench' | 'analysis'
 
 /**
  * Renders a page-aware project digest for chat grounding.
+ *
+ * `liveState` (optional) overlays the persisted Project row with values the user is actively
+ * editing in the frontend but hasn't saved yet. Each field independently overrides the
+ * corresponding persisted field; missing/null fields fall through to the DB value. This lets
+ * Sol answer questions about an in-progress AnalysisPage form, an unsaved WorkbenchPage
+ * layout tweak, etc., without requiring an explicit Save first.
  */
-export function renderProjectDigest(project: ChatProject, page: ChatPage): string {
-  const analysisConfig = parseAnalysisConfig(project.analysisConfig)
-  const analysisResults = parseAnalysisResults(project.analysisResults)
-  const layoutPreferences = parseLayoutPreferences(project.layoutPreferences)
-  const editedLayout = parseEditedLayout(project.editedLayout)
+export function renderProjectDigest(project: ChatProject, page: ChatPage, liveState?: ChatLiveState): string {
+  const analysisConfig = liveState?.analysisConfig ?? parseAnalysisConfig(project.analysisConfig)
+  const analysisResults = liveState?.analysisResults ?? parseAnalysisResults(project.analysisResults)
+  const layoutPreferences = liveState?.layoutPreferences ?? parseLayoutPreferences(project.layoutPreferences)
+  const editedLayout = liveState?.editedLayout ?? parseEditedLayout(project.editedLayout)
   const buildingInsights = parseBuildingInsights(project.location?.buildingInsightsJson)
 
   const blocks = [renderProjectBlock(project, analysisConfig, editedLayout, buildingInsights)]

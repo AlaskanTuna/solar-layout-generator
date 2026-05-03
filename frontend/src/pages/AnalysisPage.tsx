@@ -34,6 +34,7 @@ import { SortableCardContainer } from '@/components/analysis/SortableCardContain
 import { AnalysisSidebar } from '@/components/analysis/AnalysisSidebar'
 import { ChatContext } from '@/components/chat/ChatProvider'
 import { ChatLauncher } from '@/components/chat/ChatLauncher'
+import type { ChatLiveState } from '@/hooks/useChat'
 import { useAnalysisForm, type AnalysisFormState } from '@/hooks/useAnalysisForm'
 import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
 import { summarizeLayoutOrientation } from '@/lib/analysis'
@@ -483,7 +484,19 @@ export function AnalysisPage() {
           />
         </section>
 
-        {projectId && <ChatLauncher projectId={projectId} page="analysis" />}
+        {projectId && (
+          <ChatLauncher
+            projectId={projectId}
+            page="analysis"
+            liveStateProvider={(): ChatLiveState | undefined => {
+              if (!formState) return undefined
+              return {
+                analysisConfig: { ...formState, systemKwp },
+                analysisResults: analysisResults ?? null
+              }
+            }}
+          />
+        )}
       </PageContainer>
     </AppLayout>
   )

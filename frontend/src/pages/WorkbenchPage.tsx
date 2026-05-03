@@ -34,6 +34,7 @@ import { LayoutPresetModal } from '@/components/workbench/LayoutPresetModal'
 import { WorkbenchHintOverlay } from '@/components/workbench/WorkbenchHintOverlay'
 import { ChatContext } from '@/components/chat/ChatProvider'
 import { ChatLauncher } from '@/components/chat/ChatLauncher'
+import type { ChatLiveState } from '@/hooks/useChat'
 import { saveLayoutPreferences } from '@/api/projects'
 import { describeLayoutPreset, inferVisibleCount } from '@/lib/layoutPreset'
 import { markProjectVisited } from '@/lib/recentProjectActivity'
@@ -586,7 +587,16 @@ export function WorkbenchPage() {
           </Card>
         </section>
 
-        {projectId && <ChatLauncher projectId={projectId} page="workbench" />}
+        {projectId && (
+          <ChatLauncher
+            projectId={projectId}
+            page="workbench"
+            liveStateProvider={(): ChatLiveState | undefined => ({
+              editedLayout: serializeLayout(),
+              layoutPreferences: layoutPreferences ?? null
+            })}
+          />
+        )}
       </PageContainer>
 
       <LayoutPresetModal

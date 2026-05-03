@@ -5,13 +5,15 @@ import { RotateCcw, Send, Square, X } from 'lucide-react'
 import { CHAT_SEND_COOLDOWN_MS, ChatContext } from './ChatProvider'
 import { MessageBubble } from './MessageBubble'
 import { SuggestedQuestions } from './SuggestedQuestions'
-import { useChat } from '@/hooks/useChat'
+import { useChat, type ChatLiveState } from '@/hooks/useChat'
 import type { ProjectResponse } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 
 type ChatPanelProps = {
   projectId: string
   page: 'workbench' | 'analysis'
+  /** Optional callback returning the page's unsaved live state for chat grounding. */
+  liveStateProvider?: () => ChatLiveState | undefined
 }
 
 function getPaybackYears(project: ProjectResponse | undefined): number | null | undefined {
@@ -19,11 +21,11 @@ function getPaybackYears(project: ProjectResponse | undefined): number | null | 
 }
 
 /** Glass chat panel: streaming message list, markdown rendering, follow-up chips, spam-cooldown composer. */
-export function ChatPanel({ projectId, page }: ChatPanelProps) {
+export function ChatPanel({ projectId, page, liveStateProvider }: ChatPanelProps) {
   const { t } = useTranslation('chat')
   const queryClient = useQueryClient()
   const { setState } = useContext(ChatContext)
-  const { messages, isStreaming, error, send, stop, clear, cooldownUntil } = useChat(projectId, page)
+  const { messages, isStreaming, error, send, stop, clear, cooldownUntil } = useChat(projectId, page, liveStateProvider)
   const [draft, setDraft] = useState('')
   const composerRef = useRef<HTMLTextAreaElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)

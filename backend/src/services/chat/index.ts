@@ -27,7 +27,7 @@ const PROCESSING_MESSAGE: Record<ChatRequest['language'], string> = {
  */
 export async function streamChat(req: Request, res: Response): Promise<void> {
   const projectId = req.params.id as string
-  const { message, history, language, page } = req.body as ChatRequest
+  const { message, history, language, page, liveState } = req.body as ChatRequest
   const userId = req.user!.id
 
   const project = await projectService.getProject(userId, projectId)
@@ -54,7 +54,7 @@ export async function streamChat(req: Request, res: Response): Promise<void> {
   setSseHeaders(res)
   res.flushHeaders()
 
-  const systemInstruction = buildSystemInstruction(project, page, language)
+  const systemInstruction = buildSystemInstruction(project, page, language, liveState)
   const contents = buildContents(history, message)
 
   // Stop further token generation if the client disconnects mid-stream (browser

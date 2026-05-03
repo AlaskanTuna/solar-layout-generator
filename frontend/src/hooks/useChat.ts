@@ -1,7 +1,13 @@
-import { useCallback, useContext, useMemo, useRef } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CHAT_SEND_COOLDOWN_MS, ChatContext, type ChatMessage } from '@/components/chat/ChatProvider'
 import { getSupabase } from '@/lib/supabase'
+import type {
+  AnalysisResultsDto,
+  LayoutPreferences,
+  PanelEdit,
+  StoredAnalysisConfigDto
+} from '@shared/types'
 
 /** How many follow-up chips to render per model bubble, sampled from the page-specific pool. */
 const FOLLOWUP_CHIP_COUNT = 3
@@ -11,6 +17,28 @@ type ChatEvent =
   | { type: 'token'; text: string }
   | { type: 'done' }
   | { type: 'error'; category: string; message: string }
+
+/**
+ * Snapshot of unsaved frontend state forwarded to the backend chat digest.
+ * Each field is independently optional — only send what the current page actually owns.
+ */
+export type ChatLiveState = {
+  analysisConfig?: StoredAnalysisConfigDto | null
+  analysisResults?: AnalysisResultsDto | null
+  editedLayout?: PanelEdit[] | null
+  layoutPreferences?: LayoutPreferences | null
+}
+
+/** Returns true if the live state has at least one non-empty field worth sending. */
+function hasLiveState(live: ChatLiveState | undefined): live is ChatLiveState {
+  if (!live) return false
+  return (
+    live.analysisConfig != null ||
+    live.analysisResults != null ||
+    (Array.isArray(live.editedLayout) && live.editedLayout.length > 0) ||
+    live.layoutPreferences != null
+  )
+}
 
 /** Random sample of N entries from a pool, without replacement. Returns [] if pool is empty. */
 function samplePool(pool: string[], n: number): string[] {
@@ -98,11 +126,27 @@ async function readErrorMessage(response: Response): Promise<string | null> {
   return typeof body?.error === 'string' ? body.error : null
 }
 
-/** Streams project-grounded chatbot responses over SSE-over-POST. */
-export function useChat(projectId: string, page: ChatPage): UseChatReturn {
+/**
+ * Streams project-grounded chatbot responses over SSE-over-POST.
+ *
+ * `liveStateProvider` is an optional callback the hook invokes immediately before each
+ * send. It returns a fresh snapshot of unsaved page state (analysis form values, in-progress
+ * layout edits) so Sol can answer questions about values the user is actively editing. The
+ * callback is stored in a ref so it can change identity each parent render without
+ * invalidating the memoized `send` function.
+ */
+export function useChat(
+  projectId: string,
+  page: ChatPage,
+  liveStateProvider?: () => ChatLiveState | undefined
+): UseChatReturn {
   const { t, i18n } = useTranslation('chat')
   const { getState, setState, reset } = useContext(ChatContext)
   const abortRef = useRef<AbortController | null>(null)
+  const liveStateProviderRef = useRef(liveStateProvider)
+  useEffect(() => {
+    liveStateProviderRef.current = liveStateProvider
+  }, [liveStateProvider])
   const state = getState(projectId)
 
   const updateMessage = useCallback(
@@ -177,16 +221,22 @@ export function useChat(projectId: string, page: ChatPage): UseChatReturn {
       try {
         const headers = await buildAuthHeaders()
 
+        const liveStateSnapshot = liveStateProviderRef.current?.()
+        const requestBody: Record<string, unknown> = {
+          message,
+          history,
+          language: normaliseLanguage(i18n.resolvedLanguage ?? i18n.language),
+          page
+        }
+        if (hasLiveState(liveStateSnapshot)) {
+          requestBody.liveState = liveStateSnapshot
+        }
+
         const response = await fetch(`/api/projects/${projectId}/chat`, {
           method: 'POST',
           headers,
           signal: controller.signal,
-          body: JSON.stringify({
-            message,
-            history,
-            language: normaliseLanguage(i18n.resolvedLanguage ?? i18n.language),
-            page
-          })
+          body: JSON.stringify(requestBody)
         })
 
         if (!response.ok) {

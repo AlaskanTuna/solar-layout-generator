@@ -2,14 +2,17 @@ import { useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChatContext } from './ChatProvider'
 import { ChatPanel } from './ChatPanel'
+import type { ChatLiveState } from '@/hooks/useChat'
 
 type ChatLauncherProps = {
   projectId: string
   page: 'workbench' | 'analysis'
+  /** Optional callback returning the page's unsaved live state for chat grounding. */
+  liveStateProvider?: () => ChatLiveState | undefined
 }
 
 /** Floating chat launcher that mirrors the guided-tour FAB styling and position. */
-export function ChatLauncher({ projectId, page }: ChatLauncherProps) {
+export function ChatLauncher({ projectId, page, liveStateProvider }: ChatLauncherProps) {
   const { t } = useTranslation('chat')
   const { getState, setState } = useContext(ChatContext)
   const { isOpen } = getState(projectId)
@@ -24,7 +27,7 @@ export function ChatLauncher({ projectId, page }: ChatLauncherProps) {
   }, [])
 
   if (isOpen) {
-    return <ChatPanel projectId={projectId} page={page} />
+    return <ChatPanel projectId={projectId} page={page} liveStateProvider={liveStateProvider} />
   }
 
   return (

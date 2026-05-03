@@ -1,6 +1,7 @@
 import * as projectService from '../projectService.js'
 import { renderProjectDigest } from './digest.js'
 import { renderKnowledgeForPrompt } from './knowledge.js'
+import type { ChatLiveState } from '../../validators/chat.js'
 
 type ChatProject = NonNullable<Awaited<ReturnType<typeof projectService.getProject>>>
 type ChatPage = 'workbench' | 'analysis'
@@ -50,8 +51,17 @@ const LANGUAGE_META: Record<
 
 /**
  * Builds the full system instruction for a chat request.
+ *
+ * `liveState` (optional) is forwarded to the digest renderer so unsaved frontend edits
+ * shadow the persisted Project row in the prompt. See `renderProjectDigest` for the
+ * overlay semantics.
  */
-export function buildSystemInstruction(project: ChatProject, page: ChatPage, language: ChatLanguage): string {
+export function buildSystemInstruction(
+  project: ChatProject,
+  page: ChatPage,
+  language: ChatLanguage,
+  liveState?: ChatLiveState
+): string {
   const languageMeta = LANGUAGE_META[language]
 
   // Suggestions are no longer model-generated — the frontend renders chips from
@@ -62,7 +72,7 @@ export function buildSystemInstruction(project: ChatProject, page: ChatPage, lan
     renderPersonaLayer(),
     renderRulesLayer(),
     ['[LAYER 3 — Malaysian-Solar Primer]', renderKnowledgeForPrompt()].join('\n'),
-    ['[LAYER 4 — Project Digest]', renderProjectDigest(project, page)].join('\n')
+    ['[LAYER 4 — Project Digest]', renderProjectDigest(project, page, liveState)].join('\n')
   ].join('\n\n')
 }
 

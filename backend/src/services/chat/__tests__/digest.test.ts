@@ -183,4 +183,35 @@ describe('renderProjectDigest', () => {
 
     expect(digest.length).toBeLessThanOrEqual(6000)
   })
+
+  it('overlays liveState analysisResults on top of a project that has none persisted', () => {
+    // Project starts with no analysis on the DB row (user is editing the AnalysisPage form
+    // but hasn't hit Save yet). Without liveState the digest emits the "not yet computed"
+    // fallback; with liveState the live numbers must take over.
+    const project = makeProject({ analysisResults: null, analysisConfig: null })
+    const baseline = renderProjectDigest(project, 'analysis')
+    expect(baseline).toContain('Analysis not yet computed.')
+
+    const liveAnalysisResults = makeProject().analysisResults
+    const liveAnalysisConfig = makeProject().analysisConfig
+    const overlaid = renderProjectDigest(project, 'analysis', {
+      analysisConfig: liveAnalysisConfig,
+      analysisResults: liveAnalysisResults
+    })
+
+    expect(overlaid).not.toContain('Analysis not yet computed.')
+    expect(overlaid).toContain('Annual savings: RM')
+    expect(overlaid).toContain('Payback:')
+  })
+
+  it('falls back to persisted values for any liveState field left undefined', () => {
+    const project = makeProject({ analysisResults: null })
+    const overlaid = renderProjectDigest(project, 'analysis', {
+      // Only override analysisResults; analysisConfig should still come from the project row.
+      analysisResults: makeProject().analysisResults
+    })
+
+    // analysisConfig from the project (systemCostRm: 28000) should still be cited.
+    expect(overlaid).toContain('System cost: RM 28000.00')
+  })
 })
