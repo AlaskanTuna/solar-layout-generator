@@ -214,16 +214,17 @@ otp_length = 6
 otp_expiry = 3600
 
 # Custom SMTP via Resend. Note: in this config block, `admin_email` is the From address
-# that users see in the email header (Supabase's naming, not ours). Until a custom domain
-# is verified in Resend, use `onboarding@resend.dev` — Resend's pre-verified test sender.
-# Once a domain is added and verified, swap to `noreply@<yourdomain>` and re-run config push.
+# that users see in the email header (Supabase's naming, not ours). solarsim.tech is
+# verified in Resend (DKIM + SPF + MX bounce route), so we send from a no-reply mailbox
+# on the apex domain. To send from a different verified domain in future, swap the value
+# and re-run config push.
 [auth.email.smtp]
 enabled = true
 host = "smtp.resend.com"
 port = 587
 user = "resend"
 pass = "env(RESEND_API_KEY)"
-admin_email = "onboarding@resend.dev"
+admin_email = "noreply@solarsim.tech"
 sender_name = "SolarSim"
 
 [auth.email.template.invite]
