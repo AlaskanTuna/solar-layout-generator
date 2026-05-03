@@ -166,12 +166,12 @@ describe('renderProjectDigest', () => {
     expect(digest).toContain('Analysis not yet computed. Direct the user to the AnalysisPage.')
   })
 
-  it('truncates output to 6000 chars or less', () => {
+  it('truncates output to 8000 chars or less', () => {
     const digest = renderProjectDigest(
       makeProject({
-        name: 'N'.repeat(5000),
+        name: 'N'.repeat(7000),
         analysisConfig: {
-          selectedPanelModelId: 'P'.repeat(5000),
+          selectedPanelModelId: 'P'.repeat(7000),
           systemKwp: 6.56,
           systemCostRm: 28000,
           tariffEscalationRate: 0.03,
@@ -181,7 +181,59 @@ describe('renderProjectDigest', () => {
       'analysis'
     )
 
-    expect(digest.length).toBeLessThanOrEqual(6000)
+    expect(digest.length).toBeLessThanOrEqual(8000)
+  })
+
+  it('renders the 12-month breakdown table on the analysis page', () => {
+    const baseMonth = makeProject().analysisResults!.monthlyBreakdown[0]!
+    const fullYear = Array.from({ length: 12 }, (_, idx) => ({ ...baseMonth, month: idx + 1 }))
+    const digest = renderProjectDigest(
+      makeProject({ analysisResults: { ...makeProject().analysisResults!, monthlyBreakdown: fullYear } }),
+      'analysis'
+    )
+    expect(digest).toContain('### Monthly Breakdown')
+    expect(digest).toContain('| Jan |')
+    expect(digest).toContain('| Dec |')
+    const pipeLines = digest.split('\n').filter((line) => /^\| (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \|/.test(line))
+    expect(pipeLines).toHaveLength(12)
+  })
+
+  it('flags forfeited NEM credits in the breakdown table', () => {
+    const baseMonth = makeProject().analysisResults!.monthlyBreakdown[0]!
+    const decemberWithForfeit = { ...baseMonth, month: 12, creditForfeited: 45.5 }
+    const digest = renderProjectDigest(
+      makeProject({ analysisResults: { ...makeProject().analysisResults!, monthlyBreakdown: [decemberWithForfeit] } }),
+      'analysis'
+    )
+    expect(digest).toContain('forfeit 45.50 kWh')
+  })
+
+  it('cites the user-stated monthly bill in the analysis block', () => {
+    const digest = renderProjectDigest(makeProject(), 'analysis', {
+      analysisConfig: { monthlyConsumptionKwh: 850, consumptionProfile: 'seasonal', systemKwp: 4.4 }
+    })
+    expect(digest).toContain("User's stated bill: 850 kWh/month (seasonal profile)")
+  })
+
+  it('includes lifecycle-only assumption rows when analysisMode is lifecycle', () => {
+    const lifecycleResults = {
+      ...makeProject().analysisResults!,
+      analysisMode: 'lifecycle' as const
+    }
+    const digest = renderProjectDigest(
+      makeProject({
+        analysisResults: lifecycleResults,
+        analysisConfig: {
+          ...makeProject().analysisConfig!,
+          analysisMode: 'lifecycle',
+          annualMaintenanceRm: 500,
+          inverterReplacements: [{ year: 12, costRm: 4500 }]
+        }
+      }),
+      'analysis'
+    )
+    expect(digest).toContain('Annual maintenance: RM 500.00')
+    expect(digest).toContain('Inverter replacements: year 12 (RM 4500.00)')
   })
 
   it('overlays liveState analysisResults on top of a project that has none persisted', () => {

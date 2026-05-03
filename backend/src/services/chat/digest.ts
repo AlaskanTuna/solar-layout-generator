@@ -14,7 +14,12 @@ import {
 import * as projectService from '../projectService.js'
 import type { ChatLiveState } from '../../validators/chat.js'
 
-const MAX_DIGEST_CHARS = 6000
+// Raised from 6000 when the digest gained the monthly breakdown table, lifecycle
+// assumption rows, and additional analysisConfig fields (Phase 11 §9). Gemini Flash
+// handles 8000-char prompts comfortably with no measurable first-token latency hit.
+const MAX_DIGEST_CHARS = 8000
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 const solarPanelSchema = z
   .object({
@@ -70,6 +75,7 @@ function renderProjectBlock(
     `- System size: ${formatMaybeNumber(analysisConfig?.systemKwp)} kWp`,
     `- Active panels: ${countActivePanels(editedLayout)} of ${maxPanels} max`,
     `- Panel model: ${analysisConfig?.selectedPanelModelId ?? '—'}`,
+    `- Connection: ${analysisConfig?.connectionPhase ?? '—'}-phase, ${analysisConfig?.roofType ?? '—'} roof`,
     `- Location: ${locationText}`,
     `- Imagery quality: ${project.location?.imageryQuality ?? 'unknown'}`
   ].join('\n')
@@ -98,8 +104,13 @@ function renderAnalysisBlock(
     return '## Financial Analysis\n- Analysis not yet computed. Direct the user to the AnalysisPage.'
   }
 
-  return [
+  const isLifecycle = analysisResults.analysisMode === 'lifecycle'
+  const billInput = analysisConfig?.monthlyConsumptionKwh
+  const profile = analysisConfig?.consumptionProfile
+
+  const headerLines = [
     '## Financial Analysis',
+    `- User's stated bill: ${typeof billInput === 'number' ? `${billInput.toFixed(0)} kWh/month` : '—'} (${profile ?? '—'} profile)`,
     `- Annual generation: ${formatNumber(analysisResults.annualTotals.totalGenerationKwh)} kWh`,
     `- Annual baseline bill: RM ${formatRm(analysisResults.annualTotals.totalBaselineRm)}`,
     `- Annual NEM bill: RM ${formatRm(analysisResults.annualTotals.totalNemRm)}`,
@@ -109,11 +120,67 @@ function renderAnalysisBlock(
     `- 10-yr net benefit: RM ${formatRm(analysisResults.tenYearNetBenefitRm)} (ROI ${analysisResults.tenYearRoiPercent ?? 'n/a'}%)`,
     `- 25-yr net benefit: RM ${formatRm(analysisResults.twentyFiveYearNetBenefitRm)}`,
     `- Annual NEM credits forfeited: ${formatNumber(analysisResults.annualTotals.totalCreditsForfeitedKwh)} kWh`,
-    `- Carbon offset: ${formatNumber(analysisResults.carbonOffsetKg)} kg/yr`,
+    `- Carbon offset: ${formatNumber(analysisResults.carbonOffsetKg)} kg/yr`
+  ]
+
+  const assumptionLines = [
+    '',
+    '### Assumptions',
     `- System cost: RM ${formatRm(analysisConfig?.systemCostRm)}`,
-    `- Tariff escalation assumption: ${formatRate(analysisConfig?.tariffEscalationRate)}`,
-    `- Performance ratio: ${formatMaybeNumber(analysisConfig?.performanceRatio)}`
-  ].join('\n')
+    `- Tariff escalation: ${formatRate(analysisConfig?.tariffEscalationRate)}`,
+    `- Panel degradation: ${formatRate(analysisConfig?.degradationRate)}/year`,
+    `- Performance ratio: ${formatMaybeNumber(analysisConfig?.performanceRatio)}`,
+    `- DC/AC ratio: ${formatMaybeNumber(analysisConfig?.dcAcRatio)}`,
+    `- AFA rate: ${formatMaybeNumber(analysisConfig?.afaRateSenPerKwh)} sen/kWh`
+  ]
+
+  if (isLifecycle) {
+    assumptionLines.push(
+      `- Annual maintenance: RM ${formatRm(analysisConfig?.annualMaintenanceRm)}`,
+      `- Inverter replacements: ${describeInverterReplacements(analysisConfig)}`
+    )
+  }
+
+  return [...headerLines, ...assumptionLines, '', renderMonthlyBreakdownTable(analysisResults)].join('\n')
+}
+
+/**
+ * Renders a compact pipe-formatted 12-month breakdown so Sol can answer
+ * "what's my June bill?" / "which month do I forfeit credits?" /
+ * "show me the seasonal generation pattern" without hand-waving.
+ * Always 12 rows, ~600 chars total.
+ */
+function renderMonthlyBreakdownTable(analysisResults: AnalysisResultsDto): string {
+  const rows = analysisResults.monthlyBreakdown
+    .slice(0, 12)
+    .map((entry) => {
+      const label = MONTH_LABELS[entry.month - 1] ?? `M${entry.month}`
+      const inKwh = formatNumber(entry.consumptionKwh).padStart(7)
+      const genKwh = formatNumber(entry.generationKwh).padStart(7)
+      const bill = formatRm(entry.nemBill.total).padStart(8)
+      const saved = formatRm(entry.savingsRm).padStart(7)
+      const credit = entry.creditForfeited > 0 ? ` ⚠ forfeit ${formatNumber(entry.creditForfeited)} kWh` : ''
+      return `| ${label} | ${inKwh} | ${genKwh} | ${bill} | ${saved} |${credit}`
+    })
+    .join('\n')
+
+  return ['### Monthly Breakdown (kWh in / kWh gen / NEM bill RM / savings RM)', rows].join('\n')
+}
+
+/**
+ * Compresses the inverter-replacement schedule into a single human line.
+ */
+function describeInverterReplacements(analysisConfig: StoredAnalysisConfigDto | null): string {
+  const list = analysisConfig?.inverterReplacements
+  if (Array.isArray(list) && list.length > 0) {
+    return list.map((entry) => `year ${entry.year} (RM ${formatRm(entry.costRm)})`).join(', ')
+  }
+  const legacyYear = analysisConfig?.inverterReplacementYear
+  const legacyCost = analysisConfig?.inverterReplacementCostRm
+  if (typeof legacyYear === 'number' && typeof legacyCost === 'number') {
+    return `year ${legacyYear} (RM ${formatRm(legacyCost)})`
+  }
+  return 'none scheduled'
 }
 
 function parseAnalysisConfig(value: unknown): StoredAnalysisConfigDto | null {
