@@ -79,6 +79,7 @@
     ]
   },
   "streaming": {
+    "thinking": "Sol is thinking",
     "cursor": "Sol is typing..."
   }
 }

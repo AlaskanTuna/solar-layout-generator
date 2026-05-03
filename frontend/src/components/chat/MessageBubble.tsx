@@ -26,7 +26,23 @@ export function MessageBubble({ message, onSuggestionPick }: MessageBubbleProps)
                 : 'bg-muted text-foreground'
           )}
         >
-          {isUser || message.error ? (
+          {message.streaming && message.content === '' && !isUser && !message.error ? (
+            // Pre-first-token state: show explicit "thinking" label so the empty
+            // bubble doesn't read as a hung request. Swaps to the markdown body +
+            // typewriter cursor below as soon as the first token arrives.
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-1.5 py-0.5 text-xs italic text-foreground/60"
+            >
+              <span>{t('streaming.thinking')}</span>
+              <span className="flex gap-0.5">
+                <span className="h-1 w-1 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.3s]" />
+                <span className="h-1 w-1 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.15s]" />
+                <span className="h-1 w-1 animate-bounce rounded-full bg-foreground/40" />
+              </span>
+            </div>
+          ) : isUser || message.error ? (
             // User input is plain text; error bodies are localised plain strings.
             // Both are rendered without markdown to avoid surprises.
             message.content
@@ -63,7 +79,7 @@ export function MessageBubble({ message, onSuggestionPick }: MessageBubbleProps)
               {message.content}
             </ReactMarkdown>
           )}
-          {message.streaming && (
+          {message.streaming && message.content !== '' && (
             <span
               aria-label={t('streaming.cursor')}
               className="ml-1 inline-block h-3 w-2 animate-pulse bg-foreground/40 align-middle"
