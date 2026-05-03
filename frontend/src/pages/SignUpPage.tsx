@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { LanguageToggle } from '@/components/layout/LanguageToggle'
@@ -103,12 +103,14 @@ export function SignUpPage() {
                   <Mail className="h-8 w-8 text-primary" />
                 </div>
                 <h1 className="font-heading text-2xl font-bold tracking-tight">{t('signUp.success.title')}</h1>
-                <p
-                  className="mt-2 text-sm text-muted-foreground"
-                  dangerouslySetInnerHTML={{
-                    __html: t('signUp.success.subtitle', { email })
-                  }}
-                />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  <Trans
+                    i18nKey="signUp.success.subtitle"
+                    ns="auth"
+                    values={{ email }}
+                    components={{ strong: <strong /> }}
+                  />
+                </p>
                 <Link to="/sign-in" className="mt-6 block">
                   <Button variant="outline" className="w-full">
                     {t('signUp.success.backToSignIn')}
