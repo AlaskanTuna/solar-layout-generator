@@ -2,12 +2,7 @@ import { useCallback, useContext, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CHAT_SEND_COOLDOWN_MS, ChatContext, type ChatMessage } from '@/components/chat/ChatProvider'
 import { getSupabase } from '@/lib/supabase'
-import type {
-  AnalysisResultsDto,
-  LayoutPreferences,
-  PanelEdit,
-  StoredAnalysisConfigDto
-} from '@shared/types'
+import type { AnalysisResultsDto, LayoutPreferences, PanelEdit, StoredAnalysisConfigDto } from '@shared/types'
 
 /** How many follow-up chips to render per model bubble, sampled from the page-specific pool. */
 const FOLLOWUP_CHIP_COUNT = 3
@@ -216,7 +211,7 @@ export function useChat(
 
       let streamFinished = false
       const followupPoolKey = page === 'workbench' ? 'suggestions.followupsWorkbench' : 'suggestions.followupsAnalysis'
-      const followupPool = (t(followupPoolKey, { returnObjects: true, defaultValue: [] }) as unknown) as string[]
+      const followupPool = t(followupPoolKey, { returnObjects: true, defaultValue: [] }) as unknown as string[]
 
       try {
         const headers = await buildAuthHeaders()

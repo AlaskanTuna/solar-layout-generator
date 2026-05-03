@@ -139,10 +139,7 @@ export async function getLocationStatusForUser(userId: string, locationId: strin
   return prisma.location.findFirst({
     where: {
       id: locationId,
-      OR: [
-        { projects: { some: { userId } } },
-        { projects: { none: {} }, createdAt: { gte: orphanWindowStart } }
-      ]
+      OR: [{ projects: { some: { userId } } }, { projects: { none: {} }, createdAt: { gte: orphanWindowStart } }]
     },
     select: { status: true }
   })

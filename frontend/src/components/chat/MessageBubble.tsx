@@ -46,7 +46,9 @@ export function MessageBubble({ message, onSuggestionPick }: MessageBubbleProps)
                   <code className="rounded bg-foreground/10 px-1 py-0.5 font-mono text-[0.85em]">{children}</code>
                 ),
                 pre: ({ children }) => (
-                  <pre className="my-2 overflow-x-auto rounded-md bg-foreground/10 p-2 font-mono text-xs">{children}</pre>
+                  <pre className="my-2 overflow-x-auto rounded-md bg-foreground/10 p-2 font-mono text-xs">
+                    {children}
+                  </pre>
                 ),
                 a: ({ children, href }) => (
                   <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline">

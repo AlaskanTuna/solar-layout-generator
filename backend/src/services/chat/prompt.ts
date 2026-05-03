@@ -105,4 +105,3 @@ function renderRulesLayer(): string {
     `5. CITE OWN NUMBERS — When answering financial questions, cite the exact numbers from the project digest verbatim (for example: "your project's analysis estimates RM 142/month in savings").`
   ].join('\n')
 }
-
