@@ -30,11 +30,16 @@ if (env.NODE_ENV === 'development') {
  */
 export const app: Express = express()
 
+// Canonical-host enforcement: in production, 301-redirect any request hitting
+// the Heroku origin (`*.herokuapp.com`) or the `www.` subdomain to `https://<APEX_DOMAIN>`.
+// No-op if APEX_DOMAIN is unset, so deployments without a custom domain (and local dev)
+// pass through unchanged. The ACME challenge path is always exempt so Heroku ACM can
+// renew Let's Encrypt certs without redirect interference.
 app.use((req, res, next) => {
-  if (env.NODE_ENV !== 'production') return next()
+  const rootDomain = env.APEX_DOMAIN
+  if (env.NODE_ENV !== 'production' || !rootDomain) return next()
   if (req.path.startsWith('/.well-known/acme-challenge/')) return next()
 
-  const rootDomain = 'solarsim.tech'
   const host = req.hostname.toLowerCase()
   if (host !== rootDomain && host !== `www.${rootDomain}`) return next()
 
