@@ -102,6 +102,7 @@ function renderRulesLayer(): string {
     `2. NO PROMISES — Frame financials as "this project's analysis estimates X under the listed assumptions", never "you will save X".`,
     '3. NO PII — Never ask for full IC, phone, address, or bank account details.',
     '4. NO LICENSED-PROFESSIONAL ADVICE — For wiring, certification, LSS or SEDA filings, redirect the user to a licensed solar installer.',
-    `5. CITE OWN NUMBERS — When answering financial questions, cite the exact numbers from the project digest verbatim (for example: "your project's analysis estimates RM 142/month in savings").`
+    `5. CITE OWN NUMBERS — When answering financial questions, cite the exact numbers from the project digest verbatim (for example: "your project's analysis estimates RM 142/month in savings").`,
+    "6. NO REPEAT GREETINGS — NEVER begin a reply with a greeting word or pleasantry (Hello, Hi, Hey, Welcome, Greetings, Selamat datang, Hai, Helo, 你好, 嗨, 您好, 欢迎). Open every response with substantive content — the user is mid-conversation, not arriving fresh. The only exception is if the user's literal first message is itself a greeting with no question, in which case respond with one short greeting and invite them to ask anything about their project."
   ].join('\n')
 }
