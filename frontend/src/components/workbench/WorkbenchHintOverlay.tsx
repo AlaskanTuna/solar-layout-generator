@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Hand, Keyboard, Move, MousePointerClick, X, ZoomIn } from 'lucide-react'
 
-const IDLE_MS = 10000
+const IDLE_MS = 5000
 const PERMANENT_DISMISS_KEY = 'solarsim.workbench.hintDismissed'
 
 function readPermanentDismiss(): boolean {
@@ -24,19 +24,28 @@ function writePermanentDismiss(): void {
 }
 
 type Props = {
-  /** Container element whose activity drives the idle timer. */
+  /** Container element whose activity drives the post-dismiss idle timer. */
   targetRef: RefObject<HTMLDivElement | null>
-  /** Only start the timer once the canvas is interactive. */
+  /** Only enable the overlay once the canvas is interactive. */
   ready: boolean
-  /** When true, force-hide the overlay and pause the timer (e.g. while another modal owns the screen). */
+  /** When true, force-hide the overlay and pause timers (e.g. while the tour or chat owns the screen). */
   suppressed?: boolean
 }
 
-/** Centered idle-hint overlay that teaches first-time users how to interact with the canvas. */
+/**
+ * Centered hint overlay that teaches first-time users how to interact with the canvas.
+ *
+ * Visibility:
+ *   - Initial mount + ready + not suppressed + not dismissed → show immediately.
+ *   - While suppressed (tour, chat) → hide and pause timers.
+ *   - When suppression lifts (e.g. tour closes) → re-show, unless the user has dismissed.
+ *   - After explicit dismiss → fall back to the original 5s idle-timer reshow on the canvas.
+ */
 export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: Props) {
   const { t } = useTranslation('workbench')
   const [visible, setVisible] = useState(false)
   const [permanentlyDismissed, setPermanentlyDismissed] = useState<boolean>(() => readPermanentDismiss())
+  const [dismissedThisSession, setDismissedThisSession] = useState(false)
   const [dontShowAgain, setDontShowAgain] = useState(false)
   const visibleRef = useRef(false)
   const timerRef = useRef<number | null>(null)
@@ -45,12 +54,21 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
     visibleRef.current = visible
   }, [visible])
 
+  // First-time flow: surface the overlay as soon as the canvas is interactive and no
+  // higher-priority surface (tour, chat) is suppressing us. Re-arms whenever the
+  // suppressing surface closes, so finishing the tour reveals the hint.
   useEffect(() => {
-    if (suppressed && visible) setVisible(false)
-  }, [suppressed, visible])
+    if (!ready || suppressed || permanentlyDismissed || dismissedThisSession) {
+      if (visibleRef.current) setVisible(false)
+      return
+    }
+    setVisible(true)
+  }, [ready, suppressed, permanentlyDismissed, dismissedThisSession])
 
+  // Post-dismiss flow: reuse the original idle-timer behavior so the hint reappears
+  // for users who dismissed it once and then sat idle on the canvas.
   useEffect(() => {
-    if (!ready || suppressed || permanentlyDismissed) return
+    if (!ready || suppressed || permanentlyDismissed || !dismissedThisSession) return
     const target = targetRef.current
     if (!target) return
 
@@ -66,14 +84,10 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
       timerRef.current = window.setTimeout(() => setVisible(true), IDLE_MS)
     }
 
-    // Pointer movement only resets the idle countdown; it never hides a visible overlay,
-    // so a stray cursor twitch can't close it before the user reads it.
     const onMove = () => {
       scheduleShow()
     }
 
-    // Explicit interaction (click, scroll, key) hides if visible, then restarts the countdown
-    // so the overlay reappears after another idle window.
     const onAction = () => {
       if (visibleRef.current) setVisible(false)
       scheduleShow()
@@ -93,13 +107,14 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
       window.removeEventListener('keydown', onAction)
       clearTimer()
     }
-  }, [ready, suppressed, permanentlyDismissed, targetRef])
+  }, [ready, suppressed, permanentlyDismissed, dismissedThisSession, targetRef])
 
   const dismiss = () => {
     if (dontShowAgain) {
       writePermanentDismiss()
       setPermanentlyDismissed(true)
     }
+    setDismissedThisSession(true)
     setVisible(false)
   }
 
