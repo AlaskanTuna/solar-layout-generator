@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import type { User, Session, AuthError } from '@supabase/supabase-js'
 import { useQueryClient } from '@tanstack/react-query'
 import { getSupabase } from '@/lib/supabase'
+import { notify } from '@/components/ui/toastConfig'
 
 type AuthContextValue = {
   user: User | null
@@ -25,6 +26,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Surface OAuth callback errors. Supabase implicit-flow failures (e.g. identity already
+  // exists, access denied, server_error) come back in the URL hash; some flows put them in
+  // the query string instead. Without this, the user lands silently on /dashboard or /sign-in
+  // with no idea why their sign-in failed. Strip the params after toasting so a page refresh
+  // doesn't re-fire.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
+    const search = window.location.search.startsWith('?') ? window.location.search.slice(1) : ''
+    const params = new URLSearchParams(hash || search)
+    const errorCode = params.get('error')
+    const errorDescription = params.get('error_description')
+    if (!errorCode && !errorDescription) return
+
+    notify.error(errorDescription ?? errorCode ?? 'Authentication failed')
+
+    const url = new URL(window.location.href)
+    url.hash = ''
+    url.searchParams.delete('error')
+    url.searchParams.delete('error_code')
+    url.searchParams.delete('error_description')
+    window.history.replaceState({}, '', url.toString())
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
