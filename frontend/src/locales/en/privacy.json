@@ -1,0 +1,95 @@
+{
+  "header": {
+    "title": "Data Privacy & Security",
+    "subtitle": "How SolarSim collects, uses, and protects your personal information under Malaysia's Personal Data Protection Act 2010 (PDPA).",
+    "lastUpdated": "Last updated: 5 May 2026"
+  },
+  "backToHome": "Back to home",
+  "tableOfContents": "On this page",
+  "sections": {
+    "intro": {
+      "title": "Introduction",
+      "body": [
+        "The SolarSim project team controls the data used by this app as a Final Year Project for Malaysian homeowners. This policy covers the website, account features, project pages, the workbench, analysis, and the chat assistant. We are not a separate legal entity, so references to \"we\" mean the SolarSim project team.",
+        "We only process the data needed to create accounts, save projects, run solar simulations, and respond to support or complaint requests. We do not ask for government ID numbers or payment card details, and we do not intend to collect them through the app."
+      ]
+    },
+    "dataCollected": {
+      "title": "Information We Collect",
+      "body": [
+        "We collect your account email and a password hash through Supabase Auth when you sign up with email and password. If you sign in with Google, Supabase also gives us the display name and email address attached to that account.",
+        "We also collect project data you create or edit, including the project name, building coordinates, selected location status, edited solar panel layout, panel rotation and position, and the simulated billing inputs and saved analysis settings tied to that project. If you use the chat assistant, we also process the message you send and the project context needed to answer it."
+      ]
+    },
+    "purpose": {
+      "title": "How We Use Your Information",
+      "body": [
+        "We use your data to create and sign in to your account, save projects, resolve the chosen building, generate the solar layout, sample flux, and run the billing analysis. We also use it to export reports, recover saved work, and keep the app working across devices and sessions.",
+        "We use Google Solar API and Google Maps data to find the building and generate rooftop data, and we use Vertex AI/Gemini only when you use the chat assistant. We may also use logs and system traces to diagnose errors, protect the service, and prevent misuse, but not for advertising or profiling."
+      ]
+    },
+    "lawfulBasis": {
+      "title": "Lawful Basis for Processing",
+      "body": [
+        "Under the PDPA, we process your data with your consent and because the data is necessary to provide the features you ask us to run. If you do not want us to process a data item, the related feature may not work, such as saving a project without an account or running analysis without project inputs.",
+        "We also process limited data to administer the account, secure the service, and keep records needed for troubleshooting and audit. Where a third-party service acts for us, that service only receives the data needed for its role and must handle it on our behalf."
+      ]
+    },
+    "retention": {
+      "title": "How Long We Keep Your Data",
+      "body": [
+        "Project data stays in the system until you delete the project or delete your account. Account records from Supabase Auth remain as long as the account exists, because they are needed to authenticate you and protect the saved work linked to that account.",
+        "Shared location cache data may remain in the system to avoid repeated Solar API calls for the same coordinates, even after a project is removed. We keep operational logs and backup copies only for as long as needed for security, recovery, and service administration, and we do not intend to keep passwords, tokens, or other sensitive values in logs."
+      ]
+    },
+    "sharing": {
+      "title": "Who We Share Information With",
+      "body": [
+        "We share data with processors that operate the app on our behalf. These include Supabase for Auth, PostgreSQL, and Storage; Heroku for backend hosting; Google for Solar API, Google Maps JavaScript API, and Vertex AI/Gemini; and Vercel for the browser-facing export or hosting service used by the app.",
+        "Supabase stores account records, project records, and uploaded or derived files in Storage, and may issue signed URLs so files can be fetched without making buckets public. Google receives the location and project context needed for mapping, solar analysis, and chat responses, and the relevant request data may be sent across borders as part of those services."
+      ]
+    },
+    "rights": {
+      "title": "Your Rights Under PDPA",
+      "body": [
+        "Under the PDPA, you may ask to access the personal data we hold about you, and you may ask us to correct inaccurate or incomplete data. You may also withdraw consent for future processing, although doing so may stop the related feature from working.",
+        "If you believe we have mishandled your data, you may raise a complaint with the Department of Personal Data Protection, Jabatan Perlindungan Data Peribadi. To exercise any of these rights, contact us using the address below and we may ask for enough information to verify that the request is yours."
+      ]
+    },
+    "cookies": {
+      "title": "Cookies & Local Storage",
+      "body": [
+        "The app uses Supabase Auth session data in browser storage so you stay signed in, and it stores UI preferences in localStorage. Those preferences include locale, theme, project draft data, tour-dismissed flags, coverage-notice-dismissed, and workbench-hint-dismissed.",
+        "We do not use advertising cookies. Browser storage is used only to keep the app usable and to remember choices you make, and you can clear it through your browser settings if you want to sign out or reset saved preferences."
+      ]
+    },
+    "security": {
+      "title": "How We Protect Your Data",
+      "body": [
+        "We protect traffic with TLS in transit. Passwords are handled by Supabase Auth as hashes, not as plain text, and our database access is restricted with row-level security so users can only reach their own records.",
+        "Storage files are delivered with signed URLs instead of public buckets, and we avoid logging passwords, tokens, or full sensitive payloads. No system is perfect, but we keep the implementation limited to the minimum data needed and use access controls at every layer we control."
+      ]
+    },
+    "transfer": {
+      "title": "Cross-Border Data Transfer",
+      "body": [
+        "Most of the processors we use operate outside Malaysia, so your data may be transferred to and stored in other countries when you use the app. This includes the services run by Supabase, Google, Heroku, and Vercel.",
+        "Under PDPA section 129, we take reasonable steps to make sure those recipients provide a level of protection that is reasonably comparable to Malaysian requirements for the data they process for us. We also limit the data sent to those services to what is needed for the feature you are using."
+      ]
+    },
+    "updates": {
+      "title": "Updates to This Policy",
+      "body": [
+        "We may revise this policy when the app changes, when our processors change, or when the project team needs to clarify how data is handled. When that happens, we will update the lastUpdated date at the top of this page.",
+        "The updated policy applies from the date shown on the page. If the changes are material, we will surface the new version in the app so you can review it before continuing to use the service."
+      ]
+    },
+    "contact": {
+      "title": "Contact & Complaints",
+      "body": [
+        "For access, correction, withdrawal of consent, or complaint requests, contact the SolarSim project team at solarsim.project@example.com. This is a project placeholder and will be replaced by the FYP author before submission.",
+        "If you are writing about a privacy issue, include enough detail for us to identify the account or project involved. If your concern is about a data practice that falls under PDPA complaints, you may also contact the Department of Personal Data Protection directly."
+      ]
+    }
+  }
+}

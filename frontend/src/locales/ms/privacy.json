@@ -1,0 +1,95 @@
+{
+  "header": {
+    "title": "Privasi & Keselamatan Data",
+    "subtitle": "Bagaimana SolarSim mengumpul, menggunakan dan melindungi maklumat peribadi anda di bawah Akta Perlindungan Data Peribadi 2010 (PDPA) Malaysia.",
+    "lastUpdated": "Kemas kini terakhir: 5 Mei 2026"
+  },
+  "backToHome": "Kembali ke laman utama",
+  "tableOfContents": "Pada halaman ini",
+  "sections": {
+    "intro": {
+      "title": "Pengenalan",
+      "body": [
+        "Pasukan projek SolarSim mengawal data untuk aplikasi ini sebagai Projek Tahun Akhir untuk pemilik rumah di Malaysia. Polisi ini meliputi laman web, ciri akaun, halaman projek, meja kerja, analisis, dan pembantu sembang. Kami bukan entiti undang-undang yang berasingan, jadi rujukan kepada \"kami\" bermaksud pasukan projek SolarSim.",
+        "Kami hanya memproses data yang diperlukan untuk mencipta akaun, menyimpan projek, menjalankan simulasi solar, dan menjawab permintaan sokongan atau aduan. Kami tidak meminta nombor kad pengenalan kerajaan atau butiran kad pembayaran, dan kami tidak berniat mengumpulkannya melalui aplikasi ini."
+      ]
+    },
+    "dataCollected": {
+      "title": "Maklumat Yang Kami Kumpul",
+      "body": [
+        "Kami mengumpul e-mel akaun anda dan hash kata laluan melalui Supabase Auth apabila anda mendaftar dengan e-mel dan kata laluan. Jika anda log masuk dengan Google, Supabase juga memberi kami nama paparan dan alamat e-mel yang dikaitkan dengan akaun itu.",
+        "Kami juga mengumpul data projek yang anda cipta atau ubah, termasuk nama projek, koordinat bangunan, status lokasi yang dipilih, susun atur panel solar yang telah diedit, putaran dan kedudukan panel, serta input bil yang disimulasikan dan tetapan analisis yang disimpan untuk projek itu. Jika anda menggunakan pembantu sembang, kami turut memproses mesej yang anda hantar dan konteks projek yang diperlukan untuk menjawabnya."
+      ]
+    },
+    "purpose": {
+      "title": "Bagaimana Kami Menggunakan Maklumat Anda",
+      "body": [
+        "Kami menggunakan data anda untuk mencipta dan melog masuk ke akaun anda, menyimpan projek, menyelesaikan bangunan yang dipilih, menjana susun atur solar, menyampel fluks, dan menjalankan analisis bil. Kami juga menggunakannya untuk mengeksport laporan, memulihkan kerja yang disimpan, dan memastikan aplikasi berfungsi merentas peranti dan sesi.",
+        "Kami menggunakan data Google Solar API dan Google Maps untuk mencari bangunan dan menjana data bumbung, dan kami menggunakan Vertex AI/Gemini hanya apabila anda menggunakan pembantu sembang. Kami juga mungkin menggunakan log dan jejak sistem untuk mengesan ralat, melindungi perkhidmatan, dan mencegah penyalahgunaan, tetapi bukan untuk iklan atau profil pengguna."
+      ]
+    },
+    "lawfulBasis": {
+      "title": "Asas Sah Untuk Pemprosesan",
+      "body": [
+        "Di bawah PDPA, kami memproses data anda dengan persetujuan anda dan kerana data itu diperlukan untuk menyediakan ciri yang anda minta. Jika anda tidak mahu kami memproses sesuatu data, ciri berkaitan mungkin tidak berfungsi, seperti menyimpan projek tanpa akaun atau menjalankan analisis tanpa input projek.",
+        "Kami juga memproses data terhad untuk mentadbir akaun, memastikan keselamatan perkhidmatan, dan menyimpan rekod yang diperlukan untuk penyelesaian masalah dan audit. Apabila perkhidmatan pihak ketiga bertindak bagi pihak kami, perkhidmatan itu hanya menerima data yang diperlukan untuk peranannya dan mesti mengendalikannya bagi pihak kami."
+      ]
+    },
+    "retention": {
+      "title": "Berapa Lama Kami Menyimpan Data Anda",
+      "body": [
+        "Data projek kekal dalam sistem sehingga anda memadam projek atau memadam akaun anda. Rekod akaun daripada Supabase Auth kekal selagi akaun itu wujud, kerana ia diperlukan untuk mengesahkan anda dan melindungi kerja tersimpan yang dikaitkan dengan akaun itu.",
+        "Data cache lokasi yang dikongsi mungkin kekal dalam sistem untuk mengelakkan panggilan Solar API berulang bagi koordinat yang sama, walaupun selepas projek dipadam. Kami menyimpan log operasi dan salinan sandaran hanya selama yang diperlukan untuk keselamatan, pemulihan, dan pentadbiran perkhidmatan, dan kami tidak berniat menyimpan kata laluan, token, atau nilai sensitif lain dalam log."
+      ]
+    },
+    "sharing": {
+      "title": "Dengan Siapa Kami Berkongsi Maklumat",
+      "body": [
+        "Kami berkongsi data dengan pemproses yang menjalankan aplikasi bagi pihak kami. Ini termasuk Supabase untuk Auth, PostgreSQL, dan Storage; Heroku untuk hosting backend; Google untuk Solar API, Google Maps JavaScript API, dan Vertex AI/Gemini; serta Vercel untuk perkhidmatan eksport atau hosting yang diakses melalui pelayar oleh aplikasi ini.",
+        "Supabase menyimpan rekod akaun, rekod projek, dan fail yang dimuat naik atau diterbitkan semula dalam Storage, dan boleh mengeluarkan URL bertandatangan supaya fail boleh diambil tanpa menjadikan bucket awam. Google menerima lokasi dan konteks projek yang diperlukan untuk pemetaan, analisis solar, dan jawapan sembang, dan data permintaan yang berkaitan mungkin dipindahkan merentas sempadan sebagai sebahagian daripada perkhidmatan tersebut."
+      ]
+    },
+    "rights": {
+      "title": "Hak Anda Di Bawah PDPA",
+      "body": [
+        "Di bawah PDPA, anda boleh meminta untuk mengakses data peribadi yang kami simpan tentang anda, dan anda boleh meminta kami membetulkan data yang tidak tepat atau tidak lengkap. Anda juga boleh menarik balik persetujuan untuk pemprosesan masa depan, walaupun tindakan itu mungkin menyebabkan ciri berkaitan berhenti berfungsi.",
+        "Jika anda percaya kami telah mengendalikan data anda dengan salah, anda boleh membuat aduan kepada Jabatan Perlindungan Data Peribadi. Untuk menggunakan mana-mana hak ini, hubungi kami melalui alamat di bawah dan kami mungkin meminta maklumat yang mencukupi untuk mengesahkan bahawa permintaan itu datang daripada anda."
+      ]
+    },
+    "cookies": {
+      "title": "Kuki & Storan Setempat",
+      "body": [
+        "Aplikasi ini menggunakan data sesi Supabase Auth dalam storan pelayar supaya anda kekal log masuk, dan ia menyimpan pilihan antara muka dalam localStorage. Pilihan itu termasuk bahasa, tema, data draf projek, bendera tour-dismissed, coverage-notice-dismissed, dan workbench-hint-dismissed.",
+        "Kami tidak menggunakan kuki pengiklanan. Storan pelayar digunakan hanya untuk memastikan aplikasi mudah digunakan dan untuk mengingati pilihan yang anda buat, dan anda boleh mengosongkannya melalui tetapan pelayar jika anda mahu melog keluar atau menetapkan semula pilihan yang disimpan."
+      ]
+    },
+    "security": {
+      "title": "Bagaimana Kami Melindungi Data Anda",
+      "body": [
+        "Kami melindungi trafik dengan TLS semasa penghantaran. Kata laluan dikendalikan oleh Supabase Auth sebagai hash, bukan teks biasa, dan akses pangkalan data kami dihadkan dengan row-level security supaya pengguna hanya boleh mencapai rekod sendiri.",
+        "Fail Storage dihantar melalui URL bertandatangan dan bukan bucket awam, dan kami mengelakkan log kata laluan, token, atau muatan sensitif penuh. Tiada sistem yang sempurna, tetapi kami mengehadkan pelaksanaan kepada data minimum yang diperlukan dan menggunakan kawalan akses pada setiap lapisan yang kami kendalikan."
+      ]
+    },
+    "transfer": {
+      "title": "Pemindahan Data Rentas Sempadan",
+      "body": [
+        "Kebanyakan pemproses yang kami gunakan beroperasi di luar Malaysia, jadi data anda mungkin dipindahkan ke dan disimpan di negara lain apabila anda menggunakan aplikasi ini. Ini termasuk perkhidmatan yang dijalankan oleh Supabase, Google, Heroku, dan Vercel.",
+        "Di bawah seksyen 129 PDPA, kami mengambil langkah yang munasabah untuk memastikan penerima tersebut memberikan tahap perlindungan yang secara munasabah setara dengan keperluan Malaysia bagi data yang mereka proses untuk kami. Kami juga mengehadkan data yang dihantar ke perkhidmatan tersebut kepada apa yang diperlukan untuk ciri yang anda gunakan."
+      ]
+    },
+    "updates": {
+      "title": "Kemas Kini Polisi Ini",
+      "body": [
+        "Kami mungkin menyemak semula polisi ini apabila aplikasi berubah, apabila pemproses kami berubah, atau apabila pasukan projek perlu memperjelas cara data dikendalikan. Apabila itu berlaku, kami akan mengemas kini tarikh lastUpdated di bahagian atas halaman ini.",
+        "Polisi yang dikemas kini akan terpakai mulai tarikh yang dipaparkan pada halaman. Jika perubahan itu penting, kami akan memaparkan versi baharu dalam aplikasi supaya anda boleh menyemaknya sebelum terus menggunakan perkhidmatan ini."
+      ]
+    },
+    "contact": {
+      "title": "Hubungan & Aduan",
+      "body": [
+        "Untuk permintaan akses, pembetulan, penarikan balik persetujuan, atau aduan, hubungi pasukan projek SolarSim di solarsim.project@example.com. Ini ialah tempat letak projek dan akan diganti oleh penulis FYP sebelum penghantaran.",
+        "Jika anda menulis mengenai isu privasi, sila sertakan butiran yang mencukupi supaya kami boleh mengenal pasti akaun atau projek yang terlibat. Jika kebimbangan anda berkaitan amalan data yang tertakluk kepada aduan PDPA, anda juga boleh menghubungi Jabatan Perlindungan Data Peribadi secara terus."
+      ]
+    }
+  }
+}

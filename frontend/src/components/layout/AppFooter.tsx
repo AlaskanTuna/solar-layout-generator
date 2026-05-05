@@ -13,18 +13,25 @@ export function AppFooter() {
     { label: t('items.howItWorks'), href: '/#how' },
     { label: t('items.features'), href: '/#features' },
     { label: t('items.pricing'), href: '/#pricing' },
-    { label: t('items.faq'), href: '/#faq' }
+    { label: t('items.faq'), href: '/#faq' },
+    { label: t('items.privacy'), href: '/privacy' }
   ]
 
   return (
     <footer className="border-t border-border bg-muted/30 px-4 py-6 sm:px-6 sm:py-8">
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:gap-x-5">
-          {NAV_LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="transition-colors hover:text-foreground">
-              {l.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((l) =>
+            l.href.startsWith('/') && !l.href.startsWith('/#') ? (
+              <Link key={l.href} to={l.href} className="transition-colors hover:text-foreground">
+                {l.label}
+              </Link>
+            ) : (
+              <a key={l.href} href={l.href} className="transition-colors hover:text-foreground">
+                {l.label}
+              </a>
+            )
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

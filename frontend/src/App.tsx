@@ -18,6 +18,7 @@ const WorkbenchPage = lazy(() => import('./pages/WorkbenchPage').then((m) => ({ 
 const AnalysisPage = lazy(() => import('./pages/AnalysisPage').then((m) => ({ default: m.AnalysisPage })))
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })))
 const PdfPreviewPage = lazy(() => import('./pages/PdfPreviewPage').then((m) => ({ default: m.PdfPreviewPage })))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })))
 
 const PAGE_LOADING_HINTS = ['Loading page...']
 
@@ -27,6 +28,14 @@ export function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/sign-in" element={<SignInPage />} />
       <Route path="/sign-up" element={<SignUpPage />} />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<LoadingOverlay hints={PAGE_LOADING_HINTS} />}>
+            <PrivacyPage />
+          </Suspense>
+        }
+      />
       <Route
         path="/project/:projectId/pdf-preview"
         element={

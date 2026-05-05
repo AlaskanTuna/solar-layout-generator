@@ -84,6 +84,10 @@ export function SignInPage() {
             <Leaf className="h-3 w-3 text-emerald-700 dark:text-emerald-400" />
             {tNav('footer.sdg')}
           </span>
+          <span className="h-3 w-px bg-[#1a0a02]/25 dark:bg-primary-foreground/25" />
+          <Link to="/privacy" className="transition-colors hover:text-[#1a0a02] dark:hover:text-primary-foreground/70">
+            {tNav('items.privacy')}
+          </Link>
         </div>
       </div>
 
