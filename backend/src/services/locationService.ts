@@ -16,6 +16,14 @@ import {
 
 const COORDINATE_TOLERANCE = 0.0001
 
+/**
+ * If a cached row has been stuck in `processing` longer than this, treat it as
+ * dead-on-arrival: mark it failed and let the next resolve fall through to a
+ * fresh pipeline run. Prevents one hung pipeline from poisoning the cache for
+ * every future user picking that same coordinate.
+ */
+const STALE_PROCESSING_THRESHOLD_MS = 5 * 60_000
+
 type ResolveLocationResult = {
   locationId: string
   status: 'processing' | 'ready' | 'failed'
@@ -56,13 +64,26 @@ export async function resolveLocation(
   })
 
   if (existing) {
-    if (projectId) {
-      const linked = await linkOwnedProjectToLocation(userId, projectId, existing.id)
-      if (!linked) {
-        throw new NotFoundError('Project not found')
+    const isStaleProcessing =
+      existing.status === 'processing' &&
+      Date.now() - existing.createdAt.getTime() > STALE_PROCESSING_THRESHOLD_MS
+
+    if (isStaleProcessing) {
+      const ageMs = Date.now() - existing.createdAt.getTime()
+      console.warn(
+        `[LocationResolve] Stale processing row ${existing.id} (age=${ageMs}ms); marking failed and creating a fresh row`
+      )
+      await prisma.location.update({ where: { id: existing.id }, data: { status: 'failed' } })
+      // Fall through to the cache-miss path below so a fresh pipeline runs.
+    } else {
+      if (projectId) {
+        const linked = await linkOwnedProjectToLocation(userId, projectId, existing.id)
+        if (!linked) {
+          throw new NotFoundError('Project not found')
+        }
       }
+      return { locationId: existing.id, status: existing.status }
     }
-    return { locationId: existing.id, status: existing.status }
   }
 
   // Cache miss — create new location and start pipeline

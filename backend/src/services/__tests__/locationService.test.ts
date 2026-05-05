@@ -1,19 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { findFirst } = vi.hoisted(() => ({
-  findFirst: vi.fn()
+const { findFirst, update, create, projectUpdateMany } = vi.hoisted(() => ({
+  findFirst: vi.fn(),
+  update: vi.fn(),
+  create: vi.fn(),
+  projectUpdateMany: vi.fn()
 }))
+
+const runLocationPipelineMock = vi.hoisted(() => vi.fn())
 
 vi.mock('../../config/prisma.js', () => ({
   prisma: {
     location: {
-      findFirst
+      findFirst,
+      update,
+      create
+    },
+    project: {
+      updateMany: projectUpdateMany
     }
   }
 }))
 
 vi.mock('../locationPipeline.js', () => ({
-  runLocationPipeline: vi.fn()
+  runLocationPipeline: (...args: unknown[]) => runLocationPipelineMock(...args)
 }))
 
 vi.mock('../solarApiService.js', () => ({
@@ -38,7 +48,7 @@ vi.mock('../buildingInsightsService.js', () => ({
   parseBuildingInsights: vi.fn()
 }))
 
-import { getLocationDataForUser, getLocationStatusForUser } from '../locationService.js'
+import { getLocationDataForUser, getLocationStatusForUser, resolveLocation } from '../locationService.js'
 
 describe('locationService ownership filters', () => {
   beforeEach(() => {
@@ -81,5 +91,63 @@ describe('locationService ownership filters', () => {
         projects: { some: { userId: 'user_456' } }
       }
     })
+  })
+})
+
+describe('resolveLocation stale-processing recovery', () => {
+  beforeEach(() => {
+    findFirst.mockReset()
+    update.mockReset()
+    create.mockReset()
+    projectUpdateMany.mockReset()
+    runLocationPipelineMock.mockReset()
+    runLocationPipelineMock.mockResolvedValue(undefined)
+  })
+
+  it('marks a >5min-old processing row as failed and starts a fresh pipeline', async () => {
+    const sixMinutesAgo = new Date(Date.now() - 6 * 60_000)
+    findFirst.mockResolvedValue({
+      id: 'stale_loc',
+      status: 'processing',
+      createdAt: sixMinutesAgo
+    })
+    create.mockResolvedValue({ id: 'fresh_loc' })
+
+    const result = await resolveLocation('user_1', 3.14, 101.69)
+
+    expect(update).toHaveBeenCalledWith({ where: { id: 'stale_loc' }, data: { status: 'failed' } })
+    expect(create).toHaveBeenCalledWith({ data: { lat: 3.14, lng: 101.69 } })
+    expect(runLocationPipelineMock).toHaveBeenCalledWith('fresh_loc', 3.14, 101.69, 'HIGH', false)
+    expect(result).toEqual({ locationId: 'fresh_loc', status: 'processing' })
+  })
+
+  it('reuses a fresh processing row (under 5 min) instead of restarting', async () => {
+    const recentlyCreated = new Date(Date.now() - 30_000)
+    findFirst.mockResolvedValue({
+      id: 'fresh_loc',
+      status: 'processing',
+      createdAt: recentlyCreated
+    })
+
+    const result = await resolveLocation('user_1', 3.14, 101.69)
+
+    expect(update).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
+    expect(runLocationPipelineMock).not.toHaveBeenCalled()
+    expect(result).toEqual({ locationId: 'fresh_loc', status: 'processing' })
+  })
+
+  it('reuses a ready row regardless of age', async () => {
+    const longAgo = new Date(Date.now() - 24 * 60 * 60_000)
+    findFirst.mockResolvedValue({
+      id: 'cached_loc',
+      status: 'ready',
+      createdAt: longAgo
+    })
+
+    const result = await resolveLocation('user_1', 3.14, 101.69)
+
+    expect(update).not.toHaveBeenCalled()
+    expect(result).toEqual({ locationId: 'cached_loc', status: 'ready' })
   })
 })
