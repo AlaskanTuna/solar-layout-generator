@@ -13,14 +13,18 @@
     "readonlyHint": "Sila buat",
     "readonlyHintLink": "projek baharu",
     "readonlyHintSuffix": "di papan pemuka untuk lokasi baharu.",
-    "manualToggleHide": "Sembunyikan entri manual",
     "manualToggleShow": "Atau masukkan koordinat secara manual",
+    "coverageInfoButton": "Di mana liputan satelit terbaik?",
     "manualForm": {
       "latitudePlaceholder": "Latitud",
       "longitudePlaceholder": "Longitud",
       "submitButton": "Guna koordinat ini",
       "errorInvalidCoords": "Masukkan latitud dan longitud yang sah",
       "errorOutOfBounds": "Koordinat mesti dalam Malaysia (lat 0.85–7.4, lng 99.6–119.3)"
+    },
+    "manualModal": {
+      "title": "Masukkan Koordinat Secara Manual",
+      "description": "Taip latitud dan longitud dalam Malaysia untuk pusatkan peta di situ."
     }
   },
   "readonlyCard": {
@@ -40,6 +44,8 @@
   },
   "error": {
     "noImagery": "Tiada imej solar tersedia untuk lokasi ini. Cuba alamat yang berhampiran.",
+    "outOfBounds": "Sila pilih lokasi dalam Malaysia.",
+    "geocodeFailed": "Tidak dapat membaca lokasi itu. Cuba klik semula.",
     "checkImageryFailed": "Gagal menyemak ketersediaan imej",
     "resolveLocationFailed": "Gagal menyelesaikan lokasi",
     "rooftopAnalysisFailed": "Analisis data solar gagal untuk lokasi ini. Sila cuba bangunan yang lain.",
@@ -55,6 +61,31 @@
     "bullet3": "Liputan mungkin sedikit melebihi garisan bangunan.",
     "cancel": "Batal",
     "proceed": "Teruskan"
+  },
+  "coverageModal": {
+    "title": "Di Mana Liputan Solar Paling Tepat",
+    "description": "Imej satelit resolusi tinggi Google hanya tersedia di kawasan terpilih di Malaysia. Memilih bangunan dalam salah satu kawasan ini memberikan analisis yang paling tepat.",
+    "highTitle": "Liputan resolusi tinggi",
+    "regions": [
+      {
+        "name": "Lembah Klang",
+        "cities": "Klang, Port Klang, Shah Alam, Subang Jaya, Puchong"
+      },
+      {
+        "name": "Kawasan Ipoh",
+        "cities": "Ipoh, Tambun, Lahat, Menglembu, Tanjung Rambutan"
+      },
+      {
+        "name": "Kedah",
+        "cities": "Sungai Petani"
+      }
+    ],
+    "baseTitle": "Lokasi lain",
+    "baseDescription": "Bangunan di luar kawasan ini menggunakan data resolusi lebih rendah. Anda masih boleh meneruskan, tetapi cadangan susun atur panel dan anggaran tenaga akan kurang tepat.",
+    "buildingTypeTitle": "Sesuai untuk rumah kediaman",
+    "buildingTypeDescription": "Google Solar API dilatih untuk bumbung rumah individu, jadi ia paling sesuai untuk bangunan kediaman — rumah teres, separuh-berkembar dan banglo. Pangsapuri, kondominium, pusat membeli-belah dan bangunan besar atau berbumbung kongsi sering mengembalikan susun atur yang tidak tepat atau tidak boleh digunakan.",
+    "dontShowAgain": "Jangan tunjuk lagi",
+    "gotIt": "Faham"
   },
   "tour": {
     "step1Title": "Selamat Datang ke SolarSim",

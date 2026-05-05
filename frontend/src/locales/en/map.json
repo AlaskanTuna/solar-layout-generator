@@ -13,14 +13,18 @@
     "readonlyHint": "Please create",
     "readonlyHintLink": "new project",
     "readonlyHintSuffix": "in dashboard for new location.",
-    "manualToggleHide": "Hide manual entry",
     "manualToggleShow": "Or enter coordinates manually",
+    "coverageInfoButton": "Where is satellite coverage best?",
     "manualForm": {
       "latitudePlaceholder": "Latitude",
       "longitudePlaceholder": "Longitude",
       "submitButton": "Use these coordinates",
       "errorInvalidCoords": "Enter valid latitude and longitude",
       "errorOutOfBounds": "Coordinates must be within Malaysia (lat 0.85–7.4, lng 99.6–119.3)"
+    },
+    "manualModal": {
+      "title": "Enter Coordinates Manually",
+      "description": "Type a latitude and longitude inside Malaysia to centre the map there."
     }
   },
   "readonlyCard": {
@@ -40,6 +44,8 @@
   },
   "error": {
     "noImagery": "No solar imagery is available for this location. Try a nearby address.",
+    "outOfBounds": "Please pick a location inside Malaysia.",
+    "geocodeFailed": "Couldn't read that location. Try clicking again.",
     "checkImageryFailed": "Failed to check imagery availability",
     "resolveLocationFailed": "Failed to resolve location",
     "rooftopAnalysisFailed": "Solar data analysis failed for this location. Please try a different building.",
@@ -55,6 +61,31 @@
     "bullet3": "Coverage may extend slightly beyond the building outline.",
     "cancel": "Cancel",
     "proceed": "Proceed"
+  },
+  "coverageModal": {
+    "title": "Where Solar Coverage Works Best",
+    "description": "Google's high-resolution satellite imagery is only available in select Malaysian regions. Picking a building inside one of these areas gives the most accurate analysis.",
+    "highTitle": "High-resolution coverage",
+    "regions": [
+      {
+        "name": "Klang Valley",
+        "cities": "Klang, Port Klang, Shah Alam, Subang Jaya, Puchong"
+      },
+      {
+        "name": "Ipoh Region",
+        "cities": "Ipoh, Tambun, Lahat, Menglembu, Tanjung Rambutan"
+      },
+      {
+        "name": "Kedah",
+        "cities": "Sungai Petani"
+      }
+    ],
+    "baseTitle": "Other locations",
+    "baseDescription": "Buildings outside these regions fall back to lower-resolution data. You can still proceed, but suggested panel layouts and energy estimates will be less precise.",
+    "buildingTypeTitle": "Best for residential homes",
+    "buildingTypeDescription": "The Solar API was trained on individual rooftops, so it works best on residential buildings — terrace, semi-detached, and bungalow houses. Apartments, condos, shopping malls, and other large or shared-roof buildings often return inaccurate or unusable layouts.",
+    "dontShowAgain": "Don't show again",
+    "gotIt": "Got it"
   },
   "tour": {
     "step1Title": "Welcome to SolarSim",

@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { resolveLocation, getLocationStatus, probeLocation } from '@/api/locations'
 import { LowerResolutionConsentModal } from '@/components/map/LowerResolutionConsentModal'
+import { CoverageNoticeModal, readCoverageNoticeDismissed } from '@/components/map/CoverageNoticeModal'
+import { ManualCoordinateModal } from '@/components/map/ManualCoordinateModal'
 import type { ImageryQuality } from '@shared/types'
 import { createProject, getProject } from '@/api/projects'
 import { ApiError } from '@/api/client'
@@ -13,15 +15,16 @@ import { Button } from '@/components/ui/button'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { clearNewProjectDraft, readNewProjectDraft, writeNewProjectDraft } from '@/lib/projectDraftStorage'
 import { markProjectVisited } from '@/lib/recentProjectActivity'
-import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, MapPin } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Info, Loader2, Locate, MapPin } from 'lucide-react'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
-import { GuidedTour, type TourStep } from '@/components/ui/GuidedTour'
+import { GuidedTour } from '@/components/ui/GuidedTour'
 
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
 
 const PROCESSING_TIMEOUT_MS = 120_000
 
 const MALAYSIA_CENTER = { lat: 3.14, lng: 101.69 }
+const MY_BOUNDS = { latMin: 0.85, latMax: 7.4, lngMin: 99.6, lngMax: 119.3 }
 
 /**
  * Renders the map flow for location search, confirmation, and processing
@@ -44,6 +47,8 @@ export function MapPage() {
   const mapInstance = useRef<google.maps.Map | null>(null)
   const autocompleteInstance = useRef<google.maps.places.Autocomplete | null>(null)
   const markerInstance = useRef<google.maps.marker.AdvancedMarkerElement | null>(null)
+  const geocoderInstance = useRef<google.maps.Geocoder | null>(null)
+  const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const isCreatingProjectRef = useRef(false)
 
   const [phase, setPhase] = useState<Phase>(
@@ -53,11 +58,12 @@ export function MapPage() {
   const [locationId, setLocationId] = useState<string | null>(initialDraft?.locationId ?? null)
   const [errorMessage, setErrorMessage] = useState('')
   const [manualOpen, setManualOpen] = useState(false)
-  const [manualLat, setManualLat] = useState('')
-  const [manualLng, setManualLng] = useState('')
-  const [manualError, setManualError] = useState('')
   const [pendingBaseConsent, setPendingBaseConsent] = useState(false)
   const [probeInFlight, setProbeInFlight] = useState(false)
+  const [tourActive, setTourActive] = useState(false)
+  const [coverageModalOpen, setCoverageModalOpen] = useState(false)
+  const coverageAutoShownRef = useRef(false)
+  const [reverseGeocoding, setReverseGeocoding] = useState(false)
 
   const searchParams = new URLSearchParams(window.location.search)
   const isReadonly = searchParams.get('view') === 'readonly'
@@ -163,6 +169,43 @@ export function MapPage() {
     setPhase('confirm')
   }, [])
 
+  const reverseGeocodeAndSelect = useCallback(
+    async (lat: number, lng: number) => {
+      if (!geocoderInstance.current) {
+        geocoderInstance.current = new google.maps.Geocoder()
+      }
+      setReverseGeocoding(true)
+      try {
+        const { results } = await geocoderInstance.current.geocode({ location: { lat, lng } })
+        const address = results?.[0]?.formatted_address ?? `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+        handleSelectedPlace(lat, lng, address)
+      } catch {
+        // Reverse geocode failures fall back to coordinate display so the user can still proceed.
+        handleSelectedPlace(lat, lng, `${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+      } finally {
+        setReverseGeocoding(false)
+      }
+    },
+    [handleSelectedPlace]
+  )
+
+  const handleMapClick = useCallback(
+    (event: google.maps.MapMouseEvent) => {
+      if (isReadonly || phase === 'processing' || reverseGeocoding) return
+      const latLng = event.latLng
+      if (!latLng) return
+      const lat = latLng.lat()
+      const lng = latLng.lng()
+      if (lat < MY_BOUNDS.latMin || lat > MY_BOUNDS.latMax || lng < MY_BOUNDS.lngMin || lng > MY_BOUNDS.lngMax) {
+        setErrorMessage(t('error.outOfBounds'))
+        setPhase('failed')
+        return
+      }
+      void reverseGeocodeAndSelect(lat, lng)
+    },
+    [isReadonly, phase, reverseGeocoding, reverseGeocodeAndSelect, t]
+  )
+
   const initLegacyAutocomplete = useCallback(() => {
     const map = mapInstance.current
     const host = searchHostRef.current
@@ -205,9 +248,11 @@ export function MapPage() {
       mapId: 'solar-layout-map',
       disableDefaultUI: true,
       mapTypeControl: true,
-      mapTypeId: 'satellite'
+      mapTypeId: 'satellite',
+      clickableIcons: false
     })
     mapInstance.current = map
+    geocoderInstance.current = new google.maps.Geocoder()
     initLegacyAutocomplete()
   }, [initLegacyAutocomplete])
 
@@ -215,6 +260,33 @@ export function MapPage() {
     if (!isLoaded) return
     initMap()
   }, [isLoaded, initMap])
+
+  // Bind/unbind the click-to-drop-pin handler. Re-binding when handleMapClick changes
+  // keeps the closure fresh (phase, reverseGeocoding) without leaking listeners.
+  useEffect(() => {
+    const map = mapInstance.current
+    if (!map) return
+    if (clickListenerRef.current) {
+      clickListenerRef.current.remove()
+      clickListenerRef.current = null
+    }
+    clickListenerRef.current = map.addListener('click', handleMapClick)
+    return () => {
+      clickListenerRef.current?.remove()
+      clickListenerRef.current = null
+    }
+  }, [isLoaded, handleMapClick])
+
+  // Surface the coverage notice once the guided tour finishes (or was already dismissed)
+  // for a fresh new-project flow. Honors the user's permanent dismissal in localStorage.
+  useEffect(() => {
+    if (coverageAutoShownRef.current) return
+    if (!isNewProject || isReadonly) return
+    if (tourActive) return
+    if (readCoverageNoticeDismissed()) return
+    coverageAutoShownRef.current = true
+    setCoverageModalOpen(true)
+  }, [isNewProject, isReadonly, tourActive])
 
   const [pendingExpanded, setPendingExpanded] = useState(false)
 
@@ -278,20 +350,7 @@ export function MapPage() {
     }
   }
 
-  function handleManualSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setManualError('')
-    const lat = parseFloat(manualLat)
-    const lng = parseFloat(manualLng)
-    if (Number.isNaN(lat) || Number.isNaN(lng)) {
-      setManualError(t('search.manualForm.errorInvalidCoords'))
-      return
-    }
-    // Malaysia bounds (approximate, includes Sabah/Sarawak)
-    if (lat < 0.85 || lat > 7.4 || lng < 99.6 || lng > 119.3) {
-      setManualError(t('search.manualForm.errorOutOfBounds'))
-      return
-    }
+  function handleManualSubmit(lat: number, lng: number) {
     handleSelectedPlace(lat, lng, `${lat.toFixed(6)}, ${lng.toFixed(6)}`)
     setManualOpen(false)
   }
@@ -341,13 +400,25 @@ export function MapPage() {
           <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex flex-col items-center px-4">
             <div className="pointer-events-auto w-full max-w-md">
               <div
-                ref={searchHostRef}
                 data-tour="search-box"
-                className={`rounded-xl bg-card/95 shadow-lg backdrop-blur-sm border border-border ${
+                className={`flex items-center rounded-xl bg-card/95 shadow-lg backdrop-blur-sm border border-border ${
                   !isLoaded || phase === 'processing' ? 'pointer-events-none opacity-70' : ''
                 } ${isReadonly ? 'cursor-not-allowed' : ''}`}
               >
-                <div className="h-12" />
+                <div ref={searchHostRef} className="min-w-0 flex-1">
+                  <div className="h-12" />
+                </div>
+                {!isReadonly && (
+                  <button
+                    type="button"
+                    onClick={() => setManualOpen(true)}
+                    title={t('search.manualToggleShow')}
+                    aria-label={t('search.manualToggleShow')}
+                    className="mr-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <Locate className="h-4 w-4" />
+                  </button>
+                )}
               </div>
               {isReadonly && (
                 <div className="mt-2 rounded-lg bg-card/95 px-3 py-1.5 shadow-md backdrop-blur-sm border border-border">
@@ -361,51 +432,19 @@ export function MapPage() {
                 </div>
               )}
               {!isReadonly && phase !== 'processing' && (
-                <>
-                  <div className="mt-2 rounded-lg border border-border bg-card/95 px-3 py-1.5 text-center shadow-md backdrop-blur-sm">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setManualOpen((v) => !v)
-                        setManualError('')
-                      }}
-                      className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {manualOpen ? t('search.manualToggleHide') : t('search.manualToggleShow')}
-                    </button>
-                  </div>
-                  {manualOpen && (
-                    <form
-                      onSubmit={handleManualSubmit}
-                      className="mt-2 space-y-2 rounded-xl border border-border bg-card/95 p-3 shadow-md backdrop-blur-sm"
-                    >
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          autoFocus
-                          placeholder={t('search.manualForm.latitudePlaceholder')}
-                          value={manualLat}
-                          onChange={(e) => setManualLat(e.target.value)}
-                          className="h-9 rounded-md border border-input bg-background px-2 text-center text-sm outline-none focus:ring-2 focus:ring-ring"
-                        />
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          placeholder={t('search.manualForm.longitudePlaceholder')}
-                          value={manualLng}
-                          onChange={(e) => setManualLng(e.target.value)}
-                          className="h-9 rounded-md border border-input bg-background px-2 text-center text-sm outline-none focus:ring-2 focus:ring-ring"
-                        />
-                      </div>
-                      {manualError && <p className="text-xs text-destructive">{manualError}</p>}
-                      <Button type="submit" size="sm" className="w-full gap-2">
-                        <MapPin className="h-3.5 w-3.5" />
-                        {t('search.manualForm.submitButton')}
-                      </Button>
-                    </form>
-                  )}
-                </>
+                <div className="mt-2 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      coverageAutoShownRef.current = true
+                      setCoverageModalOpen(true)
+                    }}
+                    className="flex items-center gap-1 rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs text-muted-foreground shadow-md backdrop-blur-sm transition-colors hover:text-foreground"
+                  >
+                    <Info className="h-3 w-3" />
+                    {t('search.coverageInfoButton')}
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -430,6 +469,7 @@ export function MapPage() {
 
           <GuidedTour
             storageKey="slg-tour-map"
+            onActiveChange={setTourActive}
             steps={[
               {
                 title: t('tour.step1Title'),
@@ -451,8 +491,18 @@ export function MapPage() {
 
           {!isLoaded && <LoadingOverlay hints={[t('loading.loadingMaps'), t('loading.preparingMap')]} />}
 
+          {/* Reverse-geocode in flight toast */}
+          {reverseGeocoding && (
+            <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
+              <div className="glass-card flex items-center gap-2 px-4 py-2.5">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <p className="text-xs text-muted-foreground">{t('confirm.checkingImagery')}</p>
+              </div>
+            </div>
+          )}
+
           {/* Confirmation prompt */}
-          {phase === 'confirm' && selectedPlace && (
+          {phase === 'confirm' && selectedPlace && !reverseGeocoding && (
             <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-fade-in-up">
               <div className="glass-card w-[calc(100vw-2rem)] max-w-sm p-5 sm:w-96 sm:max-w-none">
                 <p className="text-sm font-medium">{t('confirm.question')}</p>
@@ -520,6 +570,15 @@ export function MapPage() {
           void runResolveLocation('BASE', pendingExpanded)
         }}
         onCancel={() => setPendingBaseConsent(false)}
+      />
+
+      <CoverageNoticeModal open={coverageModalOpen} onClose={() => setCoverageModalOpen(false)} />
+
+      <ManualCoordinateModal
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+        onSubmit={handleManualSubmit}
+        bounds={MY_BOUNDS}
       />
     </AppLayout>
   )

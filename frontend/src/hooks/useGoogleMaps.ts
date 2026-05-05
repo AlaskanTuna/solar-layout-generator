@@ -14,7 +14,8 @@ function ensureLoaded(): Promise<void> {
     loadPromise = Promise.all([
       loader.importLibrary('maps'),
       loader.importLibrary('places'),
-      loader.importLibrary('marker')
+      loader.importLibrary('marker'),
+      loader.importLibrary('geocoding')
     ]).then(() => {
       loaded = true
     })

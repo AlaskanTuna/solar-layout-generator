@@ -13,14 +13,18 @@
     "readonlyHint": "请在仪表板中",
     "readonlyHintLink": "新建项目",
     "readonlyHintSuffix": "以搜索新地址。",
-    "manualToggleHide": "隐藏手动输入",
     "manualToggleShow": "或手动输入坐标",
+    "coverageInfoButton": "哪里的卫星覆盖最佳？",
     "manualForm": {
       "latitudePlaceholder": "纬度",
       "longitudePlaceholder": "经度",
       "submitButton": "使用这些坐标",
       "errorInvalidCoords": "请输入有效的纬度和经度",
       "errorOutOfBounds": "坐标必须在马来西亚范围内（纬度 0.85–7.4，经度 99.6–119.3）"
+    },
+    "manualModal": {
+      "title": "手动输入坐标",
+      "description": "请输入位于马来西亚境内的纬度和经度，以便将地图定位到该处。"
     }
   },
   "readonlyCard": {
@@ -40,6 +44,8 @@
   },
   "error": {
     "noImagery": "该位置没有可用的太阳能影像，请尝试附近的地址。",
+    "outOfBounds": "请选择马来西亚境内的位置。",
+    "geocodeFailed": "无法识别该位置，请重新点击。",
     "checkImageryFailed": "检查影像可用性失败",
     "resolveLocationFailed": "位置解析失败",
     "rooftopAnalysisFailed": "该位置的太阳能数据分析失败，请尝试其他建筑物。",
@@ -55,6 +61,31 @@
     "bullet3": "覆盖范围可能略超出建筑物轮廓。",
     "cancel": "取消",
     "proceed": "继续"
+  },
+  "coverageModal": {
+    "title": "太阳能覆盖最佳区域",
+    "description": "Google 的高分辨率卫星影像仅覆盖马来西亚部分地区。选择这些区域内的建筑物可获得最准确的分析结果。",
+    "highTitle": "高分辨率覆盖",
+    "regions": [
+      {
+        "name": "巴生谷",
+        "cities": "巴生、巴生港、莎阿南、梳邦再也、蒲种"
+      },
+      {
+        "name": "怡保地区",
+        "cities": "怡保、丹冰、拿乞、万里望、丹绒红毛丹"
+      },
+      {
+        "name": "吉打",
+        "cities": "双溪大年"
+      }
+    ],
+    "baseTitle": "其他区域",
+    "baseDescription": "这些区域之外的建筑物将使用低分辨率数据。您仍可继续操作，但建议的面板布局和能量估算会不太精确。",
+    "buildingTypeTitle": "最适合住宅建筑",
+    "buildingTypeDescription": "Google Solar API 是针对独栋屋顶训练的，因此最适合住宅建筑——排屋、半独立式和独立式洋房。公寓、共管公寓、购物中心和其他大型或共享屋顶建筑往往会返回不准确或无法使用的布局结果。",
+    "dontShowAgain": "不再显示",
+    "gotIt": "知道了"
   },
   "tour": {
     "step1Title": "欢迎使用 SolarSim",
