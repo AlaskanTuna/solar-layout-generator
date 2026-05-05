@@ -2,6 +2,35 @@ import { env } from '../config/env.js'
 
 const BASE_URL = 'https://solar.googleapis.com/v1'
 
+/** Per-call timeout budgets so a hung Solar API request can never block the pipeline forever. */
+export const PROBE_TIMEOUT_MS = 8_000
+export const METADATA_TIMEOUT_MS = 20_000
+export const DOWNLOAD_TIMEOUT_MS = 45_000
+
+/**
+ * Wraps fetch with an AbortController-based timeout. AbortError is rethrown as a
+ * named timeout error so callers see something readable in logs and don't have
+ * to do their own AbortError detection.
+ */
+export async function fetchWithTimeout(
+  input: string | URL,
+  timeoutMs: number,
+  init?: RequestInit
+): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(input, { ...init, signal: controller.signal })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms: ${input.toString()}`)
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 /**
  * Solar API imagery quality levels
  */
@@ -84,7 +113,7 @@ export async function fetchBuildingInsights(
   opts: SolarApiOpts = {}
 ): Promise<BuildingInsightsApiResponse> {
   const params = buildSolarParams(lat, lng, opts)
-  const response = await fetch(`${BASE_URL}/buildingInsights:findClosest?${params}`)
+  const response = await fetchWithTimeout(`${BASE_URL}/buildingInsights:findClosest?${params}`, METADATA_TIMEOUT_MS)
   if (!response.ok) {
     throw new Error(`Solar API error: ${response.status} ${await response.text()}`)
   }
@@ -120,7 +149,7 @@ export async function fetchDataLayers(
   })
   if (expandedCoverage) params.set('experiments', 'EXPANDED_COVERAGE')
 
-  const response = await fetch(`${BASE_URL}/dataLayers:get?${params}`)
+  const response = await fetchWithTimeout(`${BASE_URL}/dataLayers:get?${params}`, METADATA_TIMEOUT_MS)
   if (!response.ok) {
     throw new Error(`DataLayers error: ${response.status} ${await response.text()}`)
   }
@@ -203,7 +232,7 @@ async function probeEndpoint(
     params.set('view', 'FULL_LAYERS')
   }
   try {
-    const response = await fetch(`${baseUrl}?${params}`)
+    const response = await fetchWithTimeout(`${baseUrl}?${params}`, PROBE_TIMEOUT_MS)
     return response.ok
   } catch {
     return false

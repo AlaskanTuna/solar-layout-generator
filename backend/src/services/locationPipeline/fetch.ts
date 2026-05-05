@@ -2,9 +2,11 @@ import { env } from '../../config/env.js'
 import { parseBuildingInsights } from '../buildingInsightsService.js'
 import {
   calculateRadius,
+  DOWNLOAD_TIMEOUT_MS,
   enrichBuildingInsights,
   fetchBuildingInsights,
   fetchDataLayers,
+  fetchWithTimeout,
   type BuildingInsightsApiResponse,
   type DataLayersApiResponse,
   type ImageryQuality
@@ -45,7 +47,7 @@ async function downloadLayer(url: string, field: SolarLayerKey): Promise<Downloa
   const downloadUrl = new URL(url)
   downloadUrl.searchParams.set('key', env.GOOGLE_API_KEY)
 
-  const response = await fetch(downloadUrl.toString())
+  const response = await fetchWithTimeout(downloadUrl.toString(), DOWNLOAD_TIMEOUT_MS)
   if (!response.ok) {
     throw new Error(`Failed to download ${field}`)
   }
@@ -85,7 +87,9 @@ export async function fetchLocationPipelineInputs(
   for (const field of Object.keys(LAYER_FILENAMES) as SolarLayerKey[]) {
     const url = getLayerUrl(dataLayers, field)
     if (!url) continue
+    const t0 = Date.now()
     downloadedLayers.push(await downloadLayer(url, field))
+    console.info(`[Pipeline.fetch] ${field} downloaded in ${Date.now() - t0}ms`)
   }
 
   return {
