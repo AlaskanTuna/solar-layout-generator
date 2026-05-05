@@ -4,7 +4,6 @@
     "subtitle": "SolarSim 如何依据《马来西亚 2010 年个人数据保护法（PDPA）》收集、使用和保护您的个人信息。",
     "lastUpdated": "最后更新：2026 年 5 月 5 日"
   },
-  "backToHome": "返回首页",
   "tableOfContents": "本页内容",
   "sections": {
     "intro": {
@@ -87,7 +86,7 @@
     "contact": {
       "title": "联系与投诉",
       "body": [
-        "如需提出访问、更正、撤回同意或投诉请求，请通过 solarsim.project@example.com 联系 SolarSim 项目团队。该邮箱只是项目占位符，FYP 作者会在提交前替换。",
+        "如需提出访问、更正、撤回同意或投诉请求，请通过 heezijie2004@gmail.com 联系 SolarSim 项目团队。",
         "如果您来信讨论隐私问题，请提供足够细节，以便我们识别相关账号或项目。如果您的问题属于 PDPA 投诉范围，您也可以直接联系个人数据保护局。"
       ]
     }

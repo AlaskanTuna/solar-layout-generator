@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { AppFooter } from '@/components/layout/AppFooter'
 import { LanguageToggle } from '@/components/layout/LanguageToggle'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
@@ -39,13 +39,6 @@ export function PrivacyPage() {
           <span className="font-heading text-base font-semibold tracking-tight">SolarSim</span>
         </Link>
         <div className="flex items-center gap-2">
-          <Link
-            to="/"
-            className="hidden items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:flex"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            {t('backToHome')}
-          </Link>
           <LanguageToggle />
           <ThemeToggle />
         </div>
@@ -53,15 +46,6 @@ export function PrivacyPage() {
 
       {/* Main content */}
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
-        {/* Mobile back link */}
-        <Link
-          to="/"
-          className="mb-6 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:hidden"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {t('backToHome')}
-        </Link>
-
         {/* Header */}
         <div className="mb-10">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
