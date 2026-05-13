@@ -3,6 +3,10 @@
 
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
+vi.mock('../../config/env.js', () => ({
+  env: { GOOGLE_API_KEY: 'test-google-api-key' }
+}))
+
 const downloadFromStorageMock = vi.hoisted(() => vi.fn())
 const fromArrayBufferMock = vi.hoisted(() => vi.fn())
 const setupGeoTransformMock = vi.hoisted(() => vi.fn())
