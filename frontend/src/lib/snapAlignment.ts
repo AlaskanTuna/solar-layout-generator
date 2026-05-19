@@ -1,3 +1,25 @@
+/**
+ * Workbench panel snap + overlap resolution.
+ *
+ * Provides the math behind two related interactions on the workbench canvas:
+ *
+ *   1. **Snap alignment** (`computeSnap`) — when the user drags a panel, this
+ *      module returns the nearest snap target (alignment guides matching the
+ *      centre, edge, or row of neighbour panels) so panels land in clean rows.
+ *
+ *   2. **Overlap resolution** (`resolveOverlapEscape`, `resolveGroupOverlapEscape`)
+ *      — when a drag, rotation, or group transform would push panels into each
+ *      other, this module computes the minimum translation needed to separate
+ *      them using SAT (Separating Axis Theorem) projections. The private
+ *      helpers `computeOverlapEscapeVector` and `resolveOverlapTranslation`
+ *      implement the SAT math: project all OBB corners onto each edge normal,
+ *      find the axis with the smallest overlap, and translate along it.
+ *
+ * `computeOverlapSnap` is a one-shot opposite: instead of escaping overlap, it
+ * snaps onto a neighbour edge so two panels rest cleanly against each other —
+ * used when the user is intentionally clustering panels in a row.
+ */
+
 import {
   getRectAabb,
   getRotatedRectPoints,

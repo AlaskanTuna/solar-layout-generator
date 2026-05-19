@@ -1,3 +1,10 @@
+/**
+ * Project route request validators.
+ *
+ * Re-exports shared project schemas so backend routes validate the same shapes
+ * used by frontend and shared API types.
+ */
+
 import {
   createProjectRequestSchema,
   saveAnalysisRequestSchema,
@@ -6,18 +13,26 @@ import {
 } from '@shared/types'
 
 /**
- * Creates project request schema
+ * Validates the create-project request body.
+ *
+ * Requires the project name and linked location id defined by the shared API contract.
  */
 export const createProjectSchema = createProjectRequestSchema
 /**
- * Saves layout request schema
+ * Validates the save-layout request body.
+ *
+ * Enforces the shared edited-panel layout shape and optional selected panel model.
  */
 export const saveLayoutSchema = saveLayoutRequestSchema
 /**
- * Saves analysis request schema
+ * Validates the save-analysis request body.
+ *
+ * Requires both persisted analysis configuration and computed analysis results.
  */
 export const saveAnalysisSchema = saveAnalysisRequestSchema
 /**
- * Updates layout preferences request schema
+ * Validates the update-layout-preferences request body.
+ *
+ * Accepts the shared partial preference shape used for incremental UI changes.
  */
 export const updateLayoutPreferencesSchema = updateLayoutPreferencesRequestSchema

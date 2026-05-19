@@ -1,3 +1,8 @@
+/**
+ * First-use interaction hint overlay for the workbench canvas.
+ * Teaches core canvas gestures after the tour or chat no longer controls the screen.
+ */
+
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Hand, Keyboard, Move, MousePointerClick, X, ZoomIn } from 'lucide-react'
@@ -33,13 +38,8 @@ type Props = {
 }
 
 /**
- * Centered hint overlay that teaches first-time users how to interact with the canvas.
- *
- * Visibility:
- *   - Initial mount + ready + not suppressed + not dismissed → show immediately.
- *   - While suppressed (tour, chat) → hide and pause timers.
- *   - When suppression lifts (e.g. tour closes) → re-show, unless the user has dismissed.
- *   - After explicit dismiss → fall back to the original 5s idle-timer reshow on the canvas.
+ * Renders the dismissible interaction hint overlay and its idle-timer reappearance flow.
+ * Expects the target canvas ref, readiness flag, and optional suppression while another guided surface is active.
  */
 export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: Props) {
   const { t } = useTranslation('workbench')

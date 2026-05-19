@@ -1,3 +1,8 @@
+/**
+ * Dashboard aggregation and routing helpers for project portfolio views.
+ * Converts saved analysis records into KPIs and routes users back into the right workflow step.
+ */
+
 import type { ProjectResponse } from '@/api/projects'
 
 /** Portfolio stats aggregated across the user's completed projects. */
@@ -88,7 +93,11 @@ export function aggregatePortfolio(projects: ProjectResponse[]): PortfolioStats 
   return stats
 }
 
-/** Shared helpers export */
+/**
+ * Returns the route that should open next for a project based on its saved workflow status.
+ * @param p - Project response whose status determines map, workbench, or analysis routing.
+ * @returns Internal route for the next relevant project screen.
+ */
 export function projectRoute(p: ProjectResponse): string {
   switch (p.status) {
     case 'analysis_saved':
@@ -100,7 +109,11 @@ export function projectRoute(p: ProjectResponse): string {
   }
 }
 
-/** Shared helpers export */
+/**
+ * Formats a timestamp as a compact dashboard relative date, falling back to an en-MY calendar date after one week.
+ * @param dateString - ISO timestamp from the project API.
+ * @returns Human-readable relative age or localized date.
+ */
 export function formatRelativeDate(dateString: string): string {
   const date = new Date(dateString)
   const now = new Date()

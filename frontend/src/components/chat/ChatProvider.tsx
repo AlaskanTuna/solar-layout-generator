@@ -1,3 +1,8 @@
+/**
+ * Shared in-memory chat state for project assistant surfaces.
+ * Wraps routes that can launch Sol and keeps conversations alive across workbench and analysis navigation.
+ */
+
 import { createContext, useCallback, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -45,7 +50,10 @@ export const ChatContext = createContext<ChatContextValue>({
   isAnyOpen: false
 })
 
-/** Provides per-project chat state keyed by project id. */
+/**
+ * Provides per-project chat panel state, message history, streaming flags, and send cooldown timestamps.
+ * Wraps routes that can launch the solar assistant and resets state when a different user signs in.
+ */
 export function ChatProvider({ children }: PropsWithChildren) {
   const { user } = useAuth()
   const [projectStates, setProjectStates] = useState<Map<string, ProjectChatState>>(() => new Map())

@@ -1,3 +1,8 @@
+/**
+ * Consumption input controls for the analysis sidebar.
+ * Used to tune monthly household kWh and bill estimates before running Malaysian NEM projections.
+ */
+
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
@@ -14,8 +19,8 @@ type ConsumptionControlsProps = {
 }
 
 /**
- * Renders the ConsumptionControls component
- * @param {ConsumptionControlsProps} props - Props for the component
+ * Renders monthly consumption sliders and inputs backed by the shared analysis form state.
+ * Expects a nullable form-state setter so updates preserve the rest of the analysis configuration.
  */
 export function ConsumptionControls({ formState, setFormState }: ConsumptionControlsProps) {
   const { t } = useTranslation('analysis')

@@ -1,3 +1,8 @@
+/**
+ * Fixed header and footer chrome for generated PDF reports.
+ * Used by the print route so every page carries project identity, imagery quality, SDG note, and branding.
+ */
+
 import { Leaf } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Logo } from '@/components/ui/Logo'
@@ -9,8 +14,9 @@ type HeaderProps = {
 }
 
 /**
- * Renders the PdfFixedHeader component
- * @param {HeaderProps} props - Props for the component
+ * Renders the fixed PDF header with report title and project generation metadata.
+ * @param projectName - Project name shown in the generated-at line.
+ * @param generatedAt - Localized report generation date.
  */
 export function PdfFixedHeader({ projectName, generatedAt }: HeaderProps) {
   const { t } = useTranslation('pdf')
@@ -35,8 +41,8 @@ type FooterProps = {
 }
 
 /**
- * Renders the PdfFixedFooter component
- * @param {FooterProps} props - Props for the component
+ * Renders the fixed PDF footer with SDG messaging, branding, and BASE imagery disclosure when needed.
+ * @param imageryQuality - Optional imagery quality from the project's resolved Solar API location.
  */
 export function PdfFixedFooter({ imageryQuality }: FooterProps = {}) {
   const { t } = useTranslation('pdf')

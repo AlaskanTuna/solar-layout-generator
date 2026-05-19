@@ -1,3 +1,8 @@
+/**
+ * Collapsible dashboard sidebar navigation.
+ * Used by the app shell on desktop and as a slide-in menu on mobile.
+ */
+
 import { useState, useCallback, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -119,6 +124,10 @@ type AppSidebarProps = {
   onMobileClose?: () => void
 }
 
+/**
+ * Renders the dashboard sidebar with hover expansion on desktop and controlled visibility on mobile.
+ * Expects optional mobile open state and close callback from the surrounding app layout.
+ */
 export function AppSidebar({ mobileOpen = false, onMobileClose }: AppSidebarProps = {}) {
   const [collapsed, setCollapsed] = useState(true)
   const { pathname } = useLocation()

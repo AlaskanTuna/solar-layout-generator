@@ -1,3 +1,8 @@
+/**
+ * Renders the project location map flow.
+ * It is reached at /project/:projectId/map for new or existing projects before rooftop data is ready.
+ * This page serves the site-selection step where users pick a Malaysian address and trigger Solar API processing.
+ */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -21,14 +26,15 @@ import { GuidedTour } from '@/components/ui/GuidedTour'
 
 type Phase = 'search' | 'confirm' | 'processing' | 'failed'
 
+// Keeps users from waiting indefinitely if rooftop processing stalls or polling never reaches a terminal state.
 const PROCESSING_TIMEOUT_MS = 120_000
 
+// Starts the satellite map over the Klang Valley so Malaysian address searches have useful local context.
 const MALAYSIA_CENTER = { lat: 3.14, lng: 101.69 }
+// Bounds manual and click-based selection to Malaysia, matching the FYP's supported Solar API coverage.
 const MY_BOUNDS = { latMin: 0.85, latMax: 7.4, lngMin: 99.6, lngMax: 119.3 }
 
-/**
- * Renders the map flow for location search, confirmation, and processing
- */
+/** Renders the map flow for location search, confirmation, coverage consent, and processing. */
 export function MapPage() {
   const { t } = useTranslation('map')
   const { projectId } = useParams<{ projectId: string }>()

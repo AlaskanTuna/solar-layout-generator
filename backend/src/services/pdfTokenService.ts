@@ -1,3 +1,10 @@
+/**
+ * Short-lived JWT helpers for PDF exports.
+ *
+ * Issues and verifies scoped tokens so the PDF renderer can fetch one project
+ * without reusing the user's full session credentials.
+ */
+
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env.js'
 
@@ -5,7 +12,7 @@ const TOKEN_TTL_SECONDS = 60
 const TOKEN_TYPE = 'pdf-export' as const
 
 /**
- * Claims stored inside a PDF export token
+ * Claims stored inside a PDF export token.
  */
 export type PdfTokenPayload = {
   sub: string
@@ -14,7 +21,7 @@ export type PdfTokenPayload = {
 }
 
 /**
- * Signed PDF token response
+ * Signed PDF token response.
  */
 export type SignedPdfToken = {
   token: string
@@ -22,10 +29,11 @@ export type SignedPdfToken = {
 }
 
 /**
- * Sign a short-lived PDF export token
- * @param {string} userId - Authenticated user identifier
- * @param {string} projectId - Project identifier
- * @returns {SignedPdfToken} The resulting sign pdf token value
+ * Signs a short-lived PDF export token for one project.
+ *
+ * @param userId - Authenticated user that owns the export
+ * @param projectId - Project the token may access
+ * @returns JWT and ISO expiry timestamp for the client
  */
 export function signPdfToken(userId: string, projectId: string): SignedPdfToken {
   const token = jwt.sign({ sub: userId, projectId, type: TOKEN_TYPE } satisfies PdfTokenPayload, env.PDF_TOKEN_SECRET, {
@@ -37,7 +45,7 @@ export function signPdfToken(userId: string, projectId: string): SignedPdfToken 
 }
 
 /**
- * Error thrown when a PDF token cannot be verified
+ * Error thrown when a PDF token cannot be verified.
  */
 export class InvalidPdfTokenError extends Error {
   constructor(reason: string) {
@@ -47,9 +55,10 @@ export class InvalidPdfTokenError extends Error {
 }
 
 /**
- * Verify and decode a PDF export token
- * @param {string} token - Token value
- * @returns {PdfTokenPayload} The resulting verify pdf token value
+ * Verifies and decodes a PDF export token.
+ *
+ * @param token - JWT presented by the PDF export request
+ * @returns Validated PDF token claims
  */
 export function verifyPdfToken(token: string): PdfTokenPayload {
   let decoded: unknown

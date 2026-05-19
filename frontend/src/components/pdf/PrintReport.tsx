@@ -1,3 +1,8 @@
+/**
+ * Multi-page PDF report assembly for saved solar projects.
+ * Used by the print/export route to combine fixed chrome, rooftop layout, and analysis pages.
+ */
+
 import type { ProjectResponse } from '@/api/projects'
 import { PdfFixedFooter, PdfFixedHeader } from './PdfFixedChrome'
 import { PrintPage1Workbench } from './PrintPage1Workbench'
@@ -10,8 +15,8 @@ type PrintReportProps = {
 }
 
 /**
- * Renders the multi-page PDF report
- * @param {PrintReportProps} props - Props for the component
+ * Renders the full printable report for one project, including fixed chrome and all report pages.
+ * Expects a PDF-ready project response plus optional tariff verification date for the analysis section.
  */
 export function PrintReport({ project, tariffEffectiveDate = null }: PrintReportProps) {
   const generatedAt = new Date().toLocaleDateString('en-MY', {

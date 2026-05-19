@@ -1,3 +1,8 @@
+/**
+ * Locale switcher for the SolarSim interface.
+ * Used in the app nav to swap supported languages for Malaysian homeowner workflows.
+ */
+
 import { Languages } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -6,7 +11,8 @@ import { useLocale } from '@/hooks/useLocale'
 import { LOCALE_LABELS, SUPPORTED_LOCALES, type SupportedLocale } from '@/lib/i18n'
 
 /**
- * Renders the LanguageToggle component
+ * Renders a dropdown of supported locales and updates the global locale context.
+ * Highlights the active language while keeping the trigger compact for nav placement.
  */
 export function LanguageToggle() {
   const { locale, setLocale } = useLocale()

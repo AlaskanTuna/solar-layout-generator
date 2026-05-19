@@ -1,3 +1,8 @@
+/**
+ * Konva rotation affordance for multi-panel selections.
+ * Used in the workbench canvas to rotate grouped rooftop panels around their combined center.
+ */
+
 import { useState } from 'react'
 import { Circle, Group, Line, Path } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
@@ -21,8 +26,8 @@ type GroupRotationHandleProps = {
 }
 
 /**
- * Renders the GroupRotationHandle component
- * @param {GroupRotationHandleProps} props - Props for the component
+ * Renders a draggable rotation handle for selected panel groups, snapping movement by default to five degrees.
+ * Expects selected panel positions, panel dimensions, and group rotation lifecycle callbacks.
  */
 export function GroupRotationHandle({
   panels,

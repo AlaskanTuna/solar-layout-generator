@@ -1,3 +1,8 @@
+/**
+ * Renders the authenticated dashboard landing page.
+ * It is reached after sign-in or from the app navigation and summarizes quota, shortcuts, and recent projects.
+ * This page serves the workflow hub where users start a new rooftop search or resume project work.
+ */
 import { useState, useEffect, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +30,7 @@ import { Activity, ArrowRight, CircleHelp, Clock, FolderKanban, PieChart, MapPin
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeaderCard } from '@/components/layout/PageHeaderCard'
 
+/** Returns the time-of-day greeting key used by dashboard translations. */
 function getGreeting(): string {
   const hour = new Date().getHours()
   if (hour < 12) return 'morning'
@@ -32,14 +38,13 @@ function getGreeting(): string {
   return 'evening'
 }
 
+/** Formats the quota reset timestamp for the create-project disabled tooltip. */
 function formatResetTime(resetsAt: string): string {
   const d = new Date(resetsAt)
   return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
-/**
- * Renders the dashboard home page
- */
+/** Renders the dashboard home page with quick actions, quota state, and recent project shortcuts. */
 export function DashboardPage() {
   const { t } = useTranslation('dashboard')
   const { user } = useAuth()

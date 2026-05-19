@@ -1,8 +1,21 @@
+/**
+ * App-wide toast notifier wrapper around `react-hot-toast`.
+ *
+ * Wraps each toast variant (success / error / warning / info / loading) with
+ * project-consistent styling (border colour, icon, duration, position) so the
+ * rest of the codebase can call `notify.success('...')` without re-specifying.
+ *
+ * `notify.success` ALSO pushes a persistent entry into `notificationStore` so
+ * successful actions appear in the bell-icon popover. The other variants are
+ * transient-only.
+ */
+
 import toast from 'react-hot-toast'
 import type { ToastOptions } from 'react-hot-toast'
 import { CheckCircle, XCircle, AlertTriangle, Info, Loader2 } from 'lucide-react'
 import { notificationStore } from '@/lib/notificationStore'
 
+/** Shared visual style applied to every toast variant. */
 const BASE_STYLE: React.CSSProperties = {
   background: 'var(--card)',
   color: 'var(--card-foreground)',
@@ -14,12 +27,18 @@ const BASE_STYLE: React.CSSProperties = {
   maxWidth: '420px'
 }
 
+/** Default `ToastOptions` reused by every variant. */
 const baseOptions: ToastOptions = {
   duration: 2500,
   style: BASE_STYLE,
   position: 'bottom-center'
 }
 
+/**
+ * App-wide toast facade. Each variant fires a transient `react-hot-toast`
+ * notification; `success` additionally records a persistent entry in the
+ * notification bell store.
+ */
 export const notify = {
   success: (message: string) => {
     notificationStore.push('Success', message)

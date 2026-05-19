@@ -1,10 +1,37 @@
+/**
+ * Flux sampling utilities for computing solar DC energy from Google Solar API
+ * monthly flux GeoTIFFs.
+ *
+ * A flux GeoTIFF has 12 bands (one per month) where each pixel value is the
+ * average DC irradiance in kWh/kW/year for that month. To estimate the energy
+ * produced by a panel, we average the flux values over the pixels that fall
+ * inside the panel's rotated rectangle and multiply by the panel capacity in kW.
+ *
+ * Workflow:
+ *   1. Project the panel's lat/lng corners into GeoTIFF pixel space (see
+ *      `geo/transforms.ts`).
+ *   2. Sample pixels inside that polygon (`calculateAverageFlux`).
+ *   3. Repeat across all 12 monthly bands (`computeMonthlyEnergy`).
+ *
+ * For batch updates (multiple panels on the same location), prefer
+ * `preloadFluxRasters` + `computeMonthlyEnergyFromRasters` to avoid reading the
+ * GeoTIFF bands once per panel.
+ */
+
 import type { GeoTIFFImage } from 'geotiff'
 
 /**
- * Test whether a point lies inside a polygon
- * @param {number} x - Value used for x
- * @param {number} y - Value used for y
- * @param {[number, number][]} polygon - Collection of polygon values
+ * Tests whether a 2D point lies inside a polygon using the ray-casting algorithm.
+ *
+ * Casts a horizontal ray from the point and toggles `inside` on every edge
+ * crossing — an odd total means the point is inside, even means outside. The
+ * `y > min && y <= max` half-open interval handles ray-on-vertex degeneracies
+ * by counting each vertex exactly once.
+ *
+ * @param x - X coordinate of the test point in pixel space
+ * @param y - Y coordinate of the test point in pixel space
+ * @param polygon - Polygon vertices as `[x, y]` pairs, in any winding order
+ * @returns `true` if the point lies inside the polygon
  */
 export function pointInPolygon(x: number, y: number, polygon: [number, number][]): boolean {
   const n = polygon.length
@@ -30,12 +57,21 @@ export function pointInPolygon(x: number, y: number, polygon: [number, number][]
 }
 
 /**
- * Average flux values for pixels inside a panel polygon
- * @param {[number, number][]} corners - Collection of corners values
- * @param {ArrayLike<number>} fluxData - Value used for flux data
- * @param {number} width - Value used for width
- * @param {number} height - Value used for height
- * @returns {number} The resulting calculate average flux value
+ * Computes the mean flux value across all pixels whose centres fall inside the
+ * panel polygon.
+ *
+ * The polygon is iterated only over its axis-aligned bounding box, clamped to
+ * the raster extents so we never read out of bounds. Each candidate pixel is
+ * tested at its centre (`x + 0.5`, `y + 0.5`) rather than its corner — this
+ * avoids the off-by-one bias of corner-testing where a pixel can be "in" by an
+ * edge it doesn't actually overlap.
+ *
+ * @param corners - Panel polygon corners in pixel space
+ * @param fluxData - Flat raster of flux values, row-major, length `width * height`
+ * @param width - Raster width in pixels
+ * @param height - Raster height in pixels
+ * @returns Average flux over the panel footprint, or 0 if the panel falls
+ *   entirely outside the raster
  */
 export function calculateAverageFlux(
   corners: [number, number][],
@@ -48,6 +84,9 @@ export function calculateAverageFlux(
   let minY = Math.floor(Math.min(...corners.map((c) => c[1])))
   let maxY = Math.floor(Math.max(...corners.map((c) => c[1])))
 
+  // Clamp the bounding box to the raster so out-of-bounds panels never sample
+  // garbage memory; a panel partially off the GeoTIFF will still average the
+  // pixels that remain visible.
   minX = Math.max(0, minX)
   maxX = Math.min(width - 1, maxX)
   minY = Math.max(0, minY)
@@ -56,7 +95,7 @@ export function calculateAverageFlux(
   const fluxValues: number[] = []
   for (let y = minY; y <= maxY; y++) {
     for (let x = minX; x <= maxX; x++) {
-      // Test pixel center, not corner
+      // Test pixel centre, not corner, to avoid edge-inclusion bias
       if (pointInPolygon(x + 0.5, y + 0.5, corners)) {
         fluxValues.push(fluxData[y * width + x])
       }
@@ -68,11 +107,16 @@ export function calculateAverageFlux(
 }
 
 /**
- * Computes monthly DC energy directly from a GeoTIFF image
- * @param {GeoTIFFImage} image - Value used for image
- * @param {[number, number][]} corners - Collection of corners values
- * @param {number} panelCapacityWatts - Value used for panel capacity watts
- * @returns {Promise<number[]>} A promise resolving to the resulting value
+ * Computes monthly DC energy for a panel by sampling all 12 bands of a flux
+ * GeoTIFF.
+ *
+ * Reads each monthly band on demand. Suitable for single-panel recompute; for
+ * batched recomputes use `preloadFluxRasters` + `computeMonthlyEnergyFromRasters`.
+ *
+ * @param image - The flux GeoTIFF image (12 bands, kWh/kW/year per pixel)
+ * @param corners - Panel polygon corners in pixel space
+ * @param panelCapacityWatts - Panel nameplate DC capacity in watts
+ * @returns 12-element array of monthly DC energy in kWh, index 0 = January
  */
 export async function computeMonthlyEnergy(
   image: GeoTIFFImage,
@@ -88,6 +132,7 @@ export async function computeMonthlyEnergy(
     const rasters = await image.readRasters({ samples: [band] })
     const fluxData = rasters[0] as Float32Array
     const avgFlux = calculateAverageFlux(corners, fluxData, width, height)
+    // avgFlux is kWh/kW/year-equivalent for the band; multiply by capacity in kW
     monthlyEnergyDcKwh.push(avgFlux * (panelCapacityWatts / 1000))
   }
 
@@ -95,18 +140,29 @@ export async function computeMonthlyEnergy(
 }
 
 /**
- * Preloaded flux rasters for repeated monthly sampling
+ * Cached flux raster bands kept in memory for repeated sampling.
+ *
+ * Used by batch flux recompute (one fetch, many panels) to avoid the cost of
+ * re-decoding each monthly band per panel.
  */
 export interface PreloadedFluxRasters {
+  /** 12-element array of monthly flux rasters; index 0 = January */
   bands: ArrayLike<number>[]
+  /** Raster width in pixels (shared across bands) */
   width: number
+  /** Raster height in pixels (shared across bands) */
   height: number
 }
 
 /**
- * Read all monthly flux bands into memory
- * @param {GeoTIFFImage} image - Value used for image
- * @returns {Promise<PreloadedFluxRasters>} A promise resolving to the resulting value
+ * Reads all 12 monthly flux bands of a GeoTIFF into memory.
+ *
+ * Call once per location before recomputing many panels in a batch. The
+ * returned struct can be reused across any number of `computeMonthlyEnergyFromRasters`
+ * calls without further GeoTIFF I/O.
+ *
+ * @param image - The flux GeoTIFF image (12 bands)
+ * @returns Preloaded monthly rasters plus shared dimensions
  */
 export async function preloadFluxRasters(image: GeoTIFFImage): Promise<PreloadedFluxRasters> {
   const width = image.getWidth()
@@ -122,11 +178,13 @@ export async function preloadFluxRasters(image: GeoTIFFImage): Promise<Preloaded
 }
 
 /**
- * Computes monthly DC energy from preloaded rasters
- * @param {PreloadedFluxRasters} rasters - Value used for rasters
- * @param {[number, number][]} corners - Collection of corners values
- * @param {number} panelCapacityWatts - Value used for panel capacity watts
- * @returns {number[]} The computed monthly energy from rasters
+ * Synchronous variant of `computeMonthlyEnergy` that samples from preloaded
+ * rasters instead of reading the GeoTIFF on the fly.
+ *
+ * @param rasters - Result of `preloadFluxRasters` for the same location
+ * @param corners - Panel polygon corners in pixel space
+ * @param panelCapacityWatts - Panel nameplate DC capacity in watts
+ * @returns 12-element array of monthly DC energy in kWh, index 0 = January
  */
 export function computeMonthlyEnergyFromRasters(
   rasters: PreloadedFluxRasters,

@@ -1,3 +1,30 @@
+/**
+ * Workbench canvas interactions hook.
+ *
+ * This is the largest hook in the codebase and the single owner of the
+ * workbench's interactive behaviour. It manages:
+ *   - Panel selection (single, multi, marquee)
+ *   - Drag (single panel and group)
+ *   - Rotation (per-panel handle and group rotation around the centroid)
+ *   - Snap-to-grid alignment with neighbours
+ *   - Overlap resolution via SAT (separating-axis theorem)
+ *   - Roof-mask containment so panels can't leave the detected roof
+ *   - Per-panel and batched flux recompute after position/rotation changes
+ *   - Marquee selection rectangle
+ *   - Stable-ref pattern to avoid re-binding Konva handlers on every render
+ *
+ * Throttling notes:
+ *   - Drag updates are flushed on `requestAnimationFrame` to keep Konva
+ *     responsive — without this the canvas drops below 60fps on dense layouts.
+ *   - Flux recompute fires on drag end (single panel) or save (batch), never
+ *     during the drag, because each recompute is a backend round-trip.
+ *
+ * The hook is kept in one file because most state is interdependent:
+ * selection drives drag, drag triggers recompute, recompute updates panel
+ * state, and undo snapshots wrap all of the above. Splitting into sub-hooks
+ * was considered post-submission cleanup.
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { recomputeFlux, recomputeFluxBatch } from '@/api/locations'
 import {
@@ -61,9 +88,13 @@ type UseCanvasInteractionsOptions = {
 }
 
 /**
- * Provides the canvasInteractions hook
- * @param {UseCanvasInteractionsOptions} options - Value used for options
- * @returns {Function} Hook state for canvas interactions
+ * Returns the full set of state, refs, and callbacks the workbench canvas
+ * needs to drive selection, drag, rotation, snap, overlap resolution, and
+ * flux recompute. See the file header for the architectural notes.
+ *
+ * @param options - Hook dependencies — see `UseCanvasInteractionsOptions`
+ * @returns Selection state, drag/rotate/marquee handlers, snap guide list,
+ *   segment hull overlays, and helpers for clearing/replacing selection
  */
 export function useCanvasInteractions({
   locationId,

@@ -1,3 +1,10 @@
+/**
+ * Project routing module.
+ *
+ * Owns authenticated project CRUD, saved layout/analysis mutations, and the
+ * split PDF export flow that issues and later verifies short-lived tokens.
+ */
+
 import { Router, type Router as ExpressRouter } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { requirePdfToken } from '../middleware/requirePdfToken.js'
@@ -20,6 +27,7 @@ import { NotFoundError } from '../errors.js'
  */
 export const projectsRouter: ExpressRouter = Router()
 
+/** POST /api/projects/ through auth, quota, body validation, and async handling; creates and returns a project. */
 projectsRouter.post(
   '/',
   requireAuth,
@@ -32,6 +40,7 @@ projectsRouter.post(
   })
 )
 
+/** GET /api/projects/ through auth and async handling; returns all projects owned by the user. */
 projectsRouter.get(
   '/',
   requireAuth,
@@ -41,6 +50,7 @@ projectsRouter.get(
   })
 )
 
+/** GET /api/projects/:id through auth and async handling; returns one owned project or 404. */
 projectsRouter.get(
   '/:id',
   requireAuth,
@@ -55,6 +65,7 @@ projectsRouter.get(
   })
 )
 
+/** DELETE /api/projects/:id through auth and async handling; deletes one owned project and returns success. */
 projectsRouter.delete(
   '/:id',
   requireAuth,
@@ -69,6 +80,7 @@ projectsRouter.delete(
   })
 )
 
+/** PATCH /api/projects/:id/layout through auth, body validation, and async handling; saves edited panel layout. */
 projectsRouter.patch(
   '/:id/layout',
   requireAuth,
@@ -91,6 +103,7 @@ projectsRouter.patch(
   })
 )
 
+/** PATCH /api/projects/:id/layout-preferences through auth, validation, async; saves layout preferences. */
 projectsRouter.patch(
   '/:id/layout-preferences',
   requireAuth,
@@ -110,6 +123,7 @@ projectsRouter.patch(
   })
 )
 
+/** PATCH /api/projects/:id/analysis through auth, validation, async; saves tariff analysis inputs/results. */
 projectsRouter.patch(
   '/:id/analysis',
   requireAuth,
@@ -130,6 +144,7 @@ projectsRouter.patch(
   })
 )
 
+/** POST /api/projects/:id/pdf-token through auth, rate limiting, async; issues a PDF export token. */
 projectsRouter.post(
   '/:id/pdf-token',
   requireAuth,
@@ -147,6 +162,7 @@ projectsRouter.post(
   })
 )
 
+/** GET /api/projects/:id/pdf-data through PDF-token auth and async; returns report data for the token project. */
 projectsRouter.get(
   '/:id/pdf-data',
   requirePdfToken,

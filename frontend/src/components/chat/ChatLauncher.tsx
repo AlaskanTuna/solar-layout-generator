@@ -1,3 +1,8 @@
+/**
+ * Floating AI chat entry point for project workbench and analysis pages.
+ * Mounts the chat panel with live solar-layout state so answers can reference unsaved edits.
+ */
+
 import { useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChatContext } from './ChatProvider'
@@ -11,7 +16,10 @@ type ChatLauncherProps = {
   liveStateProvider?: () => ChatLiveState | undefined
 }
 
-/** Floating chat launcher that mirrors the guided-tour FAB styling and position. */
+/**
+ * Renders the floating chat button and project-scoped chat panel.
+ * Expects the current project id, page context, and optional live-state provider for grounding.
+ */
 export function ChatLauncher({ projectId, page, liveStateProvider }: ChatLauncherProps) {
   const { t } = useTranslation('chat')
   const { getState, setState } = useContext(ChatContext)

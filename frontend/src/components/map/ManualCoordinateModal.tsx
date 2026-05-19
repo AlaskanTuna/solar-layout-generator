@@ -1,3 +1,8 @@
+/**
+ * Manual coordinate entry modal for map fallback flows.
+ * Lets users submit latitude and longitude when address search cannot locate the Malaysian rooftop precisely.
+ */
+
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -13,7 +18,13 @@ type Props = {
   bounds: Bounds
 }
 
-/** Floating modal for entering Malaysian coordinates manually. */
+/**
+ * Renders a lat/lng form with optional bounds validation for manual rooftop selection.
+ * @param open - Whether the dialog is visible.
+ * @param onClose - Called when the modal closes without a valid coordinate submit.
+ * @param onSubmit - Receives parsed latitude and longitude once validation passes.
+ * @param bounds - Allowed map bounds used to reject unsupported coordinates.
+ */
 export function ManualCoordinateModal({ open, onClose, onSubmit, bounds }: Props) {
   const { t } = useTranslation('map')
   const [lat, setLat] = useState('')

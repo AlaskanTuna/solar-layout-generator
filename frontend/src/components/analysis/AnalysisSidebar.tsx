@@ -1,3 +1,8 @@
+/**
+ * Analysis page control sidebar for Malaysian homeowner savings calculations.
+ * Used beside the analysis result cards to edit consumption, tariff, lifecycle, and PDF export inputs.
+ */
+
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -33,8 +38,8 @@ type AnalysisSidebarProps = {
 }
 
 /**
- * Renders the analysis controls sidebar
- * @param {AnalysisSidebarProps} props - Props for the component
+ * Renders the analysis control stack for a project, including tariff, consumption, lifecycle, and system metadata panels.
+ * Expects the current form state, selected panel model, Solar API building data, and save/export handlers.
  */
 export function AnalysisSidebar({
   projectId,

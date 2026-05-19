@@ -1,3 +1,8 @@
+/**
+ * Project-scoped AI chat panel for solar layout and analysis assistance.
+ * Used from the floating launcher to stream answers grounded in project data and current unsaved UI state.
+ */
+
 import { useContext, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -20,7 +25,10 @@ function getPaybackYears(project: ProjectResponse | undefined): number | null | 
   return project?.analysisResults?.paybackYears
 }
 
-/** Glass chat panel: streaming message list, markdown rendering, follow-up chips, spam-cooldown composer. */
+/**
+ * Renders the slide-out chat interface with message history, suggestions, cooldown, and streaming controls.
+ * Expects a project id, page context, and optional live-state provider used when sending prompts.
+ */
 export function ChatPanel({ projectId, page, liveStateProvider }: ChatPanelProps) {
   const { t } = useTranslation('chat')
   const queryClient = useQueryClient()

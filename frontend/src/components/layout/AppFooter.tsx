@@ -1,10 +1,16 @@
+/**
+ * Footer chrome for the authenticated and marketing layout shells.
+ * Provides localized navigation, SDG copy, and SolarSim branding after routed page content.
+ */
+
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Leaf } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 
 /**
- * Renders the AppFooter component
+ * Renders localized footer navigation and SolarSim branding for the application shell.
+ * Link targets include landing-page anchors plus static policy pages.
  */
 export function AppFooter() {
   const { t } = useTranslation('nav')

@@ -1,11 +1,19 @@
+/**
+ * Project creation quota middleware.
+ *
+ * Checks the authenticated user's current daily project usage before allowing
+ * routes that create quota-counted projects to continue.
+ */
+
 import type { Request, Response, NextFunction } from 'express'
 import { getQuotaSummary } from '../services/userService.js'
 
 /**
- * Enforces the authenticated user's daily project quota
- * @param {Request} req - Incoming Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express middleware continuation callback
+ * Blocks authenticated users whose daily project count has reached their tier limit.
+ *
+ * @param req - Authenticated request whose `req.user.id` is checked
+ * @param res - Response used for unauthorised and quota-exceeded failures
+ * @param next - Continuation called when the user has remaining quota
  */
 export async function checkQuota(req: Request, res: Response, next: NextFunction) {
   if (!req.user) {

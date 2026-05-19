@@ -1,3 +1,10 @@
+/**
+ * Flux recomputation service for moved or edited solar panels.
+ *
+ * Loads monthly Solar API flux rasters, maps edited panel geometry into GeoTIFF
+ * pixel space, and returns updated monthly DC energy estimates.
+ */
+
 import * as GeoTIFF from 'geotiff'
 import * as locationService from './locationService.js'
 import { downloadFromStorage } from './storageService.js'
@@ -19,10 +26,11 @@ type FluxLocationData = {
 type ValidatedLocation = Awaited<ReturnType<typeof locationService.getLocationDataForUser>>
 
 /**
- * Validates that a location is ready for flux recomputation
- * @param {string} userId - Authenticated user identifier
- * @param {string} locationId - Location identifier
- * @returns {Promise} A promise resolving to the resulting value
+ * Validates that an owned location has ready monthly flux data and usable panel specs.
+ *
+ * @param userId - Authenticated user that must own a project for the location
+ * @param locationId - Location whose monthly flux raster will be sampled
+ * @returns Location row and panel defaults needed for recomputation
  */
 export async function validateFluxLocation(
   userId: string,
@@ -42,6 +50,15 @@ export async function validateFluxLocation(
   return { location, panelSpecs }
 }
 
+/**
+ * Downloads the monthly flux GeoTIFF and prepares the transform shared by all
+ * panel recomputation paths. Keeping this in one helper avoids re-reading the
+ * same raster metadata differently for single-panel and batch requests.
+ *
+ * @param monthlyFluxPath - Storage path of the monthly flux GeoTIFF
+ * @param panelSpecs - Default panel dimensions and capacity from building insights
+ * @returns Loaded GeoTIFF image, coordinate transform, and panel defaults
+ */
 async function loadFluxData(monthlyFluxPath: string, panelSpecs: PanelSpecs): Promise<FluxLocationData> {
   const fluxBuffer = await downloadFromStorage(monthlyFluxPath)
   const tiff = await GeoTIFF.fromArrayBuffer(fluxBuffer)
@@ -51,11 +68,12 @@ async function loadFluxData(monthlyFluxPath: string, panelSpecs: PanelSpecs): Pr
 }
 
 /**
- * Recompute monthly energy for a single moved panel
- * @param {string} monthlyFluxPath - Monthly flux path value
- * @param {PanelSpecs} panelSpecs - Value used for panel specs
- * @param {Object} panel - Panel value
- * @returns {Promise<FluxRecomputeResponse>} A promise resolving to the resulting value
+ * Recomputes monthly energy for one edited panel.
+ *
+ * @param monthlyFluxPath - Storage path of the monthly flux GeoTIFF
+ * @param panelSpecs - Solar API defaults used when the request omits panel dimensions or capacity
+ * @param panel - Edited panel center, rotation, and optional physical overrides
+ * @returns Monthly DC energy for the requested panel
  */
 export async function recomputeSinglePanel(
   monthlyFluxPath: string,
@@ -84,11 +102,12 @@ export async function recomputeSinglePanel(
 }
 
 /**
- * Recompute monthly energy for a batch of moved panels
- * @param {string} monthlyFluxPath - Monthly flux path value
- * @param {PanelSpecs} panelSpecs - Value used for panel specs
- * @param {Array} panels - Collection of panels values
- * @returns {Promise<FluxRecomputeResponse[]>} A promise resolving to the resulting value
+ * Recomputes monthly energy for a batch of edited panels using one raster preload.
+ *
+ * @param monthlyFluxPath - Storage path of the monthly flux GeoTIFF
+ * @param panelSpecs - Solar API defaults used when a panel omits dimensions or capacity
+ * @param panels - Edited panels to sample against the monthly flux raster
+ * @returns Per-panel monthly DC energy results in request order
  */
 export async function recomputeBatchPanels(
   monthlyFluxPath: string,

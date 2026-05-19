@@ -1,3 +1,8 @@
+/**
+ * Boots the React frontend into the root DOM node.
+ * This file is reached once by Vite in the browser and wires the providers that all routes depend on.
+ * It serves the app shell step by mounting routing, auth, theme, locale, chat, query, toast, and error boundaries.
+ */
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'

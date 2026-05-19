@@ -1,9 +1,33 @@
+/**
+ * Auth provider + hook backed by Supabase Auth.
+ *
+ * Wraps `supabase.auth` and exposes the current user/session, loading state,
+ * and helpers for email-password and Google OAuth sign-in/out. Also handles
+ * two cross-cutting concerns:
+ *   - Surfaces OAuth callback errors that come back in the URL (Supabase
+ *     implicit flow puts them in the hash, some flows put them in the query).
+ *     Without this the user lands silently with no idea why sign-in failed.
+ *   - Wipes the React Query cache on sign-out so a subsequent sign-in cannot
+ *     briefly render the previous user's cached data.
+ */
+
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import type { User, Session, AuthError } from '@supabase/supabase-js'
 import { useQueryClient } from '@tanstack/react-query'
 import { getSupabase } from '@/lib/supabase'
 import { notify } from '@/components/ui/toastConfig'
 
+/**
+ * Value exposed by `useAuth`.
+ *
+ * - `user`              — current Supabase user, or `null` if signed out
+ * - `session`           — current session (includes access token), or `null`
+ * - `loading`           — `true` while the initial `getSession()` is pending
+ * - `signIn`            — email-password sign-in; returns `{ error }`
+ * - `signUp`            — email-password sign-up; returns `{ error }`
+ * - `signInWithGoogle`  — Google OAuth sign-in; returns `{ error }`
+ * - `signOut`           — sign out and clear the React Query cache
+ */
 type AuthContextValue = {
   user: User | null
   session: Session | null
@@ -17,8 +41,8 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 /**
- * Renders the AuthProvider component
- * @param {Object} props - Props for the component
+ * Wraps the React tree with auth context. Mount once near the root, above any
+ * component that calls `useAuth`.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = getSupabase()
@@ -105,8 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * Provides the auth hook
- * @returns {AuthContextValue} Hook state for auth
+ * Hook that returns the current auth context. Must be called inside
+ * `AuthProvider`; throws otherwise.
  */
 export function useAuth() {
   const context = useContext(AuthContext)

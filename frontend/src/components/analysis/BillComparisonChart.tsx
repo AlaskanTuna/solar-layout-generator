@@ -1,3 +1,8 @@
+/**
+ * Monthly bill comparison chart for the analysis dashboard.
+ * Shows Malaysian homeowner bills with and without rooftop solar under NEM assumptions.
+ */
+
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,8 +16,8 @@ type BillComparisonChartProps = {
 }
 
 /**
- * Renders the billcomparison chart
- * @param {BillComparisonChartProps} props - Props for the component
+ * Renders a responsive bar chart comparing baseline RM bills against NEM bills for each month.
+ * @param props - Chart data containing month labels plus baseline and solar-adjusted bill totals.
  */
 export function BillComparisonChart({ chartData }: BillComparisonChartProps) {
   const { t } = useTranslation('analysis')

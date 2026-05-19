@@ -1,3 +1,8 @@
+/**
+ * Renders the interactive rooftop panel layout workbench.
+ * It is reached at /project/:projectId/workbench after location processing creates rooftop imagery and panel data.
+ * This page serves the layout-editing step where users move, rotate, size, save, and inspect PV panels before analysis.
+ */
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
@@ -41,13 +46,12 @@ import { markProjectVisited } from '@/lib/recentProjectActivity'
 import type { LayoutPreferences } from '@shared/types'
 import { PANEL_MODELS, DEFAULT_PANEL_MODEL_ID, getPanelModel } from '@shared/types'
 
+/** Chooses monthly-summed annual energy when available, falling back to the source yearly panel estimate. */
 function getPanelAnnualEnergy(monthlyEnergyDcKwh: number[], yearlyEnergyDcKwh: number): number {
   return monthlyEnergyDcKwh.length > 0 ? annualEnergyFromMonthly(monthlyEnergyDcKwh) : yearlyEnergyDcKwh
 }
 
-/**
- * Renders the panel layout workbench
- */
+/** Renders the panel layout workbench with canvas editing, layout presets, guided tours, and chat context. */
 export function WorkbenchPage() {
   const { t } = useTranslation('workbench')
   const { projectId } = useParams<{ projectId: string }>()
@@ -59,6 +63,7 @@ export function WorkbenchPage() {
   const [freeRotate, setFreeRotate] = useState(false)
   const [tourActive, setTourActive] = useState(false)
   const [selectedPanelModelId, setSelectedPanelModelId] = useState(DEFAULT_PANEL_MODEL_ID)
+  // Prevents saved panel model hydration from re-running after the user changes models within the same project.
   const hydratedPanelModelProjectIdRef = useRef<string | null>(null)
   const selectedPanelModel = getPanelModel(selectedPanelModelId) ?? PANEL_MODELS[1]!
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('rgb')
@@ -111,6 +116,7 @@ export function WorkbenchPage() {
   const queryClient = useQueryClient()
   const [layoutPresetOpen, setLayoutPresetOpen] = useState(false)
   const layoutPresetAutoShownRef = useRef<string | null>(null)
+  // Suppresses the custom-sizing mutation caused by applying a preset's inferred visible panel count.
   const applyingPresetRef = useRef(false)
 
   const layoutPreferences: LayoutPreferences | null = project?.layoutPreferences ?? null

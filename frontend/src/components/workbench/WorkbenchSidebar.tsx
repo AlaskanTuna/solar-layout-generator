@@ -1,3 +1,8 @@
+/**
+ * Workbench right sidebar for project layout controls and metrics.
+ * Summarizes selected panel model, layout preferences, annual yield, CO2, selection state, and save actions.
+ */
+
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Sliders } from 'lucide-react'
@@ -54,8 +59,8 @@ type WorkbenchSidebarProps = {
 }
 
 /**
- * Renders the workbench controls sidebar
- * @param {WorkbenchSidebarProps} props - Props for the component
+ * Renders the workbench control sidebar for panel model, visibility, selected panel, and save workflow.
+ * Expects project metadata, yield metrics, panel model state, recompute flags, selection details, and layout preset controls.
  */
 export function WorkbenchSidebar({
   projectName,

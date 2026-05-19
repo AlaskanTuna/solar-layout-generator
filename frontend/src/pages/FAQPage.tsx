@@ -1,3 +1,8 @@
+/**
+ * Renders the searchable solar and app FAQ page.
+ * It is reached from /dashboard/faq and gives users self-serve support while using the authenticated dashboard.
+ * This page serves the learning and troubleshooting step for terminology, NEM billing, reports, and app usage.
+ */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, CircleHelp, Search } from 'lucide-react'
@@ -106,9 +111,7 @@ function FaqCard({ item }: { item: FaqItem }) {
   )
 }
 
-/**
- * Renders the searchable FAQ page
- */
+/** Renders the searchable, categorized FAQ list with pagination. */
 export function FAQPage() {
   const { t } = useTranslation('faq')
   const [query, setQuery] = useState('')

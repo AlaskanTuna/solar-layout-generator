@@ -1,16 +1,23 @@
+/**
+ * Supabase Google OAuth entry point for sign-in and sign-up screens.
+ * Used anywhere the auth flow offers one-click provider login instead of email credentials.
+ */
+
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
 interface GoogleSignInButtonProps {
+  /** Button copy, usually customized by the surrounding auth screen. */
   label?: string
+  /** Receives provider errors so the page can render them with its own auth messaging. */
   onError?: (message: string) => void
 }
 
 /**
- * Renders the googlesignin button
- * @param {GoogleSignInButtonProps} props - Props for the component
+ * Renders a branded Google sign-in action and invokes Supabase OAuth through the auth hook.
+ * @param props - Optional label override and error callback for surfacing OAuth launch failures.
  */
 export function GoogleSignInButton({ label = 'Continue with Google', onError }: GoogleSignInButtonProps) {
   const { signInWithGoogle } = useAuth()

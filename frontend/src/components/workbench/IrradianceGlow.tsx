@@ -1,3 +1,8 @@
+/**
+ * Seasonal irradiance glow overlay for the workbench canvas.
+ * Provides a visual cue for Peninsular Malaysia sun direction and relative monthly intensity.
+ */
+
 import { useMemo } from 'react'
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -44,9 +49,8 @@ type IrradianceGlowProps = {
 }
 
 /**
- * Decorative absolute-positioned overlay that paints a directional sun glow on the workbench canvas.
- * Position and brightness derive from {@link MONTHLY_AZIMUTH} and {@link MONTHLY_IRRADIANCE} for the
- * selected month, giving a quick visual cue of seasonal sun angle.
+ * Renders an absolute-positioned radial glow based on the selected month.
+ * @param props - Zero-based month index used to read approximate Malaysian irradiance and sun azimuth constants.
  */
 export function IrradianceGlow({ month }: IrradianceGlowProps) {
   const style = useMemo(() => {

@@ -1,3 +1,10 @@
+/**
+ * Persistence stage for the location pipeline.
+ *
+ * Writes successful Solar API outputs onto the location row, or marks the row
+ * failed when any earlier pipeline stage throws.
+ */
+
 import { prisma } from '../../config/prisma.js'
 import type { BuildingInsightsApiResponse, ImageryQuality } from '../solarApiService.js'
 import type { StoredLocationAssets } from './store.js'
@@ -7,11 +14,12 @@ function serializeJsonValue(value: unknown) {
 }
 
 /**
- * Mark a location ready and persist pipeline outputs
- * @param {string} locationId - Location identifier
- * @param {ImageryQuality} imageryQuality - Value used for imagery quality
- * @param {BuildingInsightsApiResponse} buildingInsightsJson - Value used for building insights json
- * @param {StoredLocationAssets} storedAssets - Value used for stored assets
+ * Marks a location ready and persists all pipeline outputs.
+ *
+ * @param locationId - Location row being completed
+ * @param imageryQuality - Solar API imagery quality used for the successful run
+ * @param buildingInsightsJson - Enriched building insights stored for later route responses
+ * @param storedAssets - Storage paths produced by the asset stage
  */
 export async function persistLocationPipelineSuccess(
   locationId: string,
@@ -35,8 +43,9 @@ export async function persistLocationPipelineSuccess(
 }
 
 /**
- * Mark a location failed after pipeline errors
- * @param {string} locationId - Location identifier
+ * Marks a location failed after pipeline errors.
+ *
+ * @param locationId - Location row whose pipeline failed
  */
 export async function persistLocationPipelineFailure(locationId: string): Promise<void> {
   await prisma.location.update({

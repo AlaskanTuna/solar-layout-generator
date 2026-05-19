@@ -1,3 +1,8 @@
+/**
+ * First PDF report page showing the rooftop workbench layout.
+ * Projects saved panel edits back onto the satellite image for homeowner review.
+ */
+
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ProjectResponse } from '@/api/projects'
@@ -11,8 +16,8 @@ type Props = {
 }
 
 /**
- * Renders the workbench page of the PDF report
- * @param {Props} props - Props for the component
+ * Renders the PDF workbench page with satellite image, panel overlay, and project summary tiles.
+ * Expects a PDF-enriched project response containing signed imagery, geo transform, layout, and panel model config.
  */
 export function PrintPage1Workbench({ project }: Props) {
   const { t } = useTranslation('pdf')

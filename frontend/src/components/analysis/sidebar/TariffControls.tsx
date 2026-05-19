@@ -1,3 +1,8 @@
+/**
+ * Tariff and connection controls for the analysis sidebar.
+ * Captures TNB phase limits, roof type, tariff overrides, and lifecycle controls used in the savings model.
+ */
+
 import { useEffect, useState } from 'react'
 import { ChevronDown, Sliders } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -70,8 +75,8 @@ type TariffControlsProps = {
 }
 
 /**
- * Renders the TariffControls component
- * @param {TariffControlsProps} props - Props for the component
+ * Renders connection phase, roof type, tariff override, and optional lifecycle sections for the analysis form.
+ * Expects live form state, published tariff defaults, and the current phase capacity cap in kW.
  */
 export function TariffControls({
   formState,

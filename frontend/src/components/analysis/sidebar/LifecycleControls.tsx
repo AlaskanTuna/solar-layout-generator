@@ -1,3 +1,8 @@
+/**
+ * Lifecycle finance controls for advanced analysis mode.
+ * Lets users add maintenance, degradation, tariff escalation, and inverter replacement assumptions to RM forecasts.
+ */
+
 import { ChevronDown, Plus, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -25,8 +30,8 @@ type LifecycleControlsProps = {
 }
 
 /**
- * Renders the LifecycleControls component
- * @param {LifecycleControlsProps} props - Props for the component
+ * Renders advanced lifecycle inputs for long-term rooftop solar cash-flow modelling.
+ * Expects the analysis form state and setter, then normalizes inverter replacement rows.
  */
 export function LifecycleControls({ formState, setFormState }: LifecycleControlsProps) {
   const { t } = useTranslation('analysis')

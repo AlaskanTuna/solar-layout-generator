@@ -1,3 +1,8 @@
+/**
+ * Konva rotation affordance for a single selected solar panel.
+ * Used in the workbench canvas to rotate panels while preserving visual alignment with the rooftop image.
+ */
+
 import { useState } from 'react'
 import { Circle, Group, Line, Path } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
@@ -15,8 +20,8 @@ type RotationHandleProps = {
 }
 
 /**
- * Renders the RotationHandle component
- * @param {RotationHandleProps} props - Props for the component
+ * Renders a draggable rotation handle for one selected panel and snaps the resulting angle by default to five degrees.
+ * Expects panel position, dimensions, current rotation, and an onRotate callback from workbench state.
  */
 export function RotationHandle({
   panelId,

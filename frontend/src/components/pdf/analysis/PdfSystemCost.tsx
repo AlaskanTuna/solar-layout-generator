@@ -1,3 +1,8 @@
+/**
+ * PDF system-cost breakdown section for analysis reports.
+ * Converts the Malaysian installation cost model into print-friendly chart and assumption tiles.
+ */
+
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
@@ -22,8 +27,8 @@ const SEGMENT_COLORS = {
 } as const
 
 /**
- * Renders the PdfSystemCost component
- * @param {Object} props - Props for the component
+ * Renders PDF cost breakdown chart, cost segments, and assumptions for the selected rooftop system.
+ * Expects cost model output, panel/roof inputs, tooltip styling, and assumption tiles from the PDF view model.
  */
 export function PdfSystemCost({
   costBreakdown,

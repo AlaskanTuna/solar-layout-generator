@@ -1,3 +1,8 @@
+/**
+ * Bottom drawer for selecting a solar panel model in the workbench.
+ * Shows Malaysian-market panel options, dimensions, capacity, warranty, and a lazy 3D preview.
+ */
+
 import { lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Drawer } from 'vaul'
@@ -24,8 +29,8 @@ type PanelModelDrawerProps = {
 }
 
 /**
- * Renders the PanelModelDrawer component
- * @param {PanelModelDrawerProps} props - Props for the component
+ * Renders the selected panel model summary and drawer of available module options.
+ * Expects the active model id, selection callback, and optional disabled state while recomputation is running.
  */
 export function PanelModelDrawer({ selectedModelId, onSelect, disabled = false }: PanelModelDrawerProps) {
   const { t } = useTranslation('workbench')

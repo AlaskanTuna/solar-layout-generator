@@ -1,4 +1,12 @@
-/** Render the stat card */
+/**
+ * Compact dashboard KPI tile used in portfolio summaries.
+ * Displays one icon-led metric with caller-provided accent classes.
+ */
+
+/**
+ * Renders one icon-led dashboard statistic with caller-provided accent and background classes.
+ * @param props - Icon, label, display value, and Tailwind classes for visual emphasis.
+ */
 export function StatCard({
   icon,
   label,

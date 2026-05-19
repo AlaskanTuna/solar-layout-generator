@@ -1,3 +1,8 @@
+/**
+ * Renders the public privacy and data-security disclosure.
+ * It is reached from /privacy before or after authentication when users review how project and account data is handled.
+ * This page serves the trust and compliance step for PDPA-oriented FYP documentation.
+ */
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck } from 'lucide-react'
@@ -24,7 +29,7 @@ const SECTION_ORDER = [
 type SectionKey = (typeof SECTION_ORDER)[number]
 type Section = { title: string; body: string[] }
 
-/** Public PDPA-compliant privacy & data security disclosure. */
+/** Renders the public PDPA-compliant privacy and data-security disclosure. */
 export function PrivacyPage() {
   const { t } = useTranslation('privacy')
 

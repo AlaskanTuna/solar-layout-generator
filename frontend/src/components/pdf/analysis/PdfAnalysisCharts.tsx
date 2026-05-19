@@ -1,3 +1,8 @@
+/**
+ * PDF-sized analysis charts for the solar report.
+ * Mirrors live bill and cumulative savings charts with print-friendly dimensions and labels.
+ */
+
 import { useTranslation } from 'react-i18next'
 import {
   Bar,
@@ -19,8 +24,8 @@ import type { AnalysisChartDataPoint } from '@/lib/analysis'
 type TooltipStyle = ReturnType<typeof getChartTooltipStyle>
 
 /**
- * Renders the pdfbillcomparison chart
- * @param {Object} props - Props for the component
+ * Renders the print-sized monthly bill comparison chart for baseline versus NEM bills.
+ * Expects chart data, tooltip styling, and localized series labels from the PDF analysis page.
  */
 export function PdfBillComparisonChart({
   chartData,
@@ -100,8 +105,8 @@ export function PdfBillComparisonChart({
 }
 
 /**
- * Renders the pdfcumulativesavings chart
- * @param {Object} props - Props for the component
+ * Renders the print-sized cumulative savings line chart across the report horizon.
+ * Expects annual net-benefit data and tooltip styling already matched to the active theme.
  */
 export function PdfCumulativeSavingsChart({
   chartData,

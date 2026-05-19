@@ -1,14 +1,31 @@
+/**
+ * PDF export token authentication middleware.
+ *
+ * Validates short-lived PDF export tokens and attaches the token claims used
+ * by the unauthenticated PDF data route.
+ */
+
 import type { Request, Response, NextFunction } from 'express'
 import { verifyPdfToken, InvalidPdfTokenError } from '../services/pdfTokenService.js'
 
 declare global {
   namespace Express {
+    // Declared here because this middleware is the only writer of req.pdfToken.
     interface Request {
       pdfToken?: { userId: string; projectId: string }
     }
   }
 }
 
+/**
+ * Extracts a PDF token from either the Bearer header or `?token=`.
+ *
+ * The header path is used by API clients; the query-string fallback supports
+ * browser/PDF renderer navigations where custom headers are awkward.
+ *
+ * @param req - Request that may carry the export token in either supported location
+ * @returns The raw token string, or `null` when no token is present
+ */
 function extractToken(req: Request): string | null {
   const auth = req.headers.authorization
   if (auth?.startsWith('Bearer ')) return auth.slice(7)
@@ -18,10 +35,12 @@ function extractToken(req: Request): string | null {
 }
 
 /**
- * Verify the PDF export token and attach its claims
- * @param {Request} req - Incoming Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express middleware continuation callback
+ * Verifies a PDF export token, ensures it matches the requested project id,
+ * and stores the authorised user/project claims on `req.pdfToken`.
+ *
+ * @param req - Request carrying the PDF token and optional project route param
+ * @param res - Response used for missing, invalid, or mismatched token failures
+ * @param next - Continuation called after token validation succeeds
  */
 export function requirePdfToken(req: Request, res: Response, next: NextFunction) {
   const token = extractToken(req)

@@ -1,3 +1,8 @@
+/**
+ * System cost breakdown card for the analysis page.
+ * Explains estimated Malaysian installation cost by panels, inverter, mounting, labour, permits, and margin.
+ */
+
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
@@ -31,8 +36,8 @@ const SEGMENT_COLORS = {
 type Segment = { key: string; name: string; detail: string; value: number; color: string }
 
 /**
- * Renders the systemcost card
- * @param {SystemCostCardProps} props - Props for the component
+ * Renders the estimated system cost pie chart and supporting RM cost assumptions.
+ * Expects a computed cost breakdown plus panel count, panel Wp, panel RM/Wp, and roof type.
  */
 export function SystemCostCard({
   costBreakdown,

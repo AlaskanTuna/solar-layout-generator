@@ -1,3 +1,10 @@
+/**
+ * Location response view-model builders.
+ *
+ * Keeps route handlers and services returning shared API shapes consistently
+ * while preserving backend-only transform and mask metadata.
+ */
+
 import type { ImageryQuality } from '@prisma/client'
 import type {
   FluxRecomputeBatchResponse,
@@ -11,7 +18,7 @@ import type { ImageGeoTransform, RoofMaskResult } from '../geoTiffService.js'
 import type { BuildingInsightsDto } from '../buildingInsightsService.js'
 
 /**
- * Location data response enriched with transform metadata
+ * Location data response enriched with transform metadata.
  */
 export type LocationDataRouteResponse = LocationDataResponse & {
   imageGeoTransform: ImageGeoTransform
@@ -19,41 +26,45 @@ export type LocationDataRouteResponse = LocationDataResponse & {
 }
 
 /**
- * Builds a resolve-location response object
- * @param {string} locationId - Location identifier
- * @param {ResolveLocationResponse['status']} status - Value used for status
- * @returns {Object} The built resolve location response
+ * Builds a resolve-location response object.
+ *
+ * @param locationId - Location row created or found by the resolver
+ * @param status - Current pipeline status for the location
+ * @returns Shared resolve-location API response
  */
 export function buildResolveLocationResponse(locationId: string, status: ResolveLocationResponse['status']) {
   return { locationId, status } satisfies ResolveLocationResponse
 }
 
 /**
- * Builds a location-status response object
- * @param {LocationStatusResponse['status']} status - Value used for status
- * @returns {Object} The built location status response
+ * Builds a location-status response object.
+ *
+ * @param status - Current pipeline status for the location
+ * @returns Shared status API response
  */
 export function buildLocationStatusResponse(status: LocationStatusResponse['status']) {
   return { status } satisfies LocationStatusResponse
 }
 
 /**
- * Builds a probe-location response object
- * @param {ProbeLocationResponse} result - Value used for result
- * @returns {ProbeLocationResponse} The built probe location response
+ * Builds a probe-location response object.
+ *
+ * @param result - Solar API quality probe result
+ * @returns Shared probe API response
  */
 export function buildProbeLocationResponse(result: ProbeLocationResponse) {
   return result satisfies ProbeLocationResponse
 }
 
 /**
- * Builds a location-data response object
- * @param {BuildingInsightsDto} buildingInsights - Value used for building insights
- * @param {string} rgbImageUrl - Rgb image url value
- * @param {ImageryQuality | null} imageryQuality - Value used for imagery quality
- * @param {ImageGeoTransform} imageGeoTransform - Value used for image geo transform
- * @param {RoofMaskResult} roofMask - Value used for roof mask
- * @returns {LocationDataRouteResponse} The built location data response
+ * Builds a location-data response object for the workbench.
+ *
+ * @param buildingInsights - Validated Solar API building metadata
+ * @param rgbImageUrl - Signed PNG URL for the satellite RGB layer
+ * @param imageryQuality - Solar API imagery quality used for the location, if known
+ * @param imageGeoTransform - GeoTIFF transform for aligning frontend canvas coordinates
+ * @param roofMask - Binary roof mask and transform for placement constraints
+ * @returns Shared location-data API response with backend transform metadata
  */
 export function buildLocationDataResponse(
   buildingInsights: BuildingInsightsDto,
@@ -72,18 +83,20 @@ export function buildLocationDataResponse(
 }
 
 /**
- * Builds an overlay response object
- * @param {string} url - Url value
- * @returns {Object} The built overlay response
+ * Builds an overlay response object.
+ *
+ * @param url - Signed PNG URL for the requested overlay layer
+ * @returns Overlay API response
  */
 export function buildOverlayResponse(url: string) {
   return { url }
 }
 
 /**
- * Builds a batch flux recompute response object
- * @param {FluxRecomputeResponse[]} results - Collection of results values
- * @returns {FluxRecomputeBatchResponse} The built flux recompute batch response
+ * Builds a batch flux recompute response object.
+ *
+ * @param results - Per-panel flux recompute results in request order
+ * @returns Shared batch recompute API response
  */
 export function buildFluxRecomputeBatchResponse(results: FluxRecomputeResponse[]): FluxRecomputeBatchResponse {
   return { results }

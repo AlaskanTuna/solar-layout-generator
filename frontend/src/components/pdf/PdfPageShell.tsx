@@ -1,3 +1,8 @@
+/**
+ * Shared page shell for PDF report sections.
+ * Gives workbench and analysis print pages consistent labels, page breaks, and contextual footnotes.
+ */
+
 import type { ReactNode } from 'react'
 
 type Props = {
@@ -8,8 +13,11 @@ type Props = {
 }
 
 /**
- * Renders a single PDF page shell with consistent chrome
- * @param {Props} props - Props for the component
+ * Renders one printable PDF page section with a section label and optional explanatory context.
+ * @param sectionLabel - Short page section label displayed at the top of the page.
+ * @param context - Optional explanatory note rendered near the bottom of the page.
+ * @param children - Print page body content.
+ * @param pageBreak - Whether the section forces a print page break after itself.
  */
 export function PdfPageShell({ sectionLabel, context, children, pageBreak = true }: Props) {
   return (

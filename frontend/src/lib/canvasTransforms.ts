@@ -110,13 +110,18 @@ export function panelMetersToPixels(
 }
 
 /**
- * Computes the rotated rect points value
- * @param {number} centerX - Value used for center x
- * @param {number} centerY - Value used for center y
- * @param {number} width - Value used for width
- * @param {number} height - Value used for height
- * @param {number} rotationDeg - Value used for rotation deg
- * @returns {PixelPoint[]} The requested rotated rect points
+ * Returns the four corners of a rotated rectangle in pixel space.
+ *
+ * Builds the corner offsets in local panel space (half-width/half-height
+ * around origin) then applies a 2D rotation to each. Corner order at
+ * `rotationDeg = 0` is top-left, top-right, bottom-right, bottom-left.
+ *
+ * @param centerX - Panel centre X in pixels
+ * @param centerY - Panel centre Y in pixels
+ * @param width - Panel width in pixels (along the panel's local X axis)
+ * @param height - Panel height in pixels (along the panel's local Y axis)
+ * @param rotationDeg - Rotation in degrees, clockwise in image space
+ * @returns Four corner points in clockwise order
  */
 export function getRotatedRectPoints(
   centerX: number,
@@ -145,9 +150,11 @@ export function getRotatedRectPoints(
 }
 
 /**
- * Computes the rect aabb value
- * @param {PixelPoint[]} points - Collection of points values
- * @returns {RectAabb} The requested rect aabb
+ * Computes the axis-aligned bounding box that tightly contains a set of
+ * pixel points (typically the four corners of a rotated panel).
+ *
+ * @param points - One or more pixel points
+ * @returns Tight AABB with `minX/maxX/minY/maxY` covering every input point
  */
 export function getRectAabb(points: PixelPoint[]): RectAabb {
   return {

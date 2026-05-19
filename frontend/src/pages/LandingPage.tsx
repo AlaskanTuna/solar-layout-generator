@@ -1,3 +1,8 @@
+/**
+ * Renders the public SolarSim landing page.
+ * It is reached at / before authentication and introduces the FYP solar layout workflow.
+ * This page serves the entry step that routes visitors into sign-up, sign-in, or the dashboard if already signed in.
+ */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -24,9 +29,7 @@ import {
   Bot
 } from 'lucide-react'
 
-/**
- * Renders the marketing landing page
- */
+/** Renders the public marketing and product walkthrough page. */
 export function LandingPage() {
   const { t } = useTranslation('landing')
   const { session, loading } = useAuth()

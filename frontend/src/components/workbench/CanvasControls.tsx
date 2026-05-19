@@ -1,3 +1,8 @@
+/**
+ * Floating workbench canvas toolbar.
+ * Controls panel editing, zoom, overlay mode, roof segment visibility, and canvas expansion in the layout editor.
+ */
+
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
@@ -44,8 +49,8 @@ type CanvasControlsProps = {
 }
 
 /**
- * Renders the CanvasControls component
- * @param {CanvasControlsProps} props - Props for the component
+ * Renders icon and swatch controls for editing the Konva panel layout canvas.
+ * Expects undo/redo, selection, zoom, overlay, snapping, and rotation callbacks from the workbench route.
  */
 export function CanvasControls({
   canUndo,

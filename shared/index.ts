@@ -1,21 +1,25 @@
+/**
+ * Shared type and schema barrel.
+ *
+ * Single import surface for the backend and frontend. Re-exports the public
+ * schemas, types, and helpers from the workspace-scoped files in this folder
+ * (project DTOs, panel models, cost model, layout preferences, quota, tariff
+ * defaults) and defines a handful of small request/response types used by
+ * both sides.
+ */
+
 import type { LayoutPreferences } from './layoutPreferences.ts'
 import type { PanelEdit } from './panelTypes.ts'
 import type { AnalysisConfigDto, AnalysisResultsDto, BuildingInsightsDto } from './projectDtos.ts'
 import type { TariffDefaults } from './tariffDefaults.ts'
 
-/**
- * Location processing state shared across API responses
- */
+/** Location processing state shared across API responses. */
 export type LocationStatus = 'processing' | 'ready' | 'failed'
 
-/**
- * Solar imagery quality levels exposed by location APIs
- */
+/** Solar API imagery quality tiers exposed by location APIs. */
 export type ImageryQuality = 'HIGH' | 'BASE'
 
-/**
- * Projects lifecycle state
- */
+/** Project lifecycle state — drives badge colour and status filtering. */
 export type ProjectStatus = 'draft' | 'layout_saved' | 'analysis_saved'
 
 export {
@@ -31,9 +35,7 @@ export type { BillRange, LayoutPreferences, RoofDirection, SizingGoal } from './
 export { panelEditSchema } from './panelTypes.ts'
 export type { PanelEdit } from './panelTypes.ts'
 
-/**
- * Resolves location request body
- */
+/** Body for `POST /locations/resolve` — start the Solar API pipeline for a coordinate. */
 export type ResolveLocationRequest = {
   lat: number
   lng: number
@@ -42,42 +44,32 @@ export type ResolveLocationRequest = {
   expandedCoverage?: boolean
 }
 
-/**
- * Resolves location response body
- */
+/** Response for `POST /locations/resolve` — location id + current status. */
 export type ResolveLocationResponse = {
   locationId: string
   status: LocationStatus
 }
 
-/**
- * Location status response body
- */
+/** Response for `GET /locations/:id/status` — used while polling. */
 export type LocationStatusResponse = {
   status: LocationStatus
 }
 
-/**
- * Location data response body
- */
+/** Response for `GET /locations/:id/data` — the cached Solar API record. */
 export type LocationDataResponse = {
   buildingInsights: BuildingInsightsDto
   rgbImageUrl: string
   imageryQuality: ImageryQuality | null
 }
 
-/**
- * Probes location response body
- */
+/** Response for `GET /locations/probe` — quality tiers available without resolving. */
 export type ProbeLocationResponse = {
   availableQualities: ImageryQuality[]
   bestQuality: ImageryQuality | null
   expandedCoverage: boolean
 }
 
-/**
- * Flux recompute request body
- */
+/** Body for `POST /locations/:id/panels/recompute` — flux recompute for one panel. */
 export type FluxRecomputeRequest = {
   panelId: string
   center: { lat: number; lng: number }
@@ -87,61 +79,48 @@ export type FluxRecomputeRequest = {
   capacityWp?: number
 }
 
-/**
- * Flux recompute response body
- */
+/** Response for `POST /locations/:id/panels/recompute` — 12-month DC energy. */
 export type FluxRecomputeResponse = {
   panelId: string
   monthlyEnergyDcKwh: number[]
 }
 
-/**
- * Batch flux recompute request body
- */
+/** Body for `POST /locations/:id/panels/recompute-batch` — many panels at once. */
 export type FluxRecomputeBatchRequest = {
   panels: FluxRecomputeRequest[]
 }
 
-/**
- * Batch flux recompute response body
- */
+/** Response for `POST /locations/:id/panels/recompute-batch`. */
 export type FluxRecomputeBatchResponse = {
   results: FluxRecomputeResponse[]
 }
 
-/**
- * Creates project request body
- */
+/** Body for `POST /projects` — create a project anchored to a location. */
 export type CreateProjectRequest = {
   name: string
   locationId: string
 }
 
-/**
- * Saves layout request body
- */
+/** Body for `PATCH /projects/:id/layout` — persist the workbench layout. */
 export type SaveLayoutRequest = {
   editedLayout: PanelEdit[]
   selectedPanelModelId?: string
 }
 
-/**
- * Updates layout preferences request body
- */
+/** Body for `PATCH /projects/:id/layout-preferences` — sizing-modal updates. */
 export type UpdateLayoutPreferencesRequest = {
   layoutPreferences: Partial<LayoutPreferences>
 }
 
-/**
- * Saves analysis request body
- */
+/** Body for `PATCH /projects/:id/analysis` — analysis inputs + computed results. */
 export type SaveAnalysisRequest = {
   analysisConfig: AnalysisConfigDto
   analysisResults: AnalysisResultsDto
 }
 
 /**
- * Tariff rates returned by the config endpoint
+ * Per-kWh tariff rates from the Malaysian NEM 3.0 / Tariff Rakyat structure.
+ * See `projectDtos.ts` `tariffRatesSchema` for field-by-field descriptions.
  */
 export type TariffRates = {
   energyLow: number
@@ -155,7 +134,14 @@ export type TariffRates = {
 }
 
 /**
- * Tariff thresholds returned by the config endpoint
+ * Threshold values that gate the tiered tariff and waiver logic.
+ *
+ * - `energyCliff`        — kWh threshold above which `energyHigh` applies
+ * - `retailWaiver`       — kWh threshold below which the retail charge is waived
+ * - `afaWaiver`          — kWh threshold below which AFA is waived
+ * - `sstExemption`       — kWh threshold below which SST is exempt
+ * - `eeiCutoff`          — kWh threshold above which the EEI rebate stops
+ * - `reFundExemption`    — kWh threshold below which the RE Fund levy is exempt
  */
 export type TariffThresholds = {
   energyCliff: number
@@ -167,12 +153,16 @@ export type TariffThresholds = {
 }
 
 /**
- * Tariff config response body
+ * Response for `GET /tariff/config` — the seeded NEM tariff configuration plus
+ * the EEI rebate ladder and AFA defaults. Used by the analysis page to
+ * populate the simulation inputs.
  */
 export type TariffConfigResponse = {
   rates: TariffRates
   thresholds: TariffThresholds
+  /** Step-table mapping consumption thresholds (kWh) → rebate (sen/kWh). */
   eeiTable: [number, number][]
+  /** Default AFA rate in sen/kWh used when the user doesn't override it. */
   afaRateDefault: number
   defaults: TariffDefaults
   /** When the seeded rates and AFA were last verified */
@@ -181,9 +171,7 @@ export type TariffConfigResponse = {
   sourceNote: string | null
 }
 
-/**
- * Health check response body
- */
+/** Response for `GET /health` — basic liveness probe. */
 export type HealthResponse = {
   status: 'ok'
 }

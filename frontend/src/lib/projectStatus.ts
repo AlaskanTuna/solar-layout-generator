@@ -1,9 +1,19 @@
+/**
+ * Project status presentation helpers.
+ *
+ * Maps the three `ProjectStatus` values (`draft`, `layout_saved`,
+ * `analysis_saved`) to UI metadata: label, badge variant, icon, and tooltip.
+ * Used by the projects list, project card, and breadcrumbs to keep status
+ * styling consistent across the app.
+ */
+
 import type { ProjectStatus } from '@shared/types'
 import { Map, Wrench, BarChart3 } from 'lucide-react'
 import type { ComponentType } from 'react'
 
 type BadgeVariant = 'default' | 'secondary' | 'outline'
 
+/** Per-status UI metadata used everywhere a status badge is rendered. */
 type StatusConfig = {
   label: string
   variant: BadgeVariant
@@ -33,37 +43,25 @@ const STATUS_CONFIGS: Record<ProjectStatus, StatusConfig> = {
 }
 
 /**
- * Computes the project status config value
- * @param {ProjectStatus} status - Value used for status
- * @returns {StatusConfig} The requested project status config
+ * Returns the full UI config for a project status (label, variant, icon,
+ * tooltip). Falls back to `draft` for unknown statuses so the badge always
+ * renders something sensible.
  */
 export function getProjectStatusConfig(status: ProjectStatus): StatusConfig {
   return STATUS_CONFIGS[status] ?? STATUS_CONFIGS.draft
 }
 
-/**
- * Computes the project status label value
- * @param {ProjectStatus} status - Value used for status
- * @returns {string} The requested project status label
- */
+/** Returns the human-facing label for a project status. */
 export function getProjectStatusLabel(status: ProjectStatus): string {
   return getProjectStatusConfig(status).label
 }
 
-/**
- * Computes the project status variant value
- * @param {ProjectStatus} status - Value used for status
- * @returns {BadgeVariant} The requested project status variant
- */
+/** Returns the shadcn Badge variant to use for a project status. */
 export function getProjectStatusVariant(status: ProjectStatus): BadgeVariant {
   return getProjectStatusConfig(status).variant
 }
 
-/**
- * Computes the project status tooltip value
- * @param {ProjectStatus} status - Value used for status
- * @returns {string} The requested project status tooltip
- */
+/** Returns the tooltip text explaining what a project status means. */
 export function getProjectStatusTooltip(status: ProjectStatus): string {
   return getProjectStatusConfig(status).tooltip
 }

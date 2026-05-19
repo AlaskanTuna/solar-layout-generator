@@ -1,9 +1,16 @@
+/**
+ * Storage stage for the location pipeline.
+ *
+ * Uploads downloaded Solar API GeoTIFF layers and creates the browser-facing
+ * RGB PNG derivative used by the workbench.
+ */
+
 import { uploadToStorage } from '../storageService.js'
 import { convertRgbTiffToPng } from './convert.js'
 import type { DownloadedLayer } from './fetch.js'
 
 /**
- * Storage paths produced by the location pipeline
+ * Storage paths produced by the location pipeline.
  */
 export type StoredLocationAssets = {
   monthlyFluxPath: string | null
@@ -14,10 +21,11 @@ export type StoredLocationAssets = {
 }
 
 /**
- * Persists downloaded pipeline assets to storage
- * @param {string} locationId - Location identifier
- * @param {DownloadedLayer[]} downloadedLayers - Collection of downloaded layers values
- * @returns {Promise<StoredLocationAssets>} A promise resolving to the resulting value
+ * Persists downloaded pipeline assets to storage.
+ *
+ * @param locationId - Location prefix under the shared storage bucket
+ * @param downloadedLayers - Solar API raster layers downloaded for this location
+ * @returns Stored object paths used by later pipeline and route stages
  */
 export async function storeLocationPipelineAssets(
   locationId: string,
@@ -46,6 +54,7 @@ export async function storeLocationPipelineAssets(
   }
 
   if (rgbBuffer) {
+    // RGB gets a PNG derivative because browsers display it directly; raw GeoTIFF layers are stored for backend use.
     const pngBuffer = await convertRgbTiffToPng(rgbBuffer)
     const pngPath = `locations/${locationId}/rgb.png`
     await uploadToStorage(pngPath, pngBuffer, 'image/png')

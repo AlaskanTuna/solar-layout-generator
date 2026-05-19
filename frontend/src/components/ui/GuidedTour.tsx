@@ -1,13 +1,33 @@
+/**
+ * Guided tour overlay used by the workbench and analysis pages to walk
+ * first-time users through key UI features.
+ *
+ * Loads on first visit (detected via `localStorage` key passed in `storageKey`)
+ * and offers a small modal positioned near each step's target element. After
+ * the user dismisses it, a floating help button re-opens the tour on demand.
+ *
+ * The tour content (step titles, descriptions, target selectors) lives in
+ * `lib/workbenchTour.ts`. This file owns the rendering and positioning logic.
+ */
+
 import { useCallback, useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, HelpCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+/**
+ * Single tour step definition.
+ *
+ * - `target` — CSS selector for the element to anchor the step to. Omit
+ *   together with `placement: 'center'` for an unanchored intro step.
+ * - `placement` — How to position the modal relative to the target:
+ *   `'below'` (under target), `'left'` (to its left, vertical centre),
+ *   `'center'` (viewport centre), `'center-bottom'` (bottom centre of
+ *   viewport — used for sidebar-anchored content).
+ */
 export type TourStep = {
   target?: string
   title: string
   description: string
-  /** Hint for modal placement: 'below' (below target), 'left' (left of target),
-   *  'center' (viewport center), 'center-bottom' (bottom center of viewport) */
   placement?: 'below' | 'left' | 'center' | 'center-bottom'
 }
 
@@ -140,6 +160,18 @@ function GuidedTourModal({ steps, onClose }: { steps: TourStep[]; onClose: () =>
   )
 }
 
+/**
+ * Mounts the tour modal on first visit and a floating help button after.
+ *
+ * @param storageKey - localStorage key used to remember the user has dismissed
+ *   the tour at least once. Distinct per page (workbench / analysis).
+ * @param steps - Ordered list of tour steps from `lib/workbenchTour.ts` or
+ *   equivalent.
+ * @param onActiveChange - Notifies the parent when the tour opens/closes so
+ *   other floating UI (e.g. chat launcher) can dim itself.
+ * @param hidden - Suppresses the help-button FAB when another full-screen
+ *   surface (the chat panel) owns the viewport.
+ */
 export function GuidedTour({
   storageKey,
   steps,
@@ -149,7 +181,6 @@ export function GuidedTour({
   storageKey: string
   steps: TourStep[]
   onActiveChange?: (active: boolean) => void
-  /** When true, hide the launcher FAB (e.g. while the chat panel owns the screen). */
   hidden?: boolean
 }) {
   const [showTour, setShowTour] = useState(() => !localStorage.getItem(storageKey))

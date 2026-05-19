@@ -1,3 +1,8 @@
+/**
+ * Dashboard project tile for returning to an in-progress or completed solar design.
+ * Used by project overview grids to expose status, saved analysis highlights, and destructive cleanup.
+ */
+
 import type { ProjectResponse } from '@/api/projects'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -5,7 +10,10 @@ import { Trash2, Clock, FolderOpen, ArrowRight, Receipt, Zap, Leaf, Sun } from '
 import { formatRelativeDate } from './helpers'
 import { getProjectStatusConfig } from '@/lib/projectStatus'
 
-/** Render the project card */
+/**
+ * Renders a clickable project card with status, delete action, progress, and saved analysis highlights.
+ * @param props - Project response plus open and delete handlers supplied by the dashboard page.
+ */
 export function ProjectCard({
   project,
   onOpen,

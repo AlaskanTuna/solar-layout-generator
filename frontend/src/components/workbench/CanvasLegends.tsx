@@ -1,3 +1,8 @@
+/**
+ * Overlay legend stack for the workbench canvas.
+ * Explains roof segment colours and Solar API overlays such as annual flux, DSM, and roof mask.
+ */
+
 import { useTranslation } from 'react-i18next'
 import { COLORS } from '@/lib/constants'
 import type { OverlayMode } from '@/hooks/useOverlayImages'
@@ -18,8 +23,8 @@ type CanvasLegendsProps = {
 }
 
 /**
- * Renders the CanvasLegends component
- * @param {CanvasLegendsProps} props - Props for the component
+ * Renders contextual legends for visible roof segments and the active imagery overlay.
+ * Expects segment hull metadata, overlay mode, and loading state so legends appear only when meaningful.
  */
 export function CanvasLegends({ showSegments, segmentHulls, overlayMode, isOverlayLoading }: CanvasLegendsProps) {
   const { t } = useTranslation('workbench')

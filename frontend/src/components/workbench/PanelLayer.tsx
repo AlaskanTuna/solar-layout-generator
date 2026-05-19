@@ -1,3 +1,8 @@
+/**
+ * Konva layer for interactive workbench solar panels.
+ * Draws ranked-yield panel colours plus single and group rotation handles over the rooftop image.
+ */
+
 import { useMemo } from 'react'
 import { Layer } from 'react-konva'
 import { annualEnergyFromMonthly } from '@/lib/buildingInsights'
@@ -50,8 +55,8 @@ function getPanelColorByRatio(ratio: number): string {
 }
 
 /**
- * Renders the PanelLayer component
- * @param {PanelLayerProps} props - Props for the component
+ * Renders every editable panel rectangle and the appropriate rotation controls on a Konva layer.
+ * Expects rendered panel positions, dimensions, selection state, snap handlers, drag handlers, and rotation callbacks.
  */
 export function PanelLayer({
   panels,

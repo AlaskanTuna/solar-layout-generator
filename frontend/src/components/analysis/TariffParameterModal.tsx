@@ -1,3 +1,8 @@
+/**
+ * Per-project TNB RP4 tariff override modal for analysis inputs.
+ * Used from tariff controls when users need to adjust seeded RM and sen/kWh assumptions.
+ */
+
 import { useEffect, useState } from 'react'
 import type { TariffRates } from '@shared/types'
 import { Button } from '@/components/ui/button'
@@ -66,8 +71,8 @@ function parseInputToRate(text: string, unit: TariffField['unit']): number | nul
 }
 
 /**
- * Renders the tariffparameter modal
- * @param {TariffParameterModalProps} props - Props for the component
+ * Renders editable tariff fields and saves only rates that differ from the configured TNB defaults.
+ * Expects modal state, default TariffRates, current project overrides, and a save callback.
  */
 export function TariffParameterModal({ open, onOpenChange, defaults, override, onSave }: TariffParameterModalProps) {
   const [draft, setDraft] = useState<Record<string, string>>({})

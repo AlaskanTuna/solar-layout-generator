@@ -1,3 +1,8 @@
+/**
+ * First-run layout preference modal for the workbench.
+ * Captures bill range, sizing goal, and roof direction to seed a sensible Malaysian rooftop panel layout.
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
@@ -46,8 +51,8 @@ type LayoutPresetModalProps = {
 }
 
 /**
- * Renders the layoutpreset modal
- * @param {LayoutPresetModalProps} props - Props for the component
+ * Renders the layout preset questionnaire and saves the user's sizing preferences.
+ * Expects controlled dialog state, existing preferences, and save/skip callbacks from the workbench route.
  */
 export function LayoutPresetModal({ open, onOpenChange, prefs, onSave, onSkip }: LayoutPresetModalProps) {
   const { t } = useTranslation('workbench')

@@ -1,15 +1,23 @@
+/**
+ * Location pipeline entry point.
+ *
+ * Coordinates fetching Solar API metadata/layers, storing raster assets, and
+ * persisting success or failure on the location row.
+ */
+
 import { fetchLocationPipelineInputs } from './locationPipeline/fetch.js'
 import { persistLocationPipelineFailure, persistLocationPipelineSuccess } from './locationPipeline/persist.js'
 import { storeLocationPipelineAssets } from './locationPipeline/store.js'
 import type { ImageryQuality } from './solarApiService.js'
 
 /**
- * Run the full location pipeline and persist the outcome
- * @param {string} locationId - Location identifier
- * @param {number} lat - Value used for lat
- * @param {number} lng - Value used for lng
- * @param {ImageryQuality} requiredQuality - Value used for required quality
- * @param {boolean} expandedCoverage - Whether expanded coverage
+ * Runs the full asynchronous location pipeline and persists the outcome.
+ *
+ * @param locationId - Location row being populated
+ * @param lat - Latitude in WGS84 degrees
+ * @param lng - Longitude in WGS84 degrees
+ * @param requiredQuality - Solar API imagery quality to request
+ * @param expandedCoverage - Whether to request Solar API expanded coverage for BASE imagery
  */
 export async function runLocationPipeline(
   locationId: string,

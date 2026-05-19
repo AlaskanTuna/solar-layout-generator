@@ -1,3 +1,8 @@
+/**
+ * Headline verdict card for saved solar analysis results.
+ * Converts detailed billing outputs into homeowner-friendly ROI, NEM fit, and savings signals.
+ */
+
 import type { ReactNode } from 'react'
 import { Calendar, Clock, Gauge, Star, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -33,8 +38,8 @@ function StarRating({
 }
 
 /**
- * Renders the SolarVerdict component
- * @param {SolarVerdictProps} props - Props for the component
+ * Renders the primary solar recommendation summary with payback, savings, generation, and NEM fit ratings.
+ * Expects computed analysis results and a tooltip node that explains the payback calculation.
  */
 export function SolarVerdict({ analysisResults, paybackTooltip }: SolarVerdictProps) {
   const { t } = useTranslation('analysis')

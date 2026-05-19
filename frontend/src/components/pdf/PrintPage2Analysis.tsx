@@ -1,3 +1,8 @@
+/**
+ * Analysis PDF pages for the homeowner solar report.
+ * Reuses live analysis cards and PDF-specific charts to document RM savings, NEM fit, cost, and assumptions.
+ */
+
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ProjectResponse } from '@/api/projects'
@@ -22,8 +27,8 @@ type Props = {
 }
 
 /**
- * Renders the analysis pages of the PDF report
- * @param {Props} props - Props for the component
+ * Renders the PDF analysis section from a saved project's analysis view model.
+ * Expects analysis results on the project and optionally a tariff effective date for seeded-rate disclosure.
  */
 export function PrintPage2Analysis({ project, tariffEffectiveDate = null }: Props) {
   const { t } = useTranslation('pdf')

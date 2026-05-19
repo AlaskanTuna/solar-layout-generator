@@ -1,3 +1,8 @@
+/**
+ * Shared route content width and spacing wrapper.
+ * Used by dashboard, MVP workflow, and full-bleed pages so page layouts stay consistent.
+ */
+
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -19,8 +24,8 @@ const VARIANTS: Record<NonNullable<PageContainerProps['variant']>, string> = {
 }
 
 /**
- * Renders the PageContainer component
- * @param {PageContainerProps} props - Props for the component
+ * Renders a route content container using one of the app's layout variants.
+ * @param props - Children, variant, optional dashboard flex expansion, and extra classes.
  */
 export function PageContainer({ children, variant = 'dashboard', flex = false, className }: PageContainerProps) {
   const flexClass = flex && variant === 'dashboard' ? 'flex flex-col' : ''

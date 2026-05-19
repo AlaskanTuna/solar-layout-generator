@@ -1,8 +1,16 @@
+/**
+ * Built-in panel model catalog.
+ *
+ * Curated list of panels available for selection in the panel-model drawer.
+ * Each entry includes physical dimensions, capacity, efficiency, and a
+ * representative RM/Wp price used by the cost model. Taglines are written
+ * for Malaysian residential installers and describe the trade-off the model
+ * represents (price vs. efficiency vs. shade tolerance).
+ */
+
 import type { PanelModel } from './panelTypes.ts'
 
-/**
- * Built-in panel catalog used by the UI and cost model
- */
+/** Built-in panel catalog used by the UI and cost model. */
 export const PANEL_MODELS: PanelModel[] = [
   {
     id: 'google-default',
@@ -78,15 +86,12 @@ export const PANEL_MODELS: PanelModel[] = [
   }
 ]
 
-/**
- * Default panel model id used for new projects
- */
+/** Default panel model id used for new projects. */
 export const DEFAULT_PANEL_MODEL_ID = 'jinko-tiger-neo'
 
 /**
- * Looks up a panel model by id
- * @param {string} id - Id value
- * @returns {PanelModel} The requested panel model
+ * Looks up a panel model by id. Returns `undefined` for unknown ids so
+ * callers can fall back to `DEFAULT_PANEL_MODEL_ID`.
  */
 export function getPanelModel(id: string): PanelModel | undefined {
   return PANEL_MODELS.find((model) => model.id === id)

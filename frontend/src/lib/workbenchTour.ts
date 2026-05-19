@@ -1,10 +1,19 @@
+/**
+ * First-time workbench tour step definitions.
+ *
+ * Drives the guided overlay shown when a user lands on the workbench for the
+ * first time. Step ids are not strictly sequential in this array because
+ * the tour was reordered after the sidebar layout changed but the persisted
+ * "last-seen step" key in localStorage still references the original ids —
+ * renaming them would re-fire the tour for existing users.
+ */
+
 import type { TourStep } from '@/components/ui/GuidedTour'
 import type { TFunction } from 'i18next'
 
 /**
- * Computes the workbench tour steps value
- * @param {TFunction} t - Value used for t
- * @returns {TourStep[]} The requested workbench tour steps
+ * Returns the ordered tour step list. `t` is i18next's translation function so
+ * step copy is locale-aware.
  */
 export function getWorkbenchTourSteps(t: TFunction): TourStep[] {
   return [

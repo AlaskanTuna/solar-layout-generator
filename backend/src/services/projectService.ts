@@ -1,3 +1,10 @@
+/**
+ * Project persistence service.
+ *
+ * Handles project ownership checks, quota accounting, layout and analysis saves,
+ * and PDF export payload assembly.
+ */
+
 import { Prisma } from '@prisma/client'
 import { prisma } from '../config/prisma.js'
 import { getSignedUrl } from './storageService.js'
@@ -22,11 +29,12 @@ async function findOwnedProject(userId: string, projectId: string) {
 }
 
 /**
- * Creates a project and record quota usage
- * @param {string} userId - Authenticated user identifier
- * @param {string} name - Display name for the resource
- * @param {string} locationId - Location identifier
- * @returns {Promise} A promise resolving to the created project
+ * Creates a project and records daily quota usage in the same transaction.
+ *
+ * @param userId - Authenticated project owner
+ * @param name - User-facing project name
+ * @param locationId - Location row the project starts from
+ * @returns Normalized project response for the created project
  */
 export async function createProject(userId: string, name: string, locationId: string) {
   return prisma.$transaction(async (tx) => {
@@ -42,9 +50,10 @@ export async function createProject(userId: string, name: string, locationId: st
 }
 
 /**
- * Lists projects owned by a user
- * @param {string} userId - Authenticated user identifier
- * @returns {Promise} A promise resolving to the matching projects collection
+ * Lists projects owned by a user, newest first.
+ *
+ * @param userId - Authenticated project owner
+ * @returns Normalized project responses with location status included
  */
 export async function listProjects(userId: string) {
   const projects = await prisma.project.findMany({
@@ -56,10 +65,11 @@ export async function listProjects(userId: string) {
 }
 
 /**
- * Fetches a single project owned by a user
- * @param {string} userId - Authenticated user identifier
- * @param {string} projectId - Project identifier
- * @returns {Promise} A promise resolving to the requested project
+ * Fetches a single project owned by a user.
+ *
+ * @param userId - Authenticated project owner
+ * @param projectId - Project to load
+ * @returns Normalized project response, or `null` when not found
  */
 export async function getProject(userId: string, projectId: string) {
   const project = await findOwnedProject(userId, projectId)
@@ -67,12 +77,13 @@ export async function getProject(userId: string, projectId: string) {
 }
 
 /**
- * Saves a project layout and selected panel model
- * @param {string} userId - Authenticated user identifier
- * @param {string} projectId - Project identifier
- * @param {PanelEdit[]} editedLayout - Edited panel layout to persist
- * @param {string} selectedPanelModelId - Selected panel model identifier
- * @returns {Promise} A promise resolving to the saved layout
+ * Saves the edited panel layout and optionally updates the selected panel model.
+ *
+ * @param userId - Authenticated project owner
+ * @param projectId - Project receiving the saved layout
+ * @param editedLayout - Panel geometry and selection state from the workbench
+ * @param selectedPanelModelId - Optional analysis panel model to merge into config
+ * @returns Normalized updated project, or `null` when not found
  */
 export async function saveLayout(
   userId: string,
@@ -103,10 +114,11 @@ export async function saveLayout(
 }
 
 /**
- * Deletes a project and its owned quota usage
- * @param {string} userId - Authenticated user identifier
- * @param {string} projectId - Project identifier
- * @returns {Promise} A promise resolving to the resulting value
+ * Deletes a project owned by the user.
+ *
+ * @param userId - Authenticated project owner
+ * @param projectId - Project to delete
+ * @returns Deleted project row, or `null` when not found
  */
 export async function deleteProject(userId: string, projectId: string) {
   const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
@@ -116,11 +128,12 @@ export async function deleteProject(userId: string, projectId: string) {
 }
 
 /**
- * Merges partial layout preferences into a project
- * @param {string} userId - Authenticated user identifier
- * @param {string} projectId - Project identifier
- * @param {LayoutPreferencesDto} partial - Partial values to merge into the record
- * @returns {Promise} A promise resolving to the updated layout preferences
+ * Merges partial layout preferences into a project.
+ *
+ * @param userId - Authenticated project owner
+ * @param projectId - Project receiving preference changes
+ * @param partial - Preference fields to merge with the stored value
+ * @returns Normalized updated project, or `null` when not found
  */
 export async function updateLayoutPreferences(userId: string, projectId: string, partial: LayoutPreferencesDto) {
   const project = await findOwnedProject(userId, projectId)
@@ -135,12 +148,13 @@ export async function updateLayoutPreferences(userId: string, projectId: string,
 }
 
 /**
- * Saves analysis inputs and outputs on a project
- * @param {string} userId - Authenticated user identifier
- * @param {string} projectId - Project identifier
- * @param {AnalysisConfigDto} analysisConfig - Analysis configuration to persist
- * @param {AnalysisResultsDto} analysisResults - Analysis results to persist
- * @returns {Promise} A promise resolving to the saved analysis
+ * Saves analysis inputs and computed results on a project.
+ *
+ * @param userId - Authenticated project owner
+ * @param projectId - Project receiving analysis data
+ * @param analysisConfig - Analysis settings to merge with any stored config
+ * @param analysisResults - Computed financial and energy results to persist
+ * @returns Normalized updated project, or `null` when not found
  */
 export async function saveAnalysis(
   userId: string,
@@ -164,10 +178,11 @@ export async function saveAnalysis(
 }
 
 /**
- * Builds the project payload used by PDF
- * @param {string} userId - Authenticated user identifier
- * @param {string} projectId - Project identifier
- * @returns {Promise<PdfProjectResponse<JsonFieldsProject>>} A promise resolving to the requested pdf project data
+ * Builds the project payload used by PDF export.
+ *
+ * @param userId - Authenticated project owner
+ * @param projectId - Project to render into the PDF
+ * @returns PDF-ready project response, or `null` when not found
  */
 export async function getPdfProjectData(userId: string, projectId: string) {
   const project = await findOwnedProject(userId, projectId)

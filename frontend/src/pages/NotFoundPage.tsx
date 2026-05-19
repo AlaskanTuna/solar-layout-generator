@@ -1,11 +1,14 @@
+/**
+ * Renders the catch-all 404 fallback route.
+ * It is reached when React Router cannot match the current URL to any public or protected page.
+ * This page serves the recovery step that sends users back to the landing page or dashboard.
+ */
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Sun, ArrowLeft } from 'lucide-react'
 
-/**
- * Renders the 404 fallback page
- */
+/** Renders the 404 fallback page with navigation recovery actions. */
 export function NotFoundPage() {
   const { t } = useTranslation('nav')
 

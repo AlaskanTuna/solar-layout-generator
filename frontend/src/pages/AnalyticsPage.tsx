@@ -1,3 +1,8 @@
+/**
+ * Renders portfolio analytics across completed saved analyses.
+ * It is reached from /dashboard/analytics after the user has one or more analyzed projects.
+ * This page serves the comparison step where users evaluate savings, payback, ROI, and CO2 impact across projects.
+ */
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -15,6 +20,7 @@ import { ChartTooltipContent } from '@/components/analysis/ChartTooltipContent'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/formatters'
 
+// EPA passenger-vehicle reference used to convert annual CO2 offset into a familiar car-equivalent figure.
 /** Average annual CO2 emissions of a passenger vehicle (kg). EPA reference value. */
 const KG_CO2_PER_CAR_YEAR = 4600
 
@@ -46,9 +52,7 @@ const METRIC_FORMATTERS: Record<
   }
 }
 
-/**
- * Renders the cross-project analytics summary
- */
+/** Renders the cross-project analytics summary and comparison charts. */
 export function AnalyticsPage() {
   const { t } = useTranslation('nav')
   const navigate = useNavigate()

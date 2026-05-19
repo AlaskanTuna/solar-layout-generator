@@ -1,3 +1,8 @@
+/**
+ * Declares the top-level React Router shell for SolarSim.
+ * Public auth routes and protected project workflow routes meet here, giving examiners a single map of the app.
+ * This shell serves every workflow step from landing through map, workbench, analysis, dashboards, and PDF preview.
+ */
 import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { ProtectedRoute } from './components/layout/ProtectedRoute'
@@ -20,8 +25,13 @@ const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ 
 const PdfPreviewPage = lazy(() => import('./pages/PdfPreviewPage').then((m) => ({ default: m.PdfPreviewPage })))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })))
 
+/** Shared fallback hint shown while lazy route bundles load inside Suspense. */
 const PAGE_LOADING_HINTS = ['Loading page...']
 
+/**
+ * Sets up the app router with code-split pages wrapped in Suspense fallbacks.
+ * The router is mounted under AppErrorBoundary in frontend/src/main.tsx so route crashes show the recovery UI.
+ */
 export function App() {
   return (
     <Routes>

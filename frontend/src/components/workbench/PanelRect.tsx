@@ -1,3 +1,8 @@
+/**
+ * Memoized Konva rectangle for one editable solar panel.
+ * Used by the panel layer to drag, select, snap, disable, and colour individual rooftop panels.
+ */
+
 import { memo, useState } from 'react'
 import { Rect } from 'react-konva'
 
@@ -28,7 +33,10 @@ function getCursor(disabled: boolean, selected: boolean): string {
   return 'pointer'
 }
 
-/** Single Konva Rect for one solar panel. Memoized so unrelated parent re-renders don't cascade. */
+/**
+ * Renders the draggable Konva rectangle for one solar panel and reports selection, drag, and snap updates.
+ * Expects stage bounds plus callbacks from the workbench panel state; memoization limits unrelated canvas re-renders.
+ */
 function PanelRectInternal({
   id,
   x,
@@ -116,4 +124,5 @@ function PanelRectInternal({
   )
 }
 
+/** Memoized exported panel component used by PanelLayer for each visible rooftop module. */
 export const PanelRect = memo(PanelRectInternal)

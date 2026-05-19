@@ -1,3 +1,8 @@
+/**
+ * Shared toolbar button primitives for the workbench canvas controls.
+ * Provides pin-aware tooltips for icon buttons and overlay swatches without duplicating tooltip state logic.
+ */
+
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -16,7 +21,10 @@ export type ToolButtonProps = {
   children: React.ReactNode
 }
 
-/** Square icon button for the workbench toolbar with a controlled, pin-aware tooltip. */
+/**
+ * Renders one square workbench toolbar icon button with controlled hover/click tooltip state.
+ * Expects a tooltip label, click handler, shared tooltip state, and optional active/disabled styling.
+ */
 export function ToolButton({
   onClick,
   disabled,
@@ -79,7 +87,10 @@ export type SwatchButtonProps = {
   setTooltipState: React.Dispatch<React.SetStateAction<TooltipState>>
 }
 
-/** Color-swatch button for picking a panel/segment color from the workbench toolbar. */
+/**
+ * Renders one colour swatch button with the same tooltip controller used by toolbar icons.
+ * Expects the swatch background, label, active state, click handler, and shared tooltip state.
+ */
 export function SwatchButton({ active, background, label, onClick, tooltipState, setTooltipState }: SwatchButtonProps) {
   const isTooltipOpen = tooltipState.label === label
 

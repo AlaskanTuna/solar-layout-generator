@@ -1,3 +1,8 @@
+/**
+ * Financial milestone card for the analysis results page.
+ * Summarizes system cost recovery, first-year savings, and lifecycle cash events for Malaysian solar projects.
+ */
+
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
@@ -30,8 +35,8 @@ type Milestone = {
 }
 
 /**
- * Renders the FinancialRoadmap component
- * @param {FinancialRoadmapProps} props - Props for the component
+ * Renders payback and lifecycle milestones from the current analysis assumptions.
+ * Expects RM system cost, savings, kWp size, degradation, and optional maintenance or inverter events.
  */
 export function FinancialRoadmap({
   systemCostRm,

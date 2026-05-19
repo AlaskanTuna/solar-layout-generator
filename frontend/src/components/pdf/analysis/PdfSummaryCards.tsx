@@ -1,8 +1,13 @@
+/**
+ * Compact summary card primitives for PDF analysis pages.
+ * Used to present dense RM, kWh, kWp, and assumption values without live-page spacing.
+ */
+
 import { Card, CardContent } from '@/components/ui/card'
 
 /**
- * Renders the SummaryTile component
- * @param {Object} props - Props for the component
+ * Renders one small PDF metric tile with an optional supporting detail line.
+ * @param props - Label, formatted value, and optional detail text.
  */
 export function SummaryTile({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
@@ -15,8 +20,8 @@ export function SummaryTile({ label, value, detail }: { label: string; value: st
 }
 
 /**
- * Renders the summary card
- * @param {Object} props - Props for the component
+ * Renders a grouped PDF summary card with a fixed grid column count.
+ * @param props - Card title, metric tiles, and optional 3/4/6-column layout selection.
  */
 export function SummaryCard({
   title,

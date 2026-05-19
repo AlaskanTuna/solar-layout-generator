@@ -1,10 +1,21 @@
+/**
+ * Browser-side Supabase client factory.
+ *
+ * `createClient` is lazy because import.meta.env is only safe to read inside
+ * the Vite-built bundle, and the singleton pattern avoids creating multiple
+ * Realtime websocket connections from React's strict-mode double-mount.
+ */
+
 import { createClient } from '@supabase/supabase-js'
 
 let supabaseClient: ReturnType<typeof createClient> | null = null
 
 /**
- * Computes the supabase value
- * @returns {Object} The requested supabase
+ * Returns the singleton Supabase client, creating it on first call.
+ *
+ * @throws If `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` is missing —
+ *   the app cannot run without these and failing loudly is better than
+ *   producing confusing auth errors later.
  */
 export function getSupabase() {
   if (supabaseClient) {

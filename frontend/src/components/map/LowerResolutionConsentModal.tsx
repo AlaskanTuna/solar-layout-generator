@@ -1,3 +1,8 @@
+/**
+ * Consent modal for continuing with lower-resolution Solar API imagery.
+ * Used when a Malaysian address lacks HIGH coverage but BASE imagery is available for layout generation.
+ */
+
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -17,8 +22,10 @@ type Props = {
 }
 
 /**
- * Renders the lowerresolutionconsent modal
- * @param {Props} props - Props for the component
+ * Renders the warning and accept/cancel controls for proceeding with BASE imagery.
+ * @param open - Whether the consent dialog is visible.
+ * @param onAccept - Handler for continuing with lower-resolution data.
+ * @param onCancel - Handler for dismissing the fallback option.
  */
 export function LowerResolutionConsentModal({ open, onAccept, onCancel }: Props) {
   const { t } = useTranslation('map')

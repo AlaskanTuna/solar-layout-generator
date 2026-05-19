@@ -1,3 +1,8 @@
+/**
+ * Renders the public sign-in page.
+ * It is reached from /sign-in when users need to authenticate before accessing protected dashboard and project routes.
+ * This page serves the return-user entry step with email/password, Google OAuth, and remembered email support.
+ */
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -11,11 +16,10 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { Leaf, Loader2 } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 
+// localStorage key for the optional remember-email checkbox; it stores only the email, never the password.
 const REMEMBER_EMAIL_KEY = 'slg-remember-email'
 
-/**
- * Renders the sign-in flow
- */
+/** Renders the sign-in flow and redirects authenticated users to the dashboard. */
 export function SignInPage() {
   const { t } = useTranslation('auth')
   const { t: tNav } = useTranslation('nav')

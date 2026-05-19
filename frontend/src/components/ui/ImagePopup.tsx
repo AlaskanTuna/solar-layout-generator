@@ -1,3 +1,14 @@
+/**
+ * Click-to-zoom image popup.
+ *
+ * Renders a thumbnail that opens a centred modal preview when clicked.
+ * Used by the dashboard cards and project galleries to let users see a
+ * larger version of the satellite RGB image without leaving the page.
+ *
+ * The popup is portalled to `document.body` so it escapes any parent
+ * `overflow: hidden` containers and the backdrop covers the full viewport.
+ */
+
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
@@ -6,9 +17,11 @@ type ImagePopupProps = {
   src: string
   alt: string
   className?: string
+  /** Fires when the popup opens or closes — used to dim sibling UI if needed. */
   onOpenChange?: (open: boolean) => void
 }
 
+/** Thumbnail + modal-on-click image component. */
 export function ImagePopup({ src, alt, className, onOpenChange }: ImagePopupProps) {
   const [open, setOpen] = useState(false)
 

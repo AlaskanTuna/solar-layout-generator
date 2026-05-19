@@ -1,3 +1,8 @@
+/**
+ * Read-only system summary card for the analysis sidebar.
+ * Shows the selected panel model, kWp size, active panels, and Solar API coverage warnings.
+ */
+
 import { useTranslation } from 'react-i18next'
 import { CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
@@ -14,8 +19,8 @@ type SystemMetaCardProps = {
 }
 
 /**
- * Renders the systemmeta card
- * @param {SystemMetaCardProps} props - Props for the component
+ * Renders project system metadata before the user saves analysis results.
+ * Expects panel model details, active panel count, kWp size, building insights, and any missing monthly energy.
  */
 export function SystemMetaCard({
   projectName,

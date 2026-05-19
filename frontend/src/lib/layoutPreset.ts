@@ -1,3 +1,18 @@
+/**
+ * Layout-preset helpers shared between the workbench sidebar and the panel
+ * auto-layout pipeline.
+ *
+ * Translates the user's "Layout Preferences" choices (bill range + sizing
+ * goal + roof direction) into a concrete visible-panel count by picking the
+ * smallest panel set whose summed yearly DC energy meets a fraction of
+ * their estimated annual consumption.
+ *
+ * Sizing-goal multipliers (under `SIZING_GOAL_OFFSET`):
+ *   - `conservative` → 30% of annual consumption (small, fast-payback system)
+ *   - `balanced`     → 50% (typical residential self-consumption target)
+ *   - `maximum`      → unbounded (every roof-direction-eligible panel)
+ */
+
 import {
   BILL_RANGE_TO_KWH_PER_MONTH,
   type BillRange,
@@ -18,6 +33,13 @@ export type RoofSegmentEntry = {
   azimuthDegrees: number
 }
 
+/**
+ * Fraction of annual consumption each sizing goal targets.
+ *
+ * `conservative` aims to offset 30% of the user's bill (cheap, fast payback);
+ * `balanced` targets 50% which is the typical residential self-consumption
+ * sweet spot; `maximum` is unbounded so it returns every eligible panel.
+ */
 const SIZING_GOAL_OFFSET: Record<Exclude<SizingGoal, 'custom'>, number> = {
   conservative: 0.3,
   balanced: 0.5,
@@ -92,9 +114,8 @@ export function inferVisibleCount(
 }
 
 /**
- * Human-readable label for the sidebar preset pill
- * @param {LayoutPreferences | null | undefined} prefs - Value used for prefs
- * @returns {string} The resulting describe layout preset value
+ * Returns the human-readable label shown on the sidebar preset pill.
+ * Falls back to `'Not set'` when preferences haven't been chosen yet.
  */
 export function describeLayoutPreset(prefs: LayoutPreferences | null | undefined): string {
   if (!prefs) return 'Not set'

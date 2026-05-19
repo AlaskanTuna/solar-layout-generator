@@ -1,3 +1,23 @@
+/**
+ * Workbench panel state hook.
+ *
+ * Owns the canonical panel collection for a project: starts from Google's
+ * default Solar API layout, applies the user's persisted edits, and exposes
+ * mutators (`movePanel`, `rotatePanel`, `deletePanel`, etc.) plus derived
+ * views (visible subset, ordering, totals).
+ *
+ * Three non-obvious behaviours documented inline below:
+ *   - **Slider resurrection**: increasing the visible-count slider above the
+ *     non-deleted pool size revives deleted panels in stable-order rather
+ *     than silently capping the slider.
+ *   - **Stable ordering**: panels are sorted once on init by roof-direction
+ *     match then by yield, and `stableOrderRef` preserves that ordering
+ *     across deletions so the slider behaves predictably.
+ *   - **First-load batch recompute**: on project init we batch-recompute
+ *     monthly energy for any panel that lacks 12-month samples (e.g. older
+ *     saved layouts before per-panel flux was added).
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PanelEdit, RoofDirection } from '@shared/types'
 import { recomputeFluxBatch } from '@/api/locations'
@@ -47,6 +67,17 @@ type UsePanelStateArgs = {
   onBatchRecomputeStatusChange?: (status: BatchRecomputeStatus) => void
 }
 
+/**
+ * Tunable constants for workbench panel behaviour.
+ *
+ * - `positionEpsilon` — lat/lng delta below which a panel is considered "not
+ *   moved" when serialising (~ 1 mm at Klang Valley latitudes).
+ * - `rotationEpsilon` — radian delta below which rotation is considered "not
+ *   moved" when serialising (~ 0.06°).
+ * - `undoHistoryDepth` — undo stack cap; older snapshots are discarded.
+ * - `defaultVisiblePanelFloor` — minimum panels shown on a fresh project so
+ *   the workbench never opens completely empty.
+ */
 const WORKBENCH_CONFIG = {
   positionEpsilon: 1e-8,
   rotationEpsilon: 1e-3,

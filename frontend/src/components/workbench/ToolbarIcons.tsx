@@ -1,3 +1,8 @@
+/**
+ * Inline SVG icon set for the workbench toolbar.
+ * Supplies compact controls for canvas expansion, undo/redo, selection, snapping, deletion, rotation, and overlays.
+ */
+
 const svgProps = {
   width: '16',
   height: '16',
@@ -9,9 +14,7 @@ const svgProps = {
   strokeLinejoin: 'round' as const
 }
 
-/**
- * Renders the CollapseIcon component
- */
+/** Renders the collapse-view icon used when the workbench canvas is expanded. */
 export function CollapseIcon() {
   return (
     <svg {...svgProps}>
@@ -23,9 +26,7 @@ export function CollapseIcon() {
   )
 }
 
-/**
- * Renders the ExpandIcon component
- */
+/** Renders the expand-view icon used to focus the workbench canvas. */
 export function ExpandIcon() {
   return (
     <svg {...svgProps}>
@@ -37,9 +38,7 @@ export function ExpandIcon() {
   )
 }
 
-/**
- * Renders the UndoIcon component
- */
+/** Renders the undo icon for reverting the latest panel layout edit. */
 export function UndoIcon() {
   return (
     <svg {...svgProps}>
@@ -49,9 +48,7 @@ export function UndoIcon() {
   )
 }
 
-/**
- * Renders the RedoIcon component
- */
+/** Renders the redo icon for restoring a reverted panel layout edit. */
 export function RedoIcon() {
   return (
     <svg {...svgProps}>
@@ -61,9 +58,7 @@ export function RedoIcon() {
   )
 }
 
-/**
- * Renders the MarqueeIcon component
- */
+/** Renders the marquee-select icon for selecting multiple rooftop panels. */
 export function MarqueeIcon() {
   return (
     <svg {...svgProps}>
@@ -87,9 +82,7 @@ export function MarqueeIcon() {
   )
 }
 
-/**
- * Renders the SnapIcon component
- */
+/** Renders the snap icon for toggling panel alignment assistance. */
 export function SnapIcon() {
   return (
     <svg {...svgProps}>
@@ -102,9 +95,7 @@ export function SnapIcon() {
   )
 }
 
-/**
- * Renders the DeleteIcon component
- */
+/** Renders the delete icon for removing selected panels from the layout. */
 export function DeleteIcon() {
   return (
     <svg {...svgProps}>
@@ -115,9 +106,7 @@ export function DeleteIcon() {
   )
 }
 
-/**
- * Renders the RotateIcon component
- */
+/** Renders the rotate icon for toggling free rotation controls. */
 export function RotateIcon() {
   return (
     <svg {...svgProps}>
@@ -127,9 +116,7 @@ export function RotateIcon() {
   )
 }
 
-/**
- * Renders the LayersIcon component
- */
+/** Renders the layers icon for roof segment and imagery overlay controls. */
 export function LayersIcon() {
   return (
     <svg {...svgProps}>

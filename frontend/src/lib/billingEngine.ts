@@ -207,11 +207,19 @@ export function computeNemMonth(
 }
 
 /**
- * Run a 12-month NEM billing simulation with credit carry-forward
- * @param {number | number[]} monthlyConsumption - Collection of monthly consumption values
- * @param {number[]} monthlyGeneration - Collection of monthly generation values
- * @param {BillingConfig} config - Value used for config
- * @returns {AnnualSimulationResult} The resulting run annual simulation value
+ * Runs a 12-month NEM billing simulation with credit carry-forward.
+ *
+ * Iterates {@link computeNemMonth} across all 12 months, threading the NEM
+ * credit balance through each step. December triggers credit forfeiture
+ * (Malaysian NEM 3.0 rule: surplus credits do not roll across the calendar
+ * year). Returns the per-month breakdown plus annual rollups for the
+ * analysis page charts.
+ *
+ * @param monthlyConsumption - Either a flat monthly kWh number (applied to
+ *   every month) or a 12-element array of per-month consumption
+ * @param monthlyGeneration - 12-element array of monthly solar generation in kWh
+ * @param config - Tariff config used for both baseline and NEM bill computation
+ * @returns Per-month breakdowns plus annual totals (RM, kWh, forfeited credits)
  */
 export function runAnnualSimulation(
   monthlyConsumption: number | number[],

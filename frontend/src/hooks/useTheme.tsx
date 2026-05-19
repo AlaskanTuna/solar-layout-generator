@@ -1,7 +1,24 @@
+/**
+ * Theme provider + hook for light / dark / system mode.
+ *
+ * Persists the user's choice in localStorage and syncs the `dark` class on
+ * `<html>`. When the user picks `system`, listens to the OS `prefers-color-scheme`
+ * media query and switches with the OS.
+ *
+ * One non-obvious detail: theme switching disables CSS transitions for one
+ * frame to avoid a laggy colour cascade — without this, every component
+ * fades through the in-between colour values which looks terrible on
+ * complex pages like the analysis dashboard.
+ */
+
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 
 type Theme = 'light' | 'dark' | 'system'
 
+/**
+ * Value exposed by `useTheme`. `theme` is the user's choice (may be `system`);
+ * `resolved` is the concrete `'light' | 'dark'` actually applied.
+ */
 type ThemeContextValue = {
   theme: Theme
   resolved: 'light' | 'dark'
@@ -11,17 +28,18 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
+/** Reads the OS-level colour scheme preference. */
 function getSystemTheme(): 'light' | 'dark' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
+/** Resolves a `Theme` to a concrete light/dark by consulting the OS for `system`. */
 function resolveTheme(theme: Theme): 'light' | 'dark' {
   return theme === 'system' ? getSystemTheme() : theme
 }
 
 /**
- * Renders the ThemeProvider component
- * @param {Object} props - Props for the component
+ * Wraps the React tree with theme context. Mount once near the root.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
@@ -36,7 +54,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Disable all transitions during theme switch to prevent laggy cascade
     root.style.setProperty('--theme-transition', 'none')
     root.classList.toggle('dark', t === 'dark')
-    // Re-enable after one frame
+    // Double rAF: schedule re-enable after the layout has flushed the class
+    // change. A single rAF re-enables transitions mid-paint and the cascade
+    // still leaks through.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         root.style.removeProperty('--theme-transition')
@@ -73,8 +93,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * Provides the theme hook
- * @returns {ThemeContextValue} Hook state for theme
+ * Hook that returns the current theme context. Must be called inside
+ * `ThemeProvider`; throws otherwise.
  */
 export function useTheme() {
   const context = useContext(ThemeContext)

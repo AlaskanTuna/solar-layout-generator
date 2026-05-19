@@ -1,3 +1,8 @@
+/**
+ * Dashboard page header treatment with optional decorative artwork.
+ * Used above project summaries and informational pages to keep header rhythm consistent.
+ */
+
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -9,8 +14,8 @@ type PageHeaderCardProps = {
 }
 
 /**
- * Renders the pageheader card
- * @param {PageHeaderCardProps} props - Props for the component
+ * Renders a highlighted page header with optional background artwork.
+ * Expects header children and optional image source/alt text for dashboard hero areas.
  */
 export function PageHeaderCard({ children, className, artSrc, artAlt = '' }: PageHeaderCardProps) {
   return (

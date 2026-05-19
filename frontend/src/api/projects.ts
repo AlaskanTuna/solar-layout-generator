@@ -1,3 +1,19 @@
+/**
+ * Project API client.
+ *
+ * A Project is the user's editable solar plan for a Location: their panel
+ * layout, sizing preferences, analysis inputs, and computed billing results.
+ * Projects are mutable; Locations are not.
+ *
+ * Endpoints:
+ *   - `createProject` / `listProjects` / `getProject` / `deleteProject` — CRUD
+ *   - `saveLayout`              — persist the workbench panel arrangement
+ *   - `saveAnalysis`            — persist analysis inputs + computed results
+ *   - `saveLayoutPreferences`   — sizing goal + roof direction hints
+ *   - `requestPdfExportToken`   — short-lived token for the PDF render route
+ *   - `getProjectForPdf`        — token-auth fetch used by the PDF page
+ */
+
 import { apiFetch } from './client'
 import type {
   AnalysisResultsDto,
@@ -17,6 +33,17 @@ import type { LocationImageGeoTransform } from './locations'
 /** Partial after layout save (only selectedPanelModelId), fuller after analysis save */
 export type ProjectAnalysisConfig = StoredAnalysisConfigDto
 
+/**
+ * The Project shape returned by every project endpoint.
+ *
+ * `editedLayout`, `analysisConfig`, and `analysisResults` are nullable because
+ * a freshly-created project has no layout or analysis yet — they fill in as
+ * the user progresses through Map → Workbench → Analysis.
+ *
+ * `rgbSignedUrl` and `imageGeoTransform` are populated only on the `/pdf-data`
+ * endpoint and let the PDF route render the panel layout over the satellite
+ * image without holding a Supabase session.
+ */
 export type ProjectResponse = {
   id: string
   userId: string
@@ -44,6 +71,7 @@ export type ProjectResponse = {
   imageGeoTransform?: LocationImageGeoTransform | null
 }
 
+/** Creates a new project anchored to a resolved Location. */
 export function createProject(req: CreateProjectRequest) {
   return apiFetch<ProjectResponse>('/projects', {
     method: 'POST',
@@ -51,20 +79,27 @@ export function createProject(req: CreateProjectRequest) {
   })
 }
 
+/** Lists every project owned by the authenticated user, newest first. */
 export function listProjects() {
   return apiFetch<ProjectResponse[]>('/projects')
 }
 
+/** Fetches a single project the user owns; 404 if absent or not theirs. */
 export function getProject(id: string) {
   return apiFetch<ProjectResponse>(`/projects/${id}`)
 }
 
+/** Deletes a project. Does not refund the user's daily project quota slot. */
 export function deleteProject(id: string) {
   return apiFetch<{ success: boolean }>(`/projects/${id}`, {
     method: 'DELETE'
   })
 }
 
+/**
+ * Persists the workbench layout. Also tucks `selectedPanelModelId` into
+ * `analysisConfig` so the analysis page knows which model to size against.
+ */
 export function saveLayout(id: string, req: SaveLayoutRequest) {
   return apiFetch<ProjectResponse>(`/projects/${id}/layout`, {
     method: 'PATCH',
@@ -72,6 +107,11 @@ export function saveLayout(id: string, req: SaveLayoutRequest) {
   })
 }
 
+/**
+ * Persists both the analysis inputs (tariff, consumption, escalation rates)
+ * and the computed NEM simulation results. Moves the project status to
+ * `analysis_saved`, unlocking the PDF export.
+ */
 export function saveAnalysis(id: string, req: SaveAnalysisRequest) {
   return apiFetch<ProjectResponse>(`/projects/${id}/analysis`, {
     method: 'PATCH',
@@ -79,6 +119,10 @@ export function saveAnalysis(id: string, req: SaveAnalysisRequest) {
   })
 }
 
+/**
+ * Persists sizing-modal answers (bill range, sizing goal, roof direction).
+ * Drives the panel auto-layout heuristics in the workbench.
+ */
 export function saveLayoutPreferences(id: string, req: UpdateLayoutPreferencesRequest) {
   return apiFetch<ProjectResponse>(`/projects/${id}/layout-preferences`, {
     method: 'PATCH',
@@ -86,8 +130,13 @@ export function saveLayoutPreferences(id: string, req: UpdateLayoutPreferencesRe
   })
 }
 
+/** Short-lived bearer token issued just for the PDF render route. */
 export type PdfExportToken = { token: string; expiresAt: string }
 
+/**
+ * Mints a one-shot PDF token. Used because the headless PDF renderer (a
+ * Vercel function with no Supabase cookie) can't carry the user's session.
+ */
 export function requestPdfExportToken(id: string) {
   return apiFetch<PdfExportToken>(`/projects/${id}/pdf-token`, { method: 'POST' })
 }

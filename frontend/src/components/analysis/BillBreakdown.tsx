@@ -1,3 +1,8 @@
+/**
+ * Monthly bill detail card for the NEM analysis page.
+ * Used to compare baseline and solar-adjusted TNB charges for a selected billing month.
+ */
+
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,8 +21,8 @@ type BillBreakdownProps = {
 }
 
 /**
- * Renders the BillBreakdown component
- * @param {BillBreakdownProps} props - Props for the component
+ * Renders per-month billing line items and threshold warnings for the selected simulation month.
+ * Expects a selected month index, its simulation record, and a callback for switching months.
  */
 export function BillBreakdown({
   selectedMonthIndex,

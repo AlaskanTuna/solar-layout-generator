@@ -1,3 +1,8 @@
+/**
+ * Renders the user's project catalog and creation controls.
+ * It is reached from /dashboard/projects after authentication and lists drafts, layouts, and saved analyses.
+ * This page serves the project management step where users create, resume, filter, open, or delete solar studies.
+ */
 import { useState, useMemo, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -35,14 +40,13 @@ import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { projectRoute } from '@/components/dashboard/helpers'
 import { useQuota } from '@/hooks/useQuota'
 
+/** Formats the quota reset timestamp shown beside the new-project allowance. */
 function formatResetTime(resetsAt: string): string {
   const d = new Date(resetsAt)
   return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
-/**
- * Renders the project catalog and creation flow
- */
+/** Renders the project catalog, quota message, filters, creation dialog, and delete confirmation. */
 export function ProjectsPage() {
   const { t } = useTranslation('projects')
   const navigate = useNavigate()

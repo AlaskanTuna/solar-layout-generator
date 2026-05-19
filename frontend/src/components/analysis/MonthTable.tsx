@@ -1,3 +1,8 @@
+/**
+ * Expandable monthly simulation table for analysis results.
+ * Used when users need exact kWh, RM, and NEM credit values beyond the summary charts.
+ */
+
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,8 +18,8 @@ type MonthTableProps = {
 }
 
 /**
- * Renders the MonthTable component
- * @param {MonthTableProps} props - Props for the component
+ * Renders an expandable table of every monthly billing simulation row.
+ * @param props - Annual simulation output plus open state and toggle callback owned by the analysis page.
  */
 export function MonthTable({ simulation, isOpen, onToggle }: MonthTableProps) {
   const { t } = useTranslation('analysis')

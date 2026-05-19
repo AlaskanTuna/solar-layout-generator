@@ -1,13 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { KonvaEventObject } from 'konva/lib/Node'
 
+/**
+ * Konva stage zoom + pan hook for the workbench canvas.
+ *
+ * Exposes wheel-zoom (anchored to the cursor), button-based zoom in/out/reset
+ * (anchored to the canvas centre), and a snap-back animation that pulls the
+ * stage back to 1× zoom one second after the user stops zooming out below
+ * the natural fit. The snap-back is what makes wheel zoom feel "rubber-band"
+ * rather than allowing the user to drift far from the building.
+ */
+
+/** Lower bound for the stage scale; tighter than this loses the building. */
 const MIN_ZOOM = 0.5
+/** Upper bound for the stage scale; beyond this individual pixels are too coarse. */
 const MAX_ZOOM = 3
 
 /**
- * Provides the canvasZoom hook
- * @param {Object} stageSize - Value used for stage size
- * @returns {Function} Hook state for canvas zoom
+ * Returns Konva stage scale + position state, a wheel handler that zooms
+ * around the cursor, and three button handlers (zoom in / out / reset) that
+ * zoom around the canvas centre.
+ *
+ * @param stageSize - Current pixel size of the Konva stage; used by the
+ *   centre-anchored button handlers.
  */
 export function useCanvasZoom(stageSize: { width: number; height: number }) {
   const [stageScale, setStageScale] = useState(1)
@@ -62,6 +77,10 @@ export function useCanvasZoom(stageSize: { width: number; height: number }) {
     setStagePosition({ x: 0, y: 0 })
   }
 
+  // Snap-back: if the user has zoomed below 1× and stopped interacting for
+  // 1s, animate the stage back to 1× scale and (0,0) position over 300 ms.
+  // The ease-out curve (`t * (2 - t)`) makes the return motion feel natural
+  // without overshoot.
   useEffect(() => {
     if (zoomSnapTimerRef.current) {
       clearTimeout(zoomSnapTimerRef.current)

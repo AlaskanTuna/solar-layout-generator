@@ -1,7 +1,17 @@
+/**
+ * Location route request validators.
+ *
+ * Validates coordinate bounds, Solar API quality options, and flux recompute
+ * payloads before service-layer location work starts.
+ */
+
 import { z } from 'zod'
 
 /**
- * Resolves location request schema
+ * Validates the resolve-location request body.
+ *
+ * Coordinates must be WGS84 latitude/longitude bounds; `projectId` is optional
+ * because the shared location cache can be warmed before a project is linked.
  */
 export const resolveLocationSchema = z.object({
   lat: z.number().min(-90).max(90),
@@ -12,7 +22,9 @@ export const resolveLocationSchema = z.object({
 })
 
 /**
- * Probes location query schema
+ * Validates the probe-location query parameters.
+ *
+ * Coordinates are coerced from query-string values before WGS84 bounds checks.
  */
 export const probeLocationSchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
@@ -20,7 +32,10 @@ export const probeLocationSchema = z.object({
 })
 
 /**
- * Single-panel flux recompute schema
+ * Validates a single-panel flux recompute request body.
+ *
+ * Optional dimensions and capacity must be positive when supplied; omitted
+ * values fall back to Solar API panel specs.
  */
 export const fluxRecomputeSchema = z.object({
   panelId: z.string().min(1),
@@ -35,7 +50,10 @@ export const fluxRecomputeSchema = z.object({
 })
 
 /**
- * Batch flux recompute schema
+ * Validates a batch flux recompute request body.
+ *
+ * Requires at least one panel and caps the batch at 500 panels to keep raster
+ * sampling work bounded per request.
  */
 export const fluxRecomputeBatchSchema = z.object({
   panels: z.array(fluxRecomputeSchema).min(1).max(500)

@@ -1,8 +1,16 @@
+/**
+ * Supabase bearer-token authentication middleware.
+ *
+ * Verifies API requests against Supabase Auth and attaches the authenticated
+ * user identity to Express requests for downstream route ownership checks.
+ */
+
 import type { Request, Response, NextFunction } from 'express'
 import { supabase } from '../config/supabase.js'
 
 declare global {
   namespace Express {
+    // Declared here because this middleware is the source of truth for req.user.
     interface Request {
       user?: { id: string; email: string }
     }
@@ -10,10 +18,12 @@ declare global {
 }
 
 /**
- * Verify the bearer token and attach the authenticated user
- * @param {Request} req - Incoming Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express middleware continuation callback
+ * Verifies the `Authorization: Bearer <token>` session and stores the Supabase
+ * user id/email on `req.user`.
+ *
+ * @param req - Incoming request carrying a Supabase access token
+ * @param res - Response used for unauthorised JSON failures
+ * @param next - Continuation called after successful authentication
  */
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization

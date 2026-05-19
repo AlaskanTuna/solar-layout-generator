@@ -1,10 +1,16 @@
+/**
+ * Navigation theme switch for the app shell.
+ * Lets users flip between resolved light and dark modes from compact header controls.
+ */
+
 import { Moon, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/hooks/useTheme'
 import { Button } from '@/components/ui/button'
 
 /**
- * Renders the ThemeToggle component
+ * Renders an icon-only button that switches between resolved light and dark themes.
+ * Uses localized accessible labels from the common namespace.
  */
 export function ThemeToggle() {
   const { resolved, toggle } = useTheme()

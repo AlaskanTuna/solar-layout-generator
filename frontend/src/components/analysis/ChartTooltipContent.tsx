@@ -1,3 +1,8 @@
+/**
+ * Shared Recharts tooltip renderer for analysis and PDF charts.
+ * Keeps RM values and chart payload labels visually consistent across solar savings views.
+ */
+
 import type { TooltipProps } from 'recharts'
 import { formatTooltipCurrency } from './formatters'
 
@@ -17,8 +22,8 @@ type ChartTooltipContentProps = {
 }
 
 /**
- * Renders the ChartTooltipContent component
- * @param {ChartTooltipContentProps} props - Props for the component
+ * Renders a compact tooltip for Recharts payload rows, defaulting values to formatted RM amounts.
+ * Accepts optional item class and value formatters so PDF and live charts can reuse the same shell.
  */
 export function ChartTooltipContent({
   active,

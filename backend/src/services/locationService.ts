@@ -1,3 +1,10 @@
+/**
+ * Location orchestration service.
+ *
+ * Resolves shared location cache rows, starts the Solar API pipeline, enforces
+ * project ownership, and builds location-related route responses.
+ */
+
 import { prisma } from '../config/prisma.js'
 import { runLocationPipeline } from './locationPipeline.js'
 import { NotFoundError, AppError } from '../errors.js'
@@ -14,6 +21,7 @@ import {
   buildResolveLocationResponse
 } from './viewModels/locationResponse.js'
 
+/** Coordinate cache window in decimal degrees, roughly 11 metres at the equator. */
 const COORDINATE_TOLERANCE = 0.0001
 
 /**
@@ -29,6 +37,17 @@ type ResolveLocationResult = {
   status: 'processing' | 'ready' | 'failed'
 }
 
+/**
+ * Links a project to a location only when the project belongs to the caller.
+ *
+ * Uses `updateMany` so the ownership check and write happen in a single query;
+ * a zero count means the project either does not exist or is not owned by the user.
+ *
+ * @param userId - Authenticated project owner
+ * @param projectId - Project to attach to the resolved location
+ * @param locationId - Location row produced by cache lookup or pipeline creation
+ * @returns `true` when the project was linked
+ */
 async function linkOwnedProjectToLocation(userId: string, projectId: string, locationId: string): Promise<boolean> {
   const result = await prisma.project.updateMany({
     where: { id: projectId, userId },
@@ -38,14 +57,15 @@ async function linkOwnedProjectToLocation(userId: string, projectId: string, loc
 }
 
 /**
- * Resolves a location and kick off the pipeline when needed
- * @param {string} userId - Authenticated user identifier
- * @param {number} lat - Value used for lat
- * @param {number} lng - Value used for lng
- * @param {string} projectId - Project identifier
- * @param {ImageryQuality} requiredQuality - Value used for required quality
- * @param {boolean} expandedCoverage - Whether expanded coverage
- * @returns {Promise<ResolveLocationResult>} A promise resolving to the resulting value
+ * Resolves a cached location or creates one and starts the async pipeline.
+ *
+ * @param userId - Authenticated user requesting the location
+ * @param lat - Latitude in WGS84 degrees
+ * @param lng - Longitude in WGS84 degrees
+ * @param projectId - Optional project to link once a location row is known
+ * @param requiredQuality - Solar API imagery quality requested for a new pipeline run
+ * @param expandedCoverage - Whether to request Solar API expanded coverage for BASE imagery
+ * @returns Location id and current processing status
  */
 export async function resolveLocation(
   userId: string,
@@ -112,14 +132,15 @@ export async function resolveLocation(
 }
 
 /**
- * Resolves a location and build the API response
- * @param {string} userId - Authenticated user identifier
- * @param {number} lat - Value used for lat
- * @param {number} lng - Value used for lng
- * @param {string} projectId - Project identifier
- * @param {ImageryQuality} requiredQuality - Value used for required quality
- * @param {boolean} expandedCoverage - Whether expanded coverage
- * @returns {Promise<{ locationId: string; status: LocationStatus; }>} A promise resolving to the resulting value
+ * Resolves a location and wraps the result in the route response shape.
+ *
+ * @param userId - Authenticated user requesting the location
+ * @param lat - Latitude in WGS84 degrees
+ * @param lng - Longitude in WGS84 degrees
+ * @param projectId - Optional project to link once a location row is known
+ * @param requiredQuality - Solar API imagery quality requested for a new pipeline run
+ * @param expandedCoverage - Whether to request Solar API expanded coverage for BASE imagery
+ * @returns Resolve-location response DTO
  */
 export async function resolveLocationResponse(
   userId: string,
@@ -134,10 +155,11 @@ export async function resolveLocationResponse(
 }
 
 /**
- * Probes which Solar API qualities are available
- * @param {number} lat - Value used for lat
- * @param {number} lng - Value used for lng
- * @returns {Promise<ProbeLocationResponse>} A promise resolving to the resulting value
+ * Probes which Solar API imagery qualities are available at a coordinate.
+ *
+ * @param lat - Latitude in WGS84 degrees
+ * @param lng - Longitude in WGS84 degrees
+ * @returns Available quality tiers and the recommended quality selection
  */
 export async function probeLocation(lat: number, lng: number) {
   const result = await findBestQualityForLocation(lat, lng)
@@ -145,10 +167,11 @@ export async function probeLocation(lat: number, lng: number) {
 }
 
 /**
- * Fetches the location status when the user can access it
- * @param {string} userId - Authenticated user identifier
- * @param {string} locationId - Location identifier
- * @returns {Promise<{ status: LocationStatus; }>} A promise resolving to the requested location status for user
+ * Fetches location status when the user owns it or just created an orphan row.
+ *
+ * @param userId - Authenticated user polling location status
+ * @param locationId - Location whose status should be returned
+ * @returns Matching location status row, or `null` when access is not allowed
  */
 export async function getLocationStatusForUser(userId: string, locationId: string) {
   // Allow status polling for: (a) locations linked to a project the user owns, OR
@@ -167,10 +190,11 @@ export async function getLocationStatusForUser(userId: string, locationId: strin
 }
 
 /**
- * Builds a location status response for the user
- * @param {string} userId - Authenticated user identifier
- * @param {string} locationId - Location identifier
- * @returns {Promise<{ status: LocationStatus; }>} A promise resolving to the requested location status response for user
+ * Builds a location status response for an accessible location.
+ *
+ * @param userId - Authenticated user polling location status
+ * @param locationId - Location whose status should be returned
+ * @returns Status response DTO, or `null` when access is not allowed
  */
 export async function getLocationStatusResponseForUser(userId: string, locationId: string) {
   const location = await getLocationStatusForUser(userId, locationId)
@@ -178,10 +202,11 @@ export async function getLocationStatusResponseForUser(userId: string, locationI
 }
 
 /**
- * Fetches the location row when the user owns the project
- * @param {string} userId - Authenticated user identifier
- * @param {string} locationId - Location identifier
- * @returns {Promise} A promise resolving to the requested location data for user
+ * Fetches a full location row through project ownership.
+ *
+ * @param userId - Authenticated user that must own a linked project
+ * @param locationId - Location whose stored assets should be loaded
+ * @returns Location row, or `null` when no owned project links to it
  */
 export async function getLocationDataForUser(userId: string, locationId: string) {
   return prisma.location.findFirst({
@@ -190,10 +215,11 @@ export async function getLocationDataForUser(userId: string, locationId: string)
 }
 
 /**
- * Builds the location data response for an owned project
- * @param {string} userId - Authenticated user identifier
- * @param {string} locationId - Location identifier
- * @returns {Promise<LocationDataRouteResponse>} A promise resolving to the requested location data response for user
+ * Builds the workbench location-data response for an owned ready location.
+ *
+ * @param userId - Authenticated user that must own a linked project
+ * @param locationId - Ready location whose Solar API artifacts should be returned
+ * @returns Location data response DTO, or `null` when access is not allowed
  */
 export async function getLocationDataResponseForUser(userId: string, locationId: string) {
   const location = await getLocationDataForUser(userId, locationId)
@@ -215,11 +241,12 @@ export async function getLocationDataResponseForUser(userId: string, locationId:
 }
 
 /**
- * Builds an overlay response for an owned project
- * @param {string} userId - Authenticated user identifier
- * @param {string} locationId - Location identifier
- * @param {OverlayType} overlayType - Value used for overlay type
- * @returns {Promise<{ url: string; }>} A promise resolving to the requested overlay response for user
+ * Builds a signed overlay URL response for an owned ready location.
+ *
+ * @param userId - Authenticated user that must own a linked project
+ * @param locationId - Ready location whose overlay source GeoTIFF should be rendered
+ * @param overlayType - Overlay layer to resolve and generate when missing from cache
+ * @returns Overlay response DTO containing a signed PNG URL
  */
 export async function getOverlayResponseForUser(userId: string, locationId: string, overlayType: OverlayType) {
   const location = await getLocationDataForUser(userId, locationId)

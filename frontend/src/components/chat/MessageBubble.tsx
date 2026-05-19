@@ -1,3 +1,8 @@
+/**
+ * Chat message presentation for the floating project assistant.
+ * Handles user text, streamed model markdown, error bubbles, and suggestion chips.
+ */
+
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import { cn } from '@/lib/utils'
@@ -8,7 +13,10 @@ type MessageBubbleProps = {
   onSuggestionPick: (suggestion: string) => void
 }
 
-/** Renders one chat message plus any follow-up suggestion chips attached to model responses. */
+/**
+ * Renders one chat message with role-aware styling, Markdown support, errors, and follow-up suggestion chips.
+ * @param props - Message record plus handler for selecting model-generated suggestions.
+ */
 export function MessageBubble({ message, onSuggestionPick }: MessageBubbleProps) {
   const { t } = useTranslation('chat')
   const isUser = message.role === 'user'

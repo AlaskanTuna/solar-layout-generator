@@ -1,12 +1,20 @@
+/**
+ * Supabase Storage wrapper for generated Solar API assets.
+ *
+ * Centralises uploads, downloads, and signed URL creation for the shared
+ * GeoTIFF/PNG bucket used by the location pipeline.
+ */
+
 import { supabase } from '../config/supabase.js'
 
 const BUCKET = 'geotiffs'
 
 /**
- * Upload a blob to the shared storage bucket
- * @param {string} storagePath - Storage path value
- * @param {Buffer} buffer - Value used for buffer
- * @param {string} contentType - Content type value
+ * Uploads a blob to the shared storage bucket, replacing any existing object.
+ *
+ * @param storagePath - Bucket-relative object path
+ * @param buffer - File contents to store
+ * @param contentType - MIME type sent to Supabase Storage
  */
 export async function uploadToStorage(storagePath: string, buffer: Buffer, contentType: string): Promise<void> {
   const { error } = await supabase.storage.from(BUCKET).upload(storagePath, buffer, { contentType, upsert: true })
@@ -14,9 +22,10 @@ export async function uploadToStorage(storagePath: string, buffer: Buffer, conte
 }
 
 /**
- * Download a blob from the shared storage bucket
- * @param {string} storagePath - Storage path value
- * @returns {Promise<ArrayBuffer>} A promise resolving to the resulting value
+ * Downloads a blob from the shared storage bucket.
+ *
+ * @param storagePath - Bucket-relative object path
+ * @returns Raw object bytes as an ArrayBuffer
  */
 export async function downloadFromStorage(storagePath: string): Promise<ArrayBuffer> {
   const { data, error } = await supabase.storage.from(BUCKET).download(storagePath)
@@ -25,10 +34,11 @@ export async function downloadFromStorage(storagePath: string): Promise<ArrayBuf
 }
 
 /**
- * Creates a signed read URL for a storage object
- * @param {string} storagePath - Storage path value
- * @param {number} expiresIn - Value used for expires in
- * @returns {Promise<string>} A promise resolving to the requested signed url
+ * Creates a signed read URL for a storage object.
+ *
+ * @param storagePath - Bucket-relative object path
+ * @param expiresIn - URL lifetime in seconds
+ * @returns Temporary public URL for reading the object
  */
 export async function getSignedUrl(storagePath: string, expiresIn = 3600): Promise<string> {
   const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(storagePath, expiresIn)

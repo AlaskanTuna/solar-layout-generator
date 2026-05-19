@@ -1,3 +1,8 @@
+/**
+ * Solar API coverage education modal for the map search flow.
+ * Explains where high-resolution Malaysian imagery is available before users pick a project coordinate.
+ */
+
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -36,7 +41,10 @@ type Props = {
   onClose: () => void
 }
 
-/** Educates the user on which Malaysian regions have HIGH-resolution Solar API coverage. */
+/**
+ * Renders the dismissible coverage notice and optional persistent don't-show-again choice.
+ * Expects controlled open state and an onClose callback from the map page.
+ */
 export function CoverageNoticeModal({ open, onClose }: Props) {
   const { t } = useTranslation('map')
   const [dontShowAgain, setDontShowAgain] = useState(false)

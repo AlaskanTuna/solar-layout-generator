@@ -1,3 +1,8 @@
+/**
+ * Cumulative net benefit chart for rooftop solar ROI analysis.
+ * Lets homeowners compare RM savings over selectable horizons, including lifecycle costs when enabled.
+ */
+
 import { useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -41,8 +46,8 @@ const YEAR_RANGES = [5, 10, 15, 20, 25] as const
 type YearRange = (typeof YEAR_RANGES)[number]
 
 /**
- * Renders the netbenefit chart
- * @param {NetBenefitChartProps} props - Props for the component
+ * Renders cumulative RM net benefit after upfront system cost across selectable year ranges.
+ * Expects first-year savings, degradation, tariff escalation, and optional lifecycle cost events.
  */
 export function NetBenefitChart({
   year1Savings,

@@ -1,3 +1,10 @@
+/**
+ * Location and raster-data routing module.
+ *
+ * Handles Solar API location resolution, imagery probing, data retrieval,
+ * overlay generation, and per-panel flux recomputation for authenticated users.
+ */
+
 import { Router, type Router as ExpressRouter } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
@@ -18,6 +25,7 @@ import type { OverlayType } from '../services/overlayService.js'
  */
 export const locationsRouter: ExpressRouter = Router()
 
+/** POST /api/locations/resolve through auth, body validation, and async handling; returns location metadata. */
 locationsRouter.post(
   '/resolve',
   requireAuth,
@@ -36,6 +44,7 @@ locationsRouter.post(
   })
 )
 
+/** GET /api/locations/probe through auth and async handling; returns Solar API quality for a lat/lng query. */
 locationsRouter.get(
   '/probe',
   requireAuth,
@@ -49,6 +58,7 @@ locationsRouter.get(
   })
 )
 
+/** GET /api/locations/:id/status through auth and async handling; returns status for an owned location. */
 locationsRouter.get(
   '/:id/status',
   requireAuth,
@@ -59,6 +69,7 @@ locationsRouter.get(
   })
 )
 
+/** GET /api/locations/:id/data through auth and async handling; returns workbench data for an owned location. */
 locationsRouter.get(
   '/:id/data',
   requireAuth,
@@ -69,6 +80,7 @@ locationsRouter.get(
   })
 )
 
+/** GET /api/locations/:locationId/overlay/:type through auth and async handling; returns a signed PNG URL. */
 locationsRouter.get(
   '/:locationId/overlay/:type',
   requireAuth,
@@ -87,6 +99,7 @@ locationsRouter.get(
   })
 )
 
+/** POST /api/locations/:locationId/panels/recompute through auth, validation, async; returns one panel's flux. */
 locationsRouter.post(
   '/:locationId/panels/recompute',
   requireAuth,
@@ -107,6 +120,7 @@ locationsRouter.post(
   })
 )
 
+/** POST /api/locations/:locationId/panels/recompute-batch through auth, validation, async; returns flux results. */
 locationsRouter.post(
   '/:locationId/panels/recompute-batch',
   requireAuth,

@@ -1,3 +1,8 @@
+/**
+ * Renders the public sign-up page.
+ * It is reached from /sign-up when new users create an account before starting a solar project.
+ * This page serves the onboarding entry step with email/password, Google OAuth, and email-confirmation feedback.
+ */
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
@@ -11,9 +16,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { Leaf, Loader2, Mail } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 
-/**
- * Renders the sign-up flow
- */
+/** Renders the sign-up flow and redirects authenticated users to the dashboard. */
 export function SignUpPage() {
   const { t } = useTranslation('auth')
   const { t: tNav } = useTranslation('nav')

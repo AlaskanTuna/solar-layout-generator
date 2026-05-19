@@ -1,3 +1,10 @@
+/**
+ * Validation helpers for Google Solar API building-insights payloads.
+ *
+ * Narrows the raw Solar API response to the fields required by location data
+ * responses and panel-energy recomputation.
+ */
+
 import { z } from 'zod'
 
 const solarPanelSchema = z.object({}).passthrough()
@@ -27,18 +34,19 @@ const buildingInsightsSchema = z
   .passthrough()
 
 /**
- * Solar potential subset used to size and recompute panels
+ * Solar potential subset used to size and recompute panels.
  */
 export type PanelSpecs = z.infer<typeof solarPotentialSchema>
 /**
- * Building insights payload validated for downstream use
+ * Building insights payload validated for downstream use.
  */
 export type BuildingInsightsDto = z.infer<typeof buildingInsightsSchema>
 
 /**
- * Parses a building insights payload
- * @param {unknown} buildingInsights - Value used for building insights
- * @returns {Object} The parsed building insights
+ * Parses the Solar API building-insights payload used by the app.
+ *
+ * @param buildingInsights - Raw payload returned by Solar API or loaded from the database
+ * @returns Validated building insights, or `null` when required fields are missing
  */
 export function parseBuildingInsights(buildingInsights: unknown): BuildingInsightsDto | null {
   const result = buildingInsightsSchema.safeParse(buildingInsights)
@@ -49,9 +57,10 @@ export function parseBuildingInsights(buildingInsights: unknown): BuildingInsigh
 }
 
 /**
- * Parses just the panel sizing fields from building insights
- * @param {unknown} buildingInsights - Value used for building insights
- * @returns {Object} The parsed panel specs
+ * Extracts only the panel dimensions, capacity, and optional panel list.
+ *
+ * @param buildingInsights - Raw payload containing a `solarPotential` object
+ * @returns Validated panel specs, or `null` when Solar API omitted sizing data
  */
 export function parsePanelSpecs(buildingInsights: unknown): PanelSpecs | null {
   const result = z.object({ solarPotential: solarPotentialSchema }).safeParse(buildingInsights)

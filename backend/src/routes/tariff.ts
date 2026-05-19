@@ -1,3 +1,10 @@
+/**
+ * Tariff configuration routing module.
+ *
+ * Serves the seeded electricity tariff table and defaults used by project
+ * analysis calculations.
+ */
+
 import { Router, type Router as ExpressRouter } from 'express'
 import { prisma } from '../config/prisma.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
@@ -9,6 +16,7 @@ import { tariffDefaults, type TariffConfigResponse } from '@shared/types'
  */
 export const tariffRouter: ExpressRouter = Router()
 
+/** GET /api/tariff/config through async handling; returns the tariff configuration and fallback defaults. */
 tariffRouter.get(
   '/config',
   asyncHandler(async (_req, res) => {

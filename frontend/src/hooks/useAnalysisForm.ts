@@ -1,3 +1,22 @@
+/**
+ * Analysis page state hook.
+ *
+ * The single source of truth for the AnalysisPage: it owns three React Query
+ * subscriptions (project, tariff config, location data), derives the form
+ * inputs (consumption, cost, tariff overrides, lifecycle assumptions), runs
+ * the annual NEM simulation, and returns everything the page renders.
+ *
+ * Three subtleties worth knowing:
+ *   - `initializedProjectIdRef` guards the one-time form initialisation so
+ *     navigating between projects without unmounting the page re-seeds the
+ *     state from the new project rather than leaking stale values.
+ *   - When the panel model, count, roof type, or supply phase changes the
+ *     system cost is recomputed and pushed back into `formState.systemCostRm`
+ *     unless the user has manually overridden it.
+ *   - `billingConfig` merges the seeded tariff rates with any per-project
+ *     overrides so the analysis page can preview alternative tariff scenarios.
+ */
+
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getLocationData } from '@/api/locations'
@@ -16,14 +35,11 @@ import {
 import { parseBuildingInsights, parsePanelEdits } from '@/lib/buildingInsights'
 import { runAnnualSimulation } from '@/lib/billingEngine'
 import { BILL_RANGE_TO_KWH_PER_MONTH, computeSystemCost, getPanelModel, DEFAULT_PANEL_MODEL_ID } from '@shared/types'
-/**
- * Editable analysis settings excluding derived system size
- */
+
+/** Editable analysis settings excluding the derived system size. */
 export type AnalysisFormState = Omit<AnalysisConfig, 'systemKwp'>
 
-/**
- * Monthly bill chart point used by the analysis view
- */
+/** Monthly bill chart point used by the analysis view. */
 export type ChartDataPoint = {
   month: string
   baselineBill: number
@@ -32,9 +48,12 @@ export type ChartDataPoint = {
 }
 
 /**
- * Loads and derive the analysis form state for a project
- * @param {string | undefined} projectId - Project identifier
- * @returns {Object} Hook state for analysis form
+ * Loads project + tariff + location data, derives the analysis form state,
+ * and runs the annual NEM simulation.
+ *
+ * @param projectId - Current project id (may be undefined during navigation)
+ * @returns Form state, derived values, simulation output, and React Query
+ *   handles for loading/error rendering on the analysis page
  */
 export function useAnalysisForm(projectId: string | undefined) {
   const initializedProjectIdRef = useRef<string | null>(null)

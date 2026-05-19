@@ -1,3 +1,8 @@
+/**
+ * Top navigation bar for authenticated SolarSim pages.
+ * Shows breadcrumbs, quota status, settings, locale/theme controls, and the user menu.
+ */
+
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -67,6 +72,10 @@ function useBreadcrumbs(): Crumb[] {
   return crumbs
 }
 
+/**
+ * Renders the sticky top nav with route-aware breadcrumbs and account controls.
+ * @param props - Optional minimal mode plus mobile sidebar menu callback from the app shell.
+ */
 export function AppNav({ minimal, onMenuClick }: { minimal?: boolean; onMenuClick?: () => void } = {}) {
   const { t } = useTranslation('nav')
   const { user, signOut } = useAuth()

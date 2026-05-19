@@ -1,17 +1,33 @@
+/**
+ * Notification bell + popover for the app header.
+ *
+ * Reads from `notificationStore` (localStorage-backed) and renders an
+ * animated popover listing the user's recent notifications. Clicking the
+ * bell toggles the popover; clicking a notification marks it read; the
+ * X button dismisses it; "Clear all" empties the list.
+ *
+ * Notifications come from `lib/notificationStore.ts` and are pushed by
+ * `useQuota` (low-quota warning), `notify.success` (toastConfig), and any
+ * other producer that wants a persistent record.
+ */
+
 import { useEffect, useRef, useState } from 'react'
 import { Bell, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { notificationStore } from '@/lib/notificationStore'
 
+/** A single stored notification rendered in the popover. */
 export type Notification = {
   id: string
   title: string
   description: string
   timestamp: Date
+  /** `false` until the user opens the popover and clicks this notification. */
   read: boolean
 }
 
+/** Subscribes to `notificationStore` and returns the current list. */
 function useNotifications() {
   const [notifications, setNotifications] = useState(notificationStore.get)
 
@@ -25,6 +41,11 @@ function useNotifications() {
   return notifications
 }
 
+/**
+ * Bell button + animated notification popover. Auto-closes when the user
+ * clicks outside the popover container. Shows the unread count as a badge
+ * on the bell.
+ */
 export function NotificationPopover() {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)

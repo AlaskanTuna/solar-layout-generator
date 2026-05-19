@@ -1,3 +1,10 @@
+/**
+ * Solar API fetch stage for the location pipeline.
+ *
+ * Retrieves building insights, resolves raster layer URLs, and downloads the
+ * GeoTIFF assets needed by storage and frontend workbench responses.
+ */
+
 import { env } from '../../config/env.js'
 import { parseBuildingInsights } from '../buildingInsightsService.js'
 import {
@@ -12,6 +19,11 @@ import {
   type ImageryQuality
 } from '../solarApiService.js'
 
+/**
+ * Mapping from Solar API data-layer response fields to the filenames we store
+ * under each location prefix. These names are part of the storage contract used
+ * by fallback loaders and overlay generation.
+ */
 const LAYER_FILENAMES = {
   dsmUrl: 'dsm.tif',
   rgbUrl: 'rgb.tif',
@@ -21,12 +33,12 @@ const LAYER_FILENAMES = {
 } as const
 
 /**
- * Solar API layer keys downloaded by the pipeline
+ * Solar API layer keys downloaded by the pipeline.
  */
 export type SolarLayerKey = keyof typeof LAYER_FILENAMES
 
 /**
- * One downloaded Solar API layer
+ * One downloaded Solar API layer.
  */
 export type DownloadedLayer = {
   field: SolarLayerKey
@@ -35,7 +47,7 @@ export type DownloadedLayer = {
 }
 
 /**
- * Solar API inputs fetched for the location pipeline
+ * Solar API inputs fetched for the location pipeline.
  */
 export type PipelineFetchResult = {
   buildingInsights: BuildingInsightsApiResponse
@@ -43,6 +55,13 @@ export type PipelineFetchResult = {
   downloadedLayers: DownloadedLayer[]
 }
 
+/**
+ * Downloads a signed Solar API layer URL with the project API key attached.
+ *
+ * @param url - Layer URL returned by `dataLayers:get`
+ * @param field - Data-layer field being downloaded
+ * @returns Layer bytes with the storage filename for this field
+ */
 async function downloadLayer(url: string, field: SolarLayerKey): Promise<DownloadedLayer> {
   const downloadUrl = new URL(url)
   downloadUrl.searchParams.set('key', env.GOOGLE_API_KEY)
@@ -60,12 +79,13 @@ async function downloadLayer(url: string, field: SolarLayerKey): Promise<Downloa
 }
 
 /**
- * Fetches building insights and downloadable layer assets
- * @param {number} lat - Value used for lat
- * @param {number} lng - Value used for lng
- * @param {ImageryQuality} requiredQuality - Value used for required quality
- * @param {boolean} expandedCoverage - Whether expanded coverage
- * @returns {Promise<PipelineFetchResult>} A promise resolving to the resulting value
+ * Fetches building insights and all available downloadable layer assets.
+ *
+ * @param lat - Latitude in WGS84 degrees
+ * @param lng - Longitude in WGS84 degrees
+ * @param requiredQuality - Solar API imagery quality to request
+ * @param expandedCoverage - Whether to request Solar API expanded coverage for BASE imagery
+ * @returns Building metadata plus downloaded raster layer buffers
  */
 export async function fetchLocationPipelineInputs(
   lat: number,
@@ -99,6 +119,13 @@ export async function fetchLocationPipelineInputs(
   }
 }
 
+/**
+ * Reads the URL for a known Solar API layer field.
+ *
+ * @param dataLayers - Raw `dataLayers:get` response with optional URLs
+ * @param field - Layer field to resolve
+ * @returns Signed URL for the field, or `null` when Solar API omitted the layer
+ */
 function getLayerUrl(dataLayers: DataLayersApiResponse, field: SolarLayerKey): string | null {
   return dataLayers[field] ?? null
 }

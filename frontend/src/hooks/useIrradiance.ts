@@ -1,9 +1,23 @@
+/**
+ * Workbench irradiance preview hook.
+ *
+ * Drives the soft amber sun-glow that appears behind the workbench canvas
+ * to give the user a feel for where the sun is at different times of year.
+ * Returns the currently-selected month, a setter, and a `style` object
+ * containing a radial-gradient that approximates the sun's position at solar
+ * noon for that month.
+ *
+ * The gradient values are computed from `MONTHLY_AZIMUTH` and
+ * `MONTHLY_IRRADIANCE` tables defined alongside `IrradianceGlow.tsx`.
+ */
+
 import { useMemo, useState } from 'react'
 import { MONTHLY_AZIMUTH, MONTHLY_IRRADIANCE } from '@/components/workbench/IrradianceGlow'
 
 /**
- * Provides the irradiance hook
- * @returns {Object} Hook state for irradiance
+ * Returns `{ irradianceMonth, setIrradianceMonth, irradianceStyle }` where
+ * `irradianceStyle` is an inline-style object ready to spread onto the
+ * workbench background container.
  */
 export function useIrradiance() {
   const [irradianceMonth, setIrradianceMonth] = useState(new Date().getMonth())
@@ -11,7 +25,11 @@ export function useIrradiance() {
   const irradianceStyle = useMemo(() => {
     const azimuth = MONTHLY_AZIMUTH[irradianceMonth] ?? 180
     const intensity = MONTHLY_IRRADIANCE[irradianceMonth] ?? 0.9
-    // Position glow at container edge based on azimuth
+    // Position glow at container edge based on azimuth: 0° = north (top),
+    // 90° = east (right), 180° = south (bottom), 270° = west (left). The
+    // 50% offset puts the centre at the container midpoint, then sin/cos
+    // pushes it outward by another 50% so the glow appears to sit on the
+    // container edge in the sun's direction.
     const rad = (azimuth * Math.PI) / 180
     const gx = 50 + Math.sin(rad) * 50
     const gy = 50 - Math.cos(rad) * 50

@@ -1,3 +1,10 @@
+/**
+ * Runtime environment configuration.
+ *
+ * Loads `.env`, expands references, validates required backend settings with
+ * Zod, and exports the normalized values consumed by the server.
+ */
+
 import path from 'path'
 import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
@@ -40,7 +47,10 @@ const envSchema = z
 const parsed = envSchema.parse(process.env)
 
 /**
- * Parsed and validated runtime configuration
+ * Parsed and validated runtime configuration.
+ *
+ * `PORT` can override `BACKEND_PORT` for deployment platforms that inject a
+ * single conventional port variable.
  */
 export const env = {
   ...parsed,

@@ -1,3 +1,8 @@
+/**
+ * Renders authenticated account and preference settings.
+ * It is reached from /settings and lets users manage presentation state, onboarding tours, notifications, and recents.
+ * This page serves the maintenance step for resetting local app state without changing project calculations.
+ */
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -55,9 +60,7 @@ function useNotifications() {
   return notifications
 }
 
-/**
- * Renders the settings page
- */
+/** Renders the settings page for account, appearance, notifications, guided tours, and recent activity. */
 export function SettingsPage() {
   const { t } = useTranslation('settings')
   const { user } = useAuth()

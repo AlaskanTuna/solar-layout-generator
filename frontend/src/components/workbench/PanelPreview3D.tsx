@@ -1,3 +1,8 @@
+/**
+ * Three.js solar panel preview for the workbench model drawer.
+ * Gives homeowners a quick visual sense of module proportions and cell colour before choosing a panel.
+ */
+
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useMemo } from 'react'
@@ -97,8 +102,8 @@ function PanelMesh({
 }
 
 /**
- * Renders the PanelPreview3D component
- * @param {PanelPreview3DProps} props - Props for the component
+ * Renders an orbitable 3D preview of one solar panel model with generated cell texture.
+ * @param props - Physical panel width/height in metres and optional cell colour matching the selected model.
  */
 export default function PanelPreview3D({ widthM, heightM, cellColor }: PanelPreview3DProps) {
   return (

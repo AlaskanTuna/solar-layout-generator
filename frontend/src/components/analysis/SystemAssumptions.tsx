@@ -1,3 +1,8 @@
+/**
+ * Technical assumptions card for analysis results.
+ * Shows performance ratio, losses, degradation, DC/AC ratio, and roof orientation assumptions behind the RM forecast.
+ */
+
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InfoTooltip } from '@/components/ui/InfoTooltip'
@@ -13,8 +18,8 @@ type SystemAssumptionsProps = {
 }
 
 /**
- * Renders the SystemAssumptions component
- * @param {SystemAssumptionsProps} props - Props for the component
+ * Renders the solar modelling assumptions used to produce the analysis totals.
+ * Expects normalized rates and optional layout orientation so users can audit the forecast inputs.
  */
 export function SystemAssumptions({
   performanceRatio,

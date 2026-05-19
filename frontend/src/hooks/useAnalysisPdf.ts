@@ -1,9 +1,26 @@
+/**
+ * Analysis page PDF export hook.
+ *
+ * Drives the "Export PDF" flow on the analysis page:
+ *   1. Run an optional `beforeExport` callback (used to save unsaved analysis
+ *      results before triggering the render).
+ *   2. Mint a short-lived PDF token from the backend.
+ *   3. Build the `/project/:id/pdf-preview` URL with the token, theme, and
+ *      locale baked in so the headless renderer matches the user's UI.
+ *   4. POST that URL to the external PDF renderer service, download the
+ *      resulting blob, and trigger a browser download.
+ *
+ * Localhost is blocked because the cloud renderer cannot reach `localhost`
+ * directly — testing PDF export requires the deployed app.
+ */
+
 import { useState } from 'react'
 import { requestPdfExportToken } from '@/api/projects'
 import { notify } from '@/components/ui/toastConfig'
 import { useTheme } from '@/hooks/useTheme'
 import { useLocale } from '@/hooks/useLocale'
 
+/** Strips characters that would break a download filename across OSes. */
 function sanitizeFileName(value: string) {
   return value
     .replace(/[^a-z0-9-_]+/gi, '_')
@@ -11,11 +28,13 @@ function sanitizeFileName(value: string) {
     .replace(/^_+|_+$/g, '')
 }
 
+/** Builds the `Solar_Analysis_<Project>_<YYYY-MM-DD>.pdf` download filename. */
 function buildPdfFileName(projectName: string) {
   const date = new Date().toISOString().slice(0, 10)
   return `Solar_Analysis_${sanitizeFileName(projectName) || 'Project'}_${date}.pdf`
 }
 
+/** Triggers a browser download for an in-memory blob, using a transient anchor. */
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -28,8 +47,9 @@ function triggerDownload(blob: Blob, filename: string) {
 }
 
 /**
- * Export a PDF from the analysis preview
- * @returns {Function} Hook state for analysis pdf
+ * Returns `{ isExporting, handleExportPdf }` for wiring to the analysis
+ * page's PDF button. `handleExportPdf(projectId, projectName, beforeExport?)`
+ * runs the full export flow described in the file header.
  */
 export function useAnalysisPdf() {
   const [isExporting, setIsExporting] = useState(false)
@@ -43,6 +63,8 @@ export function useAnalysisPdf() {
       return
     }
 
+    // Cloud PDF renderer cannot reach localhost; surface a helpful message
+    // instead of letting the render silently 504.
     const host = window.location.hostname
     if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local')) {
       notify.error(

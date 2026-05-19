@@ -1,8 +1,14 @@
+/**
+ * Auth guard for private React Router branches.
+ * Used around dashboard and project workflow routes before rendering nested page content.
+ */
+
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 
 /**
- * Renders the ProtectedRoute component
+ * Renders child routes only after auth loading completes and a session exists.
+ * Redirects unauthenticated visitors to sign-in while preserving a full-screen loading state.
  */
 export function ProtectedRoute() {
   const { session, loading } = useAuth()

@@ -1,3 +1,8 @@
+/**
+ * Drag-sortable wrapper for analysis result cards.
+ * Persists each user's preferred card order locally while preserving newly added solar analysis cards.
+ */
+
 import { useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
 import {
   DndContext,
@@ -42,6 +47,10 @@ function reconcile(saved: string[], current: string[]): string[] {
   return result
 }
 
+/**
+ * Renders one draggable analysis card with a grip handle and transform styles from dnd-kit.
+ * Expects a stable card id so saved order can survive re-renders.
+ */
 function SortableCard({ id, children }: { id: string; children: ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
@@ -68,8 +77,8 @@ function SortableCard({ id, children }: { id: string; children: ReactNode }) {
 }
 
 /**
- * Renders the SortableCardContainer component
- * @param {Object} props - Props for the component
+ * Renders the sortable analysis card list and reconciles saved local order with the current card set.
+ * @param props - Cards keyed by stable ids, typically the analysis result widgets for one project.
  */
 export function SortableCardContainer({ cards }: { cards: CardItem[] }) {
   const sensors = useSensors(

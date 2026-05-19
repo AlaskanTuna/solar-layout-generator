@@ -1,3 +1,8 @@
+/**
+ * Main authenticated application shell.
+ * Wraps dashboard and project routes with sidebar navigation, top nav, background treatment, and footer.
+ */
+
 import { useState, type ReactNode } from 'react'
 import { AppNav } from './AppNav'
 import { AppFooter } from './AppFooter'
@@ -9,6 +14,10 @@ type AppLayoutProps = {
   minimalNav?: boolean
 }
 
+/**
+ * Renders the shared app frame around route content.
+ * Expects children for the active page and an optional minimal nav mode for focused screens.
+ */
 export function AppLayout({ children, minimalNav }: AppLayoutProps) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 

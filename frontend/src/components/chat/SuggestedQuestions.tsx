@@ -1,3 +1,8 @@
+/**
+ * Starter prompt chips for the contextual project assistant.
+ * Used in the chat empty state to nudge users toward workbench or analysis questions.
+ */
+
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -21,7 +26,10 @@ function samplePool(pool: string[], count: number): string[] {
   return selected
 }
 
-/** Renders page-aware empty-state prompt chips. Clicks delegate to onPick, which auto-sends. */
+/**
+ * Renders randomized starter questions and contextual follow-ups for the current project page.
+ * Expects page context, a selection callback, and optional payback years for analysis-specific suggestions.
+ */
 export function SuggestedQuestions({ page, onPick, paybackYears }: SuggestedQuestionsProps) {
   const { t } = useTranslation('chat')
 

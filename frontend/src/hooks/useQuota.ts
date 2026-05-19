@@ -1,3 +1,12 @@
+/**
+ * Daily project quota hook.
+ *
+ * Polls `GET /quota` (refetches on window focus) and exposes the React Query
+ * result. Also pushes a one-per-day notification when the user crosses the
+ * `WARNING_THRESHOLD` (20% remaining), deduplicated by user id and date in
+ * localStorage so refreshing or revisiting the dashboard doesn't re-fire.
+ */
+
 import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getQuota } from '@/api/quota'
@@ -5,16 +14,19 @@ import { WARNING_THRESHOLD } from '@shared/types'
 import { notificationStore } from '@/lib/notificationStore'
 import { useAuth } from '@/hooks/useAuth'
 
+/** localStorage prefix for the dedup-by-day warning marker. */
 const QUOTA_WARNING_KEY = 'slg-quota-warning-notified'
 
+/** Formats an ISO timestamp as a localized hour:minute (e.g. "12:00 AM"). */
 function formatReset(resetsAt: string): string {
   const d = new Date(resetsAt)
   return d.toLocaleString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
 /**
- * Provides the quota hook
- * @returns {Function} Hook state for quota
+ * Returns the React Query handle for the user's quota plus a `refresh` helper
+ * that invalidates the cache. Side-effect: pushes a low-quota notification at
+ * most once per user per UTC day.
  */
 export function useQuota() {
   const { user } = useAuth()

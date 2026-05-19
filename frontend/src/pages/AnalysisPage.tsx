@@ -1,3 +1,8 @@
+/**
+ * Renders the saved solar analysis page for a project after the workbench layout is ready.
+ * It is reached from /project/:projectId/analysis and turns selected panels plus tariff inputs into savings results.
+ * This page serves the final review, assumption-tuning, save, chat, and PDF-export step of the FYP workflow.
+ */
 import { useContext, useEffect, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -40,6 +45,9 @@ import { useAnalysisPdf } from '@/hooks/useAnalysisPdf'
 import { summarizeLayoutOrientation } from '@/lib/analysis'
 import { markProjectVisited } from '@/lib/recentProjectActivity'
 
+/**
+ * Builds the persisted analysis config/result envelope expected by frontend/src/api/projects.ts.
+ */
 function buildSavePayload(formState: AnalysisFormState, systemKwp: number, analysisResults: AnalysisResultsRecord) {
   return {
     analysisConfig: {
@@ -50,9 +58,7 @@ function buildSavePayload(formState: AnalysisFormState, systemKwp: number, analy
   }
 }
 
-/**
- * Renders the analysis dashboard
- */
+/** Renders the project analysis dashboard with financial, energy, and report export controls. */
 export function AnalysisPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()

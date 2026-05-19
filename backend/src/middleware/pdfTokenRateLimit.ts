@@ -1,15 +1,26 @@
+/**
+ * In-memory rate limiter for PDF export token issuance.
+ *
+ * Protects the export-token endpoint from rapid repeated requests per user.
+ * This is intentionally scoped to token creation, not PDF data reads.
+ */
+
 import type { Request, Response, NextFunction } from 'express'
 
+// Keep the PDF token issuance window human-readable in API responses.
 const WINDOW_MS = 60 * 60 * 1000 // 1 hour
+// Ten exports per hour is enough for normal retries without allowing bulk token minting.
 const MAX_REQUESTS = 10
 
 const hits = new Map<string, number[]>()
 
 /**
- * Rate limit PDF token issuance per user
- * @param {Request} req - Incoming Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express middleware continuation callback
+ * Allows at most `MAX_REQUESTS` PDF token issuances per authenticated user
+ * within the rolling `WINDOW_MS` interval.
+ *
+ * @param req - Authenticated request whose `req.user.id` keys the bucket
+ * @param res - Response used for 401 and 429 JSON failures
+ * @param next - Continuation called when the request is within quota
  */
 export function pdfTokenRateLimit(req: Request, res: Response, next: NextFunction) {
   const userId = req.user?.id
