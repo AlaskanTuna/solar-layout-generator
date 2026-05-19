@@ -294,51 +294,103 @@ export function usePanelState({
     [totalAnnualYield, carbonOffsetFactorKgPerMwh]
   )
 
-  function updatePanelState(panelId: string, updater: (panel: WorkbenchPanelState) => WorkbenchPanelState) {
-    setPanels((current) => current.map((panel) => (panel.id === panelId ? updater(panel) : panel)))
+  // All mutators below follow the "snapshot AFTER mutation" convention: compute the next state
+  // from the latest ref, call setPanels with that explicit value, then push that exact value
+  // into the undo history. The previous push-before-mutation pattern left the latest state out
+  // of history entirely, which broke redo.
+  //
+  // We synchronously update `panelsRef` / `visibleCountRef` to the new value before each
+  // setPanels / setVisibleCountState call so consecutive mutators in the same event handler
+  // compose correctly — React batches the state updates but our refs already reflect the
+  // accumulated change.
+
+  function commitPanels(next: WorkbenchPanelState[]) {
+    panelsRef.current = next
+    setPanels(next)
+  }
+
+  function commitVisibleCount(next: number) {
+    visibleCountRef.current = next
+    setVisibleCountState(next)
   }
 
   function movePanel(panelId: string, center: { lat: number; lng: number }) {
-    pushSnapshot()
-    updatePanelState(panelId, (panel) => ({ ...panel, center }))
+    const next = panelsRef.current.map((panel) => (panel.id === panelId ? { ...panel, center } : panel))
+    commitPanels(next)
+    undoRedo.push({ panels: next, visibleCount: visibleCountRef.current })
   }
 
   const lastRotateSnapshotRef = useRef(0)
 
   function rotatePanel(panelId: string, rotation: number) {
-    // Throttle snapshots to avoid filling undo stack during continuous rotation
+    const next = panelsRef.current.map((panel) =>
+      panel.id === panelId ? { ...panel, rotation: normalizeRotation(rotation) } : panel
+    )
+    commitPanels(next)
+    const snapshot = { panels: next, visibleCount: visibleCountRef.current }
+    // Collapse continuous rotation into a single undo step: the first rotation in a new gesture
+    // pushes a fresh entry; rapid follow-up rotations within 1s replace the head of the stack so
+    // the final state is always captured without filling the undo history with frame-level steps.
     const now = Date.now()
     if (now - lastRotateSnapshotRef.current > 1000) {
-      pushSnapshot()
-      lastRotateSnapshotRef.current = now
+      undoRedo.push(snapshot)
+    } else {
+      undoRedo.replaceLast(snapshot)
     }
-    updatePanelState(panelId, (panel) => ({ ...panel, rotation: normalizeRotation(rotation) }))
+    lastRotateSnapshotRef.current = now
   }
 
   function deletePanel(panelId: string) {
-    pushSnapshot()
-    updatePanelState(panelId, (panel) => ({ ...panel, deleted: true }))
-    setVisibleCountState((current) => Math.max(minVisibleCount, current - 1))
+    const nextPanels = panelsRef.current.map((panel) =>
+      panel.id === panelId ? { ...panel, deleted: true } : panel
+    )
+    const nextVisibleCount = Math.max(minVisibleCount, visibleCountRef.current - 1)
+    commitPanels(nextPanels)
+    commitVisibleCount(nextVisibleCount)
+    undoRedo.push({ panels: nextPanels, visibleCount: nextVisibleCount })
   }
 
   function updatePanelEnergy(panelId: string, monthlyEnergyDcKwh: number[]) {
-    updatePanelState(panelId, (panel) => ({ ...panel, monthlyEnergyDcKwh }))
+    // Energy refreshes are derived data from the backend recompute; not part of the undo history.
+    const next = panelsRef.current.map((panel) =>
+      panel.id === panelId ? { ...panel, monthlyEnergyDcKwh } : panel
+    )
+    commitPanels(next)
   }
 
-  function bulkUpdatePanels(updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>) {
-    if (updates.length === 0) return
+  /**
+   * Mid-gesture bulk update — applies new centers/rotations without pushing to history.
+   * Used by the canvas interactions to live-preview group drag and group rotation; the gesture
+   * commits a single snapshot at gesture end via {@link bulkUpdatePanelsAndCommit}.
+   */
+  function bulkUpdatePanels(
+    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
+  ): WorkbenchPanelState[] {
+    if (updates.length === 0) return panelsRef.current
     const updateMap = new Map(updates.map((u) => [u.id, u]))
-    setPanels((current) =>
-      current.map((panel) => {
-        const update = updateMap.get(panel.id)
-        if (!update) return panel
-        return {
-          ...panel,
-          ...(update.center !== undefined && { center: update.center }),
-          ...(update.rotation !== undefined && { rotation: normalizeRotation(update.rotation) })
-        }
-      })
-    )
+    const next = panelsRef.current.map((panel) => {
+      const update = updateMap.get(panel.id)
+      if (!update) return panel
+      return {
+        ...panel,
+        ...(update.center !== undefined && { center: update.center }),
+        ...(update.rotation !== undefined && { rotation: normalizeRotation(update.rotation) })
+      }
+    })
+    commitPanels(next)
+    return next
+  }
+
+  /**
+   * Gesture-end bulk update — applies the final positions and pushes ONE snapshot capturing the
+   * after-state. Used at the end of group drag / group rotation so the gesture is undoable as a
+   * single transaction.
+   */
+  function bulkUpdatePanelsAndCommit(
+    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
+  ) {
+    const next = bulkUpdatePanels(updates)
+    undoRedo.push({ panels: next, visibleCount: visibleCountRef.current })
   }
 
   function getPanel(panelId: string) {
@@ -346,17 +398,16 @@ export function usePanelState({
   }
 
   function setVisibleCount(count: number) {
-    pushSnapshot()
     const target = Math.max(minVisibleCount, Math.min(maxVisibleCount, count))
 
     // If the slider goes above the current non-deleted pool size, resurrect the
     // top-of-stable-order deleted panels so increasing the slider actually adds
     // panels back to the workbench. activePanelIds always filters out deleted
     // panels, so without this the slider would silently cap at nonDeletedCount.
-    setPanels((current) => {
-      const nonDeletedCount = current.reduce((acc, panel) => acc + (panel.deleted ? 0 : 1), 0)
-      if (target <= nonDeletedCount) return current
-
+    const current = panelsRef.current
+    let nextPanels = current
+    const nonDeletedCount = current.reduce((acc, panel) => acc + (panel.deleted ? 0 : 1), 0)
+    if (target > nonDeletedCount) {
       const needed = target - nonDeletedCount
       const orderIndex = new Map(stableOrderRef.current.map((id, i) => [id, i]))
       const resurrectIds = new Set(
@@ -366,18 +417,22 @@ export function usePanelState({
           .slice(0, needed)
           .map((panel) => panel.id)
       )
+      if (resurrectIds.size > 0) {
+        nextPanels = current.map((panel) => (resurrectIds.has(panel.id) ? { ...panel, deleted: false } : panel))
+      }
+    }
 
-      if (resurrectIds.size === 0) return current
-      return current.map((panel) => (resurrectIds.has(panel.id) ? { ...panel, deleted: false } : panel))
-    })
-
-    setVisibleCountState(target)
+    commitPanels(nextPanels)
+    commitVisibleCount(target)
+    undoRedo.push({ panels: nextPanels, visibleCount: target })
   }
 
   function resetDeletionsAndApplyVisibleCount(count: number) {
-    pushSnapshot()
-    setPanels((current) => current.map((p) => (p.deleted ? { ...p, deleted: false } : p)))
-    setVisibleCountState(Math.max(minVisibleCount, Math.min(maxVisibleCount, count)))
+    const nextPanels = panelsRef.current.map((p) => (p.deleted ? { ...p, deleted: false } : p))
+    const nextVisibleCount = Math.max(minVisibleCount, Math.min(maxVisibleCount, count))
+    commitPanels(nextPanels)
+    commitVisibleCount(nextVisibleCount)
+    undoRedo.push({ panels: nextPanels, visibleCount: nextVisibleCount })
   }
 
   const undo = useCallback(() => {
@@ -437,6 +492,7 @@ export function usePanelState({
     deletePanel,
     updatePanelEnergy,
     bulkUpdatePanels,
+    bulkUpdatePanelsAndCommit,
     pushSnapshot,
     setVisibleCount,
     resetDeletionsAndApplyVisibleCount,

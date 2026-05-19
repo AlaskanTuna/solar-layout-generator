@@ -19,10 +19,14 @@ function readPermanentDismiss(): boolean {
   }
 }
 
-function writePermanentDismiss(): void {
+function writePermanentDismiss(value: boolean): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(PERMANENT_DISMISS_KEY, 'true')
+    if (value) {
+      window.localStorage.setItem(PERMANENT_DISMISS_KEY, 'true')
+    } else {
+      window.localStorage.removeItem(PERMANENT_DISMISS_KEY)
+    }
   } catch {
     // Storage unavailable (private mode, quota); fail silently — the user just sees the overlay again next session.
   }
@@ -109,9 +113,22 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
     }
   }, [ready, suppressed, permanentlyDismissed, dismissedThisSession, targetRef])
 
+  // Persist the choice immediately when the checkbox flips — the previous "save on dismiss"
+  // pattern lost the preference whenever the user checked the box and then navigated away
+  // without explicitly clicking the X/backdrop.
+  const toggleDontShowAgain = () => {
+    setDontShowAgain((current) => {
+      const next = !current
+      writePermanentDismiss(next)
+      setPermanentlyDismissed(next)
+      return next
+    })
+  }
+
   const dismiss = () => {
+    // Mirror the checkbox state at dismiss time in case the toggle handler failed silently.
     if (dontShowAgain) {
-      writePermanentDismiss()
+      writePermanentDismiss(true)
       setPermanentlyDismissed(true)
     }
     setDismissedThisSession(true)
@@ -166,11 +183,11 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
             role="checkbox"
             tabIndex={0}
             aria-checked={dontShowAgain}
-            onClick={() => setDontShowAgain((v) => !v)}
+            onClick={toggleDontShowAgain}
             onKeyDown={(event) => {
               if (event.key === ' ' || event.key === 'Enter') {
                 event.preventDefault()
-                setDontShowAgain((v) => !v)
+                toggleDontShowAgain()
               }
             }}
             className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
@@ -181,7 +198,7 @@ export function WorkbenchHintOverlay({ targetRef, ready, suppressed = false }: P
           >
             {dontShowAgain && <Check className="h-3 w-3" strokeWidth={3} />}
           </span>
-          <span onClick={() => setDontShowAgain((v) => !v)}>{t('hint.dontShowAgain')}</span>
+          <span onClick={toggleDontShowAgain}>{t('hint.dontShowAgain')}</span>
         </label>
         <p className="mt-2 text-center text-[10px] text-muted-foreground/80">{t('hint.dismissCta')}</p>
       </div>

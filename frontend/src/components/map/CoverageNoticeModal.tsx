@@ -27,10 +27,14 @@ export function readCoverageNoticeDismissed(): boolean {
   }
 }
 
-function writeCoverageNoticeDismissed(): void {
+function writeCoverageNoticeDismissed(value: boolean): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(COVERAGE_DISMISS_KEY, 'true')
+    if (value) {
+      window.localStorage.setItem(COVERAGE_DISMISS_KEY, 'true')
+    } else {
+      window.localStorage.removeItem(COVERAGE_DISMISS_KEY)
+    }
   } catch {
     // Storage unavailable; fail silently — modal reappears next session.
   }
@@ -49,8 +53,20 @@ export function CoverageNoticeModal({ open, onClose }: Props) {
   const { t } = useTranslation('map')
   const [dontShowAgain, setDontShowAgain] = useState(false)
 
+  // Persist the preference immediately on toggle so closing the modal via any path (X button,
+  // backdrop, "Got it") preserves the user's choice — and so the choice survives if the user
+  // checks the box then navigates away without clicking dismiss.
+  const toggleDontShowAgain = () => {
+    setDontShowAgain((current) => {
+      const next = !current
+      writeCoverageNoticeDismissed(next)
+      return next
+    })
+  }
+
   const dismiss = () => {
-    if (dontShowAgain) writeCoverageNoticeDismissed()
+    // Mirror the checkbox state at dismiss time as a defensive backup in case the toggle missed.
+    if (dontShowAgain) writeCoverageNoticeDismissed(true)
     onClose()
   }
 
@@ -113,11 +129,11 @@ export function CoverageNoticeModal({ open, onClose }: Props) {
               role="checkbox"
               tabIndex={0}
               aria-checked={dontShowAgain}
-              onClick={() => setDontShowAgain((v) => !v)}
+              onClick={toggleDontShowAgain}
               onKeyDown={(event) => {
                 if (event.key === ' ' || event.key === 'Enter') {
                   event.preventDefault()
-                  setDontShowAgain((v) => !v)
+                  toggleDontShowAgain()
                 }
               }}
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
@@ -128,7 +144,7 @@ export function CoverageNoticeModal({ open, onClose }: Props) {
             >
               {dontShowAgain && <Check className="h-3 w-3" strokeWidth={3} />}
             </span>
-            <span onClick={() => setDontShowAgain((v) => !v)}>{t('coverageModal.dontShowAgain')}</span>
+            <span onClick={toggleDontShowAgain}>{t('coverageModal.dontShowAgain')}</span>
           </label>
           <Button size="sm" onClick={dismiss} className="sm:min-w-[100px]">
             {t('coverageModal.gotIt')}

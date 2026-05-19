@@ -80,7 +80,12 @@ type UseCanvasInteractionsOptions = {
   rotatePanel: (id: string, rotation: number) => void
   deletePanel: (id: string) => void
   updatePanelEnergy: (panelId: string, monthlyEnergyDcKwh: number[]) => void
-  bulkUpdatePanels: (updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>) => void
+  bulkUpdatePanels: (
+    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
+  ) => unknown
+  bulkUpdatePanelsAndCommit: (
+    updates: Array<{ id: string; center?: { lat: number; lng: number }; rotation?: number }>
+  ) => void
   pushSnapshot: () => void
   showSegments: boolean
   solarPanels: SolarPanel[]
@@ -110,6 +115,7 @@ export function useCanvasInteractions({
   deletePanel,
   updatePanelEnergy,
   bulkUpdatePanels,
+  bulkUpdatePanelsAndCommit,
   pushSnapshot,
   setSelectedPanelModelId,
   showSegments,
@@ -351,7 +357,8 @@ export function useCanvasInteractions({
 
   function handlePanelDragStart(panelId: string) {
     if (selectedPanelIds.size <= 1 || !selectedPanelIds.has(panelId) || !geo) return
-    pushSnapshot()
+    // The pre-drag state is already in history as the after-state of the previous action (or the
+    // init snapshot). The new commit happens at drag END so redo can restore the post-drag state.
     const snapshots = new Map<string, { centerPx: { x: number; y: number } }>()
     for (const id of selectedPanelIds) {
       const p = getPanel(id)
@@ -603,8 +610,8 @@ export function useCanvasInteractions({
       moves.push({ id: sp.id, prevCenter, nextCenter })
     }
 
-    // No snapshot — handlePanelDragStart already pushed one at gesture start
-    bulkUpdatePanels(moves.map((mv) => ({ id: mv.id, center: mv.nextCenter })))
+    // Commit the gesture as a single undoable transaction — pushes the after-state so redo works.
+    bulkUpdatePanelsAndCommit(moves.map((mv) => ({ id: mv.id, center: mv.nextCenter })))
 
     if (!locationId) return
     setPendingPanelId(panelId)
@@ -679,7 +686,8 @@ export function useCanvasInteractions({
 
   function handleGroupRotateStart(pointerX: number, pointerY: number) {
     if (!geo) return
-    pushSnapshot()
+    // Pre-rotation state is already in history (after-state of the previous action). The commit
+    // happens at handleGroupRotateEnd so the rotated end-state is captured for redo.
     const snapshots = new Map<string, { centerPx: { x: number; y: number }; rotation: number }>()
     for (const id of selectedPanelIds) {
       const p = getPanel(id)
@@ -732,11 +740,18 @@ export function useCanvasInteractions({
   function handleGroupRotateEnd() {
     const state = groupRotateStateRef.current
     groupRotateStateRef.current = null
-    if (!state || !locationId) return
+    if (!state) return
     const panels = [...state.snapshots.keys()]
       .map((id) => getPanel(id))
       .filter((p): p is NonNullable<typeof p> => p != null)
     if (panels.length === 0) return
+
+    // Commit the rotation gesture as one undo step — captures the after-state for redo. The
+    // panel positions and rotations were already applied via bulkUpdatePanels during the gesture;
+    // this just records that final state in history.
+    pushSnapshot()
+
+    if (!locationId) return
 
     if (rotationTimeoutRef.current) clearTimeout(rotationTimeoutRef.current)
     rotationTimeoutRef.current = setTimeout(() => {
