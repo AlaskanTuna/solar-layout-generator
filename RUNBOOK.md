@@ -89,8 +89,8 @@ Create these accounts before provisioning anything:
 ## 2. Clone and install
 
 ```bash
-git clone https://github.com/AlaskanTuna/solar-layout-generator.git
-cd solar-layout-generator
+git clone https://github.com/AlaskanTuna/SolarSim.git
+cd SolarSim
 corepack enable
 pnpm install
 cp .env.example .env

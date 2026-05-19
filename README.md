@@ -251,8 +251,8 @@ flowchart LR
 corepack enable                                   # bundles pnpm 10.33.0 with Node 24
 
 # 2. Clone and install
-git clone https://github.com/AlaskanTuna/solar-layout-generator.git
-cd solar-layout-generator
+git clone https://github.com/AlaskanTuna/SolarSim.git
+cd SolarSim
 pnpm install
 
 # 3. Configure env (fill in values from your existing cloud accounts)
@@ -352,7 +352,7 @@ The production stack is **two services**: a Heroku web dyno (frontend bundle + E
 <summary><strong>Repository Layout</strong></summary>
 
 ```text
-solar-layout-generator/
+SolarSim/
 ├── assets/                     # README screenshots and brand art
 ├── shared/                     # Shared TypeScript types (consumed by both sides)
 ├── frontend/                   # React 19 + Vite SPA
