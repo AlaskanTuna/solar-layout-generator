@@ -37,7 +37,7 @@ _Search a roof. Tweak the layout. Get a NEM-accurate savings report. As easy as 
 
 ---
 
-> **Final Year Project at Asia Pacific University** · Built by **[@AlaskanTuna](https://github.com/AlaskanTuna)**.
+> Built by **[@AlaskanTuna](https://github.com/AlaskanTuna)**.
 
 > [!NOTE]
 > SolarSim is an **assessment** tool. It produces an estimate report, not a quotation, not a contract, and not an installation order. Final pricing and feasibility always come from a licensed Malaysian installer.
@@ -239,7 +239,7 @@ flowchart LR
 ## 🚀 Getting Started
 
 > [!TIP]
-> **Looking to reproduce the full stack from scratch — local dev *and* cloud deploy?**  
+> **Looking to reproduce the full stack from scratch — local dev _and_ cloud deploy?**  
 > See **[RUNBOOK.md](RUNBOOK.md)** for the complete clone-to-production walkthrough: cloud account setup, CLI provisioning, env wiring, Heroku + Vercel deploy, custom domain, smoke tests, and troubleshooting. ~60-90 min on a fresh machine.
 >
 > The section below is the **5-minute local quickstart** — enough to boot SolarSim against an existing Supabase + Google Cloud + Resend setup. If you don't have those yet, jump to RUNBOOK.md instead.

@@ -2,6 +2,7 @@
   "name": "pdf-service",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Vercel serverless function that renders a given frontend URL to PDF using headless Chromium.",
   "type": "module",
   "engines": {

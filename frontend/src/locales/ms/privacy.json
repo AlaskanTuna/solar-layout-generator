@@ -9,7 +9,7 @@
     "intro": {
       "title": "Pengenalan",
       "body": [
-        "Pasukan projek SolarSim mengawal data untuk aplikasi ini sebagai Projek Tahun Akhir untuk pemilik rumah di Malaysia. Polisi ini meliputi laman web, ciri akaun, halaman projek, meja kerja, analisis, dan pembantu sembang. Kami bukan entiti undang-undang yang berasingan, jadi rujukan kepada \"kami\" bermaksud pasukan projek SolarSim.",
+        "Pasukan projek SolarSim mengawal data untuk aplikasi ini, yang dibina untuk pemilik rumah di Malaysia. Polisi ini meliputi laman web, ciri akaun, halaman projek, meja kerja, analisis, dan pembantu sembang. Kami bukan entiti undang-undang yang berasingan, jadi rujukan kepada \"kami\" bermaksud pasukan projek SolarSim.",
         "Kami hanya memproses data yang diperlukan untuk mencipta akaun, menyimpan projek, menjalankan simulasi solar, dan menjawab permintaan sokongan atau aduan. Kami tidak meminta nombor kad pengenalan kerajaan atau butiran kad pembayaran, dan kami tidak berniat mengumpulkannya melalui aplikasi ini."
       ]
     },
